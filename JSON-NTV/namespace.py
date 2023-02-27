@@ -51,13 +51,20 @@ class Namespace():
     
     The methods defined in this class are :
     
+    *classmethods*
+    - `namespaces`
+    
+    *dynamic values (@property)
+    - `file`
+    - `cName`
+    - `content`
+    
     *instance methods*
     - `isChild`    
     - `isParent`
-    - `toStr`
     
     *static methods*
-    - `loadNamespace`
+    - `load`
     '''
     _namespaces_ =[]
     
@@ -90,6 +97,14 @@ class Namespace():
     def content(self):
         return self.load(self.name, self.parent)
     
+    @property
+    def cName(self):
+        '''return a string with the absolute name'''
+        if self.parent is None:
+            return self.name
+        else:
+            return self.parent.cName + self.name
+
     @staticmethod
     def load(name, parent=None):
         '''return list of Type and list of Namespace included in a Namespace''' 
@@ -108,13 +123,6 @@ class Namespace():
         return ({'file': filename,
                  'type':{typ:NtvType(typ, dicType[typ], name) for typ in dicType.keys()},
                 'namespace': {nsp:Namespace(nsp, parent) for nsp in dicNsp.keys()}})
-    @property
-    def cName(self):
-        '''return a string with the absolute name'''
-        if self.parent is None:
-            return self.name
-        else:
-            return self.parent.cName + self.name
         
 class TypeError(Exception):
     ''' Type Exception'''
