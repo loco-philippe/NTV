@@ -59,8 +59,13 @@ class Namespace():
     *static methods*
     - `loadNamespace`
     '''
+    _namespaces_ =[]
     
-    def __init__(self, name, file, parent=None): 
+    @classmethod
+    def namespaces(cls):
+        return [nam.cName for nam in cls._namespaces_]
+    
+    def __init__(self, name='', parent=None): 
         '''
         Namespace constructor.
 
@@ -70,29 +75,47 @@ class Namespace():
         - **file** : string - location of the file init
         - **parent** : Namespace (default None) - parent namespace'''
         self.name = name
-        self.file = file
         self.parent = parent
+        self._namespaces_.append(self)
         
-    @staticmethod
-    def loadNamespace(name, fileName ='NTV_global_namespace.ini'):
-        '''return list of Type and list of Namespace included in fileName''' 
-        listType = []
-        listNspace = []
+    @property
+    def file(self):
         config = configparser.ConfigParser()
-        config.read(fileName)
+        if self.parent:
+            config.read(self.parent.file)
+            return json.loads(config['data']['namespace'])[self.name]
+        return "NTV_global_namespace.ini"
+    
+    @property
+    def content(self):
+        return self.load(self.name, self.parent)
+    
+    @staticmethod
+    def load(name, parent=None):
+        '''return list of Type and list of Namespace included in a Namespace''' 
+        config = configparser.ConfigParser()
+        if parent:
+            config.read(parent.file)
+            filename = json.loads(config['data']['namespace'])[name]
+        else:
+            filename = "NTV_global_namespace.ini"
+        config.read(filename)
         configName = config['data']['name']
-        print(configName, name)
-        print(type(configName))
         if configName != name:
             raise TypeError('name is not correct')            
         dicType = json.loads(config['data']['type'])
-        for typ in dicType.keys():
-            listType.append(NtvType(typ, dicType[typ], name))
-        dicNspace = json.loads(config['data']['namespace'])
-        for nsp in dicNspace.keys():
-            listNspace.append(Namespace(nsp, dicNspace[nsp], None))
-        return (listType, listNspace)
-    
+        dicNsp = json.loads(config['data']['namespace'])
+        return ({'file': filename,
+                 'type':{typ:NtvType(typ, dicType[typ], name) for typ in dicType.keys()},
+                'namespace': {nsp:Namespace(nsp, parent) for nsp in dicNsp.keys()}})
+    @property
+    def cName(self):
+        '''return a string with the absolute name'''
+        if self.parent is None:
+            return self.name
+        else:
+            return self.parent.cName + self.name
+        
 class TypeError(Exception):
     ''' Type Exception'''
     # pass
