@@ -18,7 +18,7 @@ class Test_Namespace(unittest.TestCase):
             self.assertTrue(Namespace.add(nstr).long_name == nstr)
     
     def test_add_ko(self):
-        liststr = ['fr.BAN.lon', 'fr.BAN.test', 'fr', 'fr.BANN.test']
+        liststr = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
         for nstr in liststr:
             with self.assertRaises(NtvError):
                 Namespace.add(nstr)
@@ -36,5 +36,20 @@ class Test_NtvType(unittest.TestCase):
             with self.assertRaises(NtvError):
                 NtvType.add(tstr)        
 
+    def test_isinNamespace(self):
+        lon = NtvType.add("fr.BAN.lon")
+        listnsp = ['fr.BAN.', 'fr.', '']
+        listnotnsp = ['fr.IRVE.', 'fr.BAN.test.', 'schemaorg.']
+        listkonsp = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
+        res = 0
+        for nsp in listnsp:
+            self.assertTrue(lon.isin_namespace(nsp) == res)
+            res += 1
+        for nsp in listnotnsp:
+            self.assertTrue(lon.isin_namespace(nsp) == -1)            
+        for nsp in listkonsp:
+            with self.assertRaises(NtvError):
+                lon.isin_namespace(nsp)  
+                
 if __name__ == '__main__':
     unittest.main(verbosity=2)        

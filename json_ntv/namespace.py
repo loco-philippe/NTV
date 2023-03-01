@@ -4,7 +4,7 @@ Created on Feb 27 22:44:05 2023
 
 @author: Philippe@loco-labs.io
 
-The `namespace` module contains the Namespace class for NTV entity.
+The `namespace` module contains the Namespace and the NtvType classes for NTV entity.
 """
 import configparser
 import json
@@ -75,6 +75,10 @@ class NtvType():
         self.name = name
         self.nspace = nspace
         self._types_[self.long_name] = self
+
+    def __eq__(self, other):
+        ''' equal if name and nspace are equal'''
+        return self.name == other.name and self.nspace == other.nspace
 
     def __str__(self):
         '''return string format'''
@@ -168,6 +172,10 @@ class Namespace():
         self.parent = parent
         self._namespaces_[self.long_name] = self
 
+    def __eq__(self, other):
+        ''' equal if name and parent are equal'''
+        return self.name == other.name and self.parent == other.parent
+
     def __str__(self):
         '''return string format'''
         return self.long_name
@@ -199,7 +207,7 @@ class Namespace():
     @property
     def long_name(self):
         '''return a string with the absolute name'''
-        if self.parent is None:
+        if self.parent is None or self.parent.name == '':
             return self.name
         return self.parent.long_name + self.name
 
@@ -209,13 +217,14 @@ class Namespace():
         if self == nspace:
             return 0
         rang = 1
-        while not parent is None and parent != nspace:
+        while parent.name != '' and parent != nspace:
             rang += 1
             parent = parent.parent
-        if parent is None:
-            return -1
         if parent == nspace:
             return rang
+        if parent.name == '':
+            return -1
+
 
     def is_parent(self, nspace):
         '''return the number of level between self and parent, -1 if None'''
