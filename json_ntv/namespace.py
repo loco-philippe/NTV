@@ -53,6 +53,7 @@ class Namespace():
     
     *classmethods*
     - `namespaces`
+    - `add`
     
     *dynamic values (@property)
     - `file`
@@ -62,9 +63,6 @@ class Namespace():
     *instance methods*
     - `isChild`    
     - `isParent`
-    
-    *static methods*
-    - `load`
     '''
     _namespaces_ = {}
 
@@ -74,24 +72,25 @@ class Namespace():
         return [nam.cName for nam in cls._namespaces_.values()]
     
     @classmethod
-    def long(cls, cName):
+    def add(cls, cName):
         if cName in Namespace.namespaces():
-           return        
-        splitName = cName.rsplit('.', 3)
+           return cls._namespaces_[cName]
+        splitName = cName.rsplit('.', 2)
         if len(splitName) == 1:
             raise TypeError(cName + ' is not a valid classname')
         if len(splitName) == 2:
-            cls.addNamespace(splitName[0]+'.')
-        xxxx
+            return cls.addNamespace(splitName[0]+'.')
+        if len(splitName) == 3:
+            parent = Namespace.add(splitName[0]+'.')
+            return cls.addNamespace(splitName[1]+'.', parent)
         
     @classmethod
     def addNamespace(cls, name, parent=None):
         if parent is None:
-            parent=cls._namespaces_['']
+            parent = cls._namespaces_['']
         if not name in parent.content['namespace']:
             raise TypeError(name + ' is not defined in ' + parent.cName)
-        cls(name, parent)
-        return
+        return cls(name, parent)
     
     def __init__(self, name='', parent=None): 
         '''
@@ -104,6 +103,7 @@ class Namespace():
         - **parent** : Namespace (default None) - parent namespace'''
         self.name = name
         self.parent = parent
+        print(self.cName)
         self._namespaces_[self.cName] = self
         
     @property
@@ -111,8 +111,8 @@ class Namespace():
         config = configparser.ConfigParser()
         if self.parent:
             config.read(self.parent.file)
-            return json.loads(config['data']['namespace'])[self.name]
-        return "NTV_global_namespace.ini"
+            return '../config/'+json.loads(config['data']['namespace'])[self.name]
+        return "../config/NTV_global_namespace.ini"
     
     @property
     def content(self):
@@ -150,24 +150,6 @@ class Namespace():
         '''return the number of level between self and parent, -1 if None'''
         return nspace.isChild(self)
     
-    @staticmethod
-    def load(name='', parent=None):
-        '''return list of Type and list of Namespace included in a Namespace''' 
-        config = configparser.ConfigParser()
-        if parent:
-            config.read(parent.file)
-            filename = json.loads(config['data']['namespace'])[name]
-        else:
-            filename = "NTV_global_namespace.ini"
-        config.read(filename)
-        configName = config['data']['name']
-        if configName != name:
-            raise TypeError('name is not correct')            
-        dicType = json.loads(config['data']['type'])
-        dicNsp = json.loads(config['data']['namespace'])
-        return ({'file': filename,
-                 'type':{typ:NtvType(typ, dicType[typ], name) for typ in dicType.keys()},
-                'namespace': {nsp:Namespace(nsp, parent) for nsp in dicNsp.keys()}})
         
 class TypeError(Exception):
     ''' Type Exception'''
