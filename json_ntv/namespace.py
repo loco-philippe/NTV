@@ -7,7 +7,9 @@ Created on Feb 27 22:44:05 2023
 The `namespace` module contains the Namespace and the NtvType classes for NTV entity.
 """
 import configparser
+import requests
 import json
+import os
 
 
 class NtvType():
@@ -46,13 +48,13 @@ class NtvType():
             return cls._types_[long_name]
         split_name = long_name.rsplit('.', 1)
         if split_name[-1] == '':
-            raise NtvError(long_name + ' is not a valid NTVtype')
+            raise NtvTypeError(long_name + ' is not a valid NTVtype')
         if len(split_name) == 1:
             return cls.add_ntv_type(split_name[0])
         if len(split_name) == 2:
             nspace = Namespace.add(split_name[0]+'.')
             return cls.add_ntv_type(split_name[1], nspace)
-        raise NtvError(long_name + ' is not a valid NTVtype')
+        raise NtvTypeError(long_name + ' is not a valid NTVtype')
 
     @classmethod
     def add_ntv_type(cls, name, nspace=None):
@@ -60,7 +62,7 @@ class NtvType():
         if not nspace:
             nspace = Namespace()
         if not name in nspace.content['type']:
-            raise NtvError(name + ' is not defined in ' + nspace.long_name)
+            raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
         return cls(name, nspace)
 
     def __init__(self, name, nspace=None):
@@ -129,7 +131,8 @@ class Namespace():
     - `is_parent`
     '''
     _namespaces_ = {}
-
+    _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
+    
     @classmethod
     def namespaces(cls):
         '''return the list of Namespace created'''
@@ -142,13 +145,13 @@ class Namespace():
             return cls._namespaces_[long_name]
         split_name = long_name.rsplit('.', 2)
         if len(split_name) == 1 or split_name[-1] != '':
-            raise NtvError(long_name + ' is not a valid classname')
+            raise NtvTypeError(long_name + ' is not a valid classname')
         if len(split_name) == 2:
             return cls.add_namespace(split_name[0]+'.')
         if len(split_name) == 3:
             parent = Namespace.add(split_name[0]+'.')
             return cls.add_namespace(split_name[1]+'.', parent)
-        raise NtvError(long_name + ' is not a valid classname')
+        raise NtvTypeError(long_name + ' is not a valid classname')
 
     @classmethod
     def add_namespace(cls, name, parent=None):
@@ -156,7 +159,7 @@ class Namespace():
         if parent is None:
             parent = cls._namespaces_['']
         if not name in parent.content['namespace']:
-            raise NtvError(name + ' is not defined in ' + parent.long_name)
+            raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         return cls(name, parent)
 
     def __init__(self, name='', parent=None):
@@ -187,20 +190,20 @@ class Namespace():
     @property
     def file(self):
         '''return the file name of the Namespace configuration'''
-        config = configparser.ConfigParser()
         if self.parent:
-            config.read(self.parent.file)
-            return '../config/'+json.loads(config['data']['namespace'])[self.name]
-        return "../config/NTV_global_namespace.ini"
+            config = configparser.ConfigParser()
+            config.read_string(requests.get(self.parent.file, allow_redirects=True).content.decode())
+            return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[self.name]
+        return Namespace._pathconfig_ +"NTV_global_namespace.ini"
 
     @property
     def content(self):
         '''return the content of the Namespace configuration'''
         config = configparser.ConfigParser()
-        config.read(self.file)
+        config.read_string(requests.get(self.file, allow_redirects=True).content.decode())
         config_name = config['data']['name']
         if config_name != self.name:
-            raise NtvError(self.file + ' is not correct')
+            raise NtvTypeError(self.file + ' is not correct')
         return {'type': json.loads(config['data']['type']),
                 'namespace': json.loads(config['data']['namespace'])}
 
@@ -231,7 +234,7 @@ class Namespace():
         return nspace.is_child(self)
 
 
-class NtvError(Exception):
+class NtvTypeError(Exception):
     ''' Type Exception'''
     # pass
 

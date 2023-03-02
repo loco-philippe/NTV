@@ -8,7 +8,7 @@ The `NTV.test_namespace` module contains the unit tests (class unittest) for the
 `Namespace` and `Type` classes.
 """
 import unittest
-from namespace import Namespace, NtvError, NtvType
+from namespace import Namespace, NtvTypeError, NtvType
 
 class Test_Namespace(unittest.TestCase):
     
@@ -20,7 +20,7 @@ class Test_Namespace(unittest.TestCase):
     def test_add_ko(self):
         liststr = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
         for nstr in liststr:
-            with self.assertRaises(NtvError):
+            with self.assertRaises(NtvTypeError):
                 Namespace.add(nstr)
 
 class Test_NtvType(unittest.TestCase):
@@ -33,7 +33,7 @@ class Test_NtvType(unittest.TestCase):
     def test_add_ko(self):
         liststr = ['fr.BAN.test', 'fr', 'fr.BANN.lon']
         for tstr in liststr:
-            with self.assertRaises(NtvError):
+            with self.assertRaises(NtvTypeError):
                 NtvType.add(tstr)        
 
     def test_isinNamespace(self):
@@ -48,7 +48,7 @@ class Test_NtvType(unittest.TestCase):
         for nsp in listnotnsp:
             self.assertTrue(lon.isin_namespace(nsp) == -1)            
         for nsp in listkonsp:
-            with self.assertRaises(NtvError):
+            with self.assertRaises(NtvTypeError):
                 lon.isin_namespace(nsp)  
                 
 if __name__ == '__main__':
