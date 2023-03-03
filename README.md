@@ -1,3 +1,4 @@
+The NTV format is part of the [Environmental Sensing Project](https://github.com/loco-philippe/Environmental-Sensing#readme)
 # NTV
 JSON-NTV (named and typed value) : a semantic format for interoperability
     
@@ -50,6 +51,5 @@ This structuring of type makes it possible to reference any type of data that ha
 
 # Documentation
 
-- [Environmental Sensing Project](../Environmental-Sensing)
 - [Specification](./documentation)
 - [Python Connectors documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
