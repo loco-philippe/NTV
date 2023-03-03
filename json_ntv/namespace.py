@@ -5,6 +5,159 @@ Created on Feb 27 22:44:05 2023
 @author: Philippe@loco-labs.io
 
 The `namespace` module contains the Namespace and the NtvType classes for NTV entity.
+
+
+# 1 - Data type
+
+The structure of types by namespace makes it possible to have types corresponding to recognized standards at the global level.
+Generic types can also be defined (calculation of the exact type when decoding the value).
+    
+The global namespace can include the following structures:
+
+## 1.1 - Simple (JSON RFC8259)
+
+| type (generic type)| value example                 |
+|--------------------|-------------------------------|
+| boolean (None)     | true                          |
+| null (None)        | null                          |
+| number (None)      | 45.2                          |
+| string (None)      | "string"                      |
+| array  (None)      | [1, 2, 3]                     |
+| object (None)      | { "str": "test", "bool": true}|
+
+## 1.2 - Datation (ISO8601 and Posix)
+
+| type (generic type)| value example                 |
+|--------------------|-------------------------------|
+| year               | 1998                          |
+| month              | 10                            |
+| day                | 21                            |
+| week               | 38                            |
+| hour               | 20                            |
+| minute             | 18                            |
+| second             | 54                            |
+| timeposix (dat)    | 123456.78                     |
+| date (dat)         | “2022-01-28”                  |
+| time (dat)         | “T18:23:54”,  “18:23”, “T18”  |
+| datetime (dat)     | “2022-01-28T18-23-54Z”, “2022-01-28T18-23-54+0400”        |
+| timearray (dat)    | [date1, date2]                |
+| timeslot (dat)     | [timearray1, timearray2]      |   
+    
+## 1.3 - Duration (ISO8601 and Posix)
+
+| type (generic type) | value example                                |
+|---------------------|----------------------------------------------|
+| timeinterval (dur)  | "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"  |
+| durationiso (dur)   | "P0002-10- 15T10:30:20"                      |
+| durposix (dur)      | 123456.78                                    |
+     
+## 1.4 - Location (RFC7946 and Open Location Code):
+
+| type (generic type) | value example                                |
+|---------------------|------------------------------|
+| point (loc)         | [ 5.12, 45.256 ] (lon, lat)  |
+| line (loc)          | [ point1, point2, point3 ]   |
+| ring                | [ point1, point2, point3 ]   |
+| multiline           | [ line1, line2, line3]       |
+| polygon (loc)       | [ ring1, ring2, ring3]       |
+| multipolygon (loc)  | [ poly1, poly2, poly3 ]      |
+| bbox (loc)          | [ -10.0, -10.0, 10.0, 10.0 ] |
+| geojson (loc)       | {“type”: “point”, “coordinates”: [40.0, 0.0] } |
+| codeolc (loc)       | “8FW4V75V+8F6”               |
+
+## 1.5 - Tabular data
+
+| NTVtype  | NTVvalue                                               |
+|----------|--------------------------------------------------------|
+| row      | JSON-array of JSON-NTV                                 |
+| field    | JSON-array of NTVvalue (following JSON-TAB format)     |
+| table    | JSON-array of JSON-NTV fields with the same length     |
+
+
+## 1.6 - Normalized strings
+
+The type could be `uri`, cf exemples :
+- "https://www.ietf.org/rfc/rfc3986.txt"
+- "https://gallica.bnf.fr/ark:/12148/bpt6k107371t"
+- "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+- "ni:///sha-256;UyaQV-Ev4rdLoHyJJWCi11OHfrYv9E1aGQAlMO2X_-Q"
+- "geo:13.4125,103.86673" *(RFC5870)*
+- "info:eu-repo/dai/nl/12345"
+- "mailto:John.Doe@example.com"
+- "news:comp.infosystems.www.servers.unix"
+- "urn:oasis:names:specification:docbook:dtd:xml:4.1.2"
+
+## 1.7 - Namespaces
+
+Namespaces could also be defined to reference for example:
+- geopolitical entities: ISO3166-1 country code (for example "fr." for France)
+- data catalogs, for example:
+
+| NTVtype      | example JSON-NTV                                                     |
+|--------------|----------------------------------------------------------------------|
+| schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>{ “:schemaorg.unitText”:”µg/m3”}</div>  |
+| darwincore.  | { “:darwincore.acceptedNameUsage”: “Tamias minimus” }                |
+
+## 1.8 - Identifiers
+
+For example :
+ 
+| type         | definition                      | exemple               |
+|--------------|---------------------------------|-----------------------|
+| fr.uic       | code UIC station                | 8757449               |
+| fr.iata      | code IATA airport               | CDG                   |
+
+
+# 2 - Example of using a `fr.` namespace
+
+This namespace is dedicated to datasets associated with the France geopolitical namespace (see also the [presentation document](https://github.com/loco-philippe/Environmental-Sensing/blob/main/JSON-NTV/JSON-NTV-namespace-fr.pdf)).    
+    
+A namespace defines:
+- identifiers used to access additional data,
+- namespaces associated with catalogs or data sets,
+- structured entities used to facilitate the use of data
+
+## 2.1 - Identifiers
+They could correspond to identifiers used in many referenced datasets (via a data schema or a data model).
+   
+For example :
+ 
+| type         | definition                      | example               |
+|--------------|---------------------------------|-----------------------|
+| fr.dep       | code département                | 60                    |
+| fr.cp        | code postal                     | 76450                 |
+| fr.naf       | code NAF                        | 23                    |
+| fr.siren     | code SIREN enterprise           | 418447363             |
+| fr.fantoir   | code FANTOIR voie               | 4500023086F           |
+| fr.uai       | code UAI établissement          | 0951099D              |
+| fr.aca       | code académies                  | 22                    |
+| fr.finessej  | code FINESS entité juridique    | 790001606             |
+| fr.rna       | code WALDEC association         | 843S0843004860        |
+| fr.spi       | code SPI numéro fiscal          | 1899582886173         |
+| fr.nir       | code NIR sécurité sociale       | 164026005705953       |
+
+## 2.2 Namespaces
+Namespaces could correspond to catalogs or data sets whose data types are identified in data models or in referenced data schemas.
+
+For example : 
+
+|    type     | example JSON-NTV                                                                              |
+|-------------|-----------------------------------------------------------------------------------------------|
+| fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div><div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
+| fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div><div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
+| fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div><div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
+| fr.BAN.     | <div>{ ":fr.BAN.numero": 54 }</div><div>{ ":fr.BAN.lon": 3.5124 }</div>                                            |
+
+## 2.3 Entities
+They could correspond to assemblies of data associated with a defined structure.
+     
+For example : 
+
+|    type      | example JSON-NTV                                                                                                     |
+|--------------|----------------------------------------------------------------------------------------------------------------------|
+| fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div><div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
+| fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div><div><i>(fr.BAN.numero, fr.BAN.rep, fr.BAN.nom_voie, fr.cp)</i></div>  |
+
 """
 import configparser
 import requests
