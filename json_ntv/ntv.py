@@ -5,6 +5,54 @@ Created on Feb 27 22:44:05 2023
 @author: Philippe@loco-labs.io
 
 The `ntv` module contains the NtvSingle, NtvSet and NtvList classes for NTV entity.
+
+# 1 - JSON-NTV structure
+
+The NTV triplet (name, type, value) is represented using a JSON-NTV format inspired by the RFC [JSON-ND](https://github.com/glenkleidon/JSON-ND) project :
+- **```value```** (if name and type are not documented)
+- **```{ "name" : value }```** (if name is documented but not type)
+- **```{ ":type" : value }```** for primitive entities and **```{ "::type" : value }```** for structured entities (if type is documented but not name)
+- **```{ "name:type" : value }```** for primitive entities and **```{ "name::type" : value }```** for structured entities (if type and name are documented).     
+
+For an NTV-single, the value is the JSON-value of the entity. 
+For an NTV-list, value is a JSON-array where JSON-elements are the JSON-NTV formats of included NTV entities. 
+For an NTV-set, value is a JSON-object where JSON-members are the JSON-members of the JSON-NTV formats of included NTV entities. 
+
+This JSON-NTV format allows full compatibility with existing JSON structures:
+- a JSON-number, JSON-string or JSON-boolean is the representation of an NTV-single entity,
+- a JSON-object with a single member is the representation of an NTV-single entity
+- a JSON-array is the representation of an NTV-list entity
+- a JSON-object without a single member is the representation of an NTV-set entity
+
+# 2 - Examples of JSON-NTV representations
+- NTV-single, simple format : 
+   - ```"lyon"```
+   - ```52.5```
+   - ```{ }```
+- NTV-single, named format : 
+   - ```{ "paris:point" : [2.3522, 48.8566] }```
+   - ```{ ":point" : [4.8357, 45.7640] }```
+   - ```{ "city" : "paris" }```
+- NTV-list, simple format : 
+   - ```[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]```
+   - ```[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]```
+   - ```[ 4, 45 ]```
+   - ```[ "paris" ]```
+   - ```[ ]```
+- NTV-list, named format : 
+   - ```{ "cities::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }```
+   - ```{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }```
+   - ```{ "simple list" : [ 4, 45.7 ] }```
+   - ```{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }```
+- NTV-set, simple format : 
+   - ```{ "nom”: "white", "prenom": "walter", "surnom": "heisenberg" }```
+   - ```{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france" }```
+   - ```{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640] }```
+- NTV-set, named format :
+   - ```{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}```
+   - ```{ "cities" : { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
+   - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
+
 """
 import json
 from namespace import NtvType
