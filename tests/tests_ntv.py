@@ -21,6 +21,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '5NtvList': [[4,5], [1,2,3]],
                    '6NtvList': {'ntv1::fr.reg':[[4,[5,6]], {'heure':[21,22]}]},
                    '7NtvList': {'ntv1::fr.reg':[4]},
+                   '8NtvList': {'ntv1::fr.':[4]},
                    '1NtvSet': {}, '2NtvSet': {'ntv1': 1, 'ntv2':'2'},
                    '3NtvSet': {'ntv3': {'ntv1': 1, 'ntv2':'2'}},
                    '4NtvSet': {'ntv3::fr.reg': {'ntv1': 1, 'ntv2::fr.reg':'2'}},
