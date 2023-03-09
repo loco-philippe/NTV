@@ -54,6 +54,8 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
 
 """
+from datetime import date, time, datetime
+from shapely import geometry
 import json
 from namespace import NtvType, Namespace
 from util import util
@@ -126,7 +128,6 @@ class Ntv():
         if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
             ntv_type = Ntv._agreg_type(str_type, def_type, True)            
             return NtvSingle(ntv_value, ntv_name, ntv_type)
-        #raise NtvError(json.dumps(value) + ' is not a consistent Json NTV value')
         return NtvSingle(ntv_value, ntv_name, str_type)
 
     def __repr__(self):
@@ -161,11 +162,17 @@ class Ntv():
             return sep + self.type_str
         return self.ntv_name + sep + self.type_str
 
-    def to_obj(self):
+    def to_obj(self, json=True):
         '''return the JSON representation of the NTV entity (json-ntv format)'''
-        if not self.json_name:
-            return self.json_value
-        return {self.json_name: self.json_value}
+        value = self.json_value
+        name = self.json_name
+        if not json:
+            value = self.json_object
+            if value != self.json_value:
+                name = self.ntv_name
+        if not name:
+            return value
+        return {name: value}
 
     @staticmethod 
     def _agreg_type(str_type, def_type, single):
@@ -216,7 +223,6 @@ class Ntv():
             val = json_value[json_name]
             nam, typ, sep = Ntv._from_json_name(json_name)
             return (nam, typ, val, sep)
-        #raise NtvError('the value is not a JSON value')               
         val = Ntv._cast(json_value)
         return (val[0], val[1], val[2], None)
 
@@ -245,6 +251,34 @@ class Ntv():
             case _:
                 raise NtvError('connector is not defined to NTV entity')   
 
+    def _uncast(self):
+        '''return object from ntv_value'''
+        if self.ntv_type is None:
+            return self.ntv_value
+        match self.ntv_type.name:
+            case 'date':
+                return date.fromisoformat(self.ntv_value)
+            case 'time':
+                return time.fromisoformat(self.ntv_value)            
+            case 'datetime':
+                return datetime.fromisoformat(self.ntv_value)            
+            #case 'point' | 'multipoint' | 'linestring' | 'multilinestring' | 'polygon' | 'multipolygon':
+            #    return geometry.shape({"type": self.ntv_type.name, "coordinates":self.ntv_value})      
+            case 'point' :
+                return geometry.shape({"type":"point", "coordinates":self.ntv_value})
+            case 'multipoint':
+                return geometry.shape({"type":"multipoint", "coordinates":self.ntv_value})
+            case 'line':
+                return geometry.shape({"type":"linestring", "coordinates":self.ntv_value})
+            case 'multiline':
+                return geometry.shape({"type":"multilinestring", "coordinates":self.ntv_value})
+            case 'polygon':
+                return geometry.shape({"type":"polygon", "coordinates":self.ntv_value})
+            case 'multipolygon':
+                return geometry.shape({"type":"multipolygon", "coordinates":self.ntv_value})
+            case _:
+                return self.ntv_value
+     
     @staticmethod
     def _from_json_name(string):
         '''return a tuple with name, type ans separator from string'''
@@ -286,6 +320,7 @@ class NtvSingle(Ntv):
     *dynamic values (@property)
     - `json_name`
     - `json_value`
+    - `json_object`
     - `type_str`
     - `code_ntv`
 
@@ -336,6 +371,10 @@ class NtvSingle(Ntv):
         '''return the Json format of the ntv_value'''
         return self.ntv_value
 
+    @property
+    def json_object(self):
+        '''return the Json format of the ntv_value'''
+        return Ntv._uncast(self)
 
 class NtvList(Ntv):
     '''An NTV-list entity is a Ntv entity where:
@@ -356,6 +395,7 @@ class NtvList(Ntv):
     *dynamic values (@property)
     - `json_name`
     - `json_value`
+    - `json_object`
     - `type_str`
     - `code_ntv`
 
@@ -373,9 +413,8 @@ class NtvList(Ntv):
         - **ntv_type**: String (default None) - default type or namespace of the included entities
         - **list_ntv**: list - list of Ntv objects or json_value of Ntv objectd
         '''
-        if list_ntv.__class__.__name__ != 'list':
+        if not isinstance(list_ntv, list):
             raise NtvError('ntv_value is not a list')
-        #Ntv.__init__(self, list_ntv, ntv_name, ntv_type)
         ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
 
@@ -398,6 +437,10 @@ class NtvList(Ntv):
         '''return the Json format of the ntv_value'''
         return [ntv.to_obj() for ntv in self.ntv_value]
 
+    @property
+    def json_object(self):
+        '''return the Json format of the ntv_value'''
+        return [ntv.to_obj(json=False) for ntv in self.ntv_value]
 
 class NtvSet(Ntv):
     '''An NTV-set entity is a Ntv entity where:
@@ -418,6 +461,7 @@ class NtvSet(Ntv):
     *dynamic values (@property)
     - `json_name`
     - `json_value`
+    - `json_object`
     - `type_str`
     - `code_ntv`
 
@@ -435,9 +479,8 @@ class NtvSet(Ntv):
         - **ntv_type**: String (default None) - default type or namespace of the included entities
         - **list_ntv**: list - list of Ntv objects or json_value of Ntv objectd
         '''
-        if list_ntv.__class__.__name__ != 'list':
+        if not isinstance(list_ntv, list):
             raise NtvError('ntv_value is not a list')
-        #Ntv.__init__(self, list_ntv, ntv_name, ntv_type)
         ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
         
@@ -460,6 +503,14 @@ class NtvSet(Ntv):
         '''return the Json format of the ntv_value'''
         return {ntv.json_name: ntv.json_value for ntv in self.ntv_value}
 
+    @property
+    def json_object(self):
+        '''return the Json format of the ntv_value'''
+        js = {}
+        for ntv in self.ntv_value:
+            dic = ntv.to_obj(json=False)
+            js[list(dic.keys())[0]] = list(dic.values())[0]
+        return js
 
 class NtvError(Exception):
     ''' NTV Exception'''

@@ -30,6 +30,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     geometry.multipolygon.MultiPolygon((pol[0], pol[1]))]                                        
         for obj in list_obj:
             self.assertTrue(Ntv.from_obj(NtvSingle(obj).to_obj())==NtvSingle(obj))
+            self.assertTrue(NtvSingle(obj).to_obj(json=False) == obj)
 
     def test_from_obj(self):
         dictstr = {'0NtvSingle': None, 'oNtvSingle': {'none': None}, 
@@ -45,6 +46,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '6NtvList': {'ntv1::fr.reg':[[4,[5,6]], {'heure':[21,22]}]},
                    '7NtvList': {'ntv1::fr.reg':[4]},
                    '8NtvList': {'ntv1::fr.':[4]},
+                   '9NtvList': [[4,[5,6]], {'heure':[datetime.time(10, 25, 10),22]}],
                    '1NtvSet': {}, '2NtvSet': {'ntv1': 1, 'ntv2':'2'},
                    '3NtvSet': {'ntv3': {'ntv1': 1, 'ntv2':'2'}},
                    '4NtvSet': {'ntv3::fr.reg': {'ntv1': 1, 'ntv2:fr.reg':'2'}},
@@ -55,6 +57,7 @@ class Test_Ntv_creation(unittest.TestCase):
             ntv = Ntv.from_obj(nstr)
             #print(nstr, typ)
             self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv)))
+            self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, json=False)))
             self.assertTrue(ntv.__class__.__name__ == typ[1:])
 
     def test_default_type(self):
