@@ -162,7 +162,6 @@ For example :
 import configparser
 import requests
 import json
-import os
 
 
 class NtvType():
@@ -392,4 +391,8 @@ class NtvTypeError(Exception):
     # pass
 
 
-Nroot = Namespace()
+nroot = Namespace()
+for root_nsp in nroot.content['namespace'].keys():
+    nsp = Namespace.add(root_nsp)
+for root_typ in nroot.content['type'].keys():
+    typ = NtvType.add(root_typ)

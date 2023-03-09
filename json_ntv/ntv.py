@@ -56,7 +56,7 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
 """
 import json
 from namespace import NtvType, Namespace
-
+from util import util
 
 class Ntv():
     ''' NTV entity
@@ -80,15 +80,14 @@ class Ntv():
     - `to_json_name`
     - `to_obj`
     '''
-
     def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
         '''Ntv constructor.
 
         *Parameters*
 
         - **ntv_name** : String (default None) - name of the NTV entity
-        - **ntv_type**: String, NtvType or Namespace (default None) - type of the entity
-        - **ntv_value**: value of the entity
+        - **ntv_type**: String or NtvType or Namespace (default None) - type of the entity
+        - **ntv_value**: Json entity - value of the entity
         '''
         if isinstance(ntv_type, (NtvType, Namespace)):
             self.ntv_type = ntv_type
@@ -103,7 +102,7 @@ class Ntv():
 
     @staticmethod
     def from_obj(value, def_type=None):
-        ''' return an Ntv object from a Json value '''
+        ''' return an Ntv object from an object value '''
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
         if value is None:
@@ -127,7 +126,8 @@ class Ntv():
         if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
             ntv_type = Ntv._agreg_type(str_type, def_type, True)            
             return NtvSingle(ntv_value, ntv_name, ntv_type)
-        raise NtvError(json.dumps(value) + ' is not a consistent Json NTV value')
+        #raise NtvError(json.dumps(value) + ' is not a consistent Json NTV value')
+        return NtvSingle(ntv_value, ntv_name, str_type)
 
     def __repr__(self):
         '''return classname and code'''
@@ -216,7 +216,34 @@ class Ntv():
             val = json_value[json_name]
             nam, typ, sep = Ntv._from_json_name(json_name)
             return (nam, typ, val, sep)
-        # if None and if ':' => single and other cases
+        #raise NtvError('the value is not a JSON value')               
+        val = Ntv._cast(json_value)
+        return (val[0], val[1], val[2], None)
+
+    @staticmethod
+    def _cast(data):
+        '''return (name, type, value) of the data'''
+        match data.__class__.__name__:
+            case 'date':
+                return (None, 'date', data.isoformat())
+            case 'time':
+                return (None, 'time', data.isoformat())            
+            case 'datetime':
+                return (None, 'datetime', data.isoformat()) 
+            case 'Point':
+                return (None, 'point', util.listed(data.__geo_interface__['coordinates']))
+            case 'MultiPoint':
+                return (None, 'multipoint', util.listed(data.__geo_interface__['coordinates']))
+            case 'LineString':
+                return (None, 'line', util.listed(data.__geo_interface__['coordinates']))
+            case 'MultiLineString':
+                return (None, 'multiline', util.listed(data.__geo_interface__['coordinates']))
+            case 'Polygon':
+                return (None, 'polygon', util.listed(data.__geo_interface__['coordinates']))    
+            case 'MultiPolygon':
+                return (None, 'multipolygon', util.listed(data.__geo_interface__['coordinates']))    
+            case _:
+                raise NtvError('connector is not defined to NTV entity')   
 
     @staticmethod
     def _from_json_name(string):
@@ -267,15 +294,24 @@ class NtvSingle(Ntv):
     - `to_obj`
     '''
 
-    def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
+    def __init__(self, value, ntv_name=None, ntv_type=None):
         '''NtvSingle constructor.
 
         *Parameters*
 
         - **ntv_name** : String (default None) - name of the NTV entity
         - **ntv_type**: String (default None) - type of the entity
-        - **ntv_value**: Json entity - value of the entity
+        - **value**: value of the entity
         '''
+        is_json = value is None or isinstance(value, (list, int, str, float, bool, dict))
+        if not ntv_type and not is_json:
+            name, ntv_type, ntv_value = Ntv._cast(value)
+            if not ntv_name :
+                ntv_name = name
+        elif ntv_type and not is_json:
+            raise NtvError('ntv_value is not compatible with ntv_type')
+        else: 
+            ntv_value = value
         if ntv_type and isinstance(ntv_type, str) and ntv_type[-1] == '.' :
             raise NtvError('the ntv_type is not valid')
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
@@ -339,7 +375,9 @@ class NtvList(Ntv):
         '''
         if list_ntv.__class__.__name__ != 'list':
             raise NtvError('ntv_value is not a list')
-        Ntv.__init__(self, list_ntv, ntv_name, ntv_type)
+        #Ntv.__init__(self, list_ntv, ntv_name, ntv_type)
+        ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
+        Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
 
     def __str__(self):
         '''return string format'''
@@ -399,8 +437,10 @@ class NtvSet(Ntv):
         '''
         if list_ntv.__class__.__name__ != 'list':
             raise NtvError('ntv_value is not a list')
-        Ntv.__init__(self, list_ntv, ntv_name, ntv_type)
-
+        #Ntv.__init__(self, list_ntv, ntv_name, ntv_type)
+        ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
+        Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
+        
     def __str__(self):
         '''return string format'''
         return json.dumps(self.to_obj())

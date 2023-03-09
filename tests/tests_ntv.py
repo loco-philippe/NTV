@@ -8,10 +8,29 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 `NtvSingle`, `NtvList` and `NtvSet` classes.
 """
 import unittest
+import datetime
 from ntv import NtvSingle, NtvList, NtvSet, Ntv
+from shapely import geometry
 
 class Test_Ntv_creation(unittest.TestCase):
     
+    def test_cast(self):
+        point = []
+        line = []
+        pol = []
+        for i in range(6):
+            point.append(geometry.point.Point((i, i+1)))
+        for i in range(3):
+            line.append(geometry.linestring.LineString((point[i], point[i+1], point[i+2])))
+            pol.append(geometry.polygon.Polygon((line[i])))
+        list_obj = [datetime.datetime(2021, 2, 1, 0, 0), datetime.time(21,2,1),
+                    datetime.date(2021, 2, 1), point[0], line[0], pol[0],
+                    geometry.multipoint.MultiPoint((point[0], point[1])),
+                    geometry.multilinestring.MultiLineString((line[0], line[1])),                    
+                    geometry.multipolygon.MultiPolygon((pol[0], pol[1]))]                                        
+        for obj in list_obj:
+            self.assertTrue(Ntv.from_obj(NtvSingle(obj).to_obj())==NtvSingle(obj))
+
     def test_from_obj(self):
         dictstr = {'0NtvSingle': None, 'oNtvSingle': {'none': None}, 
                    '1NtvSingle': 1, '2NtvSingle': 'test', '3NtvSingle': {'single': 1},
@@ -19,6 +38,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '5NtvSingle': {'ntv1:fr.reg': {'ntv2:fr.BAN.lon': 2}},
                    '6NtvSingle': {'ntv1': True}, '7NtvSingle': True,
                    '8NtvSingle': {'ntv1:dat': [1,2]},
+                   '9NtvSingle': {'ntv1': datetime.date(2021, 2, 1)},
                    '1NtvList': [], '2NtvList': [[4,[5,6]], {'heure':[21,22]}], 
                    '3NtvList': [[4,5], {'heure':21}], '4NtvList': [[4,5], 21], 
                    '5NtvList': [[4,5], [1,2,3]],
