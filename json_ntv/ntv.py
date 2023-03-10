@@ -80,7 +80,6 @@ class Ntv():
     - `code_ntv`
 
     *instance methods*
-    - `to_obj_name`
     - `to_obj`
     '''
     def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
@@ -108,10 +107,14 @@ class Ntv():
         ''' return an Ntv object from an object value '''
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
-        if value is None:
+        if value is None or value == 'null':
             return NtvSingle(None)
-        if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in ('{', '[', '('):
-            try:
+        if value == 'true':
+            return NtvSingle(True)
+        if value == 'false':
+            return NtvSingle(False)
+        if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
+            try: 
                 value = json.loads(value)
             except JSONDecodeError:
                 pass
@@ -136,6 +139,10 @@ class Ntv():
             return NtvSingle(ntv_value, ntv_name, ntv_type)
         return NtvSingle(ntv_value, ntv_name, str_type)
 
+    def __str__(self):
+        '''return string format'''
+        return self.to_obj(encoded=True)
+
     def __repr__(self):
         '''return classname and code'''
         return self.__class__.__name__ + '(' + self.code_ntv + ')'
@@ -158,22 +165,12 @@ class Ntv():
         code += 'V'
         return code
 
-    def to_obj_name(self, sep=':', typ=True):
-        '''return the JSON name of the NTV entity (json-ntv format)'''
-        if (not self.ntv_type or not typ) and not self.ntv_name:
-            return ''
-        if (not self.ntv_type or not typ) and self.ntv_name:
-            return self.ntv_name
-        if self.ntv_type and typ and not self.ntv_name:
-            return sep + self.type_str
-        return self.ntv_name + sep + self.type_str
-
     def to_obj(self, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format)'''
-        option = {'encoded': True, 'encode_format': 'json',
+        option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
-        value, js_bool = self.obj_value(encode_format=option['encode_format'])
-        name = self.obj_name(js_bool)
+        value, js_bool = self._obj_value(**option)
+        name = self._obj_name(typ=js_bool, nam=not option['simpleval'])
         if not name:
             js = value
         else:
@@ -181,6 +178,18 @@ class Ntv():
         if option['encoded'] and option['encode_format'] == 'json':
             return json.dumps(js)
         return js
+
+    def _to_obj_name(self, sep=':', typ=True, nam=True):
+        '''return the JSON name of the NTV entity (json-ntv format)'''
+        typ = typ and self.ntv_type 
+        nam = nam and self.ntv_name
+        if not typ and not nam:
+            return ''
+        if not typ and nam:
+            return self.ntv_name
+        if typ and not nam:
+            return sep + self.type_str
+        return self.ntv_name + sep + self.type_str
     
     @staticmethod 
     def _agreg_type(str_type, def_type, single):
@@ -231,7 +240,7 @@ class Ntv():
             nam, typ, sep = Ntv._from_obj_name(json_name)
             return (nam, typ, val, sep)
         val = Ntv._cast(json_value)
-        return (val[0], val[1], val[2], None)
+        return (val[0], val[1], val[2], ':')
 
     @staticmethod
     def _cast(data):
@@ -325,14 +334,10 @@ class NtvSingle(Ntv):
     - `from_obj`
 
     *dynamic values (@property)
-    - `obj_name`
-    - `obj_value`
-    - `json_object`
     - `type_str`
     - `code_ntv`
 
     *instance methods*
-    - `to_obj_name`
     - `to_obj`
     '''
 
@@ -358,22 +363,20 @@ class NtvSingle(Ntv):
             raise NtvError('the ntv_type is not valid')
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
 
-    def __str__(self):
-        '''return string format'''
-        return json.dumps(self.to_obj())
-
     def __eq__(self, other):
         ''' equal if name type and value are equal'''
         return self.__class__.__name__ == other.__class__.__name__ and\
             self.ntv_name == other.ntv_name and self.ntv_type == other.ntv_type and\
             self.ntv_value == other.ntv_value
 
-    def obj_name(self, typ=True):
+    def _obj_name(self, typ=True, nam=True):
         '''return the string format of ntv_name + ntv_type'''
-        return Ntv.to_obj_name(self, ':', typ=typ)
+        return Ntv._to_obj_name(self, ':', typ=typ, nam=nam)
 
-    def obj_value(self, encode_format='json'):
-        if encode_format == 'json':
+    def _obj_value(self, **kwargs):
+        option = {'encoded': False, 'encode_format': 'json',
+                  'simpleval': False} | kwargs
+        if option['encode_format'] == 'json':
             return (self.ntv_value, True)
         return Ntv._uncast(self)
 
@@ -394,14 +397,10 @@ class NtvList(Ntv):
     - `from_obj`
 
     *dynamic values (@property)
-    - `obj_name`
-    - `obj_value`
-    - `json_object`
     - `type_str`
     - `code_ntv`
 
     *instance methods*
-    - `to_obj_name`
     - `to_obj`
     '''
 
@@ -419,22 +418,21 @@ class NtvList(Ntv):
         ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
 
-    def __str__(self):
-        '''return string format'''
-        return json.dumps(self.to_obj())
-
     def __eq__(self, other):
         ''' equal if name and value are equal'''
         return self.__class__.__name__ == other.__class__.__name__ and\
             self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
 
-    def obj_name(self, typ=True):
+    def _obj_name(self, typ=True, nam=True):
         '''return the string format of ntv_name + ntv_type'''
-        return Ntv.to_obj_name(self, '::', typ=typ)
+        return Ntv._to_obj_name(self, '::', typ=typ, nam=nam)
 
-    def obj_value(self, encode_format='json'):
+    def _obj_value(self, **kwargs):
         '''return the Json format of the ntv_value'''
-        return ([ntv.to_obj(encode_format=encode_format, encoded=False) for ntv in self.ntv_value], True)
+        option = {'encoded': False, 'encode_format': 'json',
+                  'simpleval': False} | kwargs
+        option2 = option | {'encoded' : False}
+        return ([ntv.to_obj(**option2) for ntv in self.ntv_value], True)
 
 class NtvSet(Ntv):
     '''An NTV-set entity is a Ntv entity where:
@@ -453,14 +451,10 @@ class NtvSet(Ntv):
     - `from_obj`
 
     *dynamic values (@property)
-    - `obj_name`
-    - `obj_value`
-    - `json_object`
     - `type_str`
     - `code_ntv`
 
     *instance methods*
-    - `to_obj_name`
     - `to_obj`
     '''
 
@@ -477,25 +471,23 @@ class NtvSet(Ntv):
             raise NtvError('ntv_value is not a list')
         ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
-        
-    def __str__(self):
-        '''return string format'''
-        return json.dumps(self.to_obj())
 
     def __eq__(self, other):
         ''' equal if name and value are equal'''
         return self.__class__.__name__ == other.__class__.__name__ and\
             self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
 
-    def obj_name(self, typ=True):
+    def _obj_name(self, typ=True, nam=True):
         '''return the string format of ntv_name + ntv_type'''
-        return Ntv.to_obj_name(self, '::', typ=typ)
+        return Ntv._to_obj_name(self, '::', typ=typ, nam=nam)
 
-    def obj_value(self, encoded_format='json'):
+    def _obj_value(self, **kwargs):
         '''return the Json format of the ntv_value'''
-        return ({list(ntv.to_obj(encoded_format=encoded_format, encoded=False).items())[0][0]: 
-                list(ntv.to_obj(encoded_format=encoded_format, encoded=False).items())[0][1] 
-                for ntv in self.ntv_value}, True)
+        option = {'encoded': False, 'encode_format': 'json',
+                  'simpleval': False} | kwargs
+        option2 = option | {'encoded' : False}
+        return ({list(ntv.to_obj(**option2).items())[0][0]: 
+                list(ntv.to_obj(**option2).items())[0][1] for ntv in self.ntv_value}, True)
 
 class NtvError(Exception):
     ''' NTV Exception'''

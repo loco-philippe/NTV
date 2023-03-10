@@ -40,6 +40,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '6NtvSingle': {'ntv1': True}, '7NtvSingle': True,
                    '8NtvSingle': {'ntv1:dat': [1,2]},
                    '9NtvSingle': {'ntv1': datetime.date(2021, 2, 1)},
+                   'aNtvSingle': '{ner',
                    '1NtvList': [], '2NtvList': [[4,[5,6]], {'heure':[21,22]}], 
                    '3NtvList': [[4,5], {'heure':21}], '4NtvList': [[4,5], 21], 
                    '5NtvList': [[4,5], [1,2,3]],
@@ -47,6 +48,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    '7NtvList': {'ntv1::fr.reg':[4]},
                    '8NtvList': {'ntv1::fr.':[4]},
                    '9NtvList': [[4,[5,6]], {'heure':[datetime.time(10, 25, 10),22]}],
+                   'aNtvList': [[4,[5,6]], {'heure':[datetime.time(10, 25, 10),
+                                                     geometry.point.Point((3,4))]}],
                    '1NtvSet': {}, '2NtvSet': {'ntv1': 1, 'ntv2':'2'},
                    '3NtvSet': {'ntv3': {'ntv1': 1, 'ntv2':'2'}},
                    '4NtvSet': {'ntv3::fr.reg': {'ntv1': 1, 'ntv2:fr.reg':'2'}},
@@ -58,6 +61,7 @@ class Test_Ntv_creation(unittest.TestCase):
             #print(nstr, typ)
             self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv)))
             self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, encode_format='cbor')))
+            self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, encoded=True)))
             self.assertTrue(ntv.__class__.__name__ == typ[1:])
 
     def test_default_type(self):
@@ -70,7 +74,11 @@ class Test_Ntv_creation(unittest.TestCase):
                      [':fr.reg', {'ntv1::fr.BAN.lon':[{':fr.reg':4},5,6]}],
                      [':fr.reg', {'ntv1::fr.BAN.':[{':fr.reg':4},5,6]}] ]
         for test in list_test:
-            self.assertEqual(Ntv.from_obj(test[1]).ntv_value[0].obj_name(), test[0])
-                
+            self.assertEqual(Ntv.from_obj(test[1]).ntv_value[0]._obj_name(), test[0])
+
+    def test_to_obj(self):
+        nstr = {'cities': [{'paris':[2.1, 40.3]}, {'lyon':[2.1, 40.3]}]}
+        self.assertEqual(Ntv.from_obj(nstr).to_obj(simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
+        
 if __name__ == '__main__':
     unittest.main(verbosity=2)        
