@@ -30,7 +30,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     geometry.multipolygon.MultiPolygon((pol[0], pol[1]))]                                        
         for obj in list_obj:
             self.assertTrue(Ntv.from_obj(NtvSingle(obj).to_obj())==NtvSingle(obj))
-            self.assertTrue(NtvSingle(obj).to_obj(json=False) == obj)
+            self.assertTrue(NtvSingle(obj).to_obj(encode_format='cbor') == obj)
 
     def test_from_obj(self):
         dictstr = {'0NtvSingle': None, 'oNtvSingle': {'none': None}, 
@@ -57,7 +57,7 @@ class Test_Ntv_creation(unittest.TestCase):
             ntv = Ntv.from_obj(nstr)
             #print(nstr, typ)
             self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv)))
-            self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, json=False)))
+            self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, encode_format='cbor')))
             self.assertTrue(ntv.__class__.__name__ == typ[1:])
 
     def test_default_type(self):
@@ -70,7 +70,7 @@ class Test_Ntv_creation(unittest.TestCase):
                      [':fr.reg', {'ntv1::fr.BAN.lon':[{':fr.reg':4},5,6]}],
                      [':fr.reg', {'ntv1::fr.BAN.':[{':fr.reg':4},5,6]}] ]
         for test in list_test:
-            self.assertEqual(Ntv.from_obj(test[1]).ntv_value[0].json_name, test[0])
+            self.assertEqual(Ntv.from_obj(test[1]).ntv_value[0].obj_name(), test[0])
                 
 if __name__ == '__main__':
     unittest.main(verbosity=2)        
