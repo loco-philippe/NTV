@@ -13,7 +13,8 @@ from namespace import Namespace, NtvTypeError, NtvType
 class Test_Namespace(unittest.TestCase):
     
     def test_add(self):
-        liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.', '$a.', '$b.$c.']
+        liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
+                   'fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.']
         for nstr in liststr:
             self.assertTrue(Namespace.add(nstr).long_name == nstr)
     
@@ -23,10 +24,17 @@ class Test_Namespace(unittest.TestCase):
             with self.assertRaises(NtvTypeError):
                 Namespace.add(nstr)
 
+    def test_user_nsp(self):
+        liststr = ['fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.']
+        for nstr in liststr:
+            self.assertTrue(Namespace.add(nstr).file == None)        
+            self.assertTrue(Namespace.add(nstr).content == {'type': {}, 'namespace': {}})        
+
 class Test_NtvType(unittest.TestCase):
     
     def test_add(self):
-        liststr = ['fr.BAN.lon', 'year', 'fr.reg', 'fr.BAN.numero', 'fr.reg']
+        liststr = ['fr.BAN.lon', 'year', 'fr.reg', 'fr.BAN.numero', 'fr.reg', 
+                   'fr.$IRVE.$a', '$a.$c', 'fr.$c']
         for tstr in liststr:
             self.assertTrue(NtvType.add(tstr).long_name == tstr)
     

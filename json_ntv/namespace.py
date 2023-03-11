@@ -177,7 +177,6 @@ class NtvType():
     *classmethods*
     - `types`
     - `add`
-    - `add_ntv_type`
 
     *dynamic values (@property)
     - `gen_type`
@@ -202,20 +201,11 @@ class NtvType():
         if split_name[-1] == '':
             raise NtvTypeError(long_name + ' is not a valid NTVtype')
         if len(split_name) == 1:
-            return cls.add_ntv_type(split_name[0])
+            return cls(split_name[0])
         if len(split_name) == 2:
             nspace = Namespace.add(split_name[0]+'.')
-            return cls.add_ntv_type(split_name[1], nspace)
+            return cls(split_name[1], nspace)
         raise NtvTypeError(long_name + ' is not a valid NTVtype')
-
-    @classmethod
-    def add_ntv_type(cls, name, nspace=None):
-        '''activate and return a valid NtvType defined by a name and a Namespace'''
-        if not nspace:
-            nspace = Namespace()
-        if name[0] != '$' and not name in nspace.content['type']:
-            raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
-        return cls(name, nspace)
 
     def __init__(self, name, nspace=None):
         '''NtvType constructor.
@@ -224,8 +214,12 @@ class NtvType():
 
         - **name** : string - name of the Type
         - **nspace** : Namespace (default None) - namespace associated'''
+        if not name or not isinstance(name, str):
+            raise NtvTypeError('null name is not allowed')            
         if not nspace:
-            nspace = Namespace()
+            nspace = Namespace._namespaces_['']
+        if name[0] != '$' and not name in nspace.content['type']:
+            raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
         self.nspace = nspace
         self._types_[self.long_name] = self
@@ -271,7 +265,6 @@ class Namespace():
     *classmethods*
     - `namespaces`
     - `add`
-    - `add_namespace`
 
     *dynamic values (@property)
     - `file`
@@ -284,6 +277,7 @@ class Namespace():
     '''
     _namespaces_ = {}
     _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
+    _global_ = "NTV_global_namespace.ini"
     
     @classmethod
     def namespaces(cls):
@@ -299,21 +293,11 @@ class Namespace():
         if len(split_name) == 1 or split_name[-1] != '':
             raise NtvTypeError(long_name + ' is not a valid classname')
         if len(split_name) == 2:
-            return cls.add_namespace(split_name[0]+'.')
+            return cls(split_name[0]+'.')
         if len(split_name) == 3:
             parent = Namespace.add(split_name[0]+'.')
-            return cls.add_namespace(split_name[1]+'.', parent)
+            return cls(split_name[1]+'.', parent)
         raise NtvTypeError(long_name + ' is not a valid classname')
-
-    @classmethod
-    def add_namespace(cls, name, parent=None):
-        '''activate and return a valid Namespace defined by a name and a parent Namespace'''
-        if parent is None:
-            #parent = cls._namespaces_['']
-            parent = cls()
-        if name[0] != '$' and not name in parent.content['namespace']:
-            raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
-        return cls(name, parent)
 
     def __init__(self, name='', parent=None):
         '''
@@ -324,6 +308,10 @@ class Namespace():
         - **name** : String - name of the namespace
         - **file** : string - location of the file init
         - **parent** : Namespace - parent namespace'''
+        if name and parent is None:
+            parent = Namespace._namespaces_['']       
+        if name and name[0] != '$' and not name in parent.content['namespace']:
+            raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
         self.parent = parent
         self._namespaces_[self.long_name] = self
@@ -343,11 +331,13 @@ class Namespace():
     @property
     def file(self):
         '''return the file name of the Namespace configuration'''
+        if self.name and self.name[0] == '$':
+            return None            
         if self.parent:
             config = configparser.ConfigParser()
             config.read_string(requests.get(self.parent.file, allow_redirects=True).content.decode())
             return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[self.name]
-        return Namespace._pathconfig_ +"NTV_global_namespace.ini"
+        return Namespace._pathconfig_ + Namespace._global_
 
     @property
     def content(self):
