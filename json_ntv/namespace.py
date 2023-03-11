@@ -213,7 +213,7 @@ class NtvType():
         '''activate and return a valid NtvType defined by a name and a Namespace'''
         if not nspace:
             nspace = Namespace()
-        if not name in nspace.content['type']:
+        if name[0] != '$' and not name in nspace.content['type']:
             raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
         return cls(name, nspace)
 
@@ -309,8 +309,9 @@ class Namespace():
     def add_namespace(cls, name, parent=None):
         '''activate and return a valid Namespace defined by a name and a parent Namespace'''
         if parent is None:
-            parent = cls._namespaces_['']
-        if not name in parent.content['namespace']:
+            #parent = cls._namespaces_['']
+            parent = cls()
+        if name[0] != '$' and not name in parent.content['namespace']:
             raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         return cls(name, parent)
 
@@ -351,6 +352,8 @@ class Namespace():
     @property
     def content(self):
         '''return the content of the Namespace configuration'''
+        if self.name and self.name[0] == '$':
+            return {'type': {}, 'namespace': {}}            
         config = configparser.ConfigParser()
         config.read_string(requests.get(self.file, allow_redirects=True).content.decode())
         config_name = config['data']['name']

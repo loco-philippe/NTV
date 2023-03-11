@@ -13,7 +13,7 @@ from namespace import Namespace, NtvTypeError, NtvType
 class Test_Namespace(unittest.TestCase):
     
     def test_add(self):
-        liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.']
+        liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.', '$a.', '$b.$c.']
         for nstr in liststr:
             self.assertTrue(Namespace.add(nstr).long_name == nstr)
     
