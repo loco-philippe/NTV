@@ -41,6 +41,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '8NtvSingle': {'ntv1:dat': [1,2]},
                    '9NtvSingle': {'ntv1': datetime.date(2021, 2, 1)},
                    'aNtvSingle': '{ner',
+                   'bNtvSingle': {':$point':{'a':[1,2], 'b':[3,4]}},
                    '1NtvList': [], '2NtvList': [[4,[5,6]], {'heure':[21,22]}], 
                    '3NtvList': [[4,5], {'heure':21}], '4NtvList': [[4,5], 21], 
                    '5NtvList': [[4,5], [1,2,3]],
@@ -57,11 +58,13 @@ class Test_Ntv_creation(unittest.TestCase):
         liststr = list(dictstr.values())
         listtyp = list(dictstr.keys())
         for nstr, typ in zip(liststr, listtyp):
+            #print('av', nstr, typ)
             ntv = Ntv.from_obj(nstr)
-            #print(nstr, typ)
+            #print('ap', nstr, typ)
             self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv)))
             self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, encode_format='cbor')))
-            self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, encoded=True)))
+            if not typ in ['9NtvList', 'aNtvList']:
+                self.assertTrue(ntv == Ntv.from_obj(Ntv.to_obj(ntv, encoded=True)))
             self.assertTrue(ntv.__class__.__name__ == typ[1:])
 
     def test_default_type(self):

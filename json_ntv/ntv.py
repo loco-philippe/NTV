@@ -103,7 +103,7 @@ class Ntv():
         self.ntv_value = ntv_value
 
     @staticmethod
-    def from_obj(value, def_type=None):
+    def from_obj(value, def_type=None, def_sep=None):
         ''' return an Ntv object from an object value '''
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
@@ -119,9 +119,11 @@ class Ntv():
             except JSONDecodeError:
                 pass
         ntv_name, str_type, ntv_value, sep = Ntv._decode(value)
+        if not sep:
+            sep = def_sep
         if isinstance(ntv_value, list) and sep in (None, '::'):
             def_type = Ntv._agreg_type(str_type, def_type, False)
-            ntv_list = [Ntv.from_obj(val, def_type) for val in ntv_value]
+            ntv_list = [Ntv.from_obj(val, def_type, ':') for val in ntv_value]
             return NtvList(ntv_list, ntv_name, def_type)
         if (isinstance(ntv_value, (int, str, float, bool, list)) 
             or ntv_value is None) and sep in (None, ':'):
@@ -131,13 +133,16 @@ class Ntv():
             keys = list(ntv_value.keys())
             values = list(ntv_value.values())
             def_type = Ntv._agreg_type(str_type, def_type, False)
-            ntv_list = [Ntv.from_obj({key: val}, def_type)
+            ntv_list = [Ntv.from_obj({key: val}, def_type, ':')
                         for key, val in zip(keys, values)]
             return NtvSet(ntv_list, ntv_name, def_type,)
         if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
             ntv_type = Ntv._agreg_type(str_type, def_type, True)            
             return NtvSingle(ntv_value, ntv_name, ntv_type)
-        return NtvSingle(ntv_value, ntv_name, str_type)
+        if sep in (None, ':'):
+            ntv_type = Ntv._agreg_type(str_type, def_type, True)            
+            return NtvSingle(ntv_value, ntv_name, ntv_type)
+        raise NtvError('separator ":" is not compatible with value')               
 
     def __str__(self):
         '''return string format'''
@@ -434,7 +439,7 @@ class NtvList(Ntv):
         '''
         if not isinstance(list_ntv, list):
             raise NtvError('ntv_value is not a list')
-        ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
+        ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
 
     def __eq__(self, other):
@@ -492,7 +497,7 @@ class NtvSet(Ntv):
         '''
         if not isinstance(list_ntv, list):
             raise NtvError('ntv_value is not a list')
-        ntv_value = [Ntv.from_obj(ntv, ntv_type) for ntv in list_ntv]
+        ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         Ntv.__init__(self, ntv_value, ntv_name, ntv_type)
 
     def __eq__(self, other):
