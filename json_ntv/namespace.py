@@ -9,9 +9,10 @@ The `namespace` module contains the Namespace and the NtvType classes for NTV en
 
 # 1 - Data type
 
-The structure of types by namespace makes it possible to have types corresponding to recognized standards at the global level.
+The structure of types by namespace makes it possible to have types corresponding 
+to recognized standards at the global level.
 Generic types can also be defined (calculation of the exact type when decoding the value).
-    
+
 The global namespace can include the following structures:
 
 ## 1.1 - Simple (JSON RFC8259)
@@ -41,8 +42,8 @@ The global namespace can include the following structures:
 | time (dat)         | “T18:23:54”,  “18:23”, “T18”  |
 | datetime (dat)     | “2022-01-28T18-23-54Z”, “2022-01-28T18-23-54+0400”        |
 | timearray (dat)    | [date1, date2]                |
-| timeslot (dat)     | [timearray1, timearray2]      |   
-    
+| timeslot (dat)     | [timearray1, timearray2]      |
+
 ## 1.3 - Duration (ISO8601 and Posix)
 
 | type (generic type) | value example                                |
@@ -50,7 +51,7 @@ The global namespace can include the following structures:
 | timeinterval (dur)  | "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"  |
 | durationiso (dur)   | "P0002-10- 15T10:30:20"                      |
 | durposix (dur)      | 123456.78                                    |
-     
+
 ## 1.4 - Location (RFC7946 and Open Location Code):
 
 | type (generic type) | value example                                |
@@ -95,13 +96,14 @@ Namespaces could also be defined to reference for example:
 
 | NTVtype      | example JSON-NTV                                                     |
 |--------------|----------------------------------------------------------------------|
-| schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>{ “:schemaorg.unitText”:”µg/m3”}</div>  |
+| schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>
+{ “:schemaorg.unitText”:”µg/m3”}</div>  |
 | darwincore.  | { “:darwincore.acceptedNameUsage”: “Tamias minimus” }                |
 
 ## 1.8 - Identifiers
 
 For example :
- 
+
 | type         | definition                      | exemple               |
 |--------------|---------------------------------|-----------------------|
 | fr.uic       | code UIC station                | 8757449               |
@@ -110,18 +112,21 @@ For example :
 
 # 2 - Example of using a `fr.` namespace
 
-This namespace is dedicated to datasets associated with the France geopolitical namespace (see also the [presentation document](https://github.com/loco-philippe/Environmental-Sensing/blob/main/JSON-NTV/JSON-NTV-namespace-fr.pdf)).    
-    
+This namespace is dedicated to datasets associated with the France geopolitical namespace 
+(see also the [presentation document](
+https://github.com/loco-philippe/Environmental-Sensing/blob/main/JSON-NTV/JSON-NTV-namespace-fr.pdf)).
+
 A namespace defines:
 - identifiers used to access additional data,
 - namespaces associated with catalogs or data sets,
 - structured entities used to facilitate the use of data
 
 ## 2.1 - Identifiers
-They could correspond to identifiers used in many referenced datasets (via a data schema or a data model).
-   
+They could correspond to identifiers used in many referenced datasets 
+(via a data schema or a data model).
+
 For example :
- 
+
 | type         | definition                      | example               |
 |--------------|---------------------------------|-----------------------|
 | fr.dep       | code département                | 60                    |
@@ -137,31 +142,37 @@ For example :
 | fr.nir       | code NIR sécurité sociale       | 164026005705953       |
 
 ## 2.2 Namespaces
-Namespaces could correspond to catalogs or data sets whose data types are identified in data models or in referenced data schemas.
+Namespaces could correspond to catalogs or data sets whose data types are identified 
+in data models or in referenced data schemas.
 
-For example : 
+For example :
 
 |    type     | example JSON-NTV                                                                              |
 |-------------|-----------------------------------------------------------------------------------------------|
-| fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div><div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
-| fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div><div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
-| fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div><div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
+| fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div>
+<div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
+| fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div>
+<div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
+| fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div>
+<div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
 | fr.BAN.     | <div>{ ":fr.BAN.numero": 54 }</div><div>{ ":fr.BAN.lon": 3.5124 }</div>                                            |
 
 ## 2.3 Entities
 They could correspond to assemblies of data associated with a defined structure.
-     
-For example : 
+
+For example :
 
 |    type      | example JSON-NTV                                                                                                     |
 |--------------|----------------------------------------------------------------------------------------------------------------------|
-| fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div><div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
-| fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div><div><i>(fr.BAN.numero, fr.BAN.rep, fr.BAN.nom_voie, fr.cp)</i></div>  |
+| fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div>
+<div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
+| fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div>
+<div><i>(fr.BAN.numero, fr.BAN.rep, fr.BAN.nom_voie, fr.cp)</i></div>  |
 
 """
 import configparser
-import requests
 import json
+import requests
 
 
 class NtvType():
@@ -215,7 +226,7 @@ class NtvType():
         - **name** : string - name of the Type
         - **nspace** : Namespace (default None) - namespace associated'''
         if not name or not isinstance(name, str):
-            raise NtvTypeError('null name is not allowed')            
+            raise NtvTypeError('null name is not allowed')
         if not nspace:
             nspace = Namespace._namespaces_['']
         if name[0] != '$' and not name in nspace.content['type']:
@@ -278,7 +289,7 @@ class Namespace():
     _namespaces_ = {}
     _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
     _global_ = "NTV_global_namespace.ini"
-    
+
     @classmethod
     def namespaces(cls):
         '''return the list of Namespace created'''
@@ -309,7 +320,7 @@ class Namespace():
         - **file** : string - location of the file init
         - **parent** : Namespace - parent namespace'''
         if name and parent is None:
-            parent = Namespace._namespaces_['']       
+            parent = Namespace._namespaces_['']
         if name and name[0] != '$' and not name in parent.content['namespace']:
             raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
@@ -332,10 +343,11 @@ class Namespace():
     def file(self):
         '''return the file name of the Namespace configuration'''
         if self.name and self.name[0] == '$':
-            return None            
+            return None
         if self.parent:
             config = configparser.ConfigParser()
-            config.read_string(requests.get(self.parent.file, allow_redirects=True).content.decode())
+            config.read_string(requests.get(
+                self.parent.file, allow_redirects=True).content.decode())
             return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[self.name]
         return Namespace._pathconfig_ + Namespace._global_
 
@@ -343,9 +355,10 @@ class Namespace():
     def content(self):
         '''return the content of the Namespace configuration'''
         if self.name and self.name[0] == '$':
-            return {'type': {}, 'namespace': {}}            
+            return {'type': {}, 'namespace': {}}
         config = configparser.ConfigParser()
-        config.read_string(requests.get(self.file, allow_redirects=True).content.decode())
+        config.read_string(requests.get(
+            self.file, allow_redirects=True).content.decode())
         config_name = config['data']['name']
         if config_name != self.name:
             raise NtvTypeError(self.file + ' is not correct')
@@ -372,7 +385,6 @@ class Namespace():
             return rang
         if parent.name == '':
             return -1
-
 
     def is_parent(self, nspace):
         '''return the number of level between self and parent, -1 if None'''
