@@ -171,7 +171,7 @@ class Ntv():
 
     def __repr__(self):
         '''return classname and code'''
-        return self.__class__.__name__ + '(' + self.code_ntv + ')'
+        return json.dumps(self.to_repr(False, False, False, 10))
 
     @property
     def type_str(self):
@@ -191,6 +191,26 @@ class Ntv():
         code += 'V'
         return code
 
+    def to_repr(self, nam=True, typ=True, val=True, max=10):
+        clas = self.__class__.__name__
+        ntv = ''
+        if clas[3:5] in ('Li', 'Se'): 
+            ntv += clas[3].lower()
+        ntv += self.code_ntv[:-1]
+        if self.ntv_name and nam: 
+            ntv += '-' + self.ntv_name
+        if self.ntv_type and typ: 
+            ntv += '-' + self.ntv_type.long_name
+        if isinstance(self, NtvSingle):
+            if val:
+                if ntv:
+                    ntv += '-'
+                ntv += json.dumps(self.ntv_value)
+            return ntv
+        if isinstance(self, (NtvList, NtvSet)):
+            return { ntv :  [ntv.to_repr(nam, typ, val) for ntv in self.ntv_value[:max]]}
+        
+                      
     def to_obj(self, def_type=None, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format)'''
         option = {'encoded': False, 'encode_format': 'json',

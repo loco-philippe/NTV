@@ -55,6 +55,6 @@ This structuring of type makes it possible to reference any type of data that ha
 
 
 """
-from namespace import Namespace
-from namespace import NtvType
+from namespace import Namespace, NtvType
+from ntv import Ntv, NtvSingle, NtvList, NtvSet
 #print('package :', __package__)
