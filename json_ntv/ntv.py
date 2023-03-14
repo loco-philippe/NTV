@@ -59,6 +59,7 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
 
 """
+from copy import copy
 from datetime import date, time, datetime
 import json
 from json import JSONDecodeError
@@ -159,11 +160,18 @@ class Ntv():
             return NtvSet(ntv_list, ntv_name, def_type,)
         if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
             ntv_type = Ntv._agreg_type(str_type, def_type, True)
-            return NtvSingle(ntv_value, ntv_name, ntv_type)
+            ntv_single = Ntv.from_obj(ntv_value, ntv_type, sep)
+            return NtvSingle(ntv_single, ntv_name, ntv_type)
         if sep in (None, ':'):
             ntv_type = Ntv._agreg_type(str_type, def_type, True)
             return NtvSingle(ntv_value, ntv_name, ntv_type)
         raise NtvError('separator ":" is not compatible with value')
+
+    def __len__(self):
+        ''' len of ntv_value'''
+        if isinstance(self.ntv_value, (list, set)):
+            return len(self.ntv_value)
+        return 1
 
     def __str__(self):
         '''return string format'''
@@ -172,6 +180,22 @@ class Ntv():
     def __repr__(self):
         '''return classname and code'''
         return json.dumps(self.to_repr(False, False, False, 10))
+
+    def __getitem__(self, ind):
+        ''' return ntv_value item (value conversion)'''
+        if isinstance(ind, tuple):
+            return [copy(self.ntv_value[i]) for i in ind]
+        return copy(self.ntv_value[ind])
+
+    def __setitem__(self, ind, value):
+        ''' modify ntv_value item'''
+        if ind < 0 or ind >= len(self):
+            raise NtvError("out of bounds")
+        self.ntv_value[ind] = value
+
+    def __delitem__(self, ind):
+        '''remove a ntv_value item'''
+        self.ntv_value.pop(ind)
 
     @property
     def type_str(self):
@@ -191,25 +215,27 @@ class Ntv():
         code += 'V'
         return code
 
-    def to_repr(self, nam=True, typ=True, val=True, max=10):
+    def to_repr(self, nam=True, typ=True, val=True, maxi=10):
+        '''return a simple json representation of the ntv entity'''
         clas = self.__class__.__name__
-        dic = {'NtvList' : 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
+        dic = {'NtvList': 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
         ntv = dic[clas] + self.code_ntv[:-1]
-        if self.ntv_name and nam: 
+        if self.ntv_name and nam:
             ntv += '-' + self.ntv_name
-        if self.ntv_type and typ: 
+        if self.ntv_type and typ:
             ntv += '-' + self.ntv_type.long_name
-        if isinstance(self, NtvSingle):
+        if isinstance(self, NtvSingle) and not isinstance(self.ntv_value, NtvSingle):
             if val:
                 if ntv:
                     ntv += '-'
                 ntv += json.dumps(self.ntv_value)
-                #ntv += self.ntv_value
             return ntv
+        if isinstance(self, NtvSingle) and isinstance(self.ntv_value, NtvSingle):
+            return {ntv:  self.ntv_value.to_repr(nam, typ, val)}
         if isinstance(self, (NtvList, NtvSet)):
-            return { ntv :  [ntv.to_repr(nam, typ, val) for ntv in self.ntv_value[:max]]}
-        
-                      
+            return {ntv:  [ntv.to_repr(nam, typ, val) for ntv in self.ntv_value[:maxi]]}
+        raise NtvError('the ntv entity is not consistent')
+
     def to_obj(self, def_type=None, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format)'''
         option = {'encoded': False, 'encode_format': 'json',
@@ -257,12 +283,11 @@ class Ntv():
     @staticmethod
     def _agreg_type(str_type, def_type, single):
         '''aggregate str_type and def_type to return an NtvType or a Namespace if not single'''
-        if not str_type and not def_type:
+        if not str_type and (not def_type or isinstance(def_type, Namespace)):
             return None
         if not str_type and isinstance(def_type, NtvType):
             return def_type
-        if not str_type and isinstance(def_type, Namespace):
-            return None
+
         if not def_type and str_type[-1] == '.':
             return Namespace.add(str_type)
         if not def_type and str_type[-1] != '.':
@@ -328,31 +353,29 @@ class Ntv():
     @staticmethod
     def _cast(data):
         '''return (name, type, value) of the data'''
-        match data.__class__.__name__:
+        dic_geo_cl = {'point': 'point', 'multipoint': 'multipoint', 'linestring': 'line',
+                      'multilinestring': 'multiline', 'polygon': 'polygon',
+                      'multipolygon': 'multipolygon'}
+        match data.__class__.__name__.lower():
             case 'date':
                 return (None, 'date', data.isoformat())
             case 'time':
                 return (None, 'time', data.isoformat())
             case 'datetime':
                 return (None, 'datetime', data.isoformat())
-            case 'Point':
-                return (None, 'point', util.listed(data.__geo_interface__['coordinates']))
-            case 'MultiPoint':
-                return (None, 'multipoint', util.listed(data.__geo_interface__['coordinates']))
-            case 'LineString':
-                return (None, 'line', util.listed(data.__geo_interface__['coordinates']))
-            case 'MultiLineString':
-                return (None, 'multiline', util.listed(data.__geo_interface__['coordinates']))
-            case 'Polygon':
-                return (None, 'polygon', util.listed(data.__geo_interface__['coordinates']))
-            case 'MultiPolygon':
-                return (None, 'multipolygon', util.listed(data.__geo_interface__['coordinates']))
+            case 'point' | 'multipoint' | 'linestring' | 'multilinestring' | \
+                    'polygon' | 'multipolygon':
+                return (None, dic_geo_cl[data.__class__.__name__.lower()],
+                        util.listed(data.__geo_interface__['coordinates']))
             case _:
                 raise NtvError('connector is not defined to NTV entity')
         return (None, None, None)
 
     def _uncast(self):
         '''return object from ntv_value'''
+        dic_geo = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
+                   'multiline': 'multilinestring', 'polygon': 'polygon',
+                   'multipolygon': 'multipolygon'}
         if self.ntv_type is None:
             return (self.ntv_value, True)
         match self.ntv_type.name:
@@ -362,24 +385,9 @@ class Ntv():
                 return (time.fromisoformat(self.ntv_value), False)
             case 'datetime':
                 return (datetime.fromisoformat(self.ntv_value), False)
-            case 'point':
-                return (geometry.shape({"type": "point", "coordinates":
-                                        self.ntv_value}), False)
-            case 'multipoint':
-                return (geometry.shape({"type": "multipoint", "coordinates":
-                                        self.ntv_value}), False)
-            case 'line':
-                return (geometry.shape({"type": "linestring", "coordinates":
-                                        self.ntv_value}), False)
-            case 'multiline':
-                return (geometry.shape({"type": "multilinestring", "coordinates":
-                                        self.ntv_value}), False)
-            case 'polygon':
-                return (geometry.shape({"type": "polygon", "coordinates":
-                                        self.ntv_value}), False)
-            case 'multipolygon':
-                return (geometry.shape({"type": "multipolygon", "coordinates":
-                                        self.ntv_value}), False)
+            case 'point' | 'multipoint' | 'line' | 'multiline' | 'polygon' | 'multipolygon':
+                return (geometry.shape({"type": dic_geo[self.ntv_type.name],
+                                        "coordinates": self.ntv_value}), False)
             case _:
                 return (self.ntv_value, True)
 
@@ -438,13 +446,13 @@ class NtvSingle(Ntv):
         - **ntv_type**: String (default None) - type of the entity
         - **value**: value of the entity
         '''
-        is_json = value is None or isinstance(
-            value, (list, int, str, float, bool, dict))
-        if not ntv_type and not is_json:
+        is_json_ntv = value is None or isinstance(
+            value, (list, int, str, float, bool, dict, NtvSingle))
+        if not ntv_type and not is_json_ntv:
             name, ntv_type, ntv_value = Ntv._cast(value)
             if not ntv_name:
                 ntv_name = name
-        elif ntv_type and not is_json:
+        elif ntv_type and not is_json_ntv:
             raise NtvError('ntv_value is not compatible with ntv_type')
         else:
             ntv_value = value
@@ -462,6 +470,12 @@ class NtvSingle(Ntv):
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         if option['encode_format'] == 'json':
+            if isinstance(self.ntv_value, NtvSingle):
+                def_type = ''
+                if self.ntv_type:
+                    def_type = self.ntv_type.long_name
+                option2 = option | {'encoded': False}
+                return (self.ntv_value.to_obj(def_type=def_type, **option2), True)
             return (self.ntv_value, True)
         return Ntv._uncast(self)
 

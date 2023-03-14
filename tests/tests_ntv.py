@@ -96,11 +96,14 @@ class Test_Ntv_creation(unittest.TestCase):
                      [':fr.reg', {'ntv1::fr.BAN.lon':[{':fr.reg':4},5,6]}],
                      [':fr.reg', {'ntv1::fr.BAN.':[{':fr.reg':4},5,6]}] ]
         for test in list_test:
+            #print(test[1])
             self.assertEqual(Ntv.from_obj(test[1]).ntv_value[0]._obj_name(), test[0])
 
     def test_to_obj(self):
         nstr = {'cities': [{'paris':[2.1, 40.3]}, {'lyon':[2.1, 40.3]}]}
         self.assertEqual(Ntv.from_obj(nstr).to_obj(simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
+        sing = Ntv.from_obj({'ntv1': {'ntv2': 2}})
+        self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
         
 if __name__ == '__main__':
     unittest.main(verbosity=2)        
