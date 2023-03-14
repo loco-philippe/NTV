@@ -193,10 +193,8 @@ class Ntv():
 
     def to_repr(self, nam=True, typ=True, val=True, max=10):
         clas = self.__class__.__name__
-        ntv = ''
-        if clas[3:5] in ('Li', 'Se'): 
-            ntv += clas[3].lower()
-        ntv += self.code_ntv[:-1]
+        dic = {'NtvList' : 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
+        ntv = dic[clas] + self.code_ntv[:-1]
         if self.ntv_name and nam: 
             ntv += '-' + self.ntv_name
         if self.ntv_type and typ: 
@@ -206,6 +204,7 @@ class Ntv():
                 if ntv:
                     ntv += '-'
                 ntv += json.dumps(self.ntv_value)
+                #ntv += self.ntv_value
             return ntv
         if isinstance(self, (NtvList, NtvSet)):
             return { ntv :  [ntv.to_repr(nam, typ, val) for ntv in self.ntv_value[:max]]}
