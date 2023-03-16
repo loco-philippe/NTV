@@ -9,7 +9,7 @@ The `namespace` module contains the Namespace and the NtvType classes for NTV en
 
 # 1 - Data type
 
-The structure of types by namespace makes it possible to have types corresponding 
+The structure of types by namespace makes it possible to have types corresponding
 to recognized standards at the global level.
 Generic types can also be defined (calculation of the exact type when decoding the value).
 
@@ -112,7 +112,7 @@ For example :
 
 # 2 - Example of using a `fr.` namespace
 
-This namespace is dedicated to datasets associated with the France geopolitical namespace 
+This namespace is dedicated to datasets associated with the France geopolitical namespace
 (see also the [presentation document](
 https://github.com/loco-philippe/Environmental-Sensing/blob/main/JSON-NTV/JSON-NTV-namespace-fr.pdf)).
 
@@ -122,7 +122,7 @@ A namespace defines:
 - structured entities used to facilitate the use of data
 
 ## 2.1 - Identifiers
-They could correspond to identifiers used in many referenced datasets 
+They could correspond to identifiers used in many referenced datasets
 (via a data schema or a data model).
 
 For example :
@@ -142,28 +142,28 @@ For example :
 | fr.nir       | code NIR sécurité sociale       | 164026005705953       |
 
 ## 2.2 Namespaces
-Namespaces could correspond to catalogs or data sets whose data types are identified 
+Namespaces could correspond to catalogs or data sets whose data types are identified
 in data models or in referenced data schemas.
 
 For example :
 
-|    type     | example JSON-NTV                                                                              |
-|-------------|-----------------------------------------------------------------------------------------------|
+|    type     | example JSON-NTV                                          |
+|-------------|-----------------------------------------------------------|
 | fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div>
 <div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
 | fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div>
 <div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
 | fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div>
 <div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
-| fr.BAN.     | <div>{ ":fr.BAN.numero": 54 }</div><div>{ ":fr.BAN.lon": 3.5124 }</div>                                            |
+| fr.BAN.     | <div>{ ":fr.BAN.numero": 54 }</div><div>{ ":fr.BAN.lon": 3.5124 }</div>|
 
 ## 2.3 Entities
 They could correspond to assemblies of data associated with a defined structure.
 
 For example :
 
-|    type      | example JSON-NTV                                                                                                     |
-|--------------|----------------------------------------------------------------------------------------------------------------------|
+|    type      | example JSON-NTV                                         |
+|--------------|----------------------------------------------------------|
 | fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div>
 <div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
 | fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div>

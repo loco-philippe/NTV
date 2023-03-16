@@ -9,11 +9,39 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-from ntv import NtvSingle, NtvList, NtvSet, Ntv
+from ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError
 from shapely import geometry
 
 class Test_Ntv_creation(unittest.TestCase):
     
+    def test_from_obj_repr(self):
+        list_repr = [[1, '"v"'],
+                     [{"truc":  1}, '"vN"'],
+                     [{":point": 1 }, '"vT"'],
+                     [{"truc:":  1 }, '"vN"'],
+                     [{":" : 1 }, '"v"'],
+                     [[1,2], '{"l": ["v", "v"]}'],
+                     [{"truc": [1,2]}, '{"lN": ["v", "v"]}'],
+                     [{":point" : [1,2] }, '"vT"' ],
+                     [{"truc:" :  [1,2] }, '"vN"' ],
+                     [{":" : [1,2] }, '"v"'],
+                     [{"::" : [1,2] }, '{"l": ["v", "v"]}'],
+                     [{"::" : [[1,2], [3,4]] }, '{"l": [{"l": ["v", "v"]}, {"l": ["v", "v"]}]}'],
+                     [{"::point":[[1,2],[3,4]]}, '{"lT": ["vT", "vT"]}'],
+                     [{"a" : 2}, '"vN"'],
+                     [{"truc": {"a" : 2}}, '{"vN": "vN"}'],
+                     [{":point": {"a" : 2}}, '"vT"'],
+                     [{"truc:": {"a" : 2}}, '"vN"'],
+                     [{":": {"a" : 2}}, '"v"'] ]
+        for test in list_repr:
+            self.assertEqual(repr(Ntv.from_obj(test[0])), test[1])
+
+    def test_from_obj_ko(self):
+        liststr = [{"::" : 1 }, {"::": {"a" : 2}}]
+        for nstr in liststr:
+            with self.assertRaises(NtvError):
+                Ntv.from_obj(nstr)
+                
     def test_cast(self):
         point = []
         line = []

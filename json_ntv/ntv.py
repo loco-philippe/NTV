@@ -143,8 +143,7 @@ class Ntv():
                 sep = ':'
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
             return NtvList(ntv_list, ntv_name, def_type)
-        if (isinstance(ntv_value, (int, str, float, bool, list))
-                or ntv_value is None) and sep in (None, ':'):
+        if sep == ':' or (not isinstance(ntv_value, dict) and sep is None):
             ntv_type = Ntv._agreg_type(str_type, def_type, True)
             return NtvSingle(ntv_value, ntv_name, ntv_type,)
         if isinstance(ntv_value, dict) and len(ntv_value) != 1 and sep in (None, '::'):
@@ -162,9 +161,6 @@ class Ntv():
             ntv_type = Ntv._agreg_type(str_type, def_type, True)
             ntv_single = Ntv.from_obj(ntv_value, ntv_type, sep)
             return NtvSingle(ntv_single, ntv_name, ntv_type)
-        if sep in (None, ':'):
-            ntv_type = Ntv._agreg_type(str_type, def_type, True)
-            return NtvSingle(ntv_value, ntv_name, ntv_type)
         raise NtvError('separator ":" is not compatible with value')
 
     def __len__(self):
@@ -287,21 +283,16 @@ class Ntv():
             return None
         if not str_type and isinstance(def_type, NtvType):
             return def_type
-
-        if not def_type and str_type[-1] == '.':
-            return Namespace.add(str_type)
-        if not def_type and str_type[-1] != '.':
-            return NtvType.add(str_type)
-        if str_type[-1] != '.':
+        clas = NtvType
+        if str_type[-1] == '.':
+            clas = Namespace
+        if not def_type:
+            return clas.add(str_type)
+        if clas == NtvType or clas == Namespace and not single:
             try:
-                return NtvType.add(str_type)
+                return clas.add(str_type)
             except NtvTypeError:
-                return NtvType.add(Ntv._join_type(def_type.long_name, str_type))
-        if str_type[-1] == '.' and not single:
-            try:
-                return Namespace.add(str_type)
-            except NtvTypeError:
-                return Namespace.add(Ntv._join_type(def_type.long_name, str_type))
+                return clas.add(Ntv._join_type(def_type.long_name, str_type))
         raise NtvError(str_type + 'and' +
                        def_type.long_name + 'are incompatible')
 
@@ -469,13 +460,13 @@ class NtvSingle(Ntv):
     def _obj_value(self, **kwargs):
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
+        if isinstance(self.ntv_value, NtvSingle):
+            def_type = ''
+            if self.ntv_type:
+                def_type = self.ntv_type.long_name
+            option2 = option | {'encoded': False}
+            return (self.ntv_value.to_obj(def_type=def_type, **option2), True)
         if option['encode_format'] == 'json':
-            if isinstance(self.ntv_value, NtvSingle):
-                def_type = ''
-                if self.ntv_type:
-                    def_type = self.ntv_type.long_name
-                option2 = option | {'encoded': False}
-                return (self.ntv_value.to_obj(def_type=def_type, **option2), True)
             return (self.ntv_value, True)
         return Ntv._uncast(self)
 
