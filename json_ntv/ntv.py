@@ -4,7 +4,7 @@ Created on Feb 27 22:44:05 2023
 
 @author: Philippe@loco-labs.io
 
-The `ntv` module contains the NtvSingle, NtvSet and NtvList classes for NTV entity.
+The `json_ntv.ntv` module contains the `ntv.NtvSingle`, `NtvSet` and `NtvList` classes for NTV entity.
 
 # 1 - JSON-NTV structure
 
@@ -72,7 +72,7 @@ from namespace import NtvType, Namespace, NtvTypeError
 class Ntv():
     ''' NTV entity
 
-    *Attributes :
+    *Attributes :*
 
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
@@ -83,12 +83,13 @@ class Ntv():
     *classmethods*
     - `from_obj`
 
-    *dynamic values (@property)
+    *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
     - `to_obj`
+    - `to_repr`
     '''
 
     def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
@@ -96,9 +97,9 @@ class Ntv():
 
         *Parameters*
 
+        - **ntv_value**: Json entity - value of the entity
         - **ntv_name** : String (default None) - name of the NTV entity
         - **ntv_type**: String or NtvType or Namespace (default None) - type of the entity
-        - **ntv_value**: Json entity - value of the entity
         '''
         if isinstance(ntv_type, (NtvType, Namespace)):
             self.ntv_type = ntv_type
@@ -113,7 +114,12 @@ class Ntv():
 
     @staticmethod
     def from_obj(value, def_type=None, def_sep=None):
-        ''' return an Ntv object from an object value '''
+        ''' return an Ntv entity from an object value.
+        *Parameters*
+
+        - **value**: value to convert in an Ntv entity
+        - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
+        - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
         if value is None or value == 'null':
@@ -195,14 +201,14 @@ class Ntv():
 
     @property
     def type_str(self):
-        '''return a string with the NTV type of the entity'''
+        '''return a string with the value of the NtvType of the entity'''
         if not self.ntv_type:
             return None
         return self.ntv_type.long_name
 
     @property
     def code_ntv(self):
-        '''return a NTV code to indicate if name or type are present'''
+        '''return a string with the NTV code to indicate if name or type are present'''
         code = ''
         if self.ntv_name:
             code += 'N'
@@ -212,7 +218,15 @@ class Ntv():
         return code
 
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
-        '''return a simple json representation of the ntv entity'''
+        '''return a simple json representation of the Ntv entity
+        *Parameters*
+
+        - **nam**: Boolean (default True) : if true, the names are included
+        - **typ**: Boolean (default True) : if true, the types are included
+        - **val**: Boolean (default True) : if true, the values are included
+        - **maxi**: Integer (default 10) : number of values to included for NtvList
+        or NtvSet entities. If maxi < 1 all the values are included.        
+        '''
         clas = self.__class__.__name__
         dic = {'NtvList': 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
         ntv = dic[clas] + self.code_ntv[:-1]
@@ -229,11 +243,21 @@ class Ntv():
         if isinstance(self, NtvSingle) and isinstance(self.ntv_value, NtvSingle):
             return {ntv:  self.ntv_value.to_repr(nam, typ, val)}
         if isinstance(self, (NtvList, NtvSet)):
+            if maxi < 1:
+                maxi = len(self.ntv_value)
             return {ntv:  [ntv.to_repr(nam, typ, val) for ntv in self.ntv_value[:maxi]]}
         raise NtvError('the ntv entity is not consistent')
 
     def to_obj(self, def_type=None, **kwargs):
-        '''return the JSON representation of the NTV entity (json-ntv format)'''
+        '''return the JSON representation of the NTV entity (json-ntv format)
+        *Parameters*
+
+        - **def_type** : NtvType or Namespace (default None) - default type to apply to the NTV entity
+        - **encoded** : boolean (default False) - choice for return format
+        (string/bytes if True, dict else)
+        - **encode_format**  : string (default 'json')- choice for return format (json, cbor)
+        - **simpleval** : boolean (default False) - if True, only value (without name and type) is included
+        '''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         value, single = self._obj_value(**option)
@@ -409,7 +433,7 @@ class Ntv():
 class NtvSingle(Ntv):
     ''' An NTV-single entity is a Ntv entity not composed with other entities.
 
-    *Attributes :
+    *Attributes :*
 
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
@@ -420,12 +444,13 @@ class NtvSingle(Ntv):
     *classmethods*
     - `from_obj`
 
-    *dynamic values (@property)
+    *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
     - `to_obj`
+    - `to_repr`
     '''
 
     def __init__(self, value, ntv_name=None, ntv_type=None):
@@ -476,7 +501,7 @@ class NtvList(Ntv):
         - ntv_value is a list of NTV entities,
         - ntv_type is a default type available for included NTV entities
 
-    *Attributes :
+    *Attributes :*
 
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
@@ -487,12 +512,13 @@ class NtvList(Ntv):
     *classmethods*
     - `from_obj`
 
-    *dynamic values (@property)
+    *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
     - `to_obj`
+    - `to_repr`
     '''
 
     def __init__(self, list_ntv, ntv_name=None, ntv_type=None):
@@ -531,7 +557,7 @@ class NtvSet(Ntv):
         - ntv_value is a list of NTV entities,
         - ntv_type is a default type available for included NTV entities
 
-    *Attributes :
+    *Attributes :*
 
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
@@ -542,12 +568,13 @@ class NtvSet(Ntv):
     *classmethods*
     - `from_obj`
 
-    *dynamic values (@property)
+    *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
     - `to_obj`
+    - `to_repr`
     '''
 
     def __init__(self, list_ntv, ntv_name=None, ntv_type=None):

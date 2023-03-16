@@ -6,6 +6,14 @@ Created on Fri Dec 24 15:21:14 2021
 
 @author: philippe@loco-labs.io
 
+This package contains the following classes:
+
+- `json_ntv.namespace` :
+
+    - `namespace.Namespace`
+    - `namespace.NtvType`
+
+
 # 0 - Abstract
 
 Today, the semantic level of shared data remains low. It is very often limited to the type of data defined in the exchange formats (strings for CSV formats; 

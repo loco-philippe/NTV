@@ -96,8 +96,7 @@ Namespaces could also be defined to reference for example:
 
 | NTVtype      | example JSON-NTV                                                     |
 |--------------|----------------------------------------------------------------------|
-| schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>
-{ “:schemaorg.unitText”:”µg/m3”}</div>  |
+| schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>{ “:schemaorg.unitText”:”µg/m3”}</div>  |
 | darwincore.  | { “:darwincore.acceptedNameUsage”: “Tamias minimus” }                |
 
 ## 1.8 - Identifiers
@@ -149,12 +148,9 @@ For example :
 
 |    type     | example JSON-NTV                                          |
 |-------------|-----------------------------------------------------------|
-| fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div>
-<div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
-| fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div>
-<div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
-| fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div>
-<div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
+| fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div><div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
+| fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div><div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
+| fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div><div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
 | fr.BAN.     | <div>{ ":fr.BAN.numero": 54 }</div><div>{ ":fr.BAN.lon": 3.5124 }</div>|
 
 ## 2.3 Entities
@@ -164,10 +160,8 @@ For example :
 
 |    type      | example JSON-NTV                                         |
 |--------------|----------------------------------------------------------|
-| fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div>
-<div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
-| fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div>
-<div><i>(fr.BAN.numero, fr.BAN.rep, fr.BAN.nom_voie, fr.cp)</i></div>  |
+| fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div><div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
+| fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div><div><i>(fr.BAN.numero, fr.BAN.rep, fr.BAN.nom_voie, fr.cp)</i></div>  |
 
 """
 import configparser
