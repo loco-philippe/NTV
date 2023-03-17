@@ -63,6 +63,6 @@ This structuring of type makes it possible to reference any type of data that ha
 
 
 """
-from namespace import Namespace, NtvType
-from ntv import Ntv, NtvSingle, NtvList, NtvSet
+from json_ntv.namespace import Namespace, NtvType, str_type
+from json_ntv.ntv import Ntv, NtvSingle, NtvList, NtvSet
 #print('package :', __package__)

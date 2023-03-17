@@ -168,6 +168,17 @@ import configparser
 import json
 import requests
 
+def str_type(long_name):
+    ''' create a NtvType or a Namespace from a string'''
+    if not long_name:
+        return None
+    if isinstance(long_name, (NtvType, Namespace)):
+        return long_name
+    if not isinstance(long_name, str):
+        raise NtvTypeError('the name is not a string')
+    if long_name[-1] == '.':
+        return Namespace.add(long_name)
+    return NtvType.add(long_name)
 
 class NtvType():
     ''' type of NTV entities.
@@ -254,7 +265,6 @@ class NtvType():
     def isin_namespace(self, long_name):
         '''return the number of level between self and nspace, -1 if None'''
         return self.nspace.is_child(Namespace.add(long_name))
-
 
 class Namespace():
     ''' Namespace of NTV entities.

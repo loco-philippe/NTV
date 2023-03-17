@@ -9,7 +9,7 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-from ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError
+from json_ntv.ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError
 from shapely import geometry
 
 class Test_Ntv_creation(unittest.TestCase):
@@ -60,6 +60,10 @@ class Test_Ntv_creation(unittest.TestCase):
             self.assertTrue(Ntv.from_obj(NtvSingle(obj).to_obj())==NtvSingle(obj))
             self.assertTrue(NtvSingle(obj).to_obj(encode_format='cbor') == obj)
 
+    def test_from_att(self):
+        self.assertEqual(repr(Ntv.obj(([[1,2],[3,4]],None,'point','single'))), '"vT"')
+        self.assertEqual(repr(Ntv.obj(([[1,2],[3,4]],None,'point','list'))), '{"lT": ["vT", "vT"]}')
+        
     def test_from_obj(self):
         dictstr = {'0NtvSingle': None, 
                    'oNtvSingle': {'none': None}, 
@@ -98,6 +102,8 @@ class Test_Ntv_creation(unittest.TestCase):
         for nstr, typ in zip(liststr, listtyp):
             #print('av', nstr, typ)
             ntv = Ntv.from_obj(nstr)
+            ntv2 = Ntv.obj(nstr)
+            self.assertEqual(ntv, ntv2)
             #print('ap', nstr, typ)
             if not typ in ['9NtvList', 'aNtvList', 'bNtvList', '9NtvSingle', 
                            '4NtvSet', '5NtvSet']:
@@ -126,6 +132,7 @@ class Test_Ntv_creation(unittest.TestCase):
         for test in list_test:
             #print(test[1])
             self.assertEqual(Ntv.from_obj(test[1]).ntv_value[0]._obj_name(), test[0])
+            self.assertEqual(Ntv.obj(test[1]).ntv_value[0]._obj_name(), test[0])
 
     def test_to_obj(self):
         nstr = {'cities': [{'paris':[2.1, 40.3]}, {'lyon':[2.1, 40.3]}]}

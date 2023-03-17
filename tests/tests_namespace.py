@@ -9,6 +9,7 @@ The `NTV.test_namespace` module contains the unit tests (class unittest) for the
 """
 import unittest
 from namespace import Namespace, NtvTypeError, NtvType
+from observation import  Ilist
 
 class Test_Namespace(unittest.TestCase):
     
