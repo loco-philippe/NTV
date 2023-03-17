@@ -82,13 +82,21 @@ class Ntv(ABC):
     The methods defined in this class are :
 
     *classmethods*
+    - `obj`
+    
+    *staticmethods*
     - `from_obj`
+    - `from_att`
+    - `from_value`
 
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
+    - `set_name`
+    - `set_type`
+    - `set_value`
     - `to_obj`
     - `to_repr`
     '''
@@ -213,9 +221,12 @@ class Ntv(ABC):
     def __getitem__(self, ind):
         ''' return ntv_value item (value conversion)'''
         if isinstance(ind, tuple):
+            return [self.ntv_value[i] for i in ind]
+        return self.ntv_value[ind]
+        """if isinstance(ind, tuple):
             return [copy(self.ntv_value[i]) for i in ind]
-        return copy(self.ntv_value[ind])
-
+        return copy(self.ntv_value[ind])"""
+    
     def __setitem__(self, ind, value):
         ''' modify ntv_value item'''
         if ind < 0 or ind >= len(self):
@@ -244,6 +255,20 @@ class Ntv(ABC):
         code += 'V'
         return code
 
+    def set_name(self, name):
+        '''set a new name to the entity'''
+        if not isinstance(name, str):
+            raise NtvError('the name is not a string')
+        self.ntv_name = name
+        return None
+
+    def set_type(self, typ):
+        '''set a new type to the entity'''
+        if not isinstance(typ, (str, NtvType, Namespace)):
+            raise NtvError('the type is not a valid type')
+        self.ntv_type = str_type(typ)    
+        return None
+    
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity
         *Parameters*
@@ -288,6 +313,8 @@ class Ntv(ABC):
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         value, single = self._obj_value(**option)
+        if option['encode_format'] == 'tuple':
+            return (self.ntv_name, self.ntv_type.long_name, value)
         sep = '::'
         if self.__class__.__name__ == 'NtvSingle':
             sep = ':'
