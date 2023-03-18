@@ -4,7 +4,8 @@ Created on Feb 27 22:44:05 2023
 
 @author: Philippe@loco-labs.io
 
-The `json_ntv.ntv` module contains the `ntv.NtvSingle`, `NtvSet` and `NtvList` classes for NTV entity.
+The `json_ntv.ntv` module contains the `ntv.NtvSingle`, `NtvSet` and `NtvList` 
+classes for NTV entity.
 
 # 1 - JSON-NTV structure
 
@@ -83,7 +84,7 @@ class Ntv(ABC):
 
     *classmethods*
     - `obj`
-    
+
     *staticmethods*
     - `from_obj`
     - `from_att`
@@ -101,7 +102,7 @@ class Ntv(ABC):
     - `to_repr`
     '''
 
-    #def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
+    # def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
     def __init__(self, ntv_value, ntv_name, ntv_type):
         '''Ntv constructor.
 
@@ -124,25 +125,25 @@ class Ntv(ABC):
         self.ntv_name = ntv_name
         self.ntv_value = ntv_value
 
-    @classmethod 
+    @classmethod
     def obj(cls, data):
         if isinstance(data, tuple):
             return cls.from_att(*data)
         return cls.from_obj(data)
-    
+
     @staticmethod
     def from_att(value, name, typ, ntv):
         value = Ntv.from_value(value)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
-            return value         
+            return value
         if isinstance(value, list) and ntv == 'list':
             return NtvList(value, name, typ)
-        if isinstance(value, list) and ntv == 'set' :
+        if isinstance(value, list) and ntv == 'set':
             return NtvSet(value, name, typ)
-        if ntv == 'single' :
+        if ntv == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
-        
+
     @staticmethod
     def from_obj(value, def_type=None, def_sep=None):
         ''' return an Ntv entity from an object value.
@@ -168,7 +169,8 @@ class Ntv(ABC):
         if sep == ':' or (not isinstance(ntv_value, dict) and sep is None):
             ntv_type = Ntv._agreg_type(str_typ, def_type, True)
             return NtvSingle(ntv_value, ntv_name, ntv_type,)
-        if isinstance(ntv_value, dict) and len(ntv_value) != 1 and sep in (None, '::'):
+        if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
+                                            sep is None):
             keys = list(ntv_value.keys())
             values = list(ntv_value.values())
             def_type = Ntv._agreg_type(str_typ, def_type, False)
@@ -184,7 +186,7 @@ class Ntv(ABC):
             ntv_single = Ntv.from_obj(ntv_value, ntv_type, sep)
             return NtvSingle(ntv_single, ntv_name, ntv_type)
         raise NtvError('separator ":" is not compatible with value')
-        
+
     @staticmethod
     def from_value(value):
         if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
@@ -198,8 +200,8 @@ class Ntv(ABC):
             return NtvSingle(True)
         if value == 'false':
             return NtvSingle(False)
-        return value     
-    
+        return value
+
     def __len__(self):
         ''' len of ntv_value'''
         if isinstance(self.ntv_value, (list, set)):
@@ -226,7 +228,7 @@ class Ntv(ABC):
         """if isinstance(ind, tuple):
             return [copy(self.ntv_value[i]) for i in ind]
         return copy(self.ntv_value[ind])"""
-    
+
     def __setitem__(self, ind, value):
         ''' modify ntv_value item'''
         if ind < 0 or ind >= len(self):
@@ -260,15 +262,13 @@ class Ntv(ABC):
         if not isinstance(name, str):
             raise NtvError('the name is not a string')
         self.ntv_name = name
-        return None
 
     def set_type(self, typ):
         '''set a new type to the entity'''
         if not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        self.ntv_type = str_type(typ)    
-        return None
-    
+        self.ntv_type = str_type(typ)
+
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity
         *Parameters*
@@ -277,7 +277,7 @@ class Ntv(ABC):
         - **typ**: Boolean (default True) : if true, the types are included
         - **val**: Boolean (default True) : if true, the values are included
         - **maxi**: Integer (default 10) : number of values to included for NtvList
-        or NtvSet entities. If maxi < 1 all the values are included.        
+        or NtvSet entities. If maxi < 1 all the values are included.
         '''
         clas = self.__class__.__name__
         dic = {'NtvList': 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
@@ -304,11 +304,13 @@ class Ntv(ABC):
         '''return the JSON representation of the NTV entity (json-ntv format)
         *Parameters*
 
-        - **def_type** : NtvType or Namespace (default None) - default type to apply to the NTV entity
+        - **def_type** : NtvType or Namespace (default None) - default type to apply
+        to the NTV entity
         - **encoded** : boolean (default False) - choice for return format
         (string/bytes if True, dict else)
         - **encode_format**  : string (default 'json')- choice for return format (json, cbor)
-        - **simpleval** : boolean (default False) - if True, only value (without name and type) is included
+        - **simpleval** : boolean (default False) - if True, only value (without 
+        name and type) is included
         '''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
@@ -318,13 +320,16 @@ class Ntv(ABC):
         sep = '::'
         if self.__class__.__name__ == 'NtvSingle':
             sep = ':'
-        name = self._obj_name(sep, single, not option['simpleval'], def_type)
-        not_single = isinstance(value, list) or (
+        not_sing = isinstance(value, list) or (
             isinstance(value, dict) and len(value) != 1)
-        if name == ':' and (not not_single or option['simpleval'] or def_type):
-            name = None
-        elif name == '::' and (not_single or option['simpleval'] or not def_type):
-            name = None
+        add_sep = (not not_sing and sep == '::') or (not_sing and sep == ':')
+        name = self._obj_name(
+            sep, single, not option['simpleval'], def_type, add_sep)
+        # if name == ':' and (not not_single or option['simpleval'] or def_type):
+        '''if name == ':' and (not not_sing or option['simpleval']):
+            name = '' #None
+        if name[-2:] == '::' and (not_sing or option['simpleval']): #or not def_type):
+            name = name[:-2] #None'''
         if not name:
             json_obj = value
         else:
@@ -336,20 +341,28 @@ class Ntv(ABC):
     def _obj_value(self):
         return (None, None)
 
-    def _obj_name(self, sep=':', typ=True, nam=True, def_type=None):
-        '''return the JSON name of the NTV entity (json-ntv format)'''
+    def _obj_name(self, sep=':', typ=True, nam=True, def_type=None, add_sep=False):
+        '''return the JSON name of the NTV entity (json-ntv format)
+
+        *Parameters*
+
+        - **typ** : boolean(default True) - if False, the type is not included'''
         typ = typ and self.ntv_type
         nam = nam and self.ntv_name
         if not typ and not nam and not sep:
             return ''
+        sep_add = ''
+        if add_sep:
+            sep_add = sep
         if not typ and not nam and sep:
-            return sep
+            return sep_add  # sep
         if not typ and nam:
-            return self.ntv_name
+            return self.ntv_name + sep_add
         relative_type = Ntv._relative_type(def_type, self.ntv_type.long_name)
         if not relative_type:
             sep = ''
-        if typ and not nam:
+        # if typ and not nam:
+        if not nam:
             return sep + relative_type
         return self.ntv_name + sep + relative_type
 
@@ -360,7 +373,7 @@ class Ntv(ABC):
             str_typ = str_typ.long_name
         #str_typ = str_type(typ)
         def_type = str_type(def_type)
-        
+
         if not str_typ and (not def_type or isinstance(def_type, Namespace)):
             return None
         if not str_typ and isinstance(def_type, NtvType):
@@ -420,8 +433,9 @@ class Ntv(ABC):
             val = json_value[json_name]
             nam, typ, sep = Ntv._from_obj_name(json_name)
             return (nam, typ, val, sep)
-        nam, typ, val = Ntv._cast(json_value)
-        return (nam, typ, val, ':')
+        return(*Ntv._cast(json_value), ':')
+        #nam, typ, val = Ntv._cast(json_value)
+        # return (nam, typ, val, ':')
 
     @staticmethod
     def _cast(data):
