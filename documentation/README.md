@@ -1,4 +1,4 @@
 # documentation
 The documentation presents :
-- [the JSN-NTV specification](./JSION-NTV-standard.pdf)
-- [an example of namespace](.//JSION-NTV-namespace-fr.pdf)
+- [the JSN-NTV specification](./JSON-NTV-standard.pdf)
+- [an example of namespace](.//JSON-NTV-namespace-fr.pdf)
