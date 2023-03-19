@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Created on Feb 27 22:44:05 2023
+Created on Feb 27 2023
 
 @author: Philippe@loco-labs.io
 
-The `json_ntv.ntv` module contains the `ntv.NtvSingle`, `NtvSet` and `NtvList`
-classes for NTV entity.
+The `ntv` module is part of the `NTV.json_ntv` package ([specification document](
+https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
+
+It contains the classes `NtvSingle`, `NtvSet`, `NtvList` and `Ntv`(abstract) for NTV entities.
 
 # 1 - JSON-NTV structure
 
@@ -56,7 +58,7 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640] }```
 - NTV-set, named format :
    - ```{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}```
-   - ```{ "cities" : { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
+   - ```{ "cities" :     { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
    - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
 
 """
@@ -71,7 +73,7 @@ from json_ntv.namespace import NtvType, Namespace, NtvTypeError, str_type
 
 
 class Ntv(ABC):
-    ''' NTV entity
+    ''' The Ntv class is an abstract class used for all NTV entities.
 
     *Attributes :*
 
@@ -79,18 +81,16 @@ class Ntv(ABC):
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
 
-    The methods defined in this class are :
-
-    *classmethods*
-    - `obj`
-
-    *staticmethods*
-    - `from_obj`
-    - `from_att`
-
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
+
+    The methods defined in this class are :
+
+    *Ntv constructor*
+    - `obj` *(classmethod)*
+    - `from_obj` *(staticmethod)*
+    - `from_att` *(staticmethod)*
 
     *instance methods*
     - `set_name`
@@ -127,14 +127,14 @@ class Ntv(ABC):
     def obj(cls, data):
         ''' return an Ntv entity from data.
         Data can be :
-        - a tuple with value, name, type and entity (see `from_att` method)
+        - a tuple with value, name, typ and cat (see `from_att` method)
         - a value to decode (see `from_obj`method)'''
         if isinstance(data, tuple):
             return cls.from_att(*data)
         return cls.from_obj(data)
 
     @staticmethod
-    def from_att(value, name, typ, entity):
+    def from_att(value, name, typ, cat):
         ''' return an Ntv entity.
 
         *Parameters*
@@ -142,21 +142,22 @@ class Ntv(ABC):
         - **value**: Ntv entity or value to convert in an Ntv entity
         - **name** : string - name of the Ntv entity
         - **typ** : string or NtvType - type of the NTV entity
-        - **entity**: string - NTV category ('single', 'list' or 'set')'''
+        - **cat**: string - NTV category ('single', 'list' or 'set')'''
         value = Ntv._from_value(value)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
-        if isinstance(value, list) and entity == 'list':
+        if isinstance(value, list) and cat == 'list':
             return NtvList(value, name, typ)
-        if isinstance(value, list) and entity == 'set':
+        if isinstance(value, list) and cat == 'set':
             return NtvSet(value, name, typ)
-        if entity == 'single':
+        if cat == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
 
     @staticmethod
     def from_obj(value, def_type=None, def_sep=None):
         ''' return an Ntv entity from an object value.
+
         *Parameters*
 
         - **value**: value to convert in an Ntv entity
@@ -256,13 +257,16 @@ class Ntv(ABC):
 
     @property
     def code_ntv(self):
-        '''return a string with the NTV code to indicate if name or type are present'''
-        code = ''
+        '''return a string with the NTV code composed with :
+        - 'l' (for NtvList), 's' (for NtvSet) or 'v' (for NtvSingle)
+        - 'N' if ntv_name is present
+        - 'T' if ntv_type is present'''
+        dic = {'NtvList': 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
+        code = dic[self.__class__.__name__]
         if self.ntv_name:
             code += 'N'
         if self.ntv_type:
             code += 'T'
-        code += 'V'
         return code
 
     def set_name(self, name):
@@ -278,7 +282,8 @@ class Ntv(ABC):
         self.ntv_type = str_type(typ)
 
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
-        '''return a simple json representation of the Ntv entity
+        '''return a simple json representation of the Ntv entity.
+
         *Parameters*
 
         - **nam**: Boolean (default True) : if true, the names are included
@@ -287,9 +292,7 @@ class Ntv(ABC):
         - **maxi**: Integer (default 10) : number of values to included for NtvList
         or NtvSet entities. If maxi < 1 all the values are included.
         '''
-        clas = self.__class__.__name__
-        dic = {'NtvList': 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
-        ntv = dic[clas] + self.code_ntv[:-1]
+        ntv = self.code_ntv
         if self.ntv_name and nam:
             ntv += '-' + self.ntv_name
         if self.ntv_type and typ:
@@ -309,7 +312,8 @@ class Ntv(ABC):
         raise NtvError('the ntv entity is not consistent')
 
     def to_obj(self, def_type=None, **kwargs):
-        '''return the JSON representation of the NTV entity (json-ntv format)
+        '''return the JSON representation of the NTV entity (json-ntv format).
+
         *Parameters*
 
         - **def_type** : NtvType or Namespace (default None) - default type to apply
@@ -364,7 +368,6 @@ class Ntv(ABC):
         relative_type = Ntv._relative_type(def_type, self.ntv_type.long_name)
         if not relative_type:
             sep = ''
-        # if typ and not nam:
         if not nam:
             return sep + relative_type
         return self.ntv_name + sep + relative_type
@@ -374,7 +377,6 @@ class Ntv(ABC):
         '''aggregate typ and def_type to return an NtvType or a Namespace if not single'''
         if isinstance(str_typ, NtvType):
             str_typ = str_typ.long_name
-        #str_typ = str_type(typ)
         def_type = str_type(def_type)
 
         if not str_typ and (not def_type or isinstance(def_type, Namespace)):
@@ -437,8 +439,6 @@ class Ntv(ABC):
             nam, typ, sep = Ntv._from_obj_name(json_name)
             return (nam, typ, val, sep)
         return(*Ntv._cast(json_value), ':')
-        #nam, typ, val = Ntv._cast(json_value)
-        # return (nam, typ, val, ':')
 
     @staticmethod
     def _cast(data):
@@ -514,16 +514,21 @@ class NtvSingle(Ntv):
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
 
-    The methods defined in this class are :
-
-    *classmethods*
-    - `from_obj`
-
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
+    The methods defined in this class are :
+
+    *Ntv constructor*
+    - `obj`
+    - `from_obj`
+    - `from_att`
+
     *instance methods*
+    - `set_name`
+    - `set_type`
+    - `set_value`
     - `to_obj`
     - `to_repr`
     '''
@@ -573,8 +578,9 @@ class NtvSingle(Ntv):
 
 class NtvList(Ntv):
     '''An NTV-list entity is a Ntv entity where:
-        - ntv_value is a list of NTV entities,
-        - ntv_type is a default type available for included NTV entities
+
+    - ntv_value is a list of NTV entities,
+    - ntv_type is a default type available for included NTV entities
 
     *Attributes :*
 
@@ -584,14 +590,19 @@ class NtvList(Ntv):
 
     The methods defined in this class are :
 
-    *classmethods*
+    *Ntv constructor*
+    - `obj`
     - `from_obj`
+    - `from_att`
 
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
+    - `set_name`
+    - `set_type`
+    - `set_value`
     - `to_obj`
     - `to_repr`
     '''
@@ -629,8 +640,9 @@ class NtvList(Ntv):
 
 class NtvSet(Ntv):
     '''An NTV-set entity is a Ntv entity where:
-        - ntv_value is a list of NTV entities,
-        - ntv_type is a default type available for included NTV entities
+
+    - ntv_value is a list of NTV entities,
+    - ntv_type is a default type available for included NTV entities
 
     *Attributes :*
 
@@ -640,14 +652,19 @@ class NtvSet(Ntv):
 
     The methods defined in this class are :
 
-    *classmethods*
+    *Ntv constructor*
+    - `obj`
     - `from_obj`
+    - `from_att`
 
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
 
     *instance methods*
+    - `set_name`
+    - `set_type`
+    - `set_value`
     - `to_obj`
     - `to_repr`
     '''
