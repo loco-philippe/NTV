@@ -1,13 +1,35 @@
 # -*- coding: utf-8 -*-
 """
-Created on Feb 27 22:44:05 2023
+Created on Jan 20 2023
 
 @author: Philippe@loco-labs.io
 
-The `namespace` module contains the Namespace and the NtvType classes for NTV entity.
+The `namespace` module is part of the `NTV.json_ntv` package ([specification document](
+https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
+
+It contains the `Namespace` and the `NtvType` classes and the `str_type` method for NTV entities.
 
 
-# 1 - Data type
+
+
+# 0 - Presentation
+
+The NTVtype is defined by a name and a Namespace. The name is unique in the Namespace  
+
+A Namespace is represented by a string followed by a point.
+Namespaces may be nested (the global Namespace is represented by an empty string). 
+
+The Namespace representations are added to the value of an NTVtype to have an absolute 
+representation of an NTVtype (long_name).
+
+*Example for an absolute representation of an NTVtype defined in two nested Namespace :*
+*“ns1.ns2.type”*
+*where:*
+- *ns1. is a Namespace defined in the global Namespace,*
+- *ns2. is a Namespace defined in the ns1. Namespace,*
+- *type is a NTVtype defined in the ns2. Namespace*
+
+# 1 - Global Namespace
 
 The structure of types by namespace makes it possible to have types corresponding
 to recognized standards at the global level.
@@ -19,12 +41,12 @@ The global namespace can include the following structures:
 
 | type (generic type)| value example                 |
 |--------------------|-------------------------------|
-| boolean (None)     | true                          |
-| null (None)        | null                          |
-| number (None)      | 45.2                          |
-| string (None)      | "string"                      |
-| array  (None)      | [1, 2, 3]                     |
-| object (None)      | { "str": "test", "bool": true}|
+| boolean (json)     | true                          |
+| null (json)        | null                          |
+| number (json)      | 45.2                          |
+| string (json)      | "string"                      |
+| array  (json)      | [1, 2, 3]                     |
+| object (json)      | { "str": "test", "bool": true}|
 
 ## 1.2 - Datation (ISO8601 and Posix)
 
@@ -113,7 +135,7 @@ For example :
 
 This namespace is dedicated to datasets associated with the France geopolitical namespace
 (see also the [presentation document](
-https://github.com/loco-philippe/Environmental-Sensing/blob/main/JSON-NTV/JSON-NTV-namespace-fr.pdf)).
+https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-namespace-fr.pdf)).
 
 A namespace defines:
 - identifiers used to access additional data,
@@ -183,7 +205,7 @@ def str_type(long_name):
 class NtvType():
     ''' type of NTV entities.
 
-    *Attributes :
+    *Attributes :*
 
     - **name** : String - name of the type
     - **nspace** : Namespace - namespace associated
@@ -194,7 +216,7 @@ class NtvType():
     - `types`
     - `add`
 
-    *dynamic values (@property)
+    *dynamic values (@property)*
     - `gen_type`
     - `long_name`
 
@@ -269,7 +291,7 @@ class NtvType():
 class Namespace():
     ''' Namespace of NTV entities.
 
-    *Attributes :
+    *Attributes :*
 
     - **name** : String - name of the namespace
     - **file** : string - location of the file init
@@ -281,7 +303,7 @@ class Namespace():
     - `namespaces`
     - `add`
 
-    *dynamic values (@property)
+    *dynamic values (@property)*
     - `file`
     - `long_name`
     - `content`
@@ -321,7 +343,6 @@ class Namespace():
         *Parameters*
 
         - **name** : String - name of the namespace
-        - **file** : string - location of the file init
         - **parent** : Namespace - parent namespace'''
         if name and parent is None:
             parent = Namespace._namespaces_['']
@@ -377,7 +398,7 @@ class Namespace():
         return self.parent.long_name + self.name
 
     def is_child(self, nspace):
-        '''return the number of level between self and parent, -1 if None'''
+        '''return the number of level between self and nspace, -1 if None'''
         parent = self.parent
         if self == nspace:
             return 0
@@ -391,12 +412,12 @@ class Namespace():
             return -1
 
     def is_parent(self, nspace):
-        '''return the number of level between self and parent, -1 if None'''
+        '''return the number of level between self and nspace, -1 if None'''
         return nspace.is_child(self)
 
 
 class NtvTypeError(Exception):
-    ''' Type Exception'''
+    ''' NtvType or Namespace Exception'''
     # pass
 
 

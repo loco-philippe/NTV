@@ -8,12 +8,18 @@ Created on Fri Dec 24 15:21:14 2021
 
 This package contains the following classes:
 
-- `json_ntv.namespace` :
+- `NTV.json_ntv.namespace` :
 
-    - `namespace.Namespace`
-    - `namespace.NtvType`
+    - `NTV.json_ntv.namespace.Namespace`
+    - `NTV.json_ntv.namespace.NtvType`
+    
+- `NTV.json_ntv.ntv` :
 
-
+    - `NTV.json_ntv.ntv.NtvSingle`
+    - `NTV.json_ntv.ntv.NtvList`
+    - `NTV.json_ntv.ntv.NtvSet`
+    - `NTV.json_ntv.ntv.Ntv` (abstract class)
+    
 # 0 - Abstract
 
 Today, the semantic level of shared data remains low. It is very often limited to the type of data defined in the exchange formats (strings for CSV formats; 
