@@ -11,5 +11,5 @@ import pdoc
 from pathlib import Path
 
 myscripts = ["../json_ntv/namespace.py", "../json_ntv/ntv.py"]
-pdoc.pdoc(*myscripts, output_directory=Path("../../pdoc/NTV"))
+pdoc.pdoc(*myscripts, output_directory=Path("../../pdoc"))
 #pdoc.pdoc("../json_ntv", output_directory=Path("../../pdoc"))
