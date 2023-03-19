@@ -4,7 +4,7 @@ Created on Feb 27 22:44:05 2023
 
 @author: Philippe@loco-labs.io
 
-The `json_ntv.ntv` module contains the `ntv.NtvSingle`, `NtvSet` and `NtvList` 
+The `json_ntv.ntv` module contains the `ntv.NtvSingle`, `NtvSet` and `NtvList`
 classes for NTV entity.
 
 # 1 - JSON-NTV structure
@@ -61,7 +61,6 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
 
 """
 from abc import ABC
-from copy import copy
 from datetime import date, time, datetime
 import json
 from json import JSONDecodeError
@@ -88,7 +87,6 @@ class Ntv(ABC):
     *staticmethods*
     - `from_obj`
     - `from_att`
-    - `from_value`
 
     *dynamic values (@property)*
     - `type_str`
@@ -127,20 +125,32 @@ class Ntv(ABC):
 
     @classmethod
     def obj(cls, data):
+        ''' return an Ntv entity from data.
+        Data can be :
+        - a tuple with value, name, type and entity (see `from_att` method)
+        - a value to decode (see `from_obj`method)'''
         if isinstance(data, tuple):
             return cls.from_att(*data)
         return cls.from_obj(data)
 
     @staticmethod
-    def from_att(value, name, typ, ntv):
-        value = Ntv.from_value(value)
+    def from_att(value, name, typ, entity):
+        ''' return an Ntv entity.
+
+        *Parameters*
+
+        - **value**: Ntv entity or value to convert in an Ntv entity
+        - **name** : string - name of the Ntv entity
+        - **typ** : string or NtvType - type of the NTV entity
+        - **entity**: string - NTV category ('single', 'list' or 'set')'''
+        value = Ntv._from_value(value)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
-        if isinstance(value, list) and ntv == 'list':
+        if isinstance(value, list) and entity == 'list':
             return NtvList(value, name, typ)
-        if isinstance(value, list) and ntv == 'set':
+        if isinstance(value, list) and entity == 'set':
             return NtvSet(value, name, typ)
-        if ntv == 'single':
+        if entity == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
 
@@ -152,7 +162,7 @@ class Ntv(ABC):
         - **value**: value to convert in an Ntv entity
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
-        value = Ntv.from_value(value)
+        value = Ntv._from_value(value)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
@@ -188,7 +198,8 @@ class Ntv(ABC):
         raise NtvError('separator ":" is not compatible with value')
 
     @staticmethod
-    def from_value(value):
+    def _from_value(value):
+        '''return a decoded value'''
         if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
             try:
                 value = json.loads(value)
@@ -225,9 +236,6 @@ class Ntv(ABC):
         if isinstance(ind, tuple):
             return [self.ntv_value[i] for i in ind]
         return self.ntv_value[ind]
-        """if isinstance(ind, tuple):
-            return [copy(self.ntv_value[i]) for i in ind]
-        return copy(self.ntv_value[ind])"""
 
     def __setitem__(self, ind, value):
         ''' modify ntv_value item'''
@@ -309,7 +317,7 @@ class Ntv(ABC):
         - **encoded** : boolean (default False) - choice for return format
         (string/bytes if True, dict else)
         - **encode_format**  : string (default 'json')- choice for return format (json, cbor)
-        - **simpleval** : boolean (default False) - if True, only value (without 
+        - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
         '''
         option = {'encoded': False, 'encode_format': 'json',
@@ -325,11 +333,6 @@ class Ntv(ABC):
         add_sep = (not not_sing and sep == '::') or (not_sing and sep == ':')
         name = self._obj_name(
             sep, single, not option['simpleval'], def_type, add_sep)
-        # if name == ':' and (not not_single or option['simpleval'] or def_type):
-        '''if name == ':' and (not not_sing or option['simpleval']):
-            name = '' #None
-        if name[-2:] == '::' and (not_sing or option['simpleval']): #or not def_type):
-            name = name[:-2] #None'''
         if not name:
             json_obj = value
         else:
