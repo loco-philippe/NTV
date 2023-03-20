@@ -190,10 +190,12 @@ import configparser
 import json
 import requests
 
-def str_type(long_name):
+def str_type(long_name, single):
     ''' create a NtvType or a Namespace from a string'''
-    if not long_name:
+    if not long_name and single:
         return NtvType('json')
+    if not long_name and not single:
+        return None
     if isinstance(long_name, (NtvType, Namespace)):
         return long_name
     if not isinstance(long_name, str):

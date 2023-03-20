@@ -171,6 +171,9 @@ class Ntv(ABC):
             sep = def_sep
         if not def_type and sep == ':':
             def_type = 'json'
+        #if not str_typ and sep == ':':
+            #str_typ = def_type
+            #str_typ = Ntv._agreg_type(str_typ, def_type, True)
         if isinstance(ntv_value, list) and sep in (None, '::'):
             def_type = Ntv._agreg_type(str_typ, def_type, False)
             if sep and not def_type:
@@ -182,8 +185,9 @@ class Ntv(ABC):
         if sep == ':' :
             ntv_type = Ntv._agreg_type(str_typ, def_type, True)
             return NtvSingle(ntv_value, ntv_name, ntv_type,)
-        if not isinstance(ntv_value, dict) and sep is None:
-            return NtvSingle(ntv_value, ntv_name, ntv_type,)
+        if sep is None and not isinstance(ntv_value, dict):
+            ntv_type = Ntv._agreg_type(str_typ, def_type, True)
+            return NtvSingle(ntv_value, ntv_name, ntv_type)
         if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
                                             sep is None):
             keys = list(ntv_value.keys())
@@ -336,9 +340,9 @@ class Ntv(ABC):
         sep = '::'
         if self.__class__.__name__ == 'NtvSingle':
             sep = ':'
-        not_sing = isinstance(value, list) or (
-            isinstance(value, dict) and len(value) != 1)
-        add_sep = (not not_sing and sep == '::') or (not_sing and sep == ':')
+        sing = not isinstance(value, list) and (
+            not isinstance(value, dict) or len(value) == 1)
+        add_sep = (sing and sep == '::') or (not sing and sep == ':')
         name = self._obj_name(
             sep, single, not option['simpleval'], def_type, add_sep)
         if not name:
@@ -383,9 +387,10 @@ class Ntv(ABC):
         '''aggregate typ and def_type to return an NtvType or a Namespace if not single'''
         if isinstance(str_typ, NtvType):
             str_typ = str_typ.long_name
-        def_type = str_type(def_type)
-
+        def_type = str_type(def_type, single)
         if not str_typ and (not def_type or isinstance(def_type, Namespace)):
+            if single:
+                return str_type('json', single)
             return None
         if not str_typ and isinstance(def_type, NtvType):
             return def_type

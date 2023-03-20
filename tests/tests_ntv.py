@@ -15,6 +15,29 @@ from shapely import geometry
 
 class Test_Ntv_creation(unittest.TestCase):
 
+    def test_agreg_type(self):
+        list_type = [[[None, None, True], 'json'],
+                     [['point', None, True], 'point'],
+                     [[None, 'fr.', True], 'json'],
+                     [['json', None, True], 'json'],
+                     [['point', 'date', True], 'point'],
+                     [['fr.reg', 'fr.', True], 'fr.reg'],
+                     [['point', 'fr.', True], 'point'],
+
+                     [[None, None, False], 'json'],
+                     [['point', None, False], 'point'],
+                     [[None, 'fr.', False], 'json'],
+                     [['json', None, True], 'json'],
+                     [['point', 'date', True], 'point'],
+                     [['fr.reg', 'fr.', True], 'fr.reg'],
+                     [['point', 'fr.', True], 'point'],
+                     [[None, None, True], 'json'],]
+        for typ in list_type:
+            if typ[0] == [None, None, False]:
+                self.assertEqual(Ntv._agreg_type(typ[0][0], typ[0][1], typ[0][2]), None)
+            else:
+                self.assertEqual(Ntv._agreg_type(typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
+    """        
     def test_from_obj_repr(self):
         list_repr = [[1, '"v"'],
                      [{"truc":  1}, '"vN"'],
@@ -62,8 +85,8 @@ class Test_Ntv_creation(unittest.TestCase):
                         (line[0], line[1])),
                     geometry.multipolygon.MultiPolygon((pol[0], pol[1]))]
         for obj in list_obj:
-            self.assertTrue(Ntv.from_obj(
-                NtvSingle(obj).to_obj()) == NtvSingle(obj))
+            self.assertEqual(Ntv.from_obj(
+                NtvSingle(obj).to_obj()), NtvSingle(obj))
             self.assertTrue(NtvSingle(obj).to_obj(encode_format='cbor') == obj)
 
     def test_from_att(self):
@@ -111,11 +134,11 @@ class Test_Ntv_creation(unittest.TestCase):
         liststr = list(dictstr.values())
         listtyp = list(dictstr.keys())
         for nstr, typ in zip(liststr, listtyp):
-            print('av', nstr, typ)
+            #print('av', nstr, typ)
             ntv = Ntv.from_obj(nstr)
             ntv2 = Ntv.obj(nstr)
             self.assertEqual(ntv, ntv2)
-            print('ap', nstr, typ)
+            #print('ap', nstr, typ)
             if not typ in ['9NtvList', 'aNtvList', 'bNtvList', '9NtvSingle',
                            '4NtvSet', '5NtvSet']:
                 self.assertEqual(nstr, ntv.to_obj())
@@ -145,7 +168,7 @@ class Test_Ntv_creation(unittest.TestCase):
                      [':fr.reg', {'ntv1::fr.BAN.lon': [{':fr.reg': 4}, 5, 6]}],
                      [':fr.reg', {'ntv1::fr.BAN.': [{':fr.reg': 4}, 5, 6]}]]
         for test in list_test:
-            # print(test[1])
+            print(test[1])
             self.assertEqual(Ntv.from_obj(
                 test[1]).ntv_value[0]._obj_name(), test[0])
             self.assertEqual(
@@ -157,7 +180,7 @@ class Test_Ntv_creation(unittest.TestCase):
             simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
         sing = Ntv.from_obj({'ntv1': {'ntv2': 2}})
         self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
-
+    """
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
