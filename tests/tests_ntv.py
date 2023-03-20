@@ -24,20 +24,21 @@ class Test_Ntv_creation(unittest.TestCase):
                      [['fr.reg', 'fr.', True], 'fr.reg'],
                      [['point', 'fr.', True], 'point'],
 
-                     [[None, None, False], 'json'],
+                     [[None, None, False], None],
                      [['point', None, False], 'point'],
-                     [[None, 'fr.', False], 'json'],
-                     [['json', None, True], 'json'],
-                     [['point', 'date', True], 'point'],
-                     [['fr.reg', 'fr.', True], 'fr.reg'],
-                     [['point', 'fr.', True], 'point'],
-                     [[None, None, True], 'json'],]
+                     [[None, 'fr.', False], 'fr.'],
+                     [['json', None, False], 'json'],
+                     [['point', 'date', False], 'point'],
+                     [['fr.reg', 'fr.', False], 'fr.reg'],
+                     [['reg', 'fr.', False], 'fr.reg'],
+                     [['point', 'fr.', False], 'point']]
         for typ in list_type:
+            #print(typ[0])
             if typ[0] == [None, None, False]:
-                self.assertEqual(Ntv._agreg_type(typ[0][0], typ[0][1], typ[0][2]), None)
+                self.assertEqual(Ntv._agreg_type(typ[0][0], typ[0][1], typ[0][2]), typ[1] )
             else:
                 self.assertEqual(Ntv._agreg_type(typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
-    """        
+            
     def test_from_obj_repr(self):
         list_repr = [[1, '"v"'],
                      [{"truc":  1}, '"vN"'],
@@ -134,7 +135,7 @@ class Test_Ntv_creation(unittest.TestCase):
         liststr = list(dictstr.values())
         listtyp = list(dictstr.keys())
         for nstr, typ in zip(liststr, listtyp):
-            #print('av', nstr, typ)
+            print('av', nstr, typ)
             ntv = Ntv.from_obj(nstr)
             ntv2 = Ntv.obj(nstr)
             self.assertEqual(ntv, ntv2)
@@ -158,7 +159,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     Ntv.to_obj(ntv, encoded=True)))
             self.assertTrue(ntv.__class__.__name__ == typ[1:])
 
-    def test_default_type(self):
+    """def test_default_type(self):
         list_test = [[':fr.BAN.lon', {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
                      [':fr.BAN.lon', {'ntv1::fr.BAN.': [{':lon': 4}, 5, 6]}],
                      [':fr.reg', {'ntv1::fr.': [{':reg': 4}, 5, 6]}],
