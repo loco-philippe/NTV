@@ -254,6 +254,8 @@ class NtvType():
         - **nspace** : Namespace (default None) - namespace associated'''
         if not name or not isinstance(name, str):
             raise NtvTypeError('null name is not allowed')
+        if not name and not nspace:
+            name = 'json'
         if not nspace:
             nspace = Namespace._namespaces_['']
         if name[0] != '$' and not name in nspace.content['type']:
@@ -264,6 +266,12 @@ class NtvType():
 
     def __eq__(self, other):
         ''' equal if name and nspace are equal'''
+        if self is None and other is None:
+            return True
+        if self is None or other is None:
+            return False
+        if self.__class__ != other.__class__:
+            return False
         return self.name == other.name and self.nspace == other.nspace
 
     def __str__(self):
@@ -354,6 +362,12 @@ class Namespace():
 
     def __eq__(self, other):
         ''' equal if name and parent are equal'''
+        if self is None and other is None:
+            return True
+        if self is None or other is None:
+            return False
+        if self.__class__ != other.__class__:
+            return False
         return self.name == other.name and self.parent == other.parent
 
     def __str__(self):
@@ -426,3 +440,4 @@ for root_nsp in nroot.content['namespace'].keys():
     nsp = Namespace.add(root_nsp)
 for root_typ in nroot.content['type'].keys():
     typ = NtvType.add(root_typ)
+typ_json = NtvType('json')

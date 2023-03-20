@@ -164,6 +164,8 @@ class Ntv(ABC):
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         value = Ntv._from_value(value)
+        if not def_type:
+            def_type = 'json'
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
@@ -265,7 +267,7 @@ class Ntv(ABC):
         code = dic[self.__class__.__name__]
         if self.ntv_name:
             code += 'N'
-        if self.ntv_type:
+        if self.ntv_type and self.ntv_type.long_name != 'json':
             code += 'T'
         return code
 
@@ -354,7 +356,7 @@ class Ntv(ABC):
         *Parameters*
 
         - **typ** : boolean(default True) - if False, the type is not included'''
-        typ = typ and self.ntv_type
+        typ = typ and (self.ntv_type.long_name != 'json' or self.ntv_type != def_type)
         nam = nam and self.ntv_name
         if not typ and not nam and not sep:
             return ''

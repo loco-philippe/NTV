@@ -115,7 +115,7 @@ class Test_Ntv_creation(unittest.TestCase):
             ntv = Ntv.from_obj(nstr)
             ntv2 = Ntv.obj(nstr)
             self.assertEqual(ntv, ntv2)
-            #print('ap', nstr, typ)
+            print('ap', nstr, typ)
             if not typ in ['9NtvList', 'aNtvList', 'bNtvList', '9NtvSingle',
                            '4NtvSet', '5NtvSet']:
                 self.assertEqual(nstr, ntv.to_obj())

@@ -26,7 +26,7 @@ Today, the semantic level of shared data remains low. It is very often limited t
 numbers, strings, arrays and objects for JSON formats).
 
 The proposed consists of adding a type and a name to the data exchanged (see also the 
-[presentation document](https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
+[JSON-NTV specification](https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
 With this evolution any data, whatever its semantic level, can be identified, shared and interpreted in a consistent way.
 The implementation of a type with a nested structure facilitates its appropriation.
