@@ -111,7 +111,7 @@ class Test_Ntv_creation(unittest.TestCase):
         liststr = list(dictstr.values())
         listtyp = list(dictstr.keys())
         for nstr, typ in zip(liststr, listtyp):
-            #print('av', nstr, typ)
+            print('av', nstr, typ)
             ntv = Ntv.from_obj(nstr)
             ntv2 = Ntv.obj(nstr)
             self.assertEqual(ntv, ntv2)

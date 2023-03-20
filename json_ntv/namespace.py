@@ -193,7 +193,7 @@ import requests
 def str_type(long_name):
     ''' create a NtvType or a Namespace from a string'''
     if not long_name:
-        return None
+        return NtvType('json')
     if isinstance(long_name, (NtvType, Namespace)):
         return long_name
     if not isinstance(long_name, str):

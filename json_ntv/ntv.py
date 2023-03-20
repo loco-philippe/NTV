@@ -164,13 +164,13 @@ class Ntv(ABC):
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         value = Ntv._from_value(value)
-        if not def_type:
-            def_type = 'json'
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
         if not sep:
             sep = def_sep
+        if not def_type and sep == ':':
+            def_type = 'json'
         if isinstance(ntv_value, list) and sep in (None, '::'):
             def_type = Ntv._agreg_type(str_typ, def_type, False)
             if sep and not def_type:
@@ -179,8 +179,10 @@ class Ntv(ABC):
                 sep = ':'
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
             return NtvList(ntv_list, ntv_name, def_type)
-        if sep == ':' or (not isinstance(ntv_value, dict) and sep is None):
+        if sep == ':' :
             ntv_type = Ntv._agreg_type(str_typ, def_type, True)
+            return NtvSingle(ntv_value, ntv_name, ntv_type,)
+        if not isinstance(ntv_value, dict) and sep is None:
             return NtvSingle(ntv_value, ntv_name, ntv_type,)
         if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
                                             sep is None):
@@ -356,6 +358,8 @@ class Ntv(ABC):
         *Parameters*
 
         - **typ** : boolean(default True) - if False, the type is not included'''
+        if not def_type:
+            def_type = 'json'
         typ = typ and (self.ntv_type.long_name != 'json' or self.ntv_type != def_type)
         nam = nam and self.ntv_name
         if not typ and not nam and not sep:
@@ -546,17 +550,17 @@ class NtvSingle(Ntv):
         '''
         is_json_ntv = value is None or isinstance(
             value, (list, int, str, float, bool, dict, NtvSingle))
+        if not ntv_type and is_json_ntv:
+            ntv_type = 'json'
         if not ntv_type and not is_json_ntv:
-            name, ntv_type, ntv_value = Ntv._cast(value)
+            name, ntv_type, value = Ntv._cast(value)
             if not ntv_name:
                 ntv_name = name
         elif ntv_type and not is_json_ntv:
             raise NtvError('ntv_value is not compatible with ntv_type')
-        else:
-            ntv_value = value
         if ntv_type and isinstance(ntv_type, str) and ntv_type[-1] == '.':
             raise NtvError('the ntv_type is not valid')
-        super().__init__(ntv_value, ntv_name, ntv_type)
+        super().__init__(value, ntv_name, ntv_type)
 
     def __eq__(self, other):
         ''' equal if name type and value are equal'''
