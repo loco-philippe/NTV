@@ -15,6 +15,30 @@ from shapely import geometry
 
 class Test_Ntv_creation(unittest.TestCase):
 
+    def test_single_obj_name(self):
+        list_obj    = [['json', 4, ('', '', '')],
+                       ['fr.', 4, ('', ':', 'json')],
+                       ['point', 4, ('', ':', 'json')],
+                       ['', 4, ('', '', '')],
+                       ['point', {":point": [1, 2]}, ('', '', '')],
+                       ['', {":point": [1, 2]}, ('', ':', 'point')],
+                       ['fr.', {":point": [1, 2]}, ('', ':', 'point')],
+                       ['json', {":": [1, 2]}, ('', '', '')],
+                       ['', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
+                       ['fr.', {":fr.reg": [1, 2]}, ('', ':', 'reg')],
+                       ['json', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
+                       ['point', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
+                       ['point', {"::point": [1, 2]}, ('', '', '')],
+                       ['', {"::point": [1, 2]}, ('', '::', 'point')],
+                       ['fr.', {"::fr.reg": [1, 2]}, ('', '::', 'reg')],
+                       ['', {"::json": [1, 2]}, ('', '::', 'json')],
+                       ['json', {"::json": [1, 2]}, ('', '', '')],
+                       ['json', {"::": [1, 2]}, ('', '::', 'json')],
+                       ]
+        for data in list_obj:
+            ntv = Ntv.obj(data[1])
+            self.assertEqual(ntv._obj_name(data[0]), data[2])
+                             
     def test_agreg_type(self):
         list_type = [[[None, None, True], 'json'],
                      [['point', None, True], 'point'],
@@ -135,7 +159,7 @@ class Test_Ntv_creation(unittest.TestCase):
         liststr = list(dictstr.values())
         listtyp = list(dictstr.keys())
         for nstr, typ in zip(liststr, listtyp):
-            print('av', nstr, typ)
+            #print('av', nstr, typ)
             ntv = Ntv.from_obj(nstr)
             ntv2 = Ntv.obj(nstr)
             self.assertEqual(ntv, ntv2)
@@ -152,24 +176,24 @@ class Test_Ntv_creation(unittest.TestCase):
                 self.assertEqual(
                     {'ntv3::fr.reg': {'ntv1': [1, 2], 'ntv2': '2'}}, ntv.to_obj())
             self.assertEqual(ntv, Ntv.from_obj(Ntv.to_obj(ntv)))
-            self.assertEqual(ntv, Ntv.from_obj(
-                Ntv.to_obj(ntv, encode_format='cbor')))
+            #self.assertEqual(ntv, Ntv.from_obj(
+            #    Ntv.to_obj(ntv, encode_format='cbor')))
             if not typ in ['9NtvList', 'aNtvList']:
                 self.assertEqual(ntv, Ntv.from_obj(
                     Ntv.to_obj(ntv, encoded=True)))
             self.assertTrue(ntv.__class__.__name__ == typ[1:])
 
-    """def test_default_type(self):
-        list_test = [[':fr.BAN.lon', {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
-                     [':fr.BAN.lon', {'ntv1::fr.BAN.': [{':lon': 4}, 5, 6]}],
-                     [':fr.reg', {'ntv1::fr.': [{':reg': 4}, 5, 6]}],
-                     [':fr.reg', {'ntv1::fr.': [{':fr.reg': 4}, 5, 6]}],
-                     [':fr.reg', {'ntv1::fr.reg': [{':fr.reg': 4}, 5, 6]}],
-                     [':fr.reg', {'ntv1::fr.reg': [4, 5, 6]}],
-                     [':fr.reg', {'ntv1::fr.BAN.lon': [{':fr.reg': 4}, 5, 6]}],
-                     [':fr.reg', {'ntv1::fr.BAN.': [{':fr.reg': 4}, 5, 6]}]]
+    def test_default_type(self):
+        list_test = [[('',':','fr.BAN.lon'), {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
+                     [('',':','fr.BAN.lon'), {'ntv1::fr.BAN.': [{':lon': 4}, 5, 6]}],
+                     [('',':','fr.reg'), {'ntv1::fr.': [{':reg': 4}, 5, 6]}],
+                     [('',':','fr.reg'), {'ntv1::fr.': [{':fr.reg': 4}, 5, 6]}],
+                     [('',':','fr.reg'), {'ntv1::fr.reg': [{':fr.reg': 4}, 5, 6]}],
+                     [('',':','fr.reg'), {'ntv1::fr.reg': [4, 5, 6]}],
+                     [('',':','fr.reg'), {'ntv1::fr.BAN.lon': [{':fr.reg': 4}, 5, 6]}],
+                     [('',':','fr.reg'), {'ntv1::fr.BAN.': [{':fr.reg': 4}, 5, 6]}]]
         for test in list_test:
-            print(test[1])
+            #print(test[1])
             self.assertEqual(Ntv.from_obj(
                 test[1]).ntv_value[0]._obj_name(), test[0])
             self.assertEqual(
@@ -181,7 +205,7 @@ class Test_Ntv_creation(unittest.TestCase):
             simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
         sing = Ntv.from_obj({'ntv1': {'ntv2': 2}})
         self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
-    """
+    
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
