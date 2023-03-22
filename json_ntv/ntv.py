@@ -387,7 +387,7 @@ class Ntv(ABC):
             return (clas, name, typ, val.to_tuple(maxi=maxi))
         if isinstance(self, (NtvList, NtvSet)):
             if maxi < 1:
-                maxi = len(self.ntv_value)
+                maxi = len(val)
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxi]])
         raise NtvError('the ntv entity is not consistent')
     
@@ -700,9 +700,14 @@ class NtvList(Ntv):
         - **ntv_type**: String (default None) - default type or namespace of the included entities
         - **list_ntv**: list - list of Ntv objects or obj_value of Ntv objectd
         '''
-        if not isinstance(list_ntv, list):
+        if isinstance(list_ntv, (NtvList, NtvSet)):
+            ntv_value = list_ntv.ntv_value
+            ntv_type = list_ntv.ntv_type
+            ntv_name = list_ntv.ntv_name
+        elif isinstance(list_ntv, list):
+            ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
+        else:
             raise NtvError('ntv_value is not a list')
-        ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         super().__init__(ntv_value, ntv_name, ntv_type)
 
     def __eq__(self, other):
@@ -761,9 +766,14 @@ class NtvSet(Ntv):
         - **ntv_type**: String (default None) - default type or namespace of the included entities
         - **list_ntv**: list - list of Ntv objects or obj_value
         '''
-        if not isinstance(list_ntv, list):
+        if isinstance(list_ntv, (NtvList, NtvSet)):
+            ntv_value = list_ntv.ntv_value
+            ntv_type = list_ntv.ntv_type
+            ntv_name = list_ntv.ntv_name
+        elif isinstance(list_ntv, list):
+            ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
+        else:
             raise NtvError('ntv_value is not a list')
-        ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         super().__init__(ntv_value, ntv_name, ntv_type)
 
     def __eq__(self, other):
