@@ -337,11 +337,11 @@ class Ntv(ABC):
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         value = self._obj_value(**option)
-        if option['encode_format'] == 'tuple':
+        '''if option['encode_format'] == 'tuple':
             ntv_type = None
             if self.ntv_type:
                 ntv_type = self.ntv_type.long_name
-            return (self.ntv_name, ntv_type, value)
+            return (self.ntv_name, ntv_type, value)'''
         obj_name = self._obj_name(def_type)
         if option['simpleval']:
             name = ''
@@ -361,6 +361,36 @@ class Ntv(ABC):
                                date_as_datetime=True)
         return json_obj
 
+    def to_tuple(self, maxi=10):
+        '''return the JSON representation of the NTV entity (json-ntv format).
+
+        *Parameters*
+
+        - **def_type** : NtvType or Namespace (default None) - default type to apply
+        to the NTV entity
+        - **encoded** : boolean (default False) - choice for return format
+        (string/bytes if True, dict/list/tuple else)
+        - **encode_format**  : string (default 'json')- choice for return format
+        (json, cbor, tuple, obj)
+        - **simpleval** : boolean (default False) - if True, only value (without
+        name and type) is included
+        '''
+        clas = self.__class__.__name__
+        val = self.ntv_value
+        name = self.ntv_name
+        typ = None
+        if self.ntv_type:
+            typ = self.ntv_type.long_name
+        if isinstance(self, NtvSingle) and not isinstance(val, NtvSingle):
+            return (clas, name, typ, val)
+        if isinstance(self, NtvSingle) and isinstance(val, NtvSingle):
+            return (clas, name, typ, val.to_tuple(maxi=maxi))
+        if isinstance(self, (NtvList, NtvSet)):
+            if maxi < 1:
+                maxi = len(self.ntv_value)
+            return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxi]])
+        raise NtvError('the ntv entity is not consistent')
+    
     def _obj_value(self):
         return ''
 
@@ -752,6 +782,7 @@ class NtvSet(Ntv):
         return {list(ntv.to_obj(def_type=def_type, **option2).items())[0][0]:
                 list(ntv.to_obj(def_type=def_type, **option2).items())[0][1]
                 for ntv in self.ntv_value}
+        
 
 
 class NtvError(Exception):
