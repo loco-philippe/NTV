@@ -15,6 +15,7 @@ Project1/
 *.bak
 .vs/
 .ipynb_checkpoints/
+.spyproject/
 *checkpoints.ipynb
 *~
 .pylint.d/
