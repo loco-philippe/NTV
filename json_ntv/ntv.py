@@ -36,7 +36,6 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
 - NTV-single, simple format :
    - ```"lyon"```
    - ```52.5```
-   - ```{ }```
 - NTV-single, named format :
    - ```{ "paris:point" : [2.3522, 48.8566] }```
    - ```{ ":point" : [4.8357, 45.7640] }```
@@ -56,6 +55,7 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "nom”: "white", "prenom": "walter", "surnom": "heisenberg" }```
    - ```{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france" }```
    - ```{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640] }```
+   - ```{ }```   
 - NTV-set, named format :
    - ```{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}```
    - ```{ "cities" :     { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
@@ -282,11 +282,13 @@ class Ntv(ABC):
             name = ''
         self.ntv_name = name
 
-    def set_type(self, typ):
+    def set_type(self, typ=None):
         '''set a new type to the entity'''
-        if not isinstance(typ, (str, NtvType, Namespace)):
+        if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        self.ntv_type = str_type(typ)
+        if self.__class__.__name__ != 'NtvSingle':
+            raise NtvError('set_type is available only for NtvSingle class')
+        self.ntv_type = str_type(typ, True)
 
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity.

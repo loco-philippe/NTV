@@ -193,7 +193,7 @@ class Test_Ntv_creation(unittest.TestCase):
                      [('', ':', 'fr.reg'), {
                          'ntv1::fr.': [{':fr.reg': 4}, 5, 6]}],
                      [('', ':', 'fr.reg'), {
-                         'ntv1::fr.reg': [{':fr.reg': 4}, 5, 6]}],
+                          'ntv1::fr.reg': [{':fr.reg': 4}, 5, 6]}],
                      [('', ':', 'fr.reg'), {'ntv1::fr.reg': [4, 5, 6]}],
                      [('', ':', 'fr.reg'), {
                          'ntv1::fr.BAN.lon': [{':fr.reg': 4}, 5, 6]}],
