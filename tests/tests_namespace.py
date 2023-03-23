@@ -13,11 +13,23 @@ from observation import  Ilist
 
 class Test_Namespace(unittest.TestCase):
     
+    def test_child_parent(self):
+        Nroot = Namespace()
+        Nfr = Namespace('fr.', Nroot)
+        NBAN = Namespace('BAN.', Nfr)     
+        self.assertEqual(NBAN.long_name, 'fr.BAN.')
+        self.assertEqual(Nroot.long_name, '')
+        self.assertNotEqual(NBAN, Nfr)
+        self.assertEqual(NBAN.is_child(Nfr), 1)
+        self.assertEqual(NBAN.is_child(Nroot), 2)
+        self.assertEqual(Nroot.is_parent(NBAN), 2)
+        self.assertEqual(Nroot.is_child(NBAN), -1)
+        
     def test_add(self):
         liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
                    'fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.']
         for nstr in liststr:
-            self.assertTrue(Namespace.add(nstr).long_name == nstr)
+            self.assertEqual(Namespace.add(nstr).long_name, nstr)
     
     def test_add_ko(self):
         liststr = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
@@ -28,8 +40,8 @@ class Test_Namespace(unittest.TestCase):
     def test_user_nsp(self):
         liststr = ['fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.']
         for nstr in liststr:
-            self.assertTrue(Namespace.add(nstr).file == None)        
-            self.assertTrue(Namespace.add(nstr).content == {'type': {}, 'namespace': {}})        
+            self.assertEqual(Namespace.add(nstr).file, None)        
+            self.assertEqual(Namespace.add(nstr).content, {'type': {}, 'namespace': {}})        
 
 class Test_NtvType(unittest.TestCase):
     
@@ -37,7 +49,7 @@ class Test_NtvType(unittest.TestCase):
         liststr = ['fr.BAN.lon', 'year', 'fr.reg', 'fr.BAN.numero', 'fr.reg', 
                    'fr.$IRVE.$a', '$a.$c', 'fr.$c']
         for tstr in liststr:
-            self.assertTrue(NtvType.add(tstr).long_name == tstr)
+            self.assertEqual(NtvType.add(tstr).long_name, tstr)
     
     def test_add_ko(self):
         liststr = ['fr.BAN.test', 'fr', 'fr.BANN.lon']
@@ -52,7 +64,7 @@ class Test_NtvType(unittest.TestCase):
         listkonsp = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
         res = 0
         for nsp in listnsp:
-            self.assertTrue(lon.isin_namespace(nsp) == res)
+            self.assertEqual(lon.isin_namespace(nsp), res)
             res += 1
         for nsp in listnotnsp:
             self.assertTrue(lon.isin_namespace(nsp) == -1)            

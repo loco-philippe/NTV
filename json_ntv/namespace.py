@@ -298,6 +298,58 @@ class NtvType():
         '''return the number of level between self and nspace, -1 if None'''
         return self.nspace.is_child(Namespace.add(long_name))
 
+    @staticmethod
+    def _agreg_type(str_typ, def_type, single):
+        '''aggregate typ and def_type to return an NtvType or a Namespace if not single'''
+        if isinstance(str_typ, NtvType):
+            str_typ = str_typ.long_name
+        def_type = str_type(def_type, single)
+        if not str_typ and (isinstance(def_type, NtvType) or
+                            (not isinstance(def_type, NtvType) and not single)):
+            return def_type
+        if not str_typ:
+            return NtvType('json')
+        clas = NtvType
+        if str_typ[-1] == '.':
+            clas = Namespace
+        if not def_type:
+            return clas.add(str_typ)
+        if clas == NtvType or clas == Namespace and not single:
+            try:
+                return clas.add(str_typ)
+            except NtvTypeError:
+                return clas.add(NtvType._join_type(def_type.long_name, str_typ))
+        raise NtvTypeError(str_typ + 'and' +
+                       def_type.long_name + 'are incompatible')
+
+    @staticmethod
+    def _join_type(namesp, str_typ):
+        '''join Namespace string and NtvType or Namespace string'''
+        namesp_split = namesp.split('.')[:-1]
+        for name in str_typ.split('.'):
+            if not name in namesp_split:
+                namesp_split.append(name)
+        return '.'.join(namesp_split)
+
+    @staticmethod
+    def _relative_type(namesp, str_typ):
+        '''return relative str_typ string from NtvType or Namespace namesp'''
+        if not namesp and not str_typ:
+            return ''
+        if namesp == str_typ:
+            return ''
+        if not namesp or not namesp in str_typ:
+            return str_typ
+        if not str_typ and namesp[-1] != ".":
+            return namesp
+        namesp_split = namesp.split('.')[:-1]
+        str_typ_split = str_typ.split('.')
+        ind = 0
+        for ind, name in enumerate(str_typ_split):
+            if not name in namesp_split:
+                break
+        return '.'.join(str_typ_split[ind:])
+    
 class Namespace():
     ''' Namespace of NTV entities.
 
@@ -416,6 +468,8 @@ class Namespace():
     def is_child(self, nspace):
         '''return the number of level between self and nspace, -1 if None'''
         parent = self.parent
+        if not self.name:
+            return -1
         if self == nspace:
             return 0
         rang = 1
