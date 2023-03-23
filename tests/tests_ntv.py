@@ -10,6 +10,7 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 import unittest
 import datetime
 from json_ntv.ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError
+from json_ntv.namespace import NtvType
 from shapely import geometry
 
 
@@ -59,10 +60,10 @@ class Test_Ntv_creation(unittest.TestCase):
         for typ in list_type:
             # print(typ[0])
             if typ[0] == [None, None, False]:
-                self.assertEqual(Ntv._agreg_type(
+                self.assertEqual(NtvType._agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]), typ[1])
             else:
-                self.assertEqual(Ntv._agreg_type(
+                self.assertEqual(NtvType._agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
 
     def test_from_obj_repr(self):
