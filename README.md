@@ -54,4 +54,5 @@ This structuring of type makes it possible to reference any type of data that ha
 # Documentation
 
 - [Specification](./documentation)
+- [Example](./example)
 - [Python Connectors documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
