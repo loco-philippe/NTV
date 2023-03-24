@@ -70,7 +70,7 @@ from json import JSONDecodeError
 import cbor2
 from shapely import geometry
 from util import util
-from json_ntv.namespace import NtvType, Namespace, NtvTypeError, str_type
+from namespace import NtvType, Namespace, str_type
 
 
 class Ntv(ABC):
@@ -283,7 +283,7 @@ class Ntv(ABC):
         self.ntv_name = name
 
     def set_type(self, typ=None):
-        '''set a new type to the entity'''
+        '''set a new type to the entity (available only for NtvSingle)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
         if self.__class__.__name__ != 'NtvSingle':
