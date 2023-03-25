@@ -70,7 +70,7 @@ from json import JSONDecodeError
 import cbor2
 from shapely import geometry
 from util import util
-from json_ntv.namespace import NtvType, Namespace, NtvTypeError, str_type
+from namespace import NtvType, Namespace, NtvTypeError, str_type
 
 
 class Ntv(ABC):
