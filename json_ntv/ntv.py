@@ -70,7 +70,8 @@ from json import JSONDecodeError
 import cbor2
 from shapely import geometry
 from util import util
-from json_ntv.namespace import NtvType, Namespace, NtvTypeError, str_type
+from namespace import NtvType, Namespace, str_type
+#from ntv_connector import NtvConnector
 
 
 class Ntv(ABC):
@@ -283,7 +284,7 @@ class Ntv(ABC):
         self.ntv_name = name
 
     def set_type(self, typ=None):
-        '''set a new type to the entity'''
+        '''set a new type to the entity (available only for NtvSingle)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
         if self.__class__.__name__ != 'NtvSingle':
@@ -466,26 +467,37 @@ class Ntv(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
+        dic_obj = {'tab': 'Ilist'} 
+        if 'dicobj' in option:
+            dic_obj |= option['dicobj']
         obj = True
         if option['encode_format'] == 'cbor':
             obj = False
             if self.ntv_type and self.ntv_type.name in dic_cbor:
                 obj = dic_cbor[self.ntv_type.name]
-        if self.ntv_type is None:
+        if self.ntv_type is None or not obj:
             return self.ntv_value
-        match (self.ntv_type.name, obj):
-            case ('date', True):
+        match self.ntv_type.name:
+            case 'date':
                 return datetime.date.fromisoformat(self.ntv_value)
-            case ('time', True):
+            case 'time':
                 return datetime.time.fromisoformat(self.ntv_value)
-            case ('datetime', True):
+            case 'datetime':
                 return datetime.datetime.fromisoformat(self.ntv_value)
-            case ('point', True) | ('multipoint', True) | ('line', True) | \
-                 ('multiline', True) | ('polygon', True) | ('multipolygon', True):
+            case 'point' | 'multipoint' | 'line' | \
+                 'multiline' | 'polygon' | 'multipolygon':
                 return geometry.shape({"type": dic_geo[self.ntv_type.name],
                                       "coordinates": self.ntv_value})
             case _:
+                #from ntv_connector import NtvConnector
+                if self.ntv_type.name in dic_obj and \
+                  dic_obj[self.ntv_type.name] in NtvConnector.connector():
+                    return NtvConnector.connector()[dic_obj[self.ntv_type.name]
+                                                    ].from_ntv(self.ntv_value)
+                    
                 return self.ntv_value
+            #case ('point', True) | ('multipoint', True) | ('line', True) | \
+            #     ('multiline', True) | ('polygon', True) | ('multipolygon', True):
 
     @staticmethod
     def _from_obj_name(string):
@@ -743,7 +755,13 @@ class NtvSet(Ntv):
                 list(ntv.to_obj(def_type=def_type, **option2).items())[0][1]
                 for ntv in self.ntv_value}
         
+class NtvConnector(ABC):
+    ''' The NtvConnector class is an abstract class used for all NTV connectors.
+    A NTV connector has two methods for conversion between NTV data and an object'''
 
+    @classmethod
+    def connector(cls):
+        return { clas.__name__: clas for clas in cls.__subclasses__()}   
 
 class NtvError(Exception):
     ''' NTV Exception'''
