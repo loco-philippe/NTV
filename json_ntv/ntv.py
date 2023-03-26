@@ -756,16 +756,8 @@ class NtvSet(Ntv):
                 for ntv in self.ntv_value}
         
 class NtvConnector(ABC):
-    ''' The NtvConnector class is an abstract class used for all NTV connectors.'''
-
-    """def __init__(self, entity):
-        '''Ntv constructor.
-
-        *Parameters*
-
-        - **entity**: class of the entity
-        '''
-        self.entity = entity"""
+    ''' The NtvConnector class is an abstract class used for all NTV connectors.
+    A NTV connector has two methods for conversion between NTV data and an object'''
 
     @classmethod
     def connector(cls):
