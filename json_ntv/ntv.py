@@ -55,7 +55,7 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "nom”: "white", "prenom": "walter", "surnom": "heisenberg" }```
    - ```{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france" }```
    - ```{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640] }```
-   - ```{ }```   
+   - ```{ }```
 - NTV-set, named format :
    - ```{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}```
    - ```{ "cities" :     { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
@@ -393,7 +393,7 @@ class Ntv(ABC):
                 maxi = len(val)
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxi]])
         raise NtvError('the ntv entity is not consistent')
-    
+
     def _obj_value(self):
         return ''
 
@@ -467,7 +467,7 @@ class Ntv(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'Ilist'} 
+        dic_obj = {'tab': 'Ilist'}
         if 'dicobj' in option:
             dic_obj |= option['dicobj']
         obj = True
@@ -491,12 +491,12 @@ class Ntv(ABC):
             case _:
                 #from ntv_connector import NtvConnector
                 if self.ntv_type.name in dic_obj and \
-                  dic_obj[self.ntv_type.name] in NtvConnector.connector():
+                        dic_obj[self.ntv_type.name] in NtvConnector.connector():
                     return NtvConnector.connector()[dic_obj[self.ntv_type.name]
                                                     ].from_ntv(self.ntv_value)
-                    
+
                 return self.ntv_value
-            #case ('point', True) | ('multipoint', True) | ('line', True) | \
+            # case ('point', True) | ('multipoint', True) | ('line', True) | \
             #     ('multiline', True) | ('polygon', True) | ('multipolygon', True):
 
     @staticmethod
@@ -754,14 +754,16 @@ class NtvSet(Ntv):
         return {list(ntv.to_obj(def_type=def_type, **option2).items())[0][0]:
                 list(ntv.to_obj(def_type=def_type, **option2).items())[0][1]
                 for ntv in self.ntv_value}
-        
+
+
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used for all NTV connectors.
     A NTV connector has two methods for conversion between NTV data and an object'''
 
     @classmethod
     def connector(cls):
-        return { clas.__name__: clas for clas in cls.__subclasses__()}   
+        return {clas.__name__: clas for clas in cls.__subclasses__()}
+
 
 class NtvError(Exception):
     ''' NTV Exception'''
