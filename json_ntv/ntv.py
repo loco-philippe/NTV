@@ -340,11 +340,6 @@ class Ntv(ABC):
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         value = self._obj_value(**option)
-        '''if option['encode_format'] == 'tuple':
-            ntv_type = None
-            if self.ntv_type:
-                ntv_type = self.ntv_type.long_name
-            return (self.ntv_name, ntv_type, value)'''
         obj_name = self._obj_name(def_type)
         if option['simpleval']:
             name = ''
@@ -489,15 +484,12 @@ class Ntv(ABC):
                 return geometry.shape({"type": dic_geo[self.ntv_type.name],
                                       "coordinates": self.ntv_value})
             case _:
-                #from ntv_connector import NtvConnector
                 if self.ntv_type.name in dic_obj and \
                         dic_obj[self.ntv_type.name] in NtvConnector.connector():
                     return NtvConnector.connector()[dic_obj[self.ntv_type.name]
                                                     ].from_ntv(self.ntv_value)
 
                 return self.ntv_value
-            # case ('point', True) | ('multipoint', True) | ('line', True) | \
-            #     ('multiline', True) | ('polygon', True) | ('multipolygon', True):
 
     @staticmethod
     def _from_obj_name(string):
@@ -762,6 +754,7 @@ class NtvConnector(ABC):
 
     @classmethod
     def connector(cls):
+        '''return a dict with the connectors: { name: class }'''
         return {clas.__name__: clas for clas in cls.__subclasses__()}
 
 
