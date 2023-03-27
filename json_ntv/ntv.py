@@ -462,7 +462,7 @@ class Ntv(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'Ilist'}
+        dic_obj = {'tab': 'Ilist', 'other': None}
         if 'dicobj' in option:
             dic_obj |= option['dicobj']
         obj = True
@@ -488,8 +488,8 @@ class Ntv(ABC):
                 if self.ntv_type.name in dic_obj and \
                         dic_obj[self.ntv_type.name] in NtvConnector.connector():
                    connector = NtvConnector.connector()[dic_obj[self.ntv_type.name]]
-                elif 'all' in dic_obj and dic_obj['all'] in NtvConnector.connector():
-                   connector = NtvConnector.connector()['all']
+                elif dic_obj['other'] in NtvConnector.connector():
+                   connector = NtvConnector.connector()['other']
                 if connector:
                     return connector.from_ntv(self.ntv_value)
                 return self.ntv_value
