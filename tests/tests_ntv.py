@@ -213,6 +213,8 @@ class Test_Ntv_creation(unittest.TestCase):
         sing = Ntv.from_obj({'ntv1': {'ntv2': 2}})
         self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
 
+    def test_pandas(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -212,11 +212,12 @@ class Ntv(ABC):
                 value = json.loads(value)
             except JSONDecodeError:
                 pass
-        if value is None or value == 'null':
+        string = isinstance(value, str)
+        if value is None or (string and value == 'null'):
             return NtvSingle(None)
-        if value == 'true':
+        if string and value == 'true':
             return NtvSingle(True)
-        if value == 'false':
+        if string and value == 'false':
             return NtvSingle(False)
         return value
 
@@ -439,7 +440,9 @@ class Ntv(ABC):
         dic_geo_cl = {'point': 'point', 'multipoint': 'multipoint', 'linestring': 'line',
                       'multilinestring': 'multiline', 'polygon': 'polygon',
                       'multipolygon': 'multipolygon'}
-        match data.__class__.__name__.lower():
+        dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
+        clas = data.__class__.__name__.lower()
+        match clas:
             case 'date':
                 return (None, 'date', data.isoformat())
             case 'time':
@@ -451,6 +454,11 @@ class Ntv(ABC):
                 return (None, dic_geo_cl[data.__class__.__name__.lower()],
                         util.listed(data.__geo_interface__['coordinates']))
             case _:
+                connector = None
+                if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
+                   connector = NtvConnector.connector()[dic_connec[clas]]
+                if connector:
+                    return connector.to_ntv(data)
                 raise NtvError('connector is not defined to NTV entity')
         return (None, None, None)
 
@@ -580,6 +588,7 @@ class NtvSingle(Ntv):
             self.ntv_value == other.ntv_value
 
     def _obj_value(self, **kwargs):
+        '''return the Json format of the ntv_value'''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         if isinstance(self.ntv_value, NtvSingle):
@@ -665,6 +674,9 @@ class NtvList(Ntv):
             ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         else:
             raise NtvError('ntv_value is not a list')
+        if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type and \
+          ntv_value[0].ntv_type.long_name != 'json':
+            ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
 
     def __eq__(self, other):
