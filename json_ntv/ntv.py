@@ -484,11 +484,14 @@ class Ntv(ABC):
                 return geometry.shape({"type": dic_geo[self.ntv_type.name],
                                       "coordinates": self.ntv_value})
             case _:
+                connector = None
                 if self.ntv_type.name in dic_obj and \
                         dic_obj[self.ntv_type.name] in NtvConnector.connector():
-                    return NtvConnector.connector()[dic_obj[self.ntv_type.name]
-                                                    ].from_ntv(self.ntv_value)
-
+                   connector = NtvConnector.connector()[dic_obj[self.ntv_type.name]]
+                elif 'all' in dic_obj and dic_obj['all'] in NtvConnector.connector():
+                   connector = NtvConnector.connector()['all']
+                if connector:
+                    return connector.from_ntv(self.ntv_value)
                 return self.ntv_value
 
     @staticmethod
