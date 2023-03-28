@@ -11,7 +11,7 @@ The JSON-NTV is defined :
 - in the [code](../json_ntv) files 
 - in the [examples](../example/README.md)
 
-The 'Namespaces' used are defined in the [configuration files](./config/README.md)
+The 'Namespaces' used are defined in the [configuration files](../config/README.md)
 
 ## Installation
 Observation itself is a pure Python package. It can be installed with pip 
