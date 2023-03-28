@@ -7,7 +7,8 @@ Created on Feb 27 2023
 The `ntv` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the classes `NtvSingle`, `NtvSet`, `NtvList` and `Ntv`(abstract) for NTV entities.
+It contains the classes `NtvSingle`, `NtvSet`, `NtvList`, `Ntv`(abstract),
+`NtvConnector` and `NtvError` for NTV entities.
 
 # 1 - JSON-NTV structure
 
@@ -71,8 +72,6 @@ import cbor2
 from shapely import geometry
 from util import util
 from namespace import NtvType, Namespace, str_type
-#from ntv_connector import NtvConnector
-
 
 class Ntv(ABC):
     ''' The Ntv class is an abstract class used for all NTV entities.
@@ -440,7 +439,8 @@ class Ntv(ABC):
         dic_geo_cl = {'point': 'point', 'multipoint': 'multipoint', 'linestring': 'line',
                       'multilinestring': 'multiline', 'polygon': 'polygon',
                       'multipolygon': 'multipolygon'}
-        dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
+        #dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
+        dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__.lower()
         match clas:
             case 'date':
@@ -456,7 +456,7 @@ class Ntv(ABC):
             case _:
                 connector = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
-                   connector = NtvConnector.connector()[dic_connec[clas]]
+                    connector = NtvConnector.connector()[dic_connec[clas]]
                 if connector:
                     return connector.to_ntv(data)
                 raise NtvError('connector is not defined to NTV entity')
@@ -495,9 +495,10 @@ class Ntv(ABC):
                 connector = None
                 if self.ntv_type.name in dic_obj and \
                         dic_obj[self.ntv_type.name] in NtvConnector.connector():
-                   connector = NtvConnector.connector()[dic_obj[self.ntv_type.name]]
+                    connector = NtvConnector.connector(
+                    )[dic_obj[self.ntv_type.name]]
                 elif dic_obj['other'] in NtvConnector.connector():
-                   connector = NtvConnector.connector()['other']
+                    connector = NtvConnector.connector()['other']
                 if connector:
                     return connector.from_ntv(self.ntv_value)
                 return self.ntv_value
@@ -675,7 +676,7 @@ class NtvList(Ntv):
         else:
             raise NtvError('ntv_value is not a list')
         if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type and \
-          ntv_value[0].ntv_type.long_name != 'json':
+                ntv_value[0].ntv_type.long_name != 'json':
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
 
@@ -771,6 +772,12 @@ class NtvConnector(ABC):
     def connector(cls):
         '''return a dict with the connectors: { name: class }'''
         return {clas.__name__: clas for clas in cls.__subclasses__()}
+
+    @classmethod
+    def dic_connec(cls):
+        '''return a dict with the clas associated to the connector:
+        { clas_obj: classconnector }'''
+        return {clas.clas_obj: clas.__name__ for clas in cls.__subclasses__()}
 
 
 class NtvError(Exception):
