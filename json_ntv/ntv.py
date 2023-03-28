@@ -70,7 +70,6 @@ from json import JSONDecodeError
 
 import cbor2
 from shapely import geometry
-from util import util
 from namespace import NtvType, Namespace, str_type
 
 class Ntv(ABC):
@@ -452,7 +451,7 @@ class Ntv(ABC):
             case 'point' | 'multipoint' | 'linestring' | 'multilinestring' | \
                     'polygon' | 'multipolygon':
                 return (None, dic_geo_cl[data.__class__.__name__.lower()],
-                        util.listed(data.__geo_interface__['coordinates']))
+                        Ntv._listed(data.__geo_interface__['coordinates']))
             case _:
                 connector = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
@@ -531,6 +530,10 @@ class Ntv(ABC):
         ''' return True if val is a json type'''
         return val is None or isinstance(val, (list, int, str, float, bool, dict))
 
+    @staticmethod
+    def _listed(idx):
+        '''transform a tuple of tuple in a list of list'''
+        return [val if not isinstance(val, tuple) else Ntv._listed(val) for val in idx]
 
 class NtvSingle(Ntv):
     ''' An NTV-single entity is a Ntv entity not composed with other entities.
