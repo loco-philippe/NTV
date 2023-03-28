@@ -7,7 +7,7 @@ Created on Feb 27 2023
 The `ntv_connector` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the child classes of `NtvConnector` abstract class.
+It contains the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class.
 """
 import json
 import pandas as pd
