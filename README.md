@@ -53,8 +53,9 @@ This structuring of type makes it possible to reference any type of data that ha
 
 ### ***If you are interested challenge us !*** We will be very happy to show you the relevance of our approach
 
-# Documentation
+# Documentation and installation
 
 - [Specification](./documentation)
 - [Example](./example)
 - [Python Connectors documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
+- [installation and package](./json_ntv)
