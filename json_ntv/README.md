@@ -7,9 +7,9 @@ The Python package includes
 ## JSON-NTV
 The JSON-NTV is defined :
 - in the [documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
-- in the [JSON-NTV format specification](./documentation/README.md)
-- in the [code](./json_ntv) files 
-- in the [examples](./example/README.md)
+- in the [JSON-NTV format specification](../documentation/README.md)
+- in the [code](../json_ntv) files 
+- in the [examples](../example/README.md)
 
 The 'Namespaces' used are defined in the [configuration files](./config/README.md)
 
