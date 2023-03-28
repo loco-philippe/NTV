@@ -12,7 +12,8 @@ This package contains the following classes:
 
     - `NTV.json_ntv.namespace.Namespace`
     - `NTV.json_ntv.namespace.NtvType`
-    
+            
+         
 - `NTV.json_ntv.ntv` :
 
     - `NTV.json_ntv.ntv.NtvSingle`
@@ -20,7 +21,8 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv.NtvSet`
     - `NTV.json_ntv.ntv.Ntv` (abstract class)
     - `NTV.json_ntv.ntv.NtvConnector` (abstract class)    
-
+          
+          
 - `NTV.json_ntv.ntv_connector` :
     
     - `NTV.json_ntv.ntv_connector.DataFrameConnec`
