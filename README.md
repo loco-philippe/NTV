@@ -53,7 +53,7 @@ This structuring of type makes it possible to reference any type of data that ha
 
 # NTV and JSON
 
-The flowchart below explain how to convert and exchange native entities throw NTV and JSON format.
+The flowchart below explain how to convert and exchange native entities through NTV and JSON format.
 
 ```mermaid
 flowchart LR
