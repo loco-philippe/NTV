@@ -12,7 +12,7 @@ It contains the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class.
 import json
 import pandas as pd
 
-from ntv import Ntv, NtvConnector, NtvSet, NtvList
+from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList
 
 
 class DataFrameConnec(NtvConnector):

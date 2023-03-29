@@ -9,8 +9,7 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-from json_ntv.ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError
-from json_ntv.namespace import NtvType
+from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType
 from shapely import geometry
 
 

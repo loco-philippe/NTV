@@ -88,6 +88,7 @@ This structuring of type makes it possible to reference any type of data that ha
 
 
 """
-from namespace import Namespace, NtvType, str_type
-from ntv import Ntv, NtvSingle, NtvList, NtvSet, NtvConnector
+from json_ntv.namespace import Namespace, NtvType, str_type
+from json_ntv.ntv import Ntv, NtvSingle, NtvList, NtvSet, NtvConnector, NtvError
+from json_ntv.ntv_connector import DataFrameConnec, SeriesConnec
 #print('package :', __package__)
