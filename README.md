@@ -51,6 +51,25 @@ The type incorporates a notion of `namespaces` that can be nested.
     
 This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate all the shared data structures within the same tree of types.
 
+# NTV and JSON
+
+The flowchart below explain how to convert and exchange native entities throw NTV and JSON format.
+
+```mermaid
+flowchart LR
+    text["#10240;#10240;JSON#10240;#10240;\ntext"]
+    val["#10240;JSON-NTV#10240;\nvalue"]
+    ntv["#10240;#10240;#10240;NTV#10240;#10240;#10240;\nentity"]
+    nat["#10240;native#10240;\nentity"]
+    text--->|JSON load|val
+    val--->|JSON dump|text
+    val--->|NTV from obj|ntv
+    ntv--->|from NTV|nat
+    ntv--->|NTV to obj|val
+    nat--->|to NTV|ntv
+
+```
+
 ### ***If you are interested challenge us !*** We will be very happy to show you the relevance of our approach
 
 # Documentation and installation
