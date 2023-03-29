@@ -18,7 +18,7 @@ from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList
 class DataFrameConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
 
-    clas_obj = 'dataframe'
+    clas_obj = 'DataFrame'
 
     @staticmethod
     def from_ntv(ntv_value):
@@ -44,7 +44,7 @@ class SeriesConnec(NtvConnector):
                      'float': 'float', 'float32': 'float32', }
     dtype_to_type = {'datetime64[ns]': 'datetime', 'string': 'string', 'int32': 'int32',
                      'int64': 'json'}
-    clas_obj = 'series'
+    clas_obj = 'Series'
 
     @staticmethod
     def from_ntv(ntv_value):

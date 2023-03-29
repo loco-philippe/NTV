@@ -435,12 +435,12 @@ class Ntv(ABC):
     @staticmethod
     def _cast(data):
         '''return (name, type, value) of the data'''
-        dic_geo_cl = {'point': 'point', 'multipoint': 'multipoint', 'linestring': 'line',
-                      'multilinestring': 'multiline', 'polygon': 'polygon',
-                      'multipolygon': 'multipolygon'}
+        dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'Line',
+                      'MultiLineString': 'multiline', 'Polygon': 'polygon',
+                      'MultiPolygon': 'multipolygon'}
         #dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
         dic_connec = NtvConnector.dic_connec()
-        clas = data.__class__.__name__.lower()
+        clas = data.__class__.__name__
         match clas:
             case 'date':
                 return (None, 'date', data.isoformat())
@@ -448,9 +448,9 @@ class Ntv(ABC):
                 return (None, 'time', data.isoformat())
             case 'datetime':
                 return (None, 'datetime', data.isoformat())
-            case 'point' | 'multipoint' | 'linestring' | 'multilinestring' | \
-                    'polygon' | 'multipolygon':
-                return (None, dic_geo_cl[data.__class__.__name__.lower()],
+            case 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | \
+                    'Polygon' | 'MultiPolygon':
+                return (None, dic_geo_cl[data.__class__.__name__],
                         Ntv._listed(data.__geo_interface__['coordinates']))
             case _:
                 connector = None

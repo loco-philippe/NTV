@@ -1,0 +1,18 @@
+package:
+  name: json_ntv
+  version: 0.0.3
+
+source:
+  path: ../json_ntv
+
+build:
+  noarch: python
+  
+requirements:
+  host:
+    - python
+
+  run:
+    - shapely
+    - pandas
+    - python>=3.9
