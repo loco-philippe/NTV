@@ -63,9 +63,9 @@ flowchart LR
     nat["#10240;native#10240;\nentity"]
     text--->|JSON load|val
     val--->|JSON dump|text
-    val--->|NTV from obj|ntv
+    val--->|NTV from JSON|ntv
     ntv--->|from NTV|nat
-    ntv--->|NTV to obj|val
+    ntv--->|NTV to JSON|val
     nat--->|to NTV|ntv
 
 ```
