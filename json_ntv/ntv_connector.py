@@ -4,16 +4,57 @@ Created on Feb 27 2023
 
 @author: Philippe@loco-labs.io
 
-The `ntv_connector` module is part of the `NTV.json_ntv` package ([specification document](
+The `NTV.ntv_connector` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class.
+It contains :
+    - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
+    - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class.
 """
+import csv
 import json
 import pandas as pd
 
-from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList
+from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList, NtvSingle, NtvError
 
+def from_csv(file_name, dialect='excel', **fmtparams):
+    ''' return a 'tab' NtvSingle from a csv file
+    
+    *parameters*
+    
+    - **file_name** : name of the csv file
+    - **dialect, fmtparams** : parameters of csv.DictReader object'''
+    with open(file_name, newline='') as csvfile:
+        reader = csv.DictReader(csvfile, dialect='excel', **fmtparams)
+        names = reader.fieldnames
+        list_ntv_value = [[] for nam in names]
+        for row in reader:
+            for ind_field, val in enumerate(list(row.values())):
+                list_ntv_value[ind_field].append(val)
+    list_ntv = []
+    for ind_field, field in enumerate(names):
+        list_ntv.append(NtvList(list_ntv_value[ind_field], *Ntv.from_obj_name(field)[:2]))
+    return NtvSingle(NtvList(list_ntv, None, None).to_obj(), None, 'tab')
+
+def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *args, **kwds):
+    ''' convert a 'tab' NtvSingle into csv file and return the file name
+    
+    *parameters*
+    
+    - **file_name** : name of the csv file
+    - **ntv** : 'tab' NtvSingle to convert
+    - **restval, extrasaction, dialect, args, kwds** : parameters of csv.DictWriter object'''
+    if not isinstance(ntv, NtvSingle) or ntv.ntv_type.long_name != 'tab':
+        raise NtvError("ntv is not a 'tab' NtvSingle object")
+    list_ntv = [Ntv.obj(field) for field in ntv.ntv_value]
+    fieldnames = [ntv_field.obj_name(string=True) for ntv_field in list_ntv]
+    with open(file_name, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval=restval, extrasaction=extrasaction, 
+                                dialect=dialect, *args, **kwds)
+        writer.writeheader()
+        for i in range(len(list_ntv[0])):
+            writer.writerow({name: field_ntv[i] for name, field_ntv in zip(fieldnames, list_ntv)})
+    return file_name 
 
 class DataFrameConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''

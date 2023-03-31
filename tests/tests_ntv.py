@@ -9,8 +9,12 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
+import csv
+
 from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType
 from shapely import geometry
+
+from ntv_connector import to_csv, from_csv
 
 
 class Test_Ntv_creation(unittest.TestCase):
@@ -213,7 +217,30 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
 
     def test_pandas(self):
-        pass
+        field = Ntv.obj({':field': 
+                     {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
+        tab   = Ntv.obj({':tab'  :
+                     {'index':           [1, 2, 3],
+                      'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
+                      'value':           [10, 20, 30],
+                      'value32::int32':  [10, 20, 30],
+                      'coord::point':    [[1,2], [3,4], [5,6]],
+                      'names::string':   ['john', 'eric', 'judith']}})
+        sr = field.to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})
+        df = tab.to_obj  (encode_format='obj', dicobj={'tab': 'DataFrameConnec'})
+        self.assertTrue(df.equals(Ntv.obj(df).to_obj(encode_format='obj', dicobj={'tab': 'DataFrameConnec'})))
+        self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})))
 
+    def test_csv(self):
+        tab   = Ntv.obj({':tab'  :
+                     {'index':           [1, 2, 3],
+                      'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
+                      'value':           [10, 20, 30],
+                      'value32::int32':  [10, 20, 30],
+                      'coord::point':    [[1,2], [3,4], [5,6]],
+                      'names::string':   ['john', 'eric', 'judith']}})        
+        self.assertEqual(tab, from_csv(to_csv('test.csv', tab)))
+        self.assertEqual(tab, from_csv(to_csv('test.csv', tab, quoting=csv.QUOTE_ALL)))
+        
 if __name__ == '__main__':
     unittest.main(verbosity=2)
