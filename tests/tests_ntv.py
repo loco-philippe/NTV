@@ -11,7 +11,7 @@ import unittest
 import datetime
 import csv
 
-from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType
+from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType, from_csv, to_csv
 from shapely import geometry
 
 from ntv_connector import to_csv, from_csv
@@ -41,7 +41,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     ]
         for data in list_obj:
             ntv = Ntv.obj(data[1])
-            self.assertEqual(ntv._obj_name(data[0]), data[2])
+            self.assertEqual(ntv.obj_name(data[0]), data[2])
 
     def test_agreg_type(self):
         list_type = [[[None, None, True], 'json'],
@@ -205,9 +205,9 @@ class Test_Ntv_creation(unittest.TestCase):
         for test in list_test:
             # print(test[1])
             self.assertEqual(Ntv.from_obj(
-                test[1]).ntv_value[0]._obj_name(), test[0])
+                test[1]).ntv_value[0].obj_name(), test[0])
             self.assertEqual(
-                Ntv.obj(test[1]).ntv_value[0]._obj_name(), test[0])
+                Ntv.obj(test[1]).ntv_value[0].obj_name(), test[0])
 
     def test_to_obj(self):
         nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}

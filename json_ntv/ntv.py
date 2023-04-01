@@ -332,7 +332,7 @@ class Ntv(ABC):
         - **encoded** : boolean (default False) - choice for return format
         (string/bytes if True, dict/list/tuple else)
         - **encode_format**  : string (default 'json')- choice for return format
-        (json, cbor, tuple, obj)
+        (json, cbor, obj)
         - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
         '''
@@ -438,7 +438,7 @@ class Ntv(ABC):
     @staticmethod
     def _cast(data):
         '''return (name, type, value) of the data'''
-        dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'Line',
+        dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
                       'MultiLineString': 'multiline', 'Polygon': 'polygon',
                       'MultiPolygon': 'multipolygon'}
         #dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
@@ -617,7 +617,7 @@ class NtvSingle(Ntv):
         - **string** : boolean (default False) - If True, return a string else a tuple'''
         if def_type is None:
             def_type = ''
-        elif isinstance(def_type, (NtvSingle, Namespace)):
+        elif isinstance(def_type, (NtvType, Namespace)):
             def_type = def_type.long_name
         json_name = ''
         if self.ntv_name:
