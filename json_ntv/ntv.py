@@ -196,10 +196,11 @@ class Ntv(ABC):
             ntv_list = [Ntv.from_obj({key: val}, def_type, sep)
                         for key, val in zip(keys, values)]
             return NtvSet(ntv_list, ntv_name, def_type,)
-        if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
+        """if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
             ntv_type = NtvType._agreg_type(str_typ, def_type, True)
             ntv_single = Ntv.from_obj(ntv_value, ntv_type, sep)
-            return NtvSingle(ntv_single, ntv_name, ntv_type)
+            return NtvSingle(ntv_single, ntv_name, ntv_type)"""
+
         raise NtvError('separator ":" is not compatible with value')
 
     @staticmethod
@@ -494,15 +495,14 @@ class Ntv(ABC):
                 return geometry.shape({"type": dic_geo[self.ntv_type.name],
                                       "coordinates": self.ntv_value})
             case _:
-                connector = None
+                connec = None
                 if self.ntv_type.name in dic_obj and \
                         dic_obj[self.ntv_type.name] in NtvConnector.connector():
-                    connector = NtvConnector.connector(
-                    )[dic_obj[self.ntv_type.name]]
+                    connec = NtvConnector.connector()[dic_obj[self.ntv_type.name]]
                 elif dic_obj['other'] in NtvConnector.connector():
-                    connector = NtvConnector.connector()['other']
-                if connector:
-                    return connector.from_ntv(self.ntv_value)
+                    connec = NtvConnector.connector()['other']
+                if connec:
+                    return connec.from_ntv(self.ntv_value)
                 return self.ntv_value
 
     @staticmethod
@@ -575,7 +575,7 @@ class NtvSingle(Ntv):
         - **ntv_type**: String (default None) - type of the entity
         - **value**: value of the entity
         '''
-        is_json_ntv = Ntv._is_json_ntv(value) or isinstance(value, NtvSingle)
+        is_json_ntv = Ntv._is_json_ntv(value) # or isinstance(value, NtvSingle)
         if not ntv_type and is_json_ntv:
             ntv_type = 'json'
         if not ntv_type and not is_json_ntv:
@@ -598,12 +598,12 @@ class NtvSingle(Ntv):
         '''return the Json format of the ntv_value'''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
-        if isinstance(self.ntv_value, NtvSingle):
+        """if isinstance(self.ntv_value, NtvSingle):
             def_type = ''
             if self.ntv_type:
                 def_type = self.ntv_type.long_name
             option2 = option | {'encoded': False}
-            return self.ntv_value.to_obj(def_type=def_type, **option2)
+            return self.ntv_value.to_obj(def_type=def_type, **option2)"""
         if option['encode_format'] in ('json', 'tuple'):
             return self.ntv_value
         return Ntv._uncast(self, **option)
