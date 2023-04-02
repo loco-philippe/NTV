@@ -9,8 +9,12 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType
+import csv
+
+from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType, from_csv, to_csv
 from shapely import geometry
+
+from ntv_connector import to_csv, from_csv
 
 
 class Test_Ntv_creation(unittest.TestCase):
@@ -37,7 +41,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     ]
         for data in list_obj:
             ntv = Ntv.obj(data[1])
-            self.assertEqual(ntv._obj_name(data[0]), data[2])
+            self.assertEqual(ntv.obj_name(data[0]), data[2])
 
     def test_agreg_type(self):
         list_type = [[[None, None, True], 'json'],
@@ -201,9 +205,9 @@ class Test_Ntv_creation(unittest.TestCase):
         for test in list_test:
             # print(test[1])
             self.assertEqual(Ntv.from_obj(
-                test[1]).ntv_value[0]._obj_name(), test[0])
+                test[1]).ntv_value[0].obj_name(), test[0])
             self.assertEqual(
-                Ntv.obj(test[1]).ntv_value[0]._obj_name(), test[0])
+                Ntv.obj(test[1]).ntv_value[0].obj_name(), test[0])
 
     def test_to_obj(self):
         nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
@@ -213,7 +217,30 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
 
     def test_pandas(self):
-        pass
+        field = Ntv.obj({':field': 
+                     {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
+        tab   = Ntv.obj({':tab'  :
+                     {'index':           [1, 2, 3],
+                      'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
+                      'value':           [10, 20, 30],
+                      'value32::int32':  [10, 20, 30],
+                      'coord::point':    [[1,2], [3,4], [5,6]],
+                      'names::string':   ['john', 'eric', 'judith']}})
+        sr = field.to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})
+        df = tab.to_obj  (encode_format='obj', dicobj={'tab': 'DataFrameConnec'})
+        self.assertTrue(df.equals(Ntv.obj(df).to_obj(encode_format='obj', dicobj={'tab': 'DataFrameConnec'})))
+        self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})))
 
+    def test_csv(self):
+        tab   = Ntv.obj({':tab'  :
+                     {'index':           [1, 2, 3],
+                      'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
+                      'value':           [10, 20, 30],
+                      'value32::int32':  [10, 20, 30],
+                      'coord::point':    [[1,2], [3,4], [5,6]],
+                      'names::string':   ['john', 'eric', 'judith']}})        
+        self.assertEqual(tab, from_csv(to_csv('test.csv', tab)))
+        self.assertEqual(tab, from_csv(to_csv('test.csv', tab, quoting=csv.QUOTE_ALL)))
+        
 if __name__ == '__main__':
     unittest.main(verbosity=2)

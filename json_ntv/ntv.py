@@ -332,14 +332,14 @@ class Ntv(ABC):
         - **encoded** : boolean (default False) - choice for return format
         (string/bytes if True, dict/list/tuple else)
         - **encode_format**  : string (default 'json')- choice for return format
-        (json, cbor, tuple, obj)
+        (json, cbor, obj)
         - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
         '''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         value = self._obj_value(**option)
-        obj_name = self._obj_name(def_type)
+        obj_name = self.obj_name(def_type)
         if option['simpleval']:
             name = ''
         elif option['encode_format'] in ('cbor', 'obj') and not Ntv._is_json_ntv(value):
@@ -391,12 +391,13 @@ class Ntv(ABC):
     def _obj_value(self):
         return ''
 
-    def _obj_name(self, def_type=None):
+    def obj_name(self, def_type=None, string=False):
         '''return the JSON name of the NTV entity (json-ntv format)
 
         *Parameters*
 
-        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity'''
+        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity
+        - **string** : boolean (default False) - If True, return a string else a tuple'''
         if def_type is None:
             def_type = ''
         elif isinstance(def_type, (NtvSingle, Namespace)):
@@ -414,6 +415,8 @@ class Ntv(ABC):
         json_sep = ''
         if json_type or (len(self.ntv_value) == 1 and self.__class__.__name__ == 'NtvSet'):
             json_sep = '::'
+        if string:
+            return json_name + json_sep + json_type
         return (json_name, json_sep, json_type)
 
     @staticmethod
@@ -428,14 +431,14 @@ class Ntv(ABC):
         if isinstance(json_value, dict) and len(json_value) == 1:
             json_name = list(json_value.keys())[0]
             val = json_value[json_name]
-            nam, typ, sep = Ntv._from_obj_name(json_name)
+            nam, typ, sep = Ntv.from_obj_name(json_name)
             return (nam, typ, val, sep)
         return(*Ntv._cast(json_value), ':')
 
     @staticmethod
     def _cast(data):
         '''return (name, type, value) of the data'''
-        dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'Line',
+        dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
                       'MultiLineString': 'multiline', 'Polygon': 'polygon',
                       'MultiPolygon': 'multipolygon'}
         #dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
@@ -503,8 +506,8 @@ class Ntv(ABC):
                 return self.ntv_value
 
     @staticmethod
-    def _from_obj_name(string):
-        '''return a tuple with name, type ans separator from string'''
+    def from_obj_name(string):
+        '''return a tuple with name, type and separator from string'''
         if not isinstance(string, str):
             raise NtvError('a json-name have to be str')
         if string == '':
@@ -605,15 +608,16 @@ class NtvSingle(Ntv):
             return self.ntv_value
         return Ntv._uncast(self, **option)
 
-    def _obj_name(self, def_type=None):
+    def obj_name(self, def_type=None, string=False):
         '''return the JSON name of the NTV entity (json-ntv format)
 
         *Parameters*
 
-        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity'''
+        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity
+        - **string** : boolean (default False) - If True, return a string else a tuple'''
         if def_type is None:
             def_type = ''
-        elif isinstance(def_type, (NtvSingle, Namespace)):
+        elif isinstance(def_type, (NtvType, Namespace)):
             def_type = def_type.long_name
         json_name = ''
         if self.ntv_name:
@@ -627,6 +631,8 @@ class NtvSingle(Ntv):
             if not isinstance(self.ntv_value, list) and \
                not (isinstance(self.ntv_value, dict) and len(self.ntv_value) != 1):
                 json_sep = ''
+        if string:
+            return json_name + json_sep + json_type
         return (json_name, json_sep, json_type)
 
 
