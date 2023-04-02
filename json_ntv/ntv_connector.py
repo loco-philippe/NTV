@@ -32,13 +32,13 @@ def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
         list_ntv_value = [[] for nam in names]
         for row in reader:
             for ind_field, val in enumerate(list(row.values())):
-                list_ntv_value[ind_field].append(val)
+                list_ntv_value[ind_field].append(json.loads(val))
     list_ntv = []
     for ind_field, field in enumerate(names):
         list_ntv.append(NtvList(list_ntv_value[ind_field], *Ntv.from_obj_name(field)[:2]))
     if single_tab:
         return NtvSingle(NtvSet(list_ntv, None, None).to_obj(), None, 'tab')
-    return NtvSet(list_ntv, None, None).to_obj()
+    return NtvSet(list_ntv, None, None)
 
 
 def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *args, **kwds):
@@ -60,7 +60,8 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
                                 dialect=dialect, *args, **kwds)
         writer.writeheader()
         for i in range(len(list_ntv[0])):
-            writer.writerow({name: field_ntv[i].to_obj(field_ntv.ntv_type) for name, field_ntv in zip(fieldnames, list_ntv)})
+            writer.writerow({name: field_ntv[i].to_obj(field_ntv.ntv_type, encoded=True)
+                             for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
     
 class DataFrameConnec(NtvConnector):
