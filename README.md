@@ -71,10 +71,10 @@ flowchart LR
 ```
 # Documentation and installation
 
-- [Specification](https://github.com/loco-philippe/NTV/documentation/README.md)
-- [Example](https://github.com/loco-philippe/NTV/example/README.md)
+- [Specification](https://github.com/loco-philippe/NTV/tree/main/documentation/README.md)
+- [Example](https://github.com/loco-philippe/NTV/tree/main/example/README.md)
 - [Python Connectors documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
-- [installation and package](https://github.com/loco-philippe/NTV/json_ntv/README.md)
+- [installation and package](https://github.com/loco-philippe/NTV/tree/main/json_ntv/README.md)
 
 
 ### ***If you are interested challenge us !*** We will be very happy to show you the relevance of our approach
