@@ -72,6 +72,7 @@ import cbor2
 from shapely import geometry
 from json_ntv.namespace import NtvType, Namespace, str_type
 
+
 class Ntv(ABC):
     ''' The Ntv class is an abstract class used for all NTV entities.
 
@@ -160,7 +161,7 @@ class Ntv(ABC):
 
         *Parameters*
 
-        - **value**: value to convert in an Ntv entity
+        - **value**: Ntv value to convert in an Ntv entity
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         value = Ntv._from_value(value)
@@ -196,11 +197,6 @@ class Ntv(ABC):
             ntv_list = [Ntv.from_obj({key: val}, def_type, sep)
                         for key, val in zip(keys, values)]
             return NtvSet(ntv_list, ntv_name, def_type,)
-        """if isinstance(ntv_value, dict) and len(ntv_value) == 1 and sep in (None, ':'):
-            ntv_type = NtvType._agreg_type(str_typ, def_type, True)
-            ntv_single = Ntv.from_obj(ntv_value, ntv_type, sep)
-            return NtvSingle(ntv_single, ntv_name, ntv_type)"""
-
         raise NtvError('separator ":" is not compatible with value')
 
     @staticmethod
@@ -442,31 +438,30 @@ class Ntv(ABC):
         dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
                       'MultiLineString': 'multiline', 'Polygon': 'polygon',
                       'MultiPolygon': 'multipolygon'}
-        #dic_connec = {'series': 'SeriesConnec', 'dataframe': 'DataFrameConnec'}
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
         match clas:
-            case 'date':
-                return (None, 'date', data.isoformat())
-            case 'time':
-                return (None, 'time', data.isoformat())
-            case 'datetime':
-                return (None, 'datetime', data.isoformat())
+            case 'date'| 'time'| 'datetime':
+                return (None, clas, data.isoformat())
             case 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | \
                     'Polygon' | 'MultiPolygon':
                 return (None, dic_geo_cl[data.__class__.__name__],
                         Ntv._listed(data.__geo_interface__['coordinates']))
+            case 'NtvSingle'| 'NtvSet'| 'NtvList':
+                return (None, 'ntv', data.to_obj())
             case _:
-                connector = None
+                connec = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
-                    connector = NtvConnector.connector()[dic_connec[clas]]
-                if connector:
-                    return connector.to_ntv(data)
+                    connec = NtvConnector.connector()[dic_connec[clas]]
+                if connec:
+                    return connec.to_ntv(data)
                 raise NtvError('connector is not defined to NTV entity')
         return (None, None, None)
 
     def _uncast(self, **option):
         '''return object from ntv_value'''
+        dic_fct = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
+                   'datetime': datetime.datetime.fromisoformat}
         dic_geo = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
                    'multiline': 'multilinestring', 'polygon': 'polygon',
                    'multipolygon': 'multipolygon'}
@@ -474,36 +469,29 @@ class Ntv(ABC):
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
         dic_obj = {'tab': 'Ilist', 'other': None}
+        type_n = self.ntv_type.name
         if 'dicobj' in option:
             dic_obj |= option['dicobj']
-        obj = True
-        if option['encode_format'] == 'cbor':
-            obj = False
-            if self.ntv_type and self.ntv_type.name in dic_cbor:
-                obj = dic_cbor[self.ntv_type.name]
+        obj = not option['encode_format'] == 'cbor' or \
+            (self.ntv_type and type_n in dic_cbor and dic_cbor[type_n])
         if self.ntv_type is None or not obj:
             return self.ntv_value
-        match self.ntv_type.name:
-            case 'date':
-                return datetime.date.fromisoformat(self.ntv_value)
-            case 'time':
-                return datetime.time.fromisoformat(self.ntv_value)
-            case 'datetime':
-                return datetime.datetime.fromisoformat(self.ntv_value)
-            case 'point' | 'multipoint' | 'line' | \
-                 'multiline' | 'polygon' | 'multipolygon':
-                return geometry.shape({"type": dic_geo[self.ntv_type.name],
-                                      "coordinates": self.ntv_value})
-            case _:
-                connec = None
-                if self.ntv_type.name in dic_obj and \
-                        dic_obj[self.ntv_type.name] in NtvConnector.connector():
-                    connec = NtvConnector.connector()[dic_obj[self.ntv_type.name]]
-                elif dic_obj['other'] in NtvConnector.connector():
-                    connec = NtvConnector.connector()['other']
-                if connec:
-                    return connec.from_ntv(self.ntv_value)
-                return self.ntv_value
+        if type_n in dic_fct:
+            return dic_fct[type_n](self.ntv_value)
+        if type_n == 'ntv':
+            return Ntv.obj(self.ntv_value)
+        if type_n in dic_geo:
+            return geometry.shape({"type": dic_geo[type_n],
+                                   "coordinates": self.ntv_value})
+        connec = None
+        if type_n in dic_obj and \
+                dic_obj[type_n] in NtvConnector.connector():
+            connec = NtvConnector.connector()[dic_obj[type_n]]
+        elif dic_obj['other'] in NtvConnector.connector():
+            connec = NtvConnector.connector()['other']
+        if connec:
+            return connec.from_ntv(self.ntv_value)
+        return self.ntv_value
 
     @staticmethod
     def from_obj_name(string):
@@ -537,6 +525,7 @@ class Ntv(ABC):
     def _listed(idx):
         '''transform a tuple of tuple in a list of list'''
         return [val if not isinstance(val, tuple) else Ntv._listed(val) for val in idx]
+
 
 class NtvSingle(Ntv):
     ''' An NTV-single entity is a Ntv entity not composed with other entities.
@@ -575,7 +564,8 @@ class NtvSingle(Ntv):
         - **ntv_type**: String (default None) - type of the entity
         - **value**: value of the entity
         '''
-        is_json_ntv = Ntv._is_json_ntv(value) # or isinstance(value, NtvSingle)
+        is_json_ntv = Ntv._is_json_ntv(
+            value)  # or isinstance(value, NtvSingle)
         if not ntv_type and is_json_ntv:
             ntv_type = 'json'
         if not ntv_type and not is_json_ntv:
@@ -598,12 +588,6 @@ class NtvSingle(Ntv):
         '''return the Json format of the ntv_value'''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
-        """if isinstance(self.ntv_value, NtvSingle):
-            def_type = ''
-            if self.ntv_type:
-                def_type = self.ntv_type.long_name
-            option2 = option | {'encoded': False}
-            return self.ntv_value.to_obj(def_type=def_type, **option2)"""
         if option['encode_format'] in ('json', 'tuple'):
             return self.ntv_value
         return Ntv._uncast(self, **option)
