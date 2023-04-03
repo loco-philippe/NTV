@@ -14,12 +14,12 @@ It contains the `Namespace` and the `NtvType` classes and the `str_type` method 
 
 # 0 - Presentation
 
-The NTVtype is defined by a name and a Namespace. The name is unique in the Namespace  
+The NTVtype is defined by a name and a Namespace. The name is unique in the Namespace
 
 A Namespace is represented by a string followed by a point.
-Namespaces may be nested (the global Namespace is represented by an empty string). 
+Namespaces may be nested (the global Namespace is represented by an empty string).
 
-The Namespace representations are added to the value of an NTVtype to have an absolute 
+The Namespace representations are added to the value of an NTVtype to have an absolute
 representation of an NTVtype (long_name).
 
 *Example for an absolute representation of an NTVtype defined in two nested Namespace :*
@@ -190,8 +190,77 @@ import configparser
 import json
 import requests
 
+
+def agreg_type(str_typ, def_type, single):
+    '''aggregate str_typ and def_type to return an NtvType or a Namespace if not single
+
+    *Parameters*
+
+        - **str_typ** : NtvType or String (long_name) - NtvType to aggregate
+        - **def_typ** : NtvType or String (long_name) - default NtvType or Namespace
+        - **single** : Boolean - Ntv entity concerned (True if NtvSingle)'''
+    if isinstance(str_typ, NtvType):
+        str_typ = str_typ.long_name
+    def_type = str_type(def_type, single)
+    if not str_typ and (isinstance(def_type, NtvType) or
+                        (not isinstance(def_type, NtvType) and not single)):
+        return def_type
+    if not str_typ:
+        return NtvType('json')
+    clas = NtvType
+    if str_typ[-1] == '.':
+        clas = Namespace
+    if not def_type:
+        return clas.add(str_typ)
+    if clas == NtvType or clas == Namespace and not single:
+        try:
+            return clas.add(str_typ)
+        except NtvTypeError:
+            return clas.add(_join_type(def_type.long_name, str_typ))
+    raise NtvTypeError(str_typ + 'and' +
+                       def_type.long_name + 'are incompatible')
+
+
+def _join_type(namesp, str_typ):
+    '''join Namespace string and NtvType or Namespace string'''
+    namesp_split = namesp.split('.')[:-1]
+    for name in str_typ.split('.'):
+        if not name in namesp_split:
+            namesp_split.append(name)
+    return '.'.join(namesp_split)
+
+
+def relative_type(str_def, str_typ):
+    '''return relative str_typ string from NtvType or Namespace str_def
+
+    *Parameters*
+
+        - **str_def** : String - long_name of the Namespace or NtvType
+        - **str_type** : String - long_name of Ntvtype to be relative '''
+    if not str_def and not str_typ:
+        return ''
+    if str_def == str_typ:
+        return ''
+    if not str_def or not str_def in str_typ:
+        return str_typ
+    if not str_typ and str_def[-1] != ".":
+        return str_def
+    str_def_split = str_def.split('.')[:-1]
+    str_typ_split = str_typ.split('.')
+    ind = 0
+    for ind, name in enumerate(str_typ_split):
+        if not name in str_def_split:
+            break
+    return '.'.join(str_typ_split[ind:])
+
+
 def str_type(long_name, single):
-    ''' create a NtvType or a Namespace from a string'''
+    ''' create a NtvType or a Namespace from a string
+
+    *Parameters*
+
+        - **long_name** : String - name of the Namespace or NtvType
+        - **single** : Boolean - If True, default type is 'json', else None'''
     if not long_name and single:
         return NtvType('json')
     if not long_name and not single:
@@ -203,6 +272,7 @@ def str_type(long_name, single):
     if long_name[-1] == '.':
         return Namespace.add(long_name)
     return NtvType.add(long_name)
+
 
 class NtvType():
     ''' type of NTV entities.
@@ -298,58 +368,7 @@ class NtvType():
         '''return the number of level between self and nspace, -1 if None'''
         return self.nspace.is_child(Namespace.add(long_name))
 
-    @staticmethod
-    def _agreg_type(str_typ, def_type, single):
-        '''aggregate typ and def_type to return an NtvType or a Namespace if not single'''
-        if isinstance(str_typ, NtvType):
-            str_typ = str_typ.long_name
-        def_type = str_type(def_type, single)
-        if not str_typ and (isinstance(def_type, NtvType) or
-                            (not isinstance(def_type, NtvType) and not single)):
-            return def_type
-        if not str_typ:
-            return NtvType('json')
-        clas = NtvType
-        if str_typ[-1] == '.':
-            clas = Namespace
-        if not def_type:
-            return clas.add(str_typ)
-        if clas == NtvType or clas == Namespace and not single:
-            try:
-                return clas.add(str_typ)
-            except NtvTypeError:
-                return clas.add(NtvType._join_type(def_type.long_name, str_typ))
-        raise NtvTypeError(str_typ + 'and' +
-                       def_type.long_name + 'are incompatible')
 
-    @staticmethod
-    def _join_type(namesp, str_typ):
-        '''join Namespace string and NtvType or Namespace string'''
-        namesp_split = namesp.split('.')[:-1]
-        for name in str_typ.split('.'):
-            if not name in namesp_split:
-                namesp_split.append(name)
-        return '.'.join(namesp_split)
-
-    @staticmethod
-    def _relative_type(namesp, str_typ):
-        '''return relative str_typ string from NtvType or Namespace namesp'''
-        if not namesp and not str_typ:
-            return ''
-        if namesp == str_typ:
-            return ''
-        if not namesp or not namesp in str_typ:
-            return str_typ
-        if not str_typ and namesp[-1] != ".":
-            return namesp
-        namesp_split = namesp.split('.')[:-1]
-        str_typ_split = str_typ.split('.')
-        ind = 0
-        for ind, name in enumerate(str_typ_split):
-            if not name in namesp_split:
-                break
-        return '.'.join(str_typ_split[ind:])
-    
 class Namespace():
     ''' Namespace of NTV entities.
 

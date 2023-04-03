@@ -11,7 +11,7 @@ import unittest
 import datetime
 import csv
 
-from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType, from_csv, to_csv
+from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType, from_csv, to_csv, agreg_type
 from shapely import geometry
 
 from ntv_connector import to_csv, from_csv
@@ -63,10 +63,10 @@ class Test_Ntv_creation(unittest.TestCase):
         for typ in list_type:
             # print(typ[0])
             if typ[0] == [None, None, False]:
-                self.assertEqual(NtvType._agreg_type(
+                self.assertEqual(agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]), typ[1])
             else:
-                self.assertEqual(NtvType._agreg_type(
+                self.assertEqual(agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
 
     def test_from_obj_repr(self):

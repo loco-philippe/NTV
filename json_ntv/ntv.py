@@ -70,7 +70,7 @@ from json import JSONDecodeError
 
 import cbor2
 from shapely import geometry
-from json_ntv.namespace import NtvType, Namespace, str_type
+from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 
 
 class Ntv(ABC):
@@ -171,7 +171,7 @@ class Ntv(ABC):
         if not sep:
             sep = def_sep
         if isinstance(ntv_value, list) and sep in (None, '::'):
-            def_type = NtvType._agreg_type(str_typ, def_type, False)
+            def_type = agreg_type(str_typ, def_type, False)
             if sep and not def_type:
                 sep = None
             if sep:
@@ -179,17 +179,17 @@ class Ntv(ABC):
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
             return NtvList(ntv_list, ntv_name, def_type)
         if sep == ':':
-            ntv_type = NtvType._agreg_type(str_typ, def_type, False)
+            ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type,)
         if sep is None and not isinstance(ntv_value, dict):
             is_json = isinstance(value, (int, str, float, bool))
-            ntv_type = NtvType._agreg_type(str_typ, def_type, is_json)
+            ntv_type = agreg_type(str_typ, def_type, is_json)
             return NtvSingle(ntv_value, ntv_name, ntv_type)
         if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
                                             sep is None):
             keys = list(ntv_value.keys())
             values = list(ntv_value.values())
-            def_type = NtvType._agreg_type(str_typ, def_type, False)
+            def_type = agreg_type(str_typ, def_type, False)
             if sep and not def_type:
                 sep = None
             if sep:
@@ -408,7 +408,7 @@ class Ntv(ABC):
         if not ntv_type:
             json_type = def_type
         else:
-            json_type = NtvType._relative_type(def_type, ntv_type)
+            json_type = relative_type(def_type, ntv_type)
         json_sep = ''
         if json_type or (len(self.ntv_value) == 1 and self.__class__.__name__ == 'NtvSet'):
             json_sep = '::'
@@ -441,13 +441,13 @@ class Ntv(ABC):
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
         match clas:
-            case 'date'| 'time'| 'datetime':
+            case 'date' | 'time' | 'datetime':
                 return (None, clas, data.isoformat())
             case 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | \
                     'Polygon' | 'MultiPolygon':
                 return (None, dic_geo_cl[data.__class__.__name__],
                         Ntv._listed(data.__geo_interface__['coordinates']))
-            case 'NtvSingle'| 'NtvSet'| 'NtvList':
+            case 'NtvSingle' | 'NtvSet' | 'NtvList':
                 return (None, 'ntv', data.to_obj())
             case _:
                 connec = None
@@ -606,7 +606,7 @@ class NtvSingle(Ntv):
         json_name = ''
         if self.ntv_name:
             json_name = self.ntv_name
-        json_type = NtvType._relative_type(def_type, self.ntv_type.long_name)
+        json_type = relative_type(def_type, self.ntv_type.long_name)
         json_sep = ''
         if json_type:
             json_sep = ':'
