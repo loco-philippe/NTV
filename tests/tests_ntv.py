@@ -15,6 +15,7 @@ from json_ntv import NtvSingle, NtvList, NtvSet, Ntv, NtvError, NtvType, from_cs
 from shapely import geometry
 
 from ntv_connector import to_csv, from_csv
+from observation import Ilist
 
 
 class Test_Ntv_creation(unittest.TestCase):
@@ -237,6 +238,23 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertTrue(df.equals(Ntv.obj(df).to_obj(encode_format='obj', dicobj={'tab': 'DataFrameConnec'})))
         self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})))
 
+    def test_observation(self):
+        field = Ntv.obj({':field': 
+                     {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
+        tab = { 'index':           [1, 2, 3],
+                'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
+                'value':           [10, 20, 30],
+                'value32::int32':  [10, 20, 30],
+                'coord::point':    [[1,2], [3,4], [5,6]],
+                'names::string':   ['john', 'eric', 'judith']}
+        il   = Ilist.dic(tab)
+        ntv = Ntv.obj( il)
+        self.assertEqual(il, ntv.to_obj(encode_format='obj'))
+        tab_ntv = Ntv.obj({':tab'  : tab})
+        il = tab_ntv.to_obj  (encode_format='obj')
+        self.assertEqual(il, Ntv.obj(il).to_obj(encode_format='obj'))
+
+                          
     def test_csv(self):
         tab   = Ntv.obj({':tab'  :
                      {'index':           [1, 2, 3],

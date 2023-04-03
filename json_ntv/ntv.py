@@ -71,6 +71,7 @@ from json import JSONDecodeError
 import cbor2
 from shapely import geometry
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
+from observation import Ilist
 
 
 class Ntv(ABC):
@@ -449,6 +450,8 @@ class Ntv(ABC):
                         Ntv._listed(data.__geo_interface__['coordinates']))
             case 'NtvSingle' | 'NtvSet' | 'NtvList':
                 return (None, 'ntv', data.to_obj())
+            case 'Ilist':
+                return (None, 'tab', data.to_obj())
             case _:
                 connec = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
@@ -483,6 +486,10 @@ class Ntv(ABC):
         if type_n in dic_geo:
             return geometry.shape({"type": dic_geo[type_n],
                                    "coordinates": self.ntv_value})
+        if type_n == 'tab' and dic_obj[type_n] == 'Ilist':
+            if isinstance(self.ntv_value, list):
+                return Ilist.obj(self.ntv_value)
+            return Ilist.dic(self.ntv_value)
         connec = None
         if type_n in dic_obj and \
                 dic_obj[type_n] in NtvConnector.connector():
