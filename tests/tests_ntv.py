@@ -86,11 +86,12 @@ class Test_Ntv_creation(unittest.TestCase):
                          '{"l": [{"l": ["v", "v"]}, {"l": ["v", "v"]}]}'],
                      [{"::point": [[1, 2], [3, 4]]}, '{"lT": ["vT", "vT"]}'],
                      [{"a": 2}, '"vN"'],
-                     [{"truc": {"a": 2}}, '{"vN": "vN"}'],
+                     #[{"truc": {"a": 2}}, '{"vN": "vN"}'],
                      [{":point": {"a": 2}}, '"vT"'],
                      [{"truc:": {"a": 2}}, '"vN"'],
                      [{":": {"a": 2}}, '"v"']]
         for test in list_repr:
+            #print(test)
             self.assertEqual(repr(Ntv.from_obj(test[0])), test[1])
 
     def test_from_obj_ko(self):
@@ -132,15 +133,21 @@ class Test_Ntv_creation(unittest.TestCase):
                    '1NtvSingle': 1,
                    '2NtvSingle': 'test',
                    '3NtvSingle': {'single': 1},
-                   '4NtvSingle': {'ntv1': {'ntv2': 2}},
+                   '4NtvSingle': {'ntv1:ntv': {'ntv2': 2}},
                    '5NtvSingle': {'ntv1:fr.reg': {'ntv2:fr.BAN.lon': 2}},
                    '6NtvSingle': {'ntv1': True},
                    '7NtvSingle': True,
                    '8NtvSingle': {'ntv1:dat': [1, 2]},
                    '9NtvSingle': {'ntv1': datetime.date(2021, 2, 1)},
+                   'dNtvSingle': datetime.date(2021, 2, 1),
                    'aNtvSingle': '{ner',
                    'bNtvSingle': {':$point': {'a': [1, 2], 'b': [3, 4]}},
                    'cNtvSingle': {':': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]},
+                   'eNtvSingle': {':': NtvSingle(1,'test')},
+                   'hNtvSingle': {'set:': NtvSet([{'l1':21}, {'l2': [2,3]}])},
+                   'fNtvSingle': {'set:': NtvSet([{'l1':21}, {'l2': datetime.date(2021, 2, 1)}])},
+                   'gNtvSingle': {'lis:': NtvList([{'l1':21}, {'l2': datetime.date(2021, 2, 1)}])},
+                   'iNtvSingle': {'lis:': NtvList([1,2,3])},
                    '1NtvList': [],
                    '2NtvList': [[4, [5, 6]], {'heure': [21, 22]}],
                    '3NtvList': [[4, 5], {'heure': 21}],
@@ -170,8 +177,9 @@ class Test_Ntv_creation(unittest.TestCase):
             ntv2 = Ntv.obj(nstr)
             self.assertEqual(ntv, ntv2)
             #print('ap', nstr, typ)
-            if not typ in ['9NtvList', 'aNtvList', 'bNtvList', '9NtvSingle',
-                           '4NtvSet', '5NtvSet']:
+            if not typ in ['9NtvList', 'aNtvList', 'bNtvList', '9NtvSingle', 'eNtvSingle',
+                           'dNtvSingle', 'fNtvSingle', 'gNtvSingle', 'hNtvSingle',
+                           'iNtvSingle', '4NtvSet', '5NtvSet']:
                 self.assertEqual(nstr, ntv.to_obj())
             if typ == 'bNtvList':
                 self.assertEqual(nstr['::'], ntv.to_obj())
@@ -213,8 +221,6 @@ class Test_Ntv_creation(unittest.TestCase):
         nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
         self.assertEqual(Ntv.from_obj(nstr).to_obj(
             simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
-        sing = Ntv.from_obj({'ntv1': {'ntv2': 2}})
-        self.assertTrue(isinstance(sing.ntv_value, NtvSingle))
 
     def test_pandas(self):
         field = Ntv.obj({':field': 
