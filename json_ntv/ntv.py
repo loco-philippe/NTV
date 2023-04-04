@@ -102,7 +102,6 @@ class Ntv(ABC):
     - `to_repr`
     '''
 
-    # def __init__(self, ntv_value, ntv_name=None, ntv_type=None):
     def __init__(self, ntv_value, ntv_name, ntv_type):
         '''Ntv constructor.
 

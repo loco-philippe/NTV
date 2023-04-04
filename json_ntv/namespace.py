@@ -281,6 +281,7 @@ class NtvType():
 
     - **name** : String - name of the type
     - **nspace** : Namespace - namespace associated
+    - **custom** : boolean - True if not referenced
 
     The methods defined in this class are :
 
@@ -330,10 +331,11 @@ class NtvType():
             name = 'json'
         if not nspace:
             nspace = Namespace._namespaces_['']
-        if name[0] != '$' and not name in nspace.content['type']:
+        if name[0] != '$' and not nspace.custom and not name in nspace.content['type']:
             raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
         self.nspace = nspace
+        self.custom = nspace.custom or name[0] == '$'
         self._types_[self.long_name] = self
 
     def __eq__(self, other):
@@ -357,6 +359,8 @@ class NtvType():
     @property
     def gen_type(self):
         '''return the generic type of the NtvType'''
+        if self.custom:
+            return ''
         return self.nspace.content['type'][self.name]
 
     @property
@@ -377,6 +381,7 @@ class Namespace():
     - **name** : String - name of the namespace
     - **file** : string - location of the file init
     - **parent** : Namespace - parent namespace
+    - **custom** : boolean - True if not referenced
 
     The methods defined in this class are :
 
@@ -427,10 +432,15 @@ class Namespace():
         - **parent** : Namespace - parent namespace'''
         if name and parent is None:
             parent = Namespace._namespaces_['']
-        if name and name[0] != '$' and not name in parent.content['namespace']:
+        if name and name[0] != '$' and not parent.custom and \
+          not name in parent.content['namespace']:
             raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
         self.parent = parent
+        if parent:
+            self.custom = parent.custom or name[0] == '$'
+        else:
+            self.custom = False
         self._namespaces_[self.long_name] = self
 
     def __eq__(self, other):
@@ -454,7 +464,7 @@ class Namespace():
     @property
     def file(self):
         '''return the file name of the Namespace configuration'''
-        if self.name and self.name[0] == '$':
+        if self.custom:
             return None
         if self.parent:
             config = configparser.ConfigParser()
@@ -466,7 +476,7 @@ class Namespace():
     @property
     def content(self):
         '''return the content of the Namespace configuration'''
-        if self.name and self.name[0] == '$':
+        if self.custom:
             return {'type': {}, 'namespace': {}}
         config = configparser.ConfigParser()
         config.read_string(requests.get(
