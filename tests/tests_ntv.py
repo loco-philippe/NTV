@@ -36,12 +36,15 @@ class Test_Ntv_creation(unittest.TestCase):
                     ['point', {"::point": [1, 2]}, ('', '', '')],
                     ['', {"::point": [1, 2]}, ('', '::', 'point')],
                     ['fr.', {"::fr.reg": [1, 2]}, ('', '::', 'reg')],
-                    ['', {"::json": [1, 2]}, ('', '::', 'json')],
+                    #['', {"::json": [1, 2]}, ('', '::', 'json')],
+                    ['', {"::json": [1, 2]}, ('', '', '')],
                     ['json', {"::json": [1, 2]}, ('', '', '')],
-                    ['json', {"::": [1, 2]}, ('', '::', 'json')],
+                    #['json', {"::": [1, 2]}, ('', '::', 'json')],
+                    ['json', {"::": [1, 2]}, ('', '', '')],
                     ]
         for data in list_obj:
             ntv = Ntv.obj(data[1])
+            #print(ntv)
             self.assertEqual(ntv.obj_name(data[0]), data[2])
 
     def test_agreg_type(self):
@@ -167,7 +170,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '3NtvSet': {'ntv3': {'ntv1': 1, 'ntv2': '2'}},
                    '4NtvSet': {'ntv3::fr.reg': {'ntv1': 1, 'ntv2:fr.reg': '2'}},
                    '5NtvSet': {'ntv3::fr.reg': {'ntv1': [1, 2], 'ntv2:fr.reg': '2'}},
-                   '6NtvSet': {"::": {"a": 2}},
+                   '6NtvSet': {"::": {" a": 2}},
                    '7NtvSet': {"test::": {"a": 2}}
                    }
         liststr = list(dictstr.values())
