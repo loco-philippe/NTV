@@ -441,6 +441,8 @@ class Namespace():
             self.custom = parent.custom or name[0] == '$'
         else:
             self.custom = False
+        self.file = Namespace._file(self.parent , self.name, self.custom)
+        self.content = Namespace._content(self.file, self.name, self.custom)
         self._namespaces_[self.long_name] = self
 
     def __eq__(self, other):
@@ -461,29 +463,29 @@ class Namespace():
         '''return classname and long name'''
         return self.__class__.__name__ + '(' + self.long_name + ')'
 
-    @property
-    def file(self):
+    @staticmethod
+    def _file(parent, name, custom):
         '''return the file name of the Namespace configuration'''
-        if self.custom:
+        if custom:
             return None
-        if self.parent:
+        if parent:
             config = configparser.ConfigParser()
             config.read_string(requests.get(
-                self.parent.file, allow_redirects=True).content.decode())
-            return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[self.name]
+                parent.file, allow_redirects=True).content.decode())
+            return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[name]
         return Namespace._pathconfig_ + Namespace._global_
 
-    @property
-    def content(self):
+    @staticmethod
+    def _content(file, name, custom):
         '''return the content of the Namespace configuration'''
-        if self.custom:
+        if custom:
             return {'type': {}, 'namespace': {}}
         config = configparser.ConfigParser()
         config.read_string(requests.get(
-            self.file, allow_redirects=True).content.decode())
+            file, allow_redirects=True).content.decode())
         config_name = config['data']['name']
-        if config_name != self.name:
-            raise NtvTypeError(self.file + ' is not correct')
+        if config_name != name:
+            raise NtvTypeError(file + ' is not correct')
         return {'type': json.loads(config['data']['type']),
                 'namespace': json.loads(config['data']['namespace'])}
 
@@ -521,8 +523,6 @@ class NtvTypeError(Exception):
 
 
 nroot = Namespace()
-for root_nsp in nroot.content['namespace'].keys():
-    nsp = Namespace.add(root_nsp)
 for root_typ in nroot.content['type'].keys():
     typ = NtvType.add(root_typ)
 typ_json = NtvType('json')

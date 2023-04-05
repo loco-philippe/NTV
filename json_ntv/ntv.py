@@ -155,7 +155,7 @@ class Ntv(ABC):
         if cat == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
-
+    
     @staticmethod
     def from_obj(value, def_type=None, def_sep=None):
         ''' return an Ntv entity from an object value.
