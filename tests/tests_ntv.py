@@ -221,14 +221,14 @@ class Test_Ntv_creation(unittest.TestCase):
             self.assertEqual(
                 Ntv.obj(test[1]).ntv_value[0].obj_name(), test[0])
 
-    def test_defaukt_list(self):
+    def test_default_list(self):
         unic = NtvSingle({'un':1, 'deux':2}, 'param')
         lis1 = NtvList([1,2,3,4], 'lis1', 'int')
         lis2 = NtvList([10,2.5,30,40], 'lis2')
         il_lis1 = NtvList([lis1, lis2, unic], 'ilis1')
         il_lis2 = NtvList([lis2, lis1, unic], 'ilis2')
-        self.assertEqual(il_lis2[0].ntv_type, il_lis1[0].ntv_type)
-        self.assertEqual(il_lis2[1].ntv_type, il_lis1[1].ntv_type)
+        self.assertEqual(il_lis2[0].ntv_type, il_lis1[1].ntv_type)
+        self.assertEqual(il_lis2[1].ntv_type, il_lis1[0].ntv_type)
         self.assertNotEqual(il_lis2.ntv_type, il_lis1.ntv_type)
         
     def test_to_obj(self):
