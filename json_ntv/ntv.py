@@ -70,7 +70,7 @@ from json import JSONDecodeError
 
 import cbor2
 from shapely import geometry
-from observation import Ilist
+#from observation import Ilist
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 
@@ -87,6 +87,7 @@ class Ntv(ABC):
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
+    - `max_len`
 
     The methods defined in this class are :
 
@@ -96,11 +97,14 @@ class Ntv(ABC):
     - `from_att` *(staticmethod)*
 
     *instance methods*
+    - `from_obj_name` *(staticmethod)*
+    - `obj_name`
     - `set_name`
     - `set_type`
     - `set_value`
     - `to_obj`
     - `to_repr`
+    - `to_tuple`
     '''
 
     def __init__(self, ntv_value, ntv_name, ntv_type):
@@ -204,23 +208,6 @@ class Ntv(ABC):
             return NtvSet(ntv_list, ntv_name, def_type,)
         raise NtvError('separator ":" is not compatible with value')
 
-    @staticmethod
-    def _from_value(value):
-        '''return a decoded value'''
-        if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
-            try:
-                value = json.loads(value)
-            except JSONDecodeError:
-                pass
-        string = isinstance(value, str)
-        if value is None or (string and value == 'null'):
-            return NtvSingle(None)
-        if string and value == 'true':
-            return NtvSingle(True)
-        if string and value == 'false':
-            return NtvSingle(False)
-        return value
-
     def __len__(self):
         ''' len of ntv_value'''
         if isinstance(self.ntv_value, (list, set)):
@@ -256,13 +243,6 @@ class Ntv(ABC):
         self.ntv_value.pop(ind)
 
     @property
-    def type_str(self):
-        '''return a string with the value of the NtvType of the entity'''
-        if not self.ntv_type:
-            return None
-        return self.ntv_type.long_name
-
-    @property
     def code_ntv(self):
         '''return a string with the NTV code composed with :
         - 'l' (for NtvList), 's' (for NtvSet) or 'v' (for NtvSingle)
@@ -275,6 +255,68 @@ class Ntv(ABC):
         if self.ntv_type and self.ntv_type.long_name != 'json':
             code += 'T'
         return code
+
+    @property
+    def max_len(self):
+        '''return the highest len of Ntv entity included'''
+        maxi = len(self)
+        if isinstance(self.ntv_value, (list, set)):
+            maxi = max(maxi, max([ntv.max_len for ntv in self.ntv_value]))
+        return maxi
+      
+    @property
+    def type_str(self):
+        '''return a string with the value of the NtvType of the entity'''
+        if not self.ntv_type:
+            return None
+        return self.ntv_type.long_name
+
+    @staticmethod
+    def from_obj_name(string):
+        '''return a tuple with name, type and separator from string'''
+        if not isinstance(string, str):
+            raise NtvError('a json-name have to be str')
+        if string == '':
+            return (None, None, None)
+        sep = None
+        if '::' in string:
+            sep = '::'
+        elif ':' in string:
+            sep = ':'
+        if sep is None:
+            return (string, None, None)
+        split = string.rsplit(sep, 2)
+        if len(split) == 1:
+            return (string, None, sep)
+        if split[0] == '':
+            return (None, split[1], sep)
+        if split[1] == '':
+            return (split[0], None, sep)
+        return (split[0], split[1], sep)
+
+    def obj_name(self, def_type=None, string=False):
+        '''return the JSON name of the NTV entity (json-ntv format)
+
+        *Parameters*
+
+        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity
+        - **string** : boolean (default False) - If True, return a string else a tuple'''
+        if def_type is None:
+            def_type = ''
+        elif isinstance(def_type, (NtvType, Namespace)):
+            def_type = def_type.long_name
+        json_name = ''
+        if self.ntv_name:
+            json_name = self.ntv_name
+        json_type = ''
+        if self.ntv_type:
+            json_type = relative_type(def_type, self.ntv_type.long_name)
+        if json_type == 'json' and (not def_type or def_type == 'json'):
+            json_type = ''
+        json_sep = self._obj_sep(json_type, def_type)
+        if string:
+            return json_name + json_sep + json_type
+        return (json_name, json_sep, json_type)
 
     def set_name(self, name):
         '''set a new name to the entity'''
@@ -396,29 +438,22 @@ class Ntv(ABC):
     def _obj_sep(self, json_type, def_type=None):
         return ''
 
-    def obj_name(self, def_type=None, string=False):
-        '''return the JSON name of the NTV entity (json-ntv format)
-
-        *Parameters*
-
-        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity
-        - **string** : boolean (default False) - If True, return a string else a tuple'''
-        if def_type is None:
-            def_type = ''
-        elif isinstance(def_type, (NtvType, Namespace)):
-            def_type = def_type.long_name
-        json_name = ''
-        if self.ntv_name:
-            json_name = self.ntv_name
-        json_type = ''
-        if self.ntv_type:
-            json_type = relative_type(def_type, self.ntv_type.long_name)
-        if json_type == 'json' and (not def_type or def_type == 'json'):
-            json_type = ''
-        json_sep = self._obj_sep(json_type, def_type)
-        if string:
-            return json_name + json_sep + json_type
-        return (json_name, json_sep, json_type)
+    @staticmethod
+    def _from_value(value):
+        '''return a decoded value'''
+        if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
+            try:
+                value = json.loads(value)
+            except JSONDecodeError:
+                pass
+        string = isinstance(value, str)
+        if value is None or (string and value == 'null'):
+            return NtvSingle(None)
+        if string and value == 'true':
+            return NtvSingle(True)
+        if string and value == 'false':
+            return NtvSingle(False)
+        return value
 
     @staticmethod
     def _decode(json_value):
@@ -490,6 +525,7 @@ class Ntv(ABC):
             return geometry.shape({"type": dic_geo[type_n],
                                    "coordinates": self.ntv_value})
         if type_n == 'tab' and dic_obj[type_n] == 'Ilist':
+            from observation import Ilist  # !!!
             if isinstance(self.ntv_value, list):
                 return Ilist.obj(self.ntv_value)
             return Ilist.dic(self.ntv_value)
@@ -502,29 +538,6 @@ class Ntv(ABC):
         if connec:
             return connec.from_ntv(self.ntv_value)
         return self.ntv_value
-
-    @staticmethod
-    def from_obj_name(string):
-        '''return a tuple with name, type and separator from string'''
-        if not isinstance(string, str):
-            raise NtvError('a json-name have to be str')
-        if string == '':
-            return (None, None, None)
-        sep = None
-        if '::' in string:
-            sep = '::'
-        elif ':' in string:
-            sep = ':'
-        if sep is None:
-            return (string, None, None)
-        split = string.rsplit(sep, 2)
-        if len(split) == 1:
-            return (string, None, sep)
-        if split[0] == '':
-            return (None, split[1], sep)
-        if split[1] == '':
-            return (split[0], None, sep)
-        return (split[0], split[1], sep)
 
     @staticmethod
     def _is_json_ntv(val):
