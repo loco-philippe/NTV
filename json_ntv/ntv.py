@@ -88,13 +88,13 @@ class Ntv(ABC):
     - `type_str`
     - `code_ntv`
     - `max_len`
-
     The methods defined in this class are :
 
     *Ntv constructor*
     - `obj` *(classmethod)*
     - `from_obj` *(staticmethod)*
     - `from_att` *(staticmethod)*
+
 
     *instance methods*
     - `from_obj_name` *(staticmethod)*
@@ -460,6 +460,8 @@ class Ntv(ABC):
         '''return (name, type, value, separator) of the json value'''
         if json_value is None:
             return (None, None, None, None)
+        if isinstance(json_value, tuple):
+            return (None, None, list(json_value), None)
         if isinstance(json_value, (list, int, str, float, bool)):
             return (None, None, json_value, None)
         if isinstance(json_value, dict) and len(json_value) != 1:
