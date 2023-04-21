@@ -498,7 +498,7 @@ class Ntv(ABC):
                     connec = NtvConnector.connector()[dic_connec[clas]]
                 if connec:
                     return connec.to_ntv(data)
-                raise NtvError('connector is not defined to NTV entity')
+                raise NtvError('connector is not defined for NTV entity of class : ', clas)
         return (None, None, None)
 
     def _uncast(self, **option):
