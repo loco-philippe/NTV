@@ -187,7 +187,7 @@ class Ntv(ABC):
             return NtvList(ntv_list, ntv_name, def_type)
         if sep == ':':
             ntv_type = agreg_type(str_typ, def_type, False)
-            return NtvSingle(ntv_value, ntv_name, ntv_type,)
+            return NtvSingle(ntv_value, ntv_name, ntv_type)
         if sep is None and not isinstance(ntv_value, dict):
             is_json = isinstance(value, (int, str, float, bool))
             ntv_type = agreg_type(str_typ, def_type, is_json)
@@ -475,7 +475,7 @@ class Ntv(ABC):
 
     @staticmethod
     def _cast(data):
-        '''return (name, type, value) of the data'''
+        '''return (name, type, json_value) of the data'''
         dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
                       'MultiLineString': 'multiline', 'Polygon': 'polygon',
                       'MultiPolygon': 'multipolygon'}
@@ -490,8 +490,8 @@ class Ntv(ABC):
                         Ntv._listed(data.__geo_interface__['coordinates']))
             case 'NtvSingle' | 'NtvSet' | 'NtvList':
                 return (None, 'ntv', data.to_obj())
-            case 'Ilist':
-                return (None, 'tab', data.to_obj())
+            #case 'Ilist':
+            #    return (None, 'tab', data.to_obj())
             case _:
                 connec = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
@@ -511,7 +511,7 @@ class Ntv(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'Ilist', 'other': None}
+        dic_obj = {'tab': 'IlistConnec', 'other': None}
         type_n = self.ntv_type.name
         if 'dicobj' in option:
             dic_obj |= option['dicobj']
@@ -526,11 +526,11 @@ class Ntv(ABC):
         if type_n in dic_geo:
             return geometry.shape({"type": dic_geo[type_n],
                                    "coordinates": self.ntv_value})
-        if type_n == 'tab' and dic_obj[type_n] == 'Ilist':
+        '''if type_n == 'tab' and dic_obj[type_n] == 'Ilist':
             from observation import Ilist  # !!!
             if isinstance(self.ntv_value, list):
                 return Ilist.obj(self.ntv_value)
-            return Ilist.dic(self.ntv_value)
+            return Ilist.dic(self.ntv_value)'''
         connec = None
         if type_n in dic_obj and \
                 dic_obj[type_n] in NtvConnector.connector():
@@ -589,8 +589,7 @@ class NtvSingle(Ntv):
         - **ntv_type**: String (default None) - type of the entity
         - **value**: value of the entity
         '''
-        is_json_ntv = Ntv._is_json_ntv(
-            value)  # or isinstance(value, NtvSingle)
+        is_json_ntv = Ntv._is_json_ntv(value)  # or isinstance(value, NtvSingle)
         if not ntv_type and is_json_ntv:
             ntv_type = 'json'
         if not ntv_type and not is_json_ntv:

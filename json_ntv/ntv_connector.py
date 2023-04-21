@@ -64,6 +64,24 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
     
+class IlistConnec(NtvConnector):
+    '''NTV connector for Ilist'''
+    
+    clas_obj = 'Ilist'
+
+    @staticmethod
+    def from_ntv(ntv_value):
+        ''' convert ntv_value into the return object'''
+        from observation import Ilist
+        print('ok')
+        ntv = Ntv.obj(ntv_value)
+        return Ilist.from_ntv(ntv)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        return (self.name, 'tab', self.to_ntv().to_obj())
+
+
 class DataFrameConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
 
