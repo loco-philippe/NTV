@@ -316,7 +316,7 @@ class Ntv(ABC):
         json_sep = self._obj_sep(json_type, def_type)
         if string:
             return json_name + json_sep + json_type
-        return (json_name, json_sep, json_type)
+        return [json_name, json_sep, json_type]
 
     def set_name(self, name):
         '''set a new name to the entity'''
@@ -379,11 +379,14 @@ class Ntv(ABC):
         (json, cbor, obj)
         - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
+        - **name** : boolean (default true) - if False, name is not included
         '''
         option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False} | kwargs
+                  'simpleval': False, 'name': True} | kwargs
         value = self._obj_value(def_type=def_type, **option)
         obj_name = self.obj_name(def_type)
+        if not option['name']:
+            obj_name[0] = ''
         if option['simpleval']:
             name = ''
         elif option['encode_format'] in ('cbor', 'obj') and not Ntv._is_json_ntv(value):
@@ -511,7 +514,7 @@ class Ntv(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'IlistConnec', 'other': None}
+        dic_obj = {'tab': 'IlistConnec', 'field': 'IindexConnec', 'other': None}
         type_n = self.ntv_type.name
         if 'dicobj' in option:
             dic_obj |= option['dicobj']
@@ -526,11 +529,6 @@ class Ntv(ABC):
         if type_n in dic_geo:
             return geometry.shape({"type": dic_geo[type_n],
                                    "coordinates": self.ntv_value})
-        '''if type_n == 'tab' and dic_obj[type_n] == 'Ilist':
-            from observation import Ilist  # !!!
-            if isinstance(self.ntv_value, list):
-                return Ilist.obj(self.ntv_value)
-            return Ilist.dic(self.ntv_value)'''
         connec = None
         if type_n in dic_obj and \
                 dic_obj[type_n] in NtvConnector.connector():

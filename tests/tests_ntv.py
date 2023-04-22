@@ -45,7 +45,7 @@ class Test_Ntv_creation(unittest.TestCase):
         for data in list_obj:
             ntv = Ntv.obj(data[1])
             #print(ntv)
-            self.assertEqual(ntv.obj_name(data[0]), data[2])
+            self.assertEqual(ntv.obj_name(data[0]), list(data[2]))
 
     def test_agreg_type(self):
         list_type = [[[None, None, True], 'json'],
@@ -217,9 +217,9 @@ class Test_Ntv_creation(unittest.TestCase):
         for test in list_test:
             # print(test[1])
             self.assertEqual(Ntv.from_obj(
-                test[1]).ntv_value[0].obj_name(), test[0])
+                test[1]).ntv_value[0].obj_name(), list(test[0]))
             self.assertEqual(
-                Ntv.obj(test[1]).ntv_value[0].obj_name(), test[0])
+                Ntv.obj(test[1]).ntv_value[0].obj_name(), list(test[0]))
 
     def test_default_list(self):
         unic = NtvSingle({'un':1, 'deux':2}, 'param')
@@ -236,7 +236,7 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.from_obj(nstr).to_obj(
             simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
 
-    def test_pandas(self):
+    def test_tab_pandas_ilist(self):
         field = Ntv.obj({':field': 
                      {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
         tab   = Ntv.obj({':tab'  :
@@ -246,28 +246,15 @@ class Test_Ntv_creation(unittest.TestCase):
                       'value32::int32':  [10, 20, 30],
                       'coord::point':    [[1,2], [3,4], [5,6]],
                       'names::string':   ['john', 'eric', 'judith']}})
-        sr = field.to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})
-        df = tab.to_obj  (encode_format='obj', dicobj={'tab': 'DataFrameConnec'})
+        sr  = field.to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})
+        df  = tab.to_obj  (encode_format='obj', dicobj={'tab': 'DataFrameConnec'})
+        il  = tab.to_obj  (encode_format='obj')
+        idx = field.to_obj(encode_format='obj')
+        self.assertEqual(idx, Ntv.obj(idx).to_obj(encode_format='obj'))
+        self.assertEqual(il, Ntv.obj(il).to_obj(encode_format='obj'))
         self.assertTrue(df.equals(Ntv.obj(df).to_obj(encode_format='obj', dicobj={'tab': 'DataFrameConnec'})))
         self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})))
 
-    def test_observation(self):
-        field = Ntv.obj({':field': 
-                     {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
-        tab = { 'index':           [1, 2, 3],
-                'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
-                'value':           [10, 20, 30],
-                'value32::int32':  [10, 20, 30],
-                'coord::point':    [[1,2], [3,4], [5,6]],
-                'names::string':   ['john', 'eric', 'judith']}
-        il   = Ilist.dic(tab)
-        ntv = Ntv.obj( il)
-        self.assertEqual(il, ntv.to_obj(encode_format='obj'))
-        tab_ntv = Ntv.obj({':tab'  : tab})
-        il = tab_ntv.to_obj  (encode_format='obj')
-        self.assertEqual(il, Ntv.obj(il).to_obj(encode_format='obj'))
-
-                          
     def test_csv(self):
         tab   = Ntv.obj({':tab'  :
                      {'index':           [1, 2, 3],

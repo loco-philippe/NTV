@@ -9,13 +9,17 @@ https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.p
 
 It contains :
     - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
-    - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class.
+    - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
+        - `IindexConnec`:    'field' connector 
+        - `IlistConnec`:     'tab' connector 
+        - `DataFrameConnec`: 'tab' connector 
+        - `SeriesConnec`:    'field' connector 
 """
 import csv
 import json
 import pandas as pd
 
-from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList, NtvSingle, NtvError
+from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList, NtvSingle
 
 def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     ''' return a 'tab' NtvSingle from a csv file
@@ -63,6 +67,22 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
             writer.writerow({name: field_ntv[i].to_obj(field_ntv.ntv_type, encoded=True)
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
+
+class IindexConnec(NtvConnector):
+    '''NTV connector for Iindex'''
+    
+    clas_obj = 'Iindex'
+
+    @staticmethod
+    def from_ntv(ntv_value):
+        ''' convert ntv_value into the return object'''
+        from observation import Iindex
+        ntv = Ntv.obj(ntv_value)
+        return Iindex.from_ntv(ntv)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        return (None, 'field', self.to_ntv(option_name=True).to_obj())
     
 class IlistConnec(NtvConnector):
     '''NTV connector for Ilist'''
@@ -73,13 +93,12 @@ class IlistConnec(NtvConnector):
     def from_ntv(ntv_value):
         ''' convert ntv_value into the return object'''
         from observation import Ilist
-        print('ok')
         ntv = Ntv.obj(ntv_value)
         return Ilist.from_ntv(ntv)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.name, 'tab', self.to_ntv().to_obj())
+        return (None, 'tab', self.to_ntv().to_obj())
 
 
 class DataFrameConnec(NtvConnector):
