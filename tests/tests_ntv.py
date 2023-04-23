@@ -236,7 +236,7 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.from_obj(nstr).to_obj(
             simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
 
-    def test_tab_pandas_ilist(self):
+    def test_tab_field_pandas_ilist_Iindex(self):
         field = Ntv.obj({':field': 
                      {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
         tab   = Ntv.obj({':tab'  :
