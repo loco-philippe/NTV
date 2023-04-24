@@ -232,10 +232,25 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertNotEqual(il_lis2.ntv_type, il_lis1.ntv_type)
         
     def test_to_obj(self):
-        nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
-        self.assertEqual(Ntv.from_obj(nstr).to_obj(
-            simpleval=True), [[2.1, 40.3], [2.1, 40.3]])
+        nstr  = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
+        nstr2 = {'cities':  {'paris': [2.1, 40.3],   'lyon': [2.1, 40.3]} }
+        nstr3 = {'cities': [          [2.1, 40.3],           [2.1, 40.3] ]}
+        self.assertTrue(Ntv.from_obj(nstr ).to_obj(simpleval=True) == 
+                        Ntv.from_obj(nstr2).to_obj(simpleval=True) ==
+                        Ntv.from_obj(nstr3).to_obj(simpleval=True) == 
+                        [[2.1, 40.3], [2.1, 40.3]])
 
+    def test_tab(self):
+        tab = Ntv.obj(  {'index':           [1, 2, 3],
+                         'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
+                         'value':           [10, 20, 30],
+                         'value32::int32':  [10, 20, 30],
+                         'res':             {'res1': 10, 'res2': 20, 'res3': 30},
+                         'coord::point':    [[1,2], [3,4], [5,6]],
+                         'names::string':   ['john', 'eric', 'judith']})
+        self.assertEqual(tab[1][2], tab['dates'][2], Ntv.obj({":datetime": "2022-01-21"}))
+        self.assertEqual(tab[4][2], tab['res']['res3'], Ntv.obj(30))        
+        
     def test_tab_field_pandas_ilist_Iindex(self):
         field = Ntv.obj({':field': 
                      {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
@@ -244,6 +259,7 @@ class Test_Ntv_creation(unittest.TestCase):
                       'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'], 
                       'value':           [10, 20, 30],
                       'value32::int32':  [10, 20, 30],
+                      'res':             {'res1': 10, 'res2': 20, 'res3': 30},
                       'coord::point':    [[1,2], [3,4], [5,6]],
                       'names::string':   ['john', 'eric', 'judith']}})
         sr  = field.to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})

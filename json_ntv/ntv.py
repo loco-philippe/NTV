@@ -90,14 +90,14 @@ class Ntv(ABC):
     - `max_len`
     The methods defined in this class are :
 
-    *Ntv constructor*
-    - `obj` *(classmethod)*
-    - `from_obj` *(staticmethod)*
-    - `from_att` *(staticmethod)*
-
+    *Ntv constructor (staticmethod)*
+    - `obj`
+    - `from_obj`
+    - `from_att`
 
     *instance methods*
-    - `from_obj_name` *(staticmethod)*
+    - `alike`
+    - `from_value`
     - `obj_name`
     - `set_name`
     - `set_type`
@@ -105,6 +105,10 @@ class Ntv(ABC):
     - `to_obj`
     - `to_repr`
     - `to_tuple`
+    
+    *utility methods*
+    - `from_obj_name` *(staticmethod)*
+
     '''
 
     def __init__(self, ntv_value, ntv_name, ntv_type):
@@ -129,15 +133,15 @@ class Ntv(ABC):
         self.ntv_name = ntv_name
         self.ntv_value = ntv_value
 
-    @classmethod
-    def obj(cls, data):
+    @staticmethod
+    def obj(data):
         ''' return an Ntv entity from data.
         Data can be :
         - a tuple with value, name, typ and cat (see `from_att` method)
         - a value to decode (see `from_obj`method)'''
         if isinstance(data, tuple):
-            return cls.from_att(*data)
-        return cls.from_obj(data)
+            return Ntv.from_att(*data)
+        return Ntv.from_obj(data)
 
     @staticmethod
     def from_att(value, name, typ, cat):
@@ -207,7 +211,7 @@ class Ntv(ABC):
                 def_type = ntv_list[0].ntv_type
             return NtvSet(ntv_list, ntv_name, def_type,)
         raise NtvError('separator ":" is not compatible with value')
-
+        
     def __len__(self):
         ''' len of ntv_value'''
         if isinstance(self.ntv_value, (list, set)):
@@ -226,11 +230,19 @@ class Ntv(ABC):
         ''' item of Ntv entities'''
         return item in self.ntv_value
 
-    def __getitem__(self, ind):
-        ''' return ntv_value item (value conversion)'''
-        if isinstance(ind, tuple):
-            return [self.ntv_value[i] for i in ind]
-        return self.ntv_value[ind]
+    def __getitem__(self, selector):
+        ''' return ntv_value item '''
+        if isinstance(selector, tuple):
+            return [self.ntv_value[i] for i in selector]
+        if isinstance(selector, str):
+            ind = [ntv.ntv_name for ntv in self.ntv_value].index(selector)
+            return self.ntv_value[ind]
+        return self.ntv_value[selector]
+        '''if isinstance(ind, tuple):
+            ntv_value = [self.ntv_value[i] for i in ind]
+        else:
+            ntv_value = self.ntv_value[ind]
+        return self.__class__(ntv_value, self.ntv_name, self.ntv_type)'''
 
     def __setitem__(self, ind, value):
         ''' modify ntv_value item'''
@@ -294,6 +306,20 @@ class Ntv(ABC):
             return (split[0], None, sep)
         return (split[0], split[1], sep)
 
+    def alike(self, ntv_value):
+        ''' return a Ntv entity with same name and type.
+
+        *Parameters*
+
+        - **ntv_value**: list of ntv values'''
+        return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
+
+    def from_value(self):
+        '''return a Ntv entity from ntv_value'''
+        if isinstance(self.ntv_value, list):
+            return NtvList(self.ntv_value)
+        return Ntv.obj(self.ntv_value)
+    
     def obj_name(self, def_type=None, string=False):
         '''return the JSON name of the NTV entity (json-ntv format)
 
@@ -383,7 +409,10 @@ class Ntv(ABC):
         '''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False, 'name': True} | kwargs
-        value = self._obj_value(def_type=def_type, **option)
+        if option['simpleval'] and isinstance(self, NtvSet):
+            value = NtvList(self)._obj_value(def_type=def_type, **option)
+        else:
+            value = self._obj_value(def_type=def_type, **option)
         obj_name = self.obj_name(def_type)
         if not option['name']:
             obj_name[0] = ''
@@ -493,8 +522,6 @@ class Ntv(ABC):
                         Ntv._listed(data.__geo_interface__['coordinates']))
             case 'NtvSingle' | 'NtvSet' | 'NtvList':
                 return (None, 'ntv', data.to_obj())
-            #case 'Ilist':
-            #    return (None, 'tab', data.to_obj())
             case _:
                 connec = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
@@ -765,9 +792,8 @@ class NtvSet(Ntv):
         option2 = option | {'encoded': False}
         if self.ntv_type:
             def_type = self.ntv_type.long_name
-        return {list(ntv.to_obj(def_type=def_type, **option2).items())[0][0]:
-                list(ntv.to_obj(def_type=def_type, **option2).items())[0][1]
-                for ntv in self.ntv_value}
+        values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
+        return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
 
 
 class NtvConnector(ABC):
