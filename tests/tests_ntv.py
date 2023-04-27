@@ -138,6 +138,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '2NtvSingle': 'test',
                    '3NtvSingle': {'single': 1},
                    '4NtvSingle': {'ntv1:ntv': {'ntv2': 2}},
+                   'jNtvSingle': {'ntv1': {'ntv2': 2}},
                    '5NtvSingle': {'ntv1:fr.reg': {'ntv2:fr.BAN.lon': 2}},
                    '6NtvSingle': {'ntv1': True},
                    '7NtvSingle': True,

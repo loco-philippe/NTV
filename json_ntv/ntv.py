@@ -189,7 +189,8 @@ class Ntv(ABC):
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
             return NtvList(ntv_list, ntv_name, def_type)
-        if sep == ':':
+        if sep == ':' or (sep is None and isinstance(ntv_value, dict) and 
+                          len(ntv_value) == 1):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type)
         if sep is None and not isinstance(ntv_value, dict):
@@ -209,7 +210,7 @@ class Ntv(ABC):
                         for key, val in zip(keys, values)]
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
-            return NtvSet(ntv_list, ntv_name, def_type,)
+            return NtvSet(ntv_list, ntv_name, def_type)
         raise NtvError('separator ":" is not compatible with value')
         
     def __len__(self):
