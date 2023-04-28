@@ -348,6 +348,10 @@ class NtvType():
             return False
         return self.name == other.name and self.nspace == other.nspace
 
+    def __hash__(self):
+        '''return hash(name) + hash(nspace)'''
+        return hash(self.name) + hash(self.nspace)
+
     def __str__(self):
         '''return string format'''
         return self.long_name
@@ -454,6 +458,10 @@ class Namespace():
         if self.__class__ != other.__class__:
             return False
         return self.name == other.name and self.parent == other.parent
+
+    def __hash__(self):
+        '''return hash(name) + hash(parent)'''
+        return hash(self.name) + hash(self.parent)
 
     def __str__(self):
         '''return string format'''

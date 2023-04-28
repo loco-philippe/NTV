@@ -634,6 +634,12 @@ class NtvSingle(Ntv):
             self.ntv_name == other.ntv_name and self.ntv_type == other.ntv_type and\
             self.ntv_value == other.ntv_value
 
+    def __hash__(self):
+        '''return hash(name) + hash(type) + hash(value)'''
+        if isinstance(self.ntv_value, list): 
+            return hash(self.ntv_name) + hash(self.ntv_type) + hash(tuple(self.ntv_value))
+        return hash(self.ntv_name) + hash(self.ntv_type) + hash(self.ntv_value)
+    
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
         if json_type or not def_type and \
@@ -709,6 +715,10 @@ class NtvList(Ntv):
         return self.__class__.__name__ == other.__class__.__name__ and\
             self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
 
+    def __hash__(self):
+        '''return hash(name) + hash(value)'''
+        return hash(self.ntv_name) + hash(tuple(self.ntv_value))
+    
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
         if json_type:
@@ -780,6 +790,10 @@ class NtvSet(Ntv):
         return self.__class__.__name__ == other.__class__.__name__ and\
             self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
 
+    def __hash__(self):
+        '''return hash(name) + hash(value)'''
+        return hash(self.ntv_name) + hash(tuple(self.ntv_value))
+    
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
         if json_type or len(self.ntv_value) == 1:
