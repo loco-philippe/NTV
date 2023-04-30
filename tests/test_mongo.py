@@ -9,7 +9,7 @@ The `observation.test_mongo` module contains the tests (class unittest) for the
 The dataset used is defined in `observation.Tests.data.py` 
 """
 import unittest
-from datetime import datetime
+import datetime
 #from tabulate import tabulate
 import requests as rq
 from pymongo.mongo_client import MongoClient
@@ -60,8 +60,13 @@ def envoi_mongo_python(data, client, baseMongo='NTV', collection='test'):
 class Test_ntv_py(unittest.TestCase):
 
     def test_insert(self):
-        ntv = Ntv.obj({'test': {'date': datetime(10,25,10), 'coord:point': [42.1, 3.2]}})
+        ntv = Ntv.obj({'ntv':'essai1', 'test': {'date': datetime.datetime(2010,2,10), 'coord:point': [42.1, 3.2]}})
         collec.insert_one(ntv.to_obj(encode_format='cbor'))
+        js_id = collec.find_one({'ntv':'essai1'})
+        js = dict(item for item in js_id.items() if item[0] != '_id')
+        print(js)
+        ntv2 = Ntv.obj(js)
+        print(ntv2 == ntv)
         
 """    def test_param_name(self):
         srch = ESSearch(Test_jeu_data_py.collec)
