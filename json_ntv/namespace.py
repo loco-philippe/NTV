@@ -325,6 +325,11 @@ class NtvType():
 
         - **name** : string - name of the Type
         - **nspace** : Namespace (default None) - namespace associated'''
+        if isinstance(name, NtvType):
+            self.name = name.name
+            self.nspace = name.nspace
+            self.custom = name.custom
+            return
         if not name or not isinstance(name, str):
             raise NtvTypeError('null name is not allowed')
         if not name and not nspace:
@@ -337,6 +342,7 @@ class NtvType():
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
         self._types_[self.long_name] = self
+        return
 
     def __eq__(self, other):
         ''' equal if name and nspace are equal'''

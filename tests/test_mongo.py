@@ -62,11 +62,10 @@ class Test_ntv_py(unittest.TestCase):
     def test_insert(self):
         ntv = Ntv.obj({'ntv':'essai1', 'test': {'date': datetime.datetime(2010,2,10), 'coord:point': [42.1, 3.2]}})
         collec.insert_one(ntv.to_obj(encode_format='cbor'))
-        js_id = collec.find_one({'ntv':'essai1'})
-        js = dict(item for item in js_id.items() if item[0] != '_id')
-        print(js)
-        ntv2 = Ntv.obj(js)
-        print(ntv2 == ntv)
+        js = collec.find_one({'ntv':'essai1'})
+        collec.delete_one({'_id': js['_id']})
+        js.pop('_id')
+        self.assertEqual(Ntv.obj(js), ntv)
         
 """    def test_param_name(self):
         srch = ESSearch(Test_jeu_data_py.collec)

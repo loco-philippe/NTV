@@ -144,6 +144,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    '7NtvSingle': True,
                    '8NtvSingle': {'ntv1:dat': [1, 2]},
                    '9NtvSingle': {'ntv1': datetime.date(2021, 2, 1)},
+                   'kNtvSingle': {'ntv1:date': datetime.date(2021, 2, 1)},
                    'dNtvSingle': datetime.date(2021, 2, 1),
                    'aNtvSingle': '{ner',
                    'bNtvSingle': {':$point': {'a': [1, 2], 'b': [3, 4]}},
@@ -184,7 +185,7 @@ class Test_Ntv_creation(unittest.TestCase):
             #print('ap', nstr, typ)
             if not typ in ['9NtvList', 'aNtvList', 'bNtvList', '9NtvSingle', 'eNtvSingle',
                            'dNtvSingle', 'fNtvSingle', 'gNtvSingle', 'hNtvSingle',
-                           'iNtvSingle', '4NtvSet', '5NtvSet']:
+                           'iNtvSingle', 'kNtvSingle', '4NtvSet', '5NtvSet']:
                 self.assertEqual(nstr, ntv.to_obj())
             if typ == 'bNtvList':
                 self.assertEqual(nstr['::'], ntv.to_obj())

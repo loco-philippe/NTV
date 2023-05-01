@@ -45,6 +45,9 @@ class Test_Namespace(unittest.TestCase):
 
 class Test_NtvType(unittest.TestCase):
     
+    def test_self_init(self):
+        self.assertEqual(NtvType(NtvType('datetime')), NtvType('datetime'))
+        
     def test_add(self):
         liststr = ['fr.BAN.lon', 'fr.BAN.$lon', 'year', 'fr.reg', 'fr.BAN.numero',
                    'fr.reg', 'fr.$IRVE.$a', '$a.$c', 'fr.$c', '$a.c.c.d', 'fr.$a.b.d']

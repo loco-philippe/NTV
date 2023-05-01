@@ -321,13 +321,14 @@ class Ntv(ABC):
             return NtvList(self.ntv_value)
         return Ntv.obj(self.ntv_value)
     
-    def obj_name(self, def_type=None, string=False):
+    def obj_name(self, def_type=None, string=False, explicit=False):
         '''return the JSON name of the NTV entity (json-ntv format)
 
         *Parameters*
 
         - **def_typ** : NtvType or Namespace (default None) - type of the parent entity
-        - **string** : boolean (default False) - If True, return a string else a tuple'''
+        - **string** : boolean (default False) - If True, return a string else a tuple
+        - **explicit** : boolean (default False) - If True, type is always included'''
         if def_type is None:
             def_type = ''
         elif isinstance(def_type, (NtvType, Namespace)):
@@ -616,14 +617,19 @@ class NtvSingle(Ntv):
         - **value**: value of the entity
         '''
         is_json_ntv = Ntv._is_json_ntv(value)  # or isinstance(value, NtvSingle)
-        if not ntv_type and is_json_ntv:
-            ntv_type = 'json'
-        if not ntv_type and not is_json_ntv:
-            name, ntv_type, value = Ntv._cast(value)
-            if not ntv_name:
-                ntv_name = name
-        elif ntv_type and not is_json_ntv:
-            raise NtvError('ntv_value is not compatible with ntv_type')
+        
+        if not is_json_ntv:
+            name, typ, value = Ntv._cast(value)
+        if not ntv_type:
+            if is_json_ntv:
+                ntv_type = 'json'
+            else:
+                ntv_type = typ
+                if not ntv_name:
+                    ntv_name = name
+        else:
+            if not is_json_ntv and NtvType(ntv_type) != NtvType(typ):
+                raise NtvError('ntv_value is not compatible with ntv_type')
         if ntv_type and isinstance(ntv_type, str) and ntv_type[-1] == '.':
             raise NtvError('the ntv_type is not valid')
         super().__init__(value, ntv_name, ntv_type)
