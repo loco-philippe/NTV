@@ -88,6 +88,7 @@ class Ntv(ABC):
     - `type_str`
     - `code_ntv`
     - `max_len`
+    - `val`
     The methods defined in this class are :
 
     *Ntv constructor (staticmethod)*
@@ -278,12 +279,22 @@ class Ntv(ABC):
         return maxi
       
     @property
+    def name(self):
+        '''return the ntv_name of the entity'''
+        return self.ntv_name
+    
+    @property
     def type_str(self):
         '''return a string with the value of the NtvType of the entity'''
         if not self.ntv_type:
             return None
         return self.ntv_type.long_name
 
+    @property
+    def val(self):
+        '''return the ntv_value of the entity'''
+        return self.ntv_value
+    
     @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type and separator from string'''
