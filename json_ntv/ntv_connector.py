@@ -19,7 +19,7 @@ import csv
 import json
 import pandas as pd
 
-from json_ntv.ntv import Ntv, NtvConnector, NtvSet, NtvList, NtvSingle
+from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 
 def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     ''' return a 'tab' NtvSingle from a csv file
@@ -41,8 +41,8 @@ def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     for ind_field, field in enumerate(names):
         list_ntv.append(NtvList(list_ntv_value[ind_field], *Ntv.from_obj_name(field)[:2]))
     if single_tab:
-        return NtvSingle(NtvSet(list_ntv, None, None).to_obj(), None, 'tab')
-    return NtvSet(list_ntv, None, None)
+        return NtvSingle(NtvList(list_ntv, None, None).to_obj(), None, 'tab')
+    return NtvList(list_ntv, None, None)
 
 
 def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *args, **kwds):
@@ -119,7 +119,7 @@ class DataFrameConnec(NtvConnector):
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
         df2 = self.reset_index()
-        return (None, 'tab', NtvSet([SeriesConnec.to_ntv(df2[colon])[2]
+        return (None, 'tab', NtvList([SeriesConnec.to_ntv(df2[colon])[2]
                                      for colon in df2.columns]).to_obj())
 
 

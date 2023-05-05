@@ -7,7 +7,7 @@ Created on Feb 27 2023
 The `ntv` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the classes `NtvSingle`, `NtvSet`, `NtvList`, `Ntv`(abstract),
+It contains the classes `NtvSingle`, `NtvList`, `Ntv`(abstract),
 `NtvConnector` and `NtvError` for NTV entities.
 
 # 1 - JSON-NTV structure
@@ -22,16 +22,13 @@ by the RFC [JSON-ND](https://github.com/glenkleidon/JSON-ND) project :
  "name::type" : value }```** for structured entities (if type and name are documented).
 
 For an NTV-single, the value is the JSON-value of the entity.
-For an NTV-list, value is a JSON-array where JSON-elements are the JSON-NTV formats
- of included NTV entities.
-For an NTV-set, value is a JSON-object where JSON-members are the JSON-members of
-the JSON-NTV formats of included NTV entities.
+For an NTV-list, value is a JSON-array (JSON-object) where JSON-elements (JSON-members)
+are the JSON-NTV formats of included NTV entities.
 
 This JSON-NTV format allows full compatibility with existing JSON structures:
 - a JSON-number, JSON-string or JSON-boolean is the representation of an NTV-single entity,
 - a JSON-object with a single member is the representation of an NTV-single entity
-- a JSON-array is the representation of an NTV-list entity
-- a JSON-object without a single member is the representation of an NTV-set entity
+- a JSON-array or JSON-object is the representation of an NTV-list entity
 
 # 2 - Examples of JSON-NTV representations
 - NTV-single, simple format :
@@ -41,23 +38,23 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "paris:point" : [2.3522, 48.8566] }```
    - ```{ ":point" : [4.8357, 45.7640] }```
    - ```{ "city" : "paris" }```
-- NTV-list, simple format :
+- NTV-list, simple format (whithout names):
    - ```[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]```
    - ```[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]```
    - ```[ 4, 45 ]```
    - ```[ "paris" ]```
    - ```[ ]```
-- NTV-list, named format :
+- NTV-list, named format (whithout names):
    - ```{ "cities::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }```
    - ```{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }```
    - ```{ "simple list" : [ 4, 45.7 ] }```
    - ```{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }```
-- NTV-set, simple format :
+- NTV-list, simple format (with names):
    - ```{ "nom”: "white", "prenom": "walter", "surnom": "heisenberg" }```
    - ```{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france" }```
    - ```{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640] }```
    - ```{ }```
-- NTV-set, named format :
+- NTV-list, named format (with names):
    - ```{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}```
    - ```{ "cities" :     { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
    - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
@@ -109,7 +106,6 @@ class Ntv(ABC):
     
     *utility methods*
     - `from_obj_name` *(staticmethod)*
-
     '''
 
     def __init__(self, ntv_value, ntv_name, ntv_type):
@@ -155,12 +151,10 @@ class Ntv(ABC):
         - **typ** : string or NtvType - type of the NTV entity
         - **cat**: string - NTV category ('single', 'list')'''
         value = Ntv._from_value(value)
-        if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
+        if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         if isinstance(value, list) and cat == 'list':
             return NtvList(value, name, typ)
-        #if isinstance(value, list) and cat == 'set':
-        #    return NtvSet(value, name, typ)
         if cat == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
@@ -175,7 +169,6 @@ class Ntv(ABC):
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         value = Ntv._from_value(value)
-        #if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
@@ -241,11 +234,6 @@ class Ntv(ABC):
             ind = [ntv.ntv_name for ntv in self.ntv_value].index(selector)
             return self.ntv_value[ind]
         return self.ntv_value[selector]
-        '''if isinstance(ind, tuple):
-            ntv_value = [self.ntv_value[i] for i in ind]
-        else:
-            ntv_value = self.ntv_value[ind]
-        return self.__class__(ntv_value, self.ntv_name, self.ntv_type)'''
 
     def __setitem__(self, ind, value):
         ''' modify ntv_value item'''
@@ -383,7 +371,7 @@ class Ntv(ABC):
         - **typ**: Boolean (default True) : if true, the types are included
         - **val**: Boolean (default True) : if true, the values are included
         - **maxi**: Integer (default 10) : number of values to included for NtvList
-        or NtvSet entities. If maxi < 1 all the values are included.
+        entities. If maxi < 1 all the values are included.
         '''
         ntv = self.code_ntv
         if nam and typ:
@@ -753,160 +741,6 @@ class NtvList(Ntv):
             return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
         values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
-
-
-class NtvListOld(Ntv):
-    '''An NTV-list entity is a Ntv entity where:
-
-    - ntv_value is a list of NTV entities,
-    - ntv_type is a default type available for included NTV entities
-
-    *Attributes :*
-
-    - **ntv_name** : String - name of the NTV entity
-    - **ntv_type**: NtvType - type of the entity
-    - **ntv_value**:  value of the entity
-
-    The methods defined in this class are :
-
-    *Ntv constructor*
-    - `obj`
-    - `from_obj`
-    - `from_att`
-
-    *dynamic values (@property)*
-    - `type_str`
-    - `code_ntv`
-
-    *instance methods*
-    - `set_name`
-    - `set_type`
-    - `set_value`
-    - `to_obj`
-    - `to_repr`
-    '''
-
-    def __init__(self, list_ntv, ntv_name=None, ntv_type=None):
-        '''NtvList constructor.
-
-        *Parameters*
-
-        - **ntv_name** : String (default None) - name of the NTV entity
-        - **ntv_type**: String (default None) - default type or namespace of the included entities
-        - **list_ntv**: list - list of Ntv objects or obj_value of Ntv objectd
-        '''
-        if isinstance(list_ntv, (NtvList, NtvSet)):
-            ntv_value = list_ntv.ntv_value
-            ntv_type = list_ntv.ntv_type
-            ntv_name = list_ntv.ntv_name
-        elif isinstance(list_ntv, list):
-            ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
-        else:
-            raise NtvError('ntv_value is not a list')
-        if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:  # and \
-            #    ntv_value[0].ntv_type.long_name != 'json':
-            ntv_type = ntv_value[0].ntv_type
-        super().__init__(ntv_value, ntv_name, ntv_type)
-
-    def __eq__(self, other):
-        ''' equal if name and value are equal'''
-        return self.__class__.__name__ == other.__class__.__name__ and\
-            self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
-
-    def __hash__(self):
-        '''return hash(name) + hash(value)'''
-        return hash(self.ntv_name) + hash(tuple(self.ntv_value))
-    
-    def _obj_sep(self, json_type, def_type=None):
-        ''' return separator to include in json_name'''
-        if json_type:
-            return '::'
-        return ''
-
-    def _obj_value(self, def_type=None, **kwargs):
-        '''return the Json format of the ntv_value'''
-        option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False} | kwargs
-        option2 = option | {'encoded': False}
-        if self.ntv_type:
-            def_type = self.ntv_type.long_name
-        return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
-
-class NtvSet(Ntv):
-    '''An NTV-set entity is a Ntv entity where:
-
-    - ntv_value is a list of NTV entities,
-    - ntv_type is a default type available for included NTV entities
-
-    *Attributes :*
-
-    - **ntv_name** : String - name of the NTV entity
-    - **ntv_type**: NtvType - type of the entity
-    - **ntv_value**:  value of the entity
-
-    The methods defined in this class are :
-
-    *Ntv constructor*
-    - `obj`
-    - `from_obj`
-    - `from_att`
-
-    *dynamic values (@property)*
-    - `type_str`
-    - `code_ntv`
-
-    *instance methods*
-    - `set_name`
-    - `set_type`
-    - `set_value`
-    - `to_obj`
-    - `to_repr`
-    '''
-
-    def __init__(self, list_ntv, ntv_name=None, ntv_type=None):
-        '''NtvSet constructor.
-
-        *Parameters*
-
-        - **ntv_name** : String (default None) - name of the NTV entity
-        - **ntv_type**: String (default None) - default type or namespace of the included entities
-        - **list_ntv**: list - list of Ntv objects or obj_value
-        '''
-        if isinstance(list_ntv, (NtvList, NtvSet)):
-            ntv_value = list_ntv.ntv_value
-            ntv_type = list_ntv.ntv_type
-            ntv_name = list_ntv.ntv_name
-        elif isinstance(list_ntv, list):
-            ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
-        else:
-            raise NtvError('ntv_value is not a list')
-        super().__init__(ntv_value, ntv_name, ntv_type)
-
-    def __eq__(self, other):
-        ''' equal if name and value are equal'''
-        return self.__class__.__name__ == other.__class__.__name__ and\
-            self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
-
-    def __hash__(self):
-        '''return hash(name) + hash(value)'''
-        return hash(self.ntv_name) + hash(tuple(self.ntv_value))
-    
-    def _obj_sep(self, json_type, def_type=None):
-        ''' return separator to include in json_name'''
-        if json_type or len(self.ntv_value) == 1:
-            return '::'
-        return ''
-
-    def _obj_value(self, def_type=None, **kwargs):
-        '''return the Json format of the ntv_value'''
-        option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False} | kwargs
-        option2 = option | {'encoded': False}
-        if self.ntv_type:
-            def_type = self.ntv_type.long_name
-        values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
-        return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
-
 
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used for all NTV connectors.
