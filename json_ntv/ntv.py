@@ -639,9 +639,7 @@ class NtvSingle(Ntv):
 
     def __hash__(self):
         '''return hash(name) + hash(type) + hash(value)'''
-        if isinstance(self.ntv_value, list): 
-            return hash(self.ntv_name) + hash(self.ntv_type) + hash(tuple(self.ntv_value))
-        return hash(self.ntv_name) + hash(self.ntv_type) + hash(self.ntv_value)
+        return hash(self.ntv_name) + hash(self.ntv_type) + hash(json.dumps(self.ntv_value))
     
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
@@ -670,7 +668,8 @@ class NtvList(Ntv):
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
-    - **ntv_list**: Boolean - True if one entity is named
+    - **ntv_list**: Boolean - False if all the entity names are present and different 
+    (dynamic value)
 
     The methods defined in this class are :
 
@@ -682,6 +681,7 @@ class NtvList(Ntv):
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
+    - `ntv_list`
 
     *instance methods*
     - `set_name`
@@ -704,16 +704,19 @@ class NtvList(Ntv):
             ntv_value = list_ntv.ntv_value
             ntv_type = list_ntv.ntv_type
             ntv_name = list_ntv.ntv_name
-            ntv_list = list_ntv.ntv_list
         elif isinstance(list_ntv, list):
             ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
-            ntv_list = '' in set([ntv.name for ntv in ntv_value])
         else:
             raise NtvError('ntv_value is not a list')
         if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
-        self.ntv_list = ntv_list
+
+    @property 
+    def ntv_list(self):
+        ''' return the ntv_list dynamic attribute'''
+        set_name = set([ntv.ntv_name for ntv in self])
+        return '' in set_name or len(set_name) != len(self)
 
     def __eq__(self, other):
         ''' equal if name and value are equal'''

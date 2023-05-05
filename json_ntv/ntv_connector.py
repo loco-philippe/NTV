@@ -82,7 +82,7 @@ class IindexConnec(NtvConnector):
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'field', self.to_ntv(option_name=True).to_obj())
+        return (None, 'field', self.to_ntv(name=True).to_obj())
     
 class IlistConnec(NtvConnector):
     '''NTV connector for Ilist'''

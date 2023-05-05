@@ -350,7 +350,7 @@ class NtvType():
             return True
         if self is None or other is None:
             return False
-        if self.__class__ != other.__class__:
+        if self.__class__.__name__ != other.__class__.__name__:
             return False
         return self.name == other.name and self.nspace == other.nspace
 
@@ -400,7 +400,6 @@ class Namespace():
     - `add`
 
     *dynamic values (@property)*
-    - `file`
     - `long_name`
     - `content`
 
@@ -461,7 +460,7 @@ class Namespace():
             return True
         if self is None or other is None:
             return False
-        if self.__class__ != other.__class__:
+        if self.__class__.__name__ != other.__class__.__name__:
             return False
         return self.name == other.name and self.parent == other.parent
 
