@@ -153,14 +153,14 @@ class Ntv(ABC):
         - **value**: Ntv entity or value to convert in an Ntv entity
         - **name** : string - name of the Ntv entity
         - **typ** : string or NtvType - type of the NTV entity
-        - **cat**: string - NTV category ('single', 'list' or 'set')'''
+        - **cat**: string - NTV category ('single', 'list')'''
         value = Ntv._from_value(value)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
             return value
         if isinstance(value, list) and cat == 'list':
             return NtvList(value, name, typ)
-        if isinstance(value, list) and cat == 'set':
-            return NtvSet(value, name, typ)
+        #if isinstance(value, list) and cat == 'set':
+        #    return NtvSet(value, name, typ)
         if cat == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
@@ -175,7 +175,8 @@ class Ntv(ABC):
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         value = Ntv._from_value(value)
-        if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
+        #if value.__class__.__name__ in ['NtvSingle', 'NtvList', 'NtvSet']:
+        if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
         if not sep:
@@ -211,7 +212,7 @@ class Ntv(ABC):
                         for key, val in zip(keys, values)]
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
-            return NtvSet(ntv_list, ntv_name, def_type)
+            return NtvList(ntv_list, ntv_name, def_type)
         raise NtvError('separator ":" is not compatible with value')
         
     def __len__(self):
@@ -259,10 +260,10 @@ class Ntv(ABC):
     @property
     def code_ntv(self):
         '''return a string with the NTV code composed with :
-        - 'l' (for NtvList), 's' (for NtvSet) or 'v' (for NtvSingle)
+        - 'l' (for NtvList) or 's' (for NtvSingle)
         - 'N' if ntv_name is present
         - 'T' if ntv_type is present'''
-        dic = {'NtvList': 'l', 'NtvSet': 's', 'NtvSingle': 'v'}
+        dic = {'NtvList': 'l', 'NtvSingle': 's'}
         code = dic[self.__class__.__name__]
         if self.ntv_name:
             code += 'N'
@@ -399,7 +400,7 @@ class Ntv(ABC):
             return ntv
         if isinstance(self, NtvSingle) and isinstance(self.ntv_value, NtvSingle):
             return {ntv:  self.ntv_value.to_repr(nam, typ, val)}
-        if isinstance(self, (NtvList, NtvSet)):
+        if isinstance(self, NtvList):
             if maxi < 1:
                 maxi = len(self.ntv_value)
             return {ntv:  [ntvi.to_repr(nam, typ, val) for ntvi in self.ntv_value[:maxi]]}
@@ -422,7 +423,7 @@ class Ntv(ABC):
         '''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False, 'name': True} | kwargs
-        if option['simpleval'] and isinstance(self, NtvSet):
+        if option['simpleval'] and isinstance(self, NtvList) and not self.ntv_list:
             value = NtvList(self)._obj_value(def_type=def_type, **option)
         else:
             value = self._obj_value(def_type=def_type, **option)
@@ -435,10 +436,7 @@ class Ntv(ABC):
             name = obj_name[0]
         else:
             name = obj_name[0] + obj_name[1] + obj_name[2]
-        if not name:
-            json_obj = value
-        else:
-            json_obj = {name: value}
+        json_obj = {name: value} if name else value
         if option['encoded'] and option['encode_format'] == 'json':
             return json.dumps(json_obj)
         if option['encoded'] and option['encode_format'] == 'cbor':
@@ -471,7 +469,7 @@ class Ntv(ABC):
             return (clas, name, typ, val)
         if isinstance(self, NtvSingle) and isinstance(val, NtvSingle):
             return (clas, name, typ, val.to_tuple(maxi=maxi))
-        if isinstance(self, (NtvList, NtvSet)):
+        if isinstance(self, NtvList):
             if maxi < 1:
                 maxi = len(val)
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxi]])
@@ -673,8 +671,91 @@ class NtvSingle(Ntv):
             return self.ntv_value
         return Ntv._uncast(self, **option)
 
-
 class NtvList(Ntv):
+    '''An NTV-list entity is a Ntv entity where:
+
+    - ntv_value is a list of NTV entities,
+    - ntv_type is a default type available for included NTV entities
+
+    *Attributes :*
+
+    - **ntv_name** : String - name of the NTV entity
+    - **ntv_type**: NtvType - type of the entity
+    - **ntv_value**:  value of the entity
+    - **ntv_list**: Boolean - True if one entity is named
+
+    The methods defined in this class are :
+
+    *Ntv constructor*
+    - `obj`
+    - `from_obj`
+    - `from_att`
+
+    *dynamic values (@property)*
+    - `type_str`
+    - `code_ntv`
+
+    *instance methods*
+    - `set_name`
+    - `set_type`
+    - `set_value`
+    - `to_obj`
+    - `to_repr`
+    '''
+
+    def __init__(self, list_ntv, ntv_name=None, ntv_type=None):
+        '''NtvList constructor.
+
+        *Parameters*
+
+        - **ntv_name** : String (default None) - name of the NTV entity
+        - **ntv_type**: String (default None) - default type or namespace of the included entities
+        - **list_ntv**: list - list of Ntv objects or obj_value of Ntv objectd
+        '''
+        if isinstance(list_ntv, NtvList):
+            ntv_value = list_ntv.ntv_value
+            ntv_type = list_ntv.ntv_type
+            ntv_name = list_ntv.ntv_name
+            ntv_list = list_ntv.ntv_list
+        elif isinstance(list_ntv, list):
+            ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
+            ntv_list = '' in set([ntv.name for ntv in ntv_value])
+        else:
+            raise NtvError('ntv_value is not a list')
+        if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
+            ntv_type = ntv_value[0].ntv_type
+        super().__init__(ntv_value, ntv_name, ntv_type)
+        self.ntv_list = ntv_list
+
+    def __eq__(self, other):
+        ''' equal if name and value are equal'''
+        return self.__class__.__name__ == other.__class__.__name__ and\
+            self.ntv_name == other.ntv_name and self.ntv_value == other.ntv_value
+
+    def __hash__(self):
+        '''return hash(name) + hash(value)'''
+        return hash(self.ntv_name) + hash(tuple(self.ntv_value))
+    
+    def _obj_sep(self, json_type, def_type=None):
+        ''' return separator to include in json_name'''
+        if json_type or (len(self.ntv_value) == 1 and not self.ntv_list):
+            return '::'
+        return ''
+
+    def _obj_value(self, def_type=None, **kwargs):
+        '''return the Json format of the ntv_value'''
+        option = {'encoded': False, 'encode_format': 'json',
+                  'simpleval': False} | kwargs
+        option2 = option | {'encoded': False}
+        if self.ntv_type:
+            def_type = self.ntv_type.long_name
+        if self.ntv_list or option['simpleval']:
+            return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
+        values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
+        return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
+
+
+class NtvListOld(Ntv):
     '''An NTV-list entity is a Ntv entity where:
 
     - ntv_value is a list of NTV entities,
@@ -750,7 +831,6 @@ class NtvList(Ntv):
         if self.ntv_type:
             def_type = self.ntv_type.long_name
         return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
-
 
 class NtvSet(Ntv):
     '''An NTV-set entity is a Ntv entity where:
