@@ -38,8 +38,8 @@ as well as two JSON formats:
 - named format when the name or type is present (see example above for an NTV-single entity and below for a structured entity).
 >
 > *Example of an entity composed of two other entities:*
-> - *```{ "cities::point": [[2.3522, 48.8566], [4.8357, 45.7640]] }``` for an NTV-list entity*
-> - *```{ "cities::point": { "paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640] } }``` for an NTV-set entity*
+> - *```{ "cities::point": [[2.3522, 48.8566], [4.8357, 45.7640]] }``` for an unnamed NTV-list entity*
+> - *```{ "cities::point": { "paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640] } }``` for a named NTV-list entity*
 >
 > *Note: This syntax can also be used for CSV file headers*
 
