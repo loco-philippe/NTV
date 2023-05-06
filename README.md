@@ -24,14 +24,14 @@ The constructed entities (called NTV for *named typed value*) are therefore a tr
 > - *a type: the coordinates of a point according to the GeoJSON format,*
 > - *a value: [ 2.3522, 48.8566]*
 
-The easiest way to add this information is to use a JSON-object with a single member using the syntax [JSON-ND](https://github.com/glenkleidon/JSON-ND) for the first term of the member and the JSON-value for the second term of the member.
+The easiest way to add this information into a JSON-value is to use a JSON-object with a single member using the syntax [JSON-ND](https://github.com/glenkleidon/JSON-ND) for the first term of the member and the JSON-value for the second term of the member.
 >
 > *For the example above, the JSON representation is:*    
 > *```{ "paris:point" : [2.3522, 48.8566] }```*
 
-With this approach, three NTV entities are defined:
+With this approach, two NTV entities are defined:
 - a primitive entity which is not composed of any other entity (NTV-single),
-- two structured entities: an unordered collection of NTV entities (NTV-set) and an ordered sequence of NTV entities (NTV-list).
+- a structured entity which is an ordered sequence of NTV entities (Ntv-list).
       
 as well as two JSON formats:
 - simple format when the name and the type are not present (this is the usual case of CSV data),
