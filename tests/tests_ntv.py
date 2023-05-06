@@ -250,6 +250,9 @@ class Test_Ntv_creation(unittest.TestCase):
                         Ntv.from_obj(nstr2).to_obj(simpleval=True) ==
                         Ntv.from_obj(nstr3).to_obj(simpleval=True) == 
                         [[2.1, 40.3], [2.1, 40.3]])
+        self.assertEqual(Ntv.obj(nstr), Ntv.obj(nstr2))
+        self.assertEqual(Ntv.obj(nstr).to_obj(ntv_list=True ), nstr )
+        self.assertEqual(Ntv.obj(nstr).to_obj(ntv_list=False), nstr2)
 
     def test_tab(self):
         tab = Ntv.obj(  {'index':           [1, 2, 3],

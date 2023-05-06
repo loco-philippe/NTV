@@ -408,9 +408,10 @@ class Ntv(ABC):
         - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
         - **name** : boolean (default true) - if False, name is not included
+        - **ntv_list** : boolean (default false) - if True, Json-object is not used for NtvList
         '''
         option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False, 'name': True} | kwargs
+                  'simpleval': False, 'name': True, 'ntv_list': False} | kwargs
         if option['simpleval'] and isinstance(self, NtvList) and not self.ntv_list:
             value = NtvList(self)._obj_value(def_type=def_type, **option)
         else:
@@ -736,11 +737,11 @@ class NtvList(Ntv):
     def _obj_value(self, def_type=None, **kwargs):
         '''return the Json format of the ntv_value'''
         option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False} | kwargs
+                  'simpleval': False, 'ntv_list': False} | kwargs
         option2 = option | {'encoded': False}
         if self.ntv_type:
             def_type = self.ntv_type.long_name
-        if self.ntv_list or option['simpleval']:
+        if self.ntv_list or option['simpleval'] or option['ntv_list']:
             return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
         values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
