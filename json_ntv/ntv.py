@@ -473,7 +473,9 @@ class Ntv(ABC):
     @staticmethod
     def _from_value(value):
         '''return a decoded value'''
-        if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
+        if isinstance(value, bytes):
+            value = cbor2.loads(value)
+        elif isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
             try:
                 value = json.loads(value)
             except JSONDecodeError:
