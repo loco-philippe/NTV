@@ -394,6 +394,12 @@ class Ntv(ABC):
             return {ntv:  [ntvi.to_repr(nam, typ, val) for ntvi in self.ntv_value[:maxi]]}
         raise NtvError('the ntv entity is not consistent')
 
+    def to_name(self, default=''):
+        '''return the name of the NTV entity'''
+        if self.ntv_name == '':
+            return default
+        return self.ntv_name
+        
     def to_obj(self, def_type=None, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format).
 
@@ -473,7 +479,9 @@ class Ntv(ABC):
     @staticmethod
     def _from_value(value):
         '''return a decoded value'''
-        if isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
+        if isinstance(value, bytes):
+            value = cbor2.loads(value)
+        elif isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
             try:
                 value = json.loads(value)
             except JSONDecodeError:
@@ -656,6 +664,8 @@ class NtvSingle(Ntv):
                   'simpleval': False} | kwargs
         if option['encode_format'] in ('json', 'tuple'):
             return self.ntv_value
+        if option['encode_format'] == 'obj' and self.ntv_value == 'null':
+            return None
         return Ntv._uncast(self, **option)
 
 class NtvList(Ntv):
