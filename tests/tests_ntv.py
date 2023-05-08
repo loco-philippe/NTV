@@ -253,6 +253,8 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj(nstr), Ntv.obj(nstr2))
         self.assertEqual(Ntv.obj(nstr).to_obj(ntv_list=True ), nstr )
         self.assertEqual(Ntv.obj(nstr).to_obj(ntv_list=False), nstr2)
+        self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(encode_format='obj'),
+                         {'paris:point': None})
 
     def test_tab(self):
         tab = Ntv.obj(  {'index':           [1, 2, 3],
