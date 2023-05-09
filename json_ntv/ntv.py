@@ -245,6 +245,10 @@ class Ntv(ABC):
         '''remove a ntv_value item'''
         self.ntv_value.pop(ind)
 
+    def __lt__(self, other):
+        ''' return a comparison between hash value'''
+        return hash(self) < hash(other)
+    
     @property
     def code_ntv(self):
         '''return a string with the NTV code composed with :
@@ -571,7 +575,7 @@ class Ntv(ABC):
         elif dic_obj['other'] in NtvConnector.connector():
             connec = NtvConnector.connector()['other']
         if connec:
-            return connec.from_ntv(self.ntv_value)
+            return connec.from_ntv(self.ntv_value, **option)
         return self.ntv_value
 
     @staticmethod

@@ -74,7 +74,7 @@ class IindexConnec(NtvConnector):
     clas_obj = 'Iindex'
 
     @staticmethod
-    def from_ntv(ntv_value):
+    def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         from observation import Iindex
         ntv = Ntv.obj(ntv_value)
@@ -90,7 +90,7 @@ class IlistConnec(NtvConnector):
     clas_obj = 'Ilist'
 
     @staticmethod
-    def from_ntv(ntv_value):
+    def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         from observation import Ilist
         ntv = Ntv.obj(ntv_value)
@@ -107,7 +107,7 @@ class DataFrameConnec(NtvConnector):
     clas_obj = 'DataFrame'
 
     @staticmethod
-    def from_ntv(ntv_value):
+    def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         ntv = Ntv.obj(ntv_value)
         dataframe = pd.DataFrame(
@@ -133,14 +133,15 @@ class SeriesConnec(NtvConnector):
     clas_obj = 'Series'
 
     @staticmethod
-    def from_ntv(ntv_value):
+    def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
+        option = {'index':None} | kwargs
         dtype = None
         ntv = Ntv.obj(ntv_value)
-        if ntv.ntv_type and ntv.ntv_type.long_name in SeriesConnec.type_to_dtype:
-            dtype = SeriesConnec.type_to_dtype[ntv.ntv_type.long_name]
+        if ntv.type_str in SeriesConnec.type_to_dtype:
+            dtype = SeriesConnec.type_to_dtype[ntv.type_str]
         return pd.Series(ntv.to_obj(encode_format='obj', simpleval=True),
-                         name=ntv.ntv_name, dtype=dtype)
+                         name=ntv.ntv_name, index=option['index'] , dtype=dtype)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
