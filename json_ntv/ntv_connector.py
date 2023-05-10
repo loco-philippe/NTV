@@ -110,11 +110,12 @@ class DataFrameConnec(NtvConnector):
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         ntv = Ntv.obj(ntv_value)
-        dataframe = pd.DataFrame(
-            {d.ntv_name: SeriesConnec.from_ntv(d) for d in ntv})
-        if 'index' in dataframe.columns:
-            return dataframe.set_index('index')
-        return dataframe
+        leng = max([len(ntvi) for ntvi in ntv.ntv_value])
+        df = pd.DataFrame(
+            {d.ntv_name: SeriesConnec.from_ntv(d, leng=leng) for d in ntv})
+        if 'index' in df.columns:
+            return df.set_index('index')
+        return df
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
@@ -127,21 +128,27 @@ class SeriesConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
     type_to_dtype = {'date': 'datetime64[ns]', 'datetime': 'datetime64[ns]',
                      'string': 'string', 'int32': 'int32', 'int64': 'int64',
-                     'float': 'float', 'float32': 'float32', }
-    dtype_to_type = {'datetime64[ns]': 'datetime', 'string': 'string', 'int32': 'int32',
-                     'int64': 'json'}
+                     'float': 'float', 'float32': 'float32', 'boolean': 'boolean'}
+    dtype_to_type = {'datetime64[ns]': 'datetime', 'string': 'string', 
+                     'int32': 'int32', 'int64': 'json', 'float': 'json', 
+                     'float32': 'float32', 'boolean': 'json'}
     clas_obj = 'Series'
 
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
-        option = {'index':None} | kwargs
+        option = {'index':None, 'leng':None} | kwargs
         dtype = None
         ntv = Ntv.obj(ntv_value)
         if ntv.type_str in SeriesConnec.type_to_dtype:
             dtype = SeriesConnec.type_to_dtype[ntv.type_str]
-        return pd.Series(ntv.to_obj(encode_format='obj', simpleval=True),
-                         name=ntv.ntv_name, index=option['index'] , dtype=dtype)
+        if isinstance(ntv, NtvSingle) and option['leng']:
+            data = [ntv.to_obj(encode_format='obj', simpleval=True)] * option['leng']
+        elif len(ntv) == 1 and option['leng']:
+            data = ntv.to_obj(encode_format='obj', simpleval=True) * option['leng']
+        else:
+            data = ntv.to_obj(encode_format='obj', simpleval=True)
+        return pd.Series(data, name=ntv.ntv_name, index=option['index'] , dtype=dtype)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
