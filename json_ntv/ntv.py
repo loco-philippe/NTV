@@ -131,14 +131,15 @@ class Ntv(ABC):
         self.ntv_value = ntv_value
 
     @staticmethod
-    def obj(data):
+    def obj(data, no_typ=False):
         ''' return an Ntv entity from data.
-        Data can be :
+        **Data** can be :
         - a tuple with value, name, typ and cat (see `from_att` method)
-        - a value to decode (see `from_obj`method)'''
+        - a value to decode (see `from_obj`method)
+        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type'''
         if isinstance(data, tuple):
             return Ntv.from_att(*data)
-        return Ntv.from_obj(data)
+        return Ntv.from_obj(data, no_typ=no_typ)
 
     @staticmethod
     def from_att(value, name, typ, cat):
@@ -160,15 +161,17 @@ class Ntv(ABC):
         return Ntv.from_obj(value, def_type=typ)
     
     @staticmethod
-    def from_obj(value, def_type=None, def_sep=None):
+    def from_obj(value, def_type=None, def_sep=None, no_typ=False):
         ''' return an Ntv entity from an object value.
 
         *Parameters*
 
         - **value**: Ntv value to convert in an Ntv entity
+        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
         - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
         - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
         value = Ntv._from_value(value)
+        #notype = def_type == 'notype'
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
@@ -183,6 +186,8 @@ class Ntv(ABC):
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
+            if no_typ:
+                def_type = 'json'
             return NtvList(ntv_list, ntv_name, def_type)
         if sep == ':' or (sep is None and isinstance(ntv_value, dict) and 
                           len(ntv_value) == 1):
@@ -205,6 +210,8 @@ class Ntv(ABC):
                         for key, val in zip(keys, values)]
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
+            if no_typ:
+                def_type = 'json'
             return NtvList(ntv_list, ntv_name, def_type)
         raise NtvError('separator ":" is not compatible with value')
         
@@ -230,7 +237,7 @@ class Ntv(ABC):
         ''' return ntv_value item '''
         if isinstance(selector, tuple):
             return [self.ntv_value[i] for i in selector]
-        if isinstance(selector, str):
+        if isinstance(selector, str) and isinstance(self, NtvList) :
             ind = [ntv.ntv_name for ntv in self.ntv_value].index(selector)
             return self.ntv_value[ind]
         return self.ntv_value[selector]
@@ -359,11 +366,11 @@ class Ntv(ABC):
         self.ntv_name = name
 
     def set_type(self, typ=None):
-        '''set a new type to the entity (available only for NtvSingle)'''
+        '''set a new type to the entity (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        if self.__class__.__name__ != 'NtvSingle':
-            raise NtvError('set_type is available only for NtvSingle class')
+        #if self.__class__.__name__ != 'NtvSingle':
+        #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
