@@ -111,6 +111,8 @@ class DataFrameConnec(NtvConnector):
         ''' convert ntv_value into the return object'''
         ntv = Ntv.obj(ntv_value)
         leng = max([len(ntvi) for ntvi in ntv.ntv_value])
+        keys = [
+            ]
         df = pd.DataFrame(
             {d.ntv_name: SeriesConnec.from_ntv(d, leng=leng) for d in ntv})
         if 'index' in df.columns:
@@ -168,7 +170,9 @@ class SeriesConnec(NtvConnector):
             ntv_type = SeriesConnec.dtype_to_type[self.cat.categories.dtype.name]
             val_codec = json.loads(sr_codec.to_json(orient='records', date_format='iso',
                                                     default_handler=str))
-            ntv_value = NtvList([NtvList(val_codec, ntv_type=ntv_type),
-                         NtvList(list(self.cat.codes))], ntv_type='json') 
+            #ntv_value = NtvList([NtvList(val_codec, ntv_type=ntv_type),
+            #             NtvList(list(self.cat.codes))], ntv_type='json') 
+            ntv_value = [NtvList(val_codec, ntv_type=ntv_type),
+                         NtvList(list(self.cat.codes))] 
         ntv_name = self.name
         return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
