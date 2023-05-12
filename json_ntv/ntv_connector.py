@@ -111,10 +111,9 @@ class DataFrameConnec(NtvConnector):
         ''' convert ntv_value into the return object'''
         ntv = Ntv.obj(ntv_value)
         leng = max([len(ntvi) for ntvi in ntv.ntv_value])
-        keys = [
-            ]
-        df = pd.DataFrame(
-            {d.ntv_name: SeriesConnec.from_ntv(d, leng=leng) for d in ntv})
+        #keys_ntv = [d[1] if len(d) == 2 and len(d[1]) == leng else None for d in ntv]
+        df = pd.DataFrame({d.name: SeriesConnec.from_ntv(d, leng=leng) for d in ntv})
+        #    {d.ntv_name: SeriesConnec.from_ntv(d, index=keys, leng=leng) for d, keys in zip(ntv, keys_ntv)})
         if 'index' in df.columns:
             return df.set_index('index')
         return df
@@ -139,17 +138,25 @@ class SeriesConnec(NtvConnector):
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
-        option = {'index':None, 'leng':None} | kwargs
+        option = {'index':None, 'leng':None} | kwargs 
         dtype = None
         ntv = Ntv.obj(ntv_value)
+        codes = len(ntv) == 2 and len(ntv[1]) > 1
+        if codes:
+            cod = ntv[1].to_obj(simpleval=True)
+            ntv = ntv[0]
+        ntv_obj = ntv.to_obj(encode_format='obj', simpleval=True)
         if ntv.type_str in SeriesConnec.type_to_dtype:
             dtype = SeriesConnec.type_to_dtype[ntv.type_str]
         if isinstance(ntv, NtvSingle) and option['leng']:
-            data = [ntv.to_obj(encode_format='obj', simpleval=True)] * option['leng']
+            data = [ntv_obj] * option['leng']
         elif len(ntv) == 1 and option['leng']:
-            data = ntv.to_obj(encode_format='obj', simpleval=True) * option['leng']
+            data = ntv_obj * option['leng']
+        elif not codes:
+            data = ntv_obj
         else:
-            data = ntv.to_obj(encode_format='obj', simpleval=True)
+            cat = pd.CategoricalDtype(categories=pd.Series(ntv_obj))
+            data = pd.Categorical.from_codes(codes=cod, dtype=cat)
         return pd.Series(data, name=ntv.ntv_name, index=option['index'] , dtype=dtype)
 
     def to_ntv(self):
