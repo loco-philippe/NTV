@@ -131,7 +131,7 @@ class SeriesConnec(NtvConnector):
                      'float': 'float', 'float32': 'float32', 'boolean': 'boolean'}
     dtype_to_type = {'datetime64[ns]': 'datetime', 'string': 'string', 
                      'int32': 'int32', 'int64': 'json', 'float': 'json', 
-                     'float32': 'float32', 'boolean': 'json'}
+                     'float32': 'float32', 'boolean': 'json', 'object': None}
     clas_obj = 'Series'
 
     @staticmethod
@@ -152,14 +152,23 @@ class SeriesConnec(NtvConnector):
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
-        ntv_type = None
         dtype = self.dtype.name
+        ntv_type = None
+        if dtype in SeriesConnec.dtype_to_type and SeriesConnec.dtype_to_type[dtype] != 'json':
+            ntv_type = SeriesConnec.dtype_to_type[dtype]
         if dtype in SeriesConnec.dtype_to_type:
-            if SeriesConnec.dtype_to_type[dtype] != 'json':
-                ntv_type = SeriesConnec.dtype_to_type[dtype]
+            #if SeriesConnec.dtype_to_type[dtype] != 'json':
+            #    ntv_type = SeriesConnec.dtype_to_type[dtype]
             ntv_value = json.loads(self.to_json(orient='records', date_format='iso',
                                                 default_handler=str))
-        elif self.dtype.name == 'object':
+        elif dtype == 'object':
             ntv_value = self.to_list()
+        elif dtype == 'category':
+            sr_codec = pd.Series(self.cat.categories)
+            ntv_type = SeriesConnec.dtype_to_type[self.cat.categories.dtype.name]
+            val_codec = json.loads(sr_codec.to_json(orient='records', date_format='iso',
+                                                    default_handler=str))
+            ntv_value = NtvList([NtvList(val_codec, ntv_type=ntv_type),
+                         NtvList(list(self.cat.codes))], ntv_type='json') 
         ntv_name = self.name
         return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
