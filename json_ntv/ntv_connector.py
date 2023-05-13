@@ -161,29 +161,27 @@ class SeriesConnec(NtvConnector):
             dtype = 'category'
         name = name + '::' + ntv.type_str \
             if dtype == 'object' or (codes and ntv.type_str != 'json') else name
-        #name = name if name and name != 'index' else None
         name = name if name else None
         return pd.Series(data, name=name, index=option['index'] , dtype=dtype)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
+        to_type = SeriesConnec.dtype_to_type
         dtype = self.dtype.name
         ntv_type = None
         ntv_name = self.name if self.name else ''
-        if dtype in SeriesConnec.dtype_to_type and SeriesConnec.dtype_to_type[dtype] != 'json':
-            ntv_type = SeriesConnec.dtype_to_type[dtype]
-        if dtype in SeriesConnec.dtype_to_type:
-            ntv_value = json.loads(self.to_json(orient='records', date_format='iso',
-                                                default_handler=str))
+        if dtype in to_type and to_type[dtype] != 'json':
+            ntv_type = to_type[dtype]
+        if dtype in to_type:
+            js = self.to_json(orient='records', date_format='iso', default_handler=str)
+            ntv_value = json.loads(js)
         elif dtype == 'object':
             ntv_name, ntv_type, sep = Ntv.from_obj_name(ntv_name)
             ntv_value = self.to_list()
         elif dtype == 'category':
             ntv_name, ntv_type, sep = Ntv.from_obj_name(ntv_name)
-            sr_codec = pd.Series(self.cat.categories)
-            #ntv_type = SeriesConnec.dtype_to_type[self.cat.categories.dtype.name]
-            val_codec = json.loads(sr_codec.to_json(orient='records', date_format='iso',
-                                                    default_handler=str))
-            ntv_value = [NtvList(val_codec, ntv_type=ntv_type),
+            cdc = pd.Series(self.cat.categories)
+            js = cdc.to_json(orient='records', date_format='iso', default_handler=str)
+            ntv_value = [NtvList(json.loads(js), ntv_type=ntv_type),
                          NtvList(list(self.cat.codes))] 
         return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
