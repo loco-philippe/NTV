@@ -111,9 +111,8 @@ class DataFrameConnec(NtvConnector):
         ''' convert ntv_value into the return object'''
         ntv = Ntv.obj(ntv_value)
         leng = max([len(ntvi) for ntvi in ntv.ntv_value])
-        #keys_ntv = [d[1] if len(d) == 2 and len(d[1]) == leng else None for d in ntv]
-        df = pd.DataFrame({d.name: SeriesConnec.from_ntv(d, leng=leng) for d in ntv})
-        #    {d.ntv_name: SeriesConnec.from_ntv(d, index=keys, leng=leng) for d, keys in zip(ntv, keys_ntv)})
+        list_series = [SeriesConnec.from_ntv(d, leng=leng) for d in ntv]
+        df = pd.DataFrame({ser.name: ser for ser in list_series})
         if 'index' in df.columns:
             return df.set_index('index')
         return df
@@ -127,20 +126,22 @@ class DataFrameConnec(NtvConnector):
 
 class SeriesConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
-    type_to_dtype = {'date': 'datetime64[ns]', 'datetime': 'datetime64[ns]',
+    type_to_dtype = {'datetime': 'datetime64[ns]',
                      'string': 'string', 'int32': 'int32', 'int64': 'int64',
-                     'float': 'float', 'float32': 'float32', 'boolean': 'boolean'}
+                     'float': 'float', 'float32': 'float32', 'boolean': 'boolean',
+                     'json': None}
     dtype_to_type = {'datetime64[ns]': 'datetime', 'string': 'string', 
                      'int32': 'int32', 'int64': 'json', 'float': 'json', 
-                     'float32': 'float32', 'boolean': 'json', 'object': None}
+                     'float32': 'float32', 'boolean': 'json'}
     clas_obj = 'Series'
 
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         option = {'index':None, 'leng':None} | kwargs 
-        dtype = None
+        dtype = 'object'
         ntv = Ntv.obj(ntv_value)
+        name = ntv.ntv_name
         codes = len(ntv) == 2 and len(ntv[1]) > 1
         if codes:
             cod = ntv[1].to_obj(simpleval=True)
@@ -157,29 +158,32 @@ class SeriesConnec(NtvConnector):
         else:
             cat = pd.CategoricalDtype(categories=pd.Series(ntv_obj))
             data = pd.Categorical.from_codes(codes=cod, dtype=cat)
-        return pd.Series(data, name=ntv.ntv_name, index=option['index'] , dtype=dtype)
+            dtype = 'category'
+        name = name + '::' + ntv.type_str \
+            if dtype == 'object' or (codes and ntv.type_str != 'json') else name
+        #name = name if name and name != 'index' else None
+        name = name if name else None
+        return pd.Series(data, name=name, index=option['index'] , dtype=dtype)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
         dtype = self.dtype.name
         ntv_type = None
+        ntv_name = self.name if self.name else ''
         if dtype in SeriesConnec.dtype_to_type and SeriesConnec.dtype_to_type[dtype] != 'json':
             ntv_type = SeriesConnec.dtype_to_type[dtype]
         if dtype in SeriesConnec.dtype_to_type:
-            #if SeriesConnec.dtype_to_type[dtype] != 'json':
-            #    ntv_type = SeriesConnec.dtype_to_type[dtype]
             ntv_value = json.loads(self.to_json(orient='records', date_format='iso',
                                                 default_handler=str))
         elif dtype == 'object':
+            ntv_name, ntv_type, sep = Ntv.from_obj_name(ntv_name)
             ntv_value = self.to_list()
         elif dtype == 'category':
+            ntv_name, ntv_type, sep = Ntv.from_obj_name(ntv_name)
             sr_codec = pd.Series(self.cat.categories)
-            ntv_type = SeriesConnec.dtype_to_type[self.cat.categories.dtype.name]
+            #ntv_type = SeriesConnec.dtype_to_type[self.cat.categories.dtype.name]
             val_codec = json.loads(sr_codec.to_json(orient='records', date_format='iso',
                                                     default_handler=str))
-            #ntv_value = NtvList([NtvList(val_codec, ntv_type=ntv_type),
-            #             NtvList(list(self.cat.codes))], ntv_type='json') 
             ntv_value = [NtvList(val_codec, ntv_type=ntv_type),
                          NtvList(list(self.cat.codes))] 
-        ntv_name = self.name
         return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
