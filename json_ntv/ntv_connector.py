@@ -114,7 +114,8 @@ class DataFrameConnec(NtvConnector):
         list_series = [SeriesConnec.from_ntv(d, leng=leng) for d in ntv]
         df = pd.DataFrame({ser.name: ser for ser in list_series})
         if 'index' in df.columns:
-            return df.set_index('index')
+            df = df.set_index('index')
+            df.index.rename(None, inplace=True)
         return df
 
     def to_ntv(self):
@@ -128,11 +129,11 @@ class SeriesConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
     type_to_dtype = {'datetime': 'datetime64[ns]',
                      'string': 'string', 'int32': 'int32', 'int64': 'int64',
-                     'float': 'float', 'float32': 'float32', 'boolean': 'boolean',
+                     'float': 'float', 'float32': 'float32', 'boolean': 'bool',
                      'json': None}
     dtype_to_type = {'datetime64[ns]': 'datetime', 'string': 'string', 
                      'int32': 'int32', 'int64': 'json', 'float': 'json', 
-                     'float32': 'float32', 'boolean': 'json'}
+                     'float32': 'float32', 'bool': 'json'}
     clas_obj = 'Series'
 
     @staticmethod
@@ -181,7 +182,12 @@ class SeriesConnec(NtvConnector):
         elif dtype == 'category':
             ntv_name, ntv_type, sep = Ntv.from_obj_name(ntv_name)
             cdc = pd.Series(self.cat.categories)
-            js = cdc.to_json(orient='records', date_format='iso', default_handler=str)
-            ntv_value = [NtvList(json.loads(js), ntv_type=ntv_type),
-                         NtvList(list(self.cat.codes))] 
+            if cdc.dtype.name == 'object':
+                ntv_value = [Ntv.obj(Ntv.obj(cdc).val),
+                             NtvList(list(self.cat.codes))] 
+            else:
+                js = cdc.to_json(orient='records', date_format='iso', default_handler=str)
+                ntv_value = [NtvList(json.loads(js), ntv_type=ntv_type),
+                             NtvList(list(self.cat.codes))] 
+            ntv_type = 'json'
         return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
