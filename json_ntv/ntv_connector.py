@@ -120,14 +120,17 @@ class DataFrameConnec(NtvConnector):
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
+        from observation import Ilist
         df2 = self.reset_index()
-        """df2_list = [[SeriesConnec.to_ntv(df2[colon])[2] 
-                     if len(df2[colon].astype('category').cat.categories) > 1
-                     else SeriesConnec.to_ntv(df2[colon][0])[2] 
-                     for colon in df2.columns]]
-        return (None, 'tab', NtvList(df2_list).to_obj())"""
-        return (None, 'tab', NtvList([SeriesConnec.to_ntv(df2[colon])[2]
-                                     for colon in df2.columns]).to_obj())
+        """js = NtvList([[SeriesConnec.to_ntv(df2[col])[2] 
+                     if len(df2[col].astype('category').cat.categories) > 1
+                     else SeriesConnec.to_ntv(df2[col][0])[2] 
+                     for col in df2.columns]]).to_obj() # methode si unique et hash"""
+        js = NtvList([SeriesConnec.to_ntv(df2[col])[2] for col in df2.columns]).to_obj()
+        # methode si non unique
+        return (None, 'tab', js) 
+        #return (None, 'tab', Ilist.ntv(js).to_ntv(modecodec='full').to_obj()) 
+        # methode si non categorical
 
 
 class SeriesConnec(NtvConnector):
