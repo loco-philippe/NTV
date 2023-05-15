@@ -511,8 +511,9 @@ class Ntv(ABC):
         '''return (name, type, value, separator) of the json value'''
         if json_value is None:
             return (None, None, None, None)
-        if isinstance(json_value, tuple):
-            return (None, None, list(json_value), None)
+        #if isinstance(json_value, tuple):
+        #    return (None, None, list(json_value), None)
+        #if isinstance(json_value, (int, str, float, bool)):
         if isinstance(json_value, (list, int, str, float, bool)):
             return (None, None, json_value, None)
         if isinstance(json_value, dict) and len(json_value) != 1:
@@ -533,6 +534,8 @@ class Ntv(ABC):
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
         match clas:
+            case 'tuple':
+                return (None, 'array', list(data))
             case 'date' | 'time' | 'datetime':
                 return (None, clas, data.isoformat())
             case 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | \
@@ -553,7 +556,7 @@ class Ntv(ABC):
     def _uncast(self, **option):
         '''return object from ntv_value'''
         dic_fct = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
-                   'datetime': datetime.datetime.fromisoformat}
+                   'datetime': datetime.datetime.fromisoformat, 'array': tuple}
         dic_geo = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
                    'multiline': 'multilinestring', 'polygon': 'polygon',
                    'multipolygon': 'multipolygon'}
@@ -588,6 +591,7 @@ class Ntv(ABC):
     @staticmethod
     def _is_json_ntv(val):
         ''' return True if val is a json type'''
+        #return val is None or isinstance(val, (list, int, str, float, bool, dict))
         return val is None or isinstance(val, (list, int, str, float, bool, dict))
 
     @staticmethod

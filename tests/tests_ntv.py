@@ -41,6 +41,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     ['json', {"::json": [1, 2]}, ('', '', '')],
                     #['json', {"::": [1, 2]}, ('', '::', 'json')],
                     ['json', {"::": [1, 2]}, ('', '', '')],
+                    ['array', {":array": [1, 2]}, ('', '', '')],
                     ]
         for data in list_obj:
             ntv = Ntv.obj(data[1])
@@ -142,6 +143,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvSingle', {'Ntv1:fr.reg': {'Ntv2:fr.BAN.lon': 2}}],
                    ['NtvSingle', {'Ntv1': True}],
                    ['NtvSingle', True],
+                   ['NtvSingle', {'Ntv1:array': [1, 2]}],
                    ['NtvSingle', {'Ntv1:dat': [1, 2]}],
                    ['NtvSingle', '{ner'],
                    ['NtvSingle', {':$point': {'a': [1, 2], 'b': [3, 4]}}],

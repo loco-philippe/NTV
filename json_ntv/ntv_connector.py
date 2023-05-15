@@ -121,6 +121,11 @@ class DataFrameConnec(NtvConnector):
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
         df2 = self.reset_index()
+        """df2_list = [[SeriesConnec.to_ntv(df2[colon])[2] 
+                     if len(df2[colon].astype('category').cat.categories) > 1
+                     else SeriesConnec.to_ntv(df2[colon][0])[2] 
+                     for colon in df2.columns]]
+        return (None, 'tab', NtvList(df2_list).to_obj())"""
         return (None, 'tab', NtvList([SeriesConnec.to_ntv(df2[colon])[2]
                                      for colon in df2.columns]).to_obj())
 
