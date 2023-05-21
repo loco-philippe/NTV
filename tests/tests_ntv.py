@@ -46,7 +46,7 @@ class Test_Ntv_creation(unittest.TestCase):
         for data in list_obj:
             ntv = Ntv.obj(data[1])
             #print(ntv)
-            self.assertEqual(ntv.obj_name(data[0]), list(data[2]))
+            self.assertEqual(ntv.json_name(data[0]), list(data[2]))
 
     def test_agreg_type(self):
         list_type = [[[None, None, True], 'json'],
@@ -230,9 +230,9 @@ class Test_Ntv_creation(unittest.TestCase):
         for test in list_test:
             # print(test[1])
             self.assertEqual(Ntv.from_obj(
-                test[1]).ntv_value[0].obj_name(), list(test[0]))
+                test[1]).ntv_value[0].json_name(), list(test[0]))
             self.assertEqual(
-                Ntv.obj(test[1]).ntv_value[0].obj_name(), list(test[0]))
+                Ntv.obj(test[1]).ntv_value[0].json_name(), list(test[0]))
 
     def test_default_list(self):
         unic = NtvSingle({'un':1, 'deux':2}, 'param')

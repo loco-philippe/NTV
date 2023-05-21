@@ -58,7 +58,7 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
     else:
         ntv_set = ntv
     list_ntv = [Ntv.obj(field) for field in ntv_set]
-    fieldnames = [ntv_field.obj_name(string=True) for ntv_field in list_ntv]
+    fieldnames = [ntv_field.json_name(string=True) for ntv_field in list_ntv]
     with open(file_name, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval=restval, extrasaction=extrasaction, 
                                 dialect=dialect, *args, **kwds)

@@ -96,7 +96,7 @@ class Ntv(ABC):
     *instance methods*
     - `alike`
     - `from_value`
-    - `obj_name`
+    - `json_name`
     - `set_name`
     - `set_type`
     - `set_value`
@@ -332,7 +332,7 @@ class Ntv(ABC):
             return NtvList(self.ntv_value)
         return Ntv.obj(self.ntv_value)
     
-    def obj_name(self, def_type=None, string=False, explicit=False):
+    def json_name(self, def_type=None, string=False, explicit=False):
         '''return the JSON name of the NTV entity (json-ntv format)
 
         *Parameters*
@@ -405,12 +405,6 @@ class Ntv(ABC):
             return {ntv:  [ntvi.to_repr(nam, typ, val) for ntvi in self.ntv_value[:maxi]]}
         raise NtvError('the ntv entity is not consistent')
 
-    def to_name(self, default=''):
-        '''return the name of the NTV entity'''
-        if self.ntv_name == '':
-            return default
-        return self.ntv_name
-        
     def to_obj(self, def_type=None, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format).
 
@@ -433,7 +427,7 @@ class Ntv(ABC):
             value = NtvList(self)._obj_value(def_type=def_type, **option)
         else:
             value = self._obj_value(def_type=def_type, **option)
-        obj_name = self.obj_name(def_type)
+        obj_name = self.json_name(def_type)
         if not option['name']:
             obj_name[0] = ''
         if option['simpleval']:
