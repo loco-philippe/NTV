@@ -102,6 +102,7 @@ class Ntv(ABC):
     - `set_value`
     - `to_obj`
     - `to_repr`
+    - `to_mermaid`
     - `to_tuple`
     
     *utility methods*
@@ -373,6 +374,32 @@ class Ntv(ABC):
         #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
+    def to_mermaid(self, title='', disp=False):
+        '''return a mermaid flowchart.
+
+        *Parameters*
+
+        - **title**: String (default '') : title of the flowchart
+        - **disp**: Boolean (default False) : if true, return a display else return 
+        a mermaid text diagram
+        '''
+        from base64 import b64encode
+        from IPython.display import Image, display
+        from json_ntv.json_mermaid import diagram
+        
+        ntv = Ntv.obj(self)
+        node_list = []
+        link_list = []
+        Ntv._mermaid_link(ntv, '0', None, node_list, link_list)
+        mermaid_json = {title + ':$flowchart' : { 
+            'orientation': 'top-down',
+            'node::': {node[0]: node[1] for node in node_list},
+            'link::': link_list}}
+        if disp:
+            return display(Image(url="https://mermaid.ink/img/" + 
+                b64encode(diagram(mermaid_json).encode("ascii")).decode("ascii")))
+        return diagram(mermaid_json)        
+        
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity.
 
@@ -593,7 +620,35 @@ class Ntv(ABC):
         '''transform a tuple of tuple in a list of list'''
         return [val if not isinstance(val, tuple) else Ntv._listed(val) for val in idx]
 
+    @staticmethod
+    def _mermaid_node(ntv, node, def_typ_str):
+        '''create and return a node'''
+        j_name, j_sep, j_type = ntv.json_name(def_typ_str)
+        name = ''
+        if j_name:
+            name += '<b>' + j_name + '</b>\n'
+        if j_type:
+            name += j_type + '\n'
+        if isinstance(ntv, NtvSingle):
+            if isinstance(ntv.val, str):
+                name += '<i>' + ntv.val + '</i>\n'
+            else:
+                name += '<i>' + json.dumps(ntv.val) + '</i>\n'
+            return [node, ['rectangle', name[:-1]]]
+        if not name:
+            name = '<b>::</b>\n'
+        return [node, ['roundedge', name[:-1]]]
+        
+    @staticmethod
+    def _mermaid_link(ntv, node, def_typ_str, node_list, link_list):
+        '''add nodes and links from ntv in node_list and link_list '''
+        node_list.append(Ntv._mermaid_node(ntv, node, def_typ_str))
+        if isinstance(ntv, NtvList):
+            for r_node, ntv_val in enumerate(ntv):
+                Ntv._mermaid_link(ntv_val, node + str(r_node), ntv.type_str, node_list, link_list)
+                link_list.append([node, 'normalarrow', node + str(r_node)])
 
+        
 class NtvSingle(Ntv):
     ''' An NTV-single entity is a Ntv entity not composed with other entities.
 
