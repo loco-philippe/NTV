@@ -18,7 +18,6 @@ This package contains the following classes:
 
     - `NTV.json_ntv.ntv.NtvSingle`
     - `NTV.json_ntv.ntv.NtvList`
-    - `NTV.json_ntv.ntv.NtvSet`
     - `NTV.json_ntv.ntv.Ntv` (abstract class)
     - `NTV.json_ntv.ntv.NtvConnector` (abstract class)    
           
@@ -27,7 +26,12 @@ This package contains the following classes:
     
     - `NTV.json_ntv.ntv_connector.DataFrameConnec`
     - `NTV.json_ntv.ntv_connector.SeriesConnec`
-    
+    - `NTV.json_ntv.ntv_connector.IlistConnec`
+    - `NTV.json_ntv.ntv_connector.IindexConnec`
+     
+The functions to convert a json object to Mermaid code are in the 
+`NTV.json_ntv.json_mermaid` submodule.    
+       
 # 0 - Abstract
 
 Today, the semantic level of shared data remains low. It is very often limited 
