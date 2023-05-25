@@ -74,6 +74,17 @@ class Test_Ntv_creation(unittest.TestCase):
                 self.assertEqual(agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
 
+    def test_address(self):
+        a = Ntv.obj({'test':{'t1':1, 't2':2, 't3':[3,4]}})
+        self.assertTrue(a._parent is None)
+        self.assertEqual(a.address, [0])
+        self.assertEqual(a.address_name, '0')
+        self.assertEqual(a['t3'].address, [0,2])
+        self.assertEqual(a['t3'].address_name, '0.2')
+        self.assertEqual(a['t3'][0]._parent._parent, a)
+        self.assertEqual(a['t3'][0].address, [0, 2, 0])
+        self.assertEqual(a['t3'][0].address_name, '0.2.0')
+        
     def test_from_obj_repr(self):
         list_repr = [[1, '"s"'],
                      [{"truc":  1}, '"sN"'],

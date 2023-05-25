@@ -80,12 +80,17 @@ class Ntv(ABC):
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
+    - **_parent**:  parent NTVList entity
+    - **_row**:  row in the parent NtvList
 
     *dynamic values (@property)*
+    - `address`
+    - `address_name`
     - `type_str`
     - `code_ntv`
     - `max_len`
     - `val`
+         
     The methods defined in this class are :
 
     *Ntv constructor (staticmethod)*
@@ -130,6 +135,7 @@ class Ntv(ABC):
             ntv_name = ''
         self.ntv_name = ntv_name
         self.ntv_value = ntv_value
+        self._parent = None
 
     @staticmethod
     def obj(data, no_typ=False):
@@ -256,7 +262,22 @@ class Ntv(ABC):
     def __lt__(self, other):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
-    
+
+    @property
+    def address(self):
+        '''return a list of parent row from root'''
+        if not self._parent:
+            return [0]
+        return self._parent.address + [self._row]
+
+    @property
+    def address_name(self):
+        '''return a string of address'''
+        name = ''
+        for ind in self.address:
+            name += str(ind) +'.'
+        return name[:-1]
+        
     @property
     def code_ntv(self):
         '''return a string with the NTV code composed with :
@@ -374,7 +395,7 @@ class Ntv(ABC):
         #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
-    def to_mermaid(self, title='', disp=False):
+    def to_mermaid(self, title='', disp=False, row=False):
         '''return a mermaid flowchart.
 
         *Parameters*
@@ -390,7 +411,7 @@ class Ntv(ABC):
         ntv = Ntv.obj(self)
         node_list = []
         link_list = []
-        Ntv._mermaid_link(ntv, '0', None, node_list, link_list)
+        Ntv._mermaid_link(ntv, None, node_list, link_list, row)
         mermaid_json = {title + ':$flowchart' : { 
             'orientation': 'top-down',
             'node::': {node[0]: node[1] for node in node_list},
@@ -621,7 +642,7 @@ class Ntv(ABC):
         return [val if not isinstance(val, tuple) else Ntv._listed(val) for val in idx]
 
     @staticmethod
-    def _mermaid_node(ntv, node, def_typ_str):
+    def _mermaid_node(ntv, def_typ_str, val):
         '''create and return a node'''
         j_name, j_sep, j_type = ntv.json_name(def_typ_str)
         name = ''
@@ -629,24 +650,27 @@ class Ntv(ABC):
             name += '<b>' + j_name + '</b>\n'
         if j_type:
             name += j_type + '\n'
-        if isinstance(ntv, NtvSingle):
+        if val:
+            name += '<i>' + val + '</i>\n'
+        elif isinstance(ntv, NtvSingle):
             if isinstance(ntv.val, str):
                 name += '<i>' + ntv.val + '</i>\n'
             else:
                 name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [node, ['rectangle', name[:-1]]]
+            return [ntv.address_name, ['rectangle', name[:-1]]]
         if not name:
             name = '<b>::</b>\n'
-        return [node, ['roundedge', name[:-1]]]
+        return [ntv.address_name, ['roundedge', name[:-1]]]
         
     @staticmethod
-    def _mermaid_link(ntv, node, def_typ_str, node_list, link_list):
+    def _mermaid_link(ntv, def_typ_str, node_list, link_list, row):
         '''add nodes and links from ntv in node_list and link_list '''
-        node_list.append(Ntv._mermaid_node(ntv, node, def_typ_str))
+        val = str(len(node_list)) if row else None
+        node_list.append(Ntv._mermaid_node(ntv, def_typ_str, val))
         if isinstance(ntv, NtvList):
             for r_node, ntv_val in enumerate(ntv):
-                Ntv._mermaid_link(ntv_val, node + str(r_node), ntv.type_str, node_list, link_list)
-                link_list.append([node, 'normalarrow', node + str(r_node)])
+                Ntv._mermaid_link(ntv_val, ntv.type_str, node_list, link_list, row)
+                link_list.append([ntv.address_name, 'normalarrow', ntv_val.address_name])
 
         
 class NtvSingle(Ntv):
@@ -786,6 +810,9 @@ class NtvList(Ntv):
         if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
+        for row, ntv in enumerate(self):
+            ntv._parent = self
+            ntv._row = row
 
     @property 
     def ntv_list(self):
