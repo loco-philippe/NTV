@@ -453,6 +453,12 @@ class Ntv(ABC):
             return {ntv:  [ntvi.to_repr(nam, typ, val) for ntvi in self.ntv_value[:maxi]]}
         raise NtvError('the ntv entity is not consistent')
 
+    def to_name(self, default=''):
+        '''return the name of the NTV entity'''
+        if self.ntv_name == '':
+            return default
+        return self.ntv_name
+    
     def to_obj(self, def_type=None, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format).
 

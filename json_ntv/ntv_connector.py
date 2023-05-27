@@ -68,6 +68,38 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
 
+class NtvfieldConnec(NtvConnector):
+    '''NTV connector for Iindex'''
+    
+    clas_obj = 'Ntvfield'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+        from observation import Ntvfield
+        ntv = Ntv.obj(ntv_value)
+        return Ntvfield.from_ntv(ntv)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        return (None, 'field', self.to_ntv(name=True).to_obj())
+    
+class NtvdatasetConnec(NtvConnector):
+    '''NTV connector for Ntvdataset'''
+    
+    clas_obj = 'Ntvdataset'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+        from observation import Ntvdataset
+        ntv = Ntv.obj(ntv_value)
+        return Ntvdataset.from_ntv(ntv)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        return (None, 'tab', self.to_ntv().to_obj())
+
 class IindexConnec(NtvConnector):
     '''NTV connector for Iindex'''
     
@@ -120,7 +152,7 @@ class DataFrameConnec(NtvConnector):
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, value)'''
-        from observation import Ilist
+        # from observation import Ilist
         df2 = self.reset_index()
         """js = NtvList([[SeriesConnec.to_ntv(df2[col])[2] 
                      if len(df2[col].astype('category').cat.categories) > 1
