@@ -8,7 +8,7 @@ The `ntv` module is part of the `NTV.json_ntv` package ([specification document]
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
 It contains the classes `NtvSingle`, `NtvList`, `Ntv`(abstract),
-`NtvConnector` and `NtvError` for NTV entities.
+`NtvConnector`, `NtvTree` and `NtvError` for NTV entities.
 
 # 1 - JSON-NTV structure
 
@@ -64,10 +64,12 @@ from abc import ABC
 import datetime
 import json
 from json import JSONDecodeError
+from base64 import b64encode
 
 import cbor2
 from shapely import geometry
 #from observation import Ilist
+from IPython.display import Image, display
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 
@@ -80,12 +82,13 @@ class Ntv(ABC):
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
-    - **_parent**:  parent NTVList entity
+    - **parent**:  parent NtvList entity
     - **_row**:  row in the parent NtvList
 
     *dynamic values (@property)*
     - `address`
     - `address_name`
+    - `json_array`
     - `type_str`
     - `code_ntv`
     - `max_len`
@@ -135,7 +138,8 @@ class Ntv(ABC):
             ntv_name = ''
         self.ntv_name = ntv_name
         self.ntv_value = ntv_value
-        self._parent = None
+        self.parent = None
+        self._row = None
 
     @staticmethod
     def obj(data, no_typ=False):
@@ -259,9 +263,9 @@ class Ntv(ABC):
     @property
     def address(self):
         '''return a list of parent row from root'''
-        if not self._parent:
+        if not self.parent:
             return [0]
-        return self._parent.address + [self._row]
+        return self.parent.address + [self._row]
 
     @property
     def address_name(self):
@@ -290,7 +294,7 @@ class Ntv(ABC):
         '''return the highest len of Ntv entity included'''
         maxi = len(self)
         if isinstance(self.ntv_value, (list, set)):
-            maxi = max(maxi, max([ntv.max_len for ntv in self.ntv_value]))
+            maxi = max(maxi, max(ntv.max_len for ntv in self.ntv_value))
         return maxi
 
     @property
@@ -399,23 +403,20 @@ class Ntv(ABC):
         - **leaves**: Boolean (default False) - if True, add the leaf row
         a mermaid text diagram
         '''
-        from base64 import b64encode
-        from IPython.display import Image, display
         from json_ntv.json_mermaid import diagram
 
         ntv = Ntv.obj(self)
-        node_list = []
-        link_list = []
+        node_link = {'nodes': [], 'links': []}
         dic_node = {}
         if leaves:
             nodes = [node for node in NtvTree(
                 ntv) if not isinstance(node.val, list)]
             dic_node = {node: row for row, node in enumerate(nodes)}
-        Ntv._mermaid_link(ntv, None, node_list, link_list, row, dic_node)
+        Ntv._mermaid_link(ntv, None, node_link, row, dic_node)
         mermaid_json = {title + ':$flowchart': {
             'orientation': 'top-down',
-            'node::': {node[0]: node[1] for node in node_list},
-            'link::': link_list}}
+            'node::': {node[0]: node[1] for node in node_link['nodes']},
+            'link::': node_link['links']}}
         if disp:
             return display(Image(url="https://mermaid.ink/img/" +
                                  b64encode(diagram(mermaid_json).encode("ascii")).decode("ascii")))
@@ -473,11 +474,11 @@ class Ntv(ABC):
         - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
         - **name** : boolean (default true) - if False, name is not included
-        - **ntv_list** : boolean (default false) - if True, Json-object is not used for NtvList
+        - **json_array** : boolean (default false) - if True, Json-object is not used for NtvList
         '''
         option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False, 'name': True, 'ntv_list': False} | kwargs
-        if option['simpleval'] and isinstance(self, NtvList) and not self.ntv_list:
+                  'simpleval': False, 'name': True, 'json_array': False} | kwargs
+        if option['simpleval'] and isinstance(self, NtvList) and not self.json_array:
             value = NtvList(self).obj_value(def_type=def_type, **option)
         else:
             value = self.obj_value(def_type=def_type, **option)
@@ -530,9 +531,16 @@ class Ntv(ABC):
         raise NtvError('the ntv entity is not consistent')
 
     def obj_value(self):
+        '''abstract method'''
         return ''
 
-    def _obj_sep(self, json_type, def_type=None):
+    @property
+    def json_array(self):
+        '''abstract method'''
+        return False
+
+    def _obj_sep(self, json_type, def_type):
+        '''abstract method'''
         return ''
 
     @staticmethod
@@ -673,15 +681,15 @@ class Ntv(ABC):
         return [ntv.address_name, ['roundedge', name[:-1]]]
 
     @staticmethod
-    def _mermaid_link(ntv, def_typ_str, node_list, link_list, row, dic_node):
+    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node):
         '''add nodes and links from ntv in node_list and link_list '''
-        num = str(len(node_list)) if row else ''
-        node_list.append(Ntv._mermaid_node(ntv, def_typ_str, num, dic_node))
+        num = str(len(node_link['nodes'])) if row else ''
+        node_link['nodes'].append(Ntv._mermaid_node(ntv, def_typ_str, num, dic_node))
         if isinstance(ntv, NtvList):
             for ntv_val in ntv:
                 Ntv._mermaid_link(ntv_val, ntv.type_str,
-                                  node_list, link_list, row, dic_node)
-                link_list.append(
+                                  node_link, row, dic_node)
+                node_link['links'].append(
                     [ntv.address_name, 'normalarrow', ntv_val.address_name])
 
 
@@ -760,8 +768,13 @@ class NtvSingle(Ntv):
             return ':'
         return ''
 
+    @property
+    def json_array(self):
+        ''' return the json_array dynamic attribute'''
+        return False
+
     def obj_value(self, def_type=None, **kwargs):
-        '''return the Json format of the ntv_value'''
+        '''return the ntv_value with different formats defined by kwargs'''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
         if option['encode_format'] in ('json', 'tuple'):
@@ -782,7 +795,7 @@ class NtvList(Ntv):
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
-    - **ntv_list**: Boolean - False if all the entity names are present and different
+    - **json_array**: Boolean - False if all the entity names are present and different
     (dynamic value)
 
     The methods defined in this class are :
@@ -795,7 +808,7 @@ class NtvList(Ntv):
     *dynamic values (@property)*
     - `type_str`
     - `code_ntv`
-    - `ntv_list`
+    - `json_array`
 
     *instance methods*
     - `set_name`
@@ -829,12 +842,12 @@ class NtvList(Ntv):
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
         for row, ntv in enumerate(self):
-            ntv._parent = self
+            ntv.parent = self
             ntv._row = row
 
     @property
-    def ntv_list(self):
-        ''' return the ntv_list dynamic attribute'''
+    def json_array(self):
+        ''' return the json_array dynamic attribute'''
         set_name = {ntv.ntv_name for ntv in self}
         return '' in set_name or len(set_name) != len(self)
 
@@ -849,50 +862,83 @@ class NtvList(Ntv):
 
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
-        if json_type or (len(self.ntv_value) == 1 and not self.ntv_list):
+        if json_type or (len(self.ntv_value) == 1 and not self.json_array):
             return '::'
         return ''
 
     def obj_value(self, def_type=None, **kwargs):
-        '''return the Json format of the ntv_value'''
+        '''return the ntv_value with different formats defined by kwargs'''
         option = {'encoded': False, 'encode_format': 'json',
-                  'simpleval': False, 'ntv_list': False} | kwargs
-        option2 = option | {'encoded': False}
+                  'simpleval': False, 'json_array': False} | kwargs
+        opt2 = option | {'encoded': False}
         if self.ntv_type:
             def_type = self.ntv_type.long_name
-        if self.ntv_list or option['simpleval'] or option['ntv_list']:
-            return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
-        values = [ntv.to_obj(def_type=def_type, **option2)
-                  for ntv in self.ntv_value]
+        if self.json_array or option['simpleval'] or option['json_array']:
+            return [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value]
+        values = [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
 
 
 class NtvTree:
-    ''' The NtvTree class is an iterator class used to traverse a NTV tree structure'''
+    ''' The NtvTree class is an iterator class used to traverse a NTV tree structure.
+    Some methods give tree indicators '''
 
     def __init__(self, ntv):
         self.ntv = ntv
-        self.node = ntv
+        self.node = None
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if isinstance(self.node.val, list):
-            self.next_down()
+        if self.node is None:
+            self.node = self.ntv
+        elif isinstance(self.node.val, list):
+            self._next_down()
         else:
-            self.next_up()
+            self._next_up()
         return self.node
 
-    def next_down(self):
+    @property
+    def breadth(self):
+        ''' return the number of leaves'''
+        return len(self.leaf_nodes())
+
+    @property
+    def size(self):
+        ''' return the number of nodes'''
+        return len(self.nodes())
+    
+    @property
+    def height(self):
+        ''' return the height of the tree'''
+        return max(len(node.address) for node in self.__class__(self.ntv)) - 1
+    
+    def adjacency_list(self):
+        ''' return a dict with the list of child nodes for each parent node'''
+        return {node: node.val for node in self.inner_nodes()}
+    
+    def nodes(self):
+        ''' return the list of nodes'''
+        return [node for node in self.__class__(self.ntv)]
+
+    def leaf_nodes(self):
+        ''' return the list of leaf nodes'''
+        return [node for node in self.__class__(self.ntv) if not isinstance(node.val, list)]
+        
+    def inner_nodes(self):
+        ''' return the list of inner nodes'''
+        return [node for node in self.__class__(self.ntv) if isinstance(node.val, list)]
+        
+    def _next_down(self):
         ''' find the next subchild node'''
         self.node = self.node[0]
         if isinstance(self.node, NtvList):
-            self.next_down()
+            self._next_down()
 
-    def next_up(self):
+    def _next_up(self):
         ''' find the next sibling or ancestor node'''
-        parent = self.node._parent
+        parent = self.node.parent
         ind = parent.val.index(self.node)
         if ind < len(parent) - 1:
             self.node = parent[ind + 1]
@@ -900,7 +946,7 @@ class NtvTree:
             if parent == self.ntv:
                 raise StopIteration
             self.node = parent
-            self.next_up()
+            self._next_up()
 
 
 class NtvConnector(ABC):

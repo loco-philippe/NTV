@@ -73,12 +73,12 @@ class Test_Ntv_creation(unittest.TestCase):
 
     def test_address(self):
         a = Ntv.obj({'test':{'t1':1, 't2':2, 't3':[3,4]}})
-        self.assertTrue(a._parent is None)
+        self.assertTrue(a.parent is None)
         self.assertEqual(a.address, [0])
         self.assertEqual(a.address_name, '0')
         self.assertEqual(a['t3'].address, [0,2])
         self.assertEqual(a['t3'].address_name, '0.2')
-        self.assertEqual(a['t3'][0]._parent._parent, a)
+        self.assertEqual(a['t3'][0].parent.parent, a)
         self.assertEqual(a['t3'][0].address, [0, 2, 0])
         self.assertEqual(a['t3'][0].address_name, '0.2.0')
         
@@ -261,8 +261,8 @@ class Test_Ntv_creation(unittest.TestCase):
                         Ntv.from_obj(nstr3).to_obj(simpleval=True) == 
                         [[2.1, 40.3], [2.1, 40.3]])
         self.assertEqual(Ntv.obj(nstr), Ntv.obj(nstr2))
-        self.assertEqual(Ntv.obj(nstr).to_obj(ntv_list=True ), nstr )
-        self.assertEqual(Ntv.obj(nstr).to_obj(ntv_list=False), nstr2)
+        self.assertEqual(Ntv.obj(nstr).to_obj(json_array=True ), nstr )
+        self.assertEqual(Ntv.obj(nstr).to_obj(json_array=False), nstr2)
         self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(encode_format='obj'),
                          {'paris:point': None})
 
