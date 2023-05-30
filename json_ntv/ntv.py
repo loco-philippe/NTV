@@ -90,7 +90,7 @@ class Ntv(ABC):
     - `code_ntv`
     - `max_len`
     - `val`
-         
+
     The methods defined in this class are :
 
     *Ntv constructor (staticmethod)*
@@ -109,7 +109,7 @@ class Ntv(ABC):
     - `to_repr`
     - `to_mermaid`
     - `to_tuple`
-    
+
     *utility methods*
     - `from_obj_name` *(staticmethod)*
     '''
@@ -166,7 +166,7 @@ class Ntv(ABC):
         if cat == 'single':
             return NtvSingle(value, name, typ)
         return Ntv.from_obj(value, def_type=typ)
-    
+
     @staticmethod
     def from_obj(value, def_type=None, def_sep=None, no_typ=False):
         ''' return an Ntv entity from an object value.
@@ -182,21 +182,17 @@ class Ntv(ABC):
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
-        if not sep:
-            sep = def_sep
+        sep = def_sep if not sep else sep
         if isinstance(ntv_value, list) and sep in (None, '::'):
             def_type = agreg_type(str_typ, def_type, False)
-            if sep and not def_type:
-                sep = None
-            if sep:
-                sep = ':'
+            sep = None if sep and not def_type else sep
+            sep = ':' if sep else sep
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
-            if no_typ:
-                def_type = 'json'
+            def_type = 'json' if no_typ else def_type
             return NtvList(ntv_list, ntv_name, def_type)
-        if sep == ':' or (sep is None and isinstance(ntv_value, dict) and 
+        if sep == ':' or (sep is None and isinstance(ntv_value, dict) and
                           len(ntv_value) == 1):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type)
@@ -209,19 +205,16 @@ class Ntv(ABC):
             keys = list(ntv_value.keys())
             values = list(ntv_value.values())
             def_type = agreg_type(str_typ, def_type, False)
-            if sep and not def_type:
-                sep = None
-            if sep:
-                sep = ':'
+            sep = None if sep and not def_type else sep
+            sep = ':' if sep else sep
             ntv_list = [Ntv.from_obj({key: val}, def_type, sep)
                         for key, val in zip(keys, values)]
             if not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
-            if no_typ:
-                def_type = 'json'
+            def_type = 'json' if no_typ else def_type
             return NtvList(ntv_list, ntv_name, def_type)
         raise NtvError('separator ":" is not compatible with value')
-        
+
     def __len__(self):
         ''' len of ntv_value'''
         if isinstance(self.ntv_value, (list, set)):
@@ -244,7 +237,7 @@ class Ntv(ABC):
         ''' return ntv_value item '''
         if isinstance(selector, tuple):
             return [self.ntv_value[i] for i in selector]
-        if isinstance(selector, str) and isinstance(self, NtvList) :
+        if isinstance(selector, str) and isinstance(self, NtvList):
             ind = [ntv.ntv_name for ntv in self.ntv_value].index(selector)
             return self.ntv_value[ind]
         return self.ntv_value[selector]
@@ -275,9 +268,9 @@ class Ntv(ABC):
         '''return a string of address'''
         name = ''
         for ind in self.address:
-            name += str(ind) +'.'
+            name += str(ind) + '.'
         return name[:-1]
-        
+
     @property
     def code_ntv(self):
         '''return a string with the NTV code composed with :
@@ -299,12 +292,12 @@ class Ntv(ABC):
         if isinstance(self.ntv_value, (list, set)):
             maxi = max(maxi, max([ntv.max_len for ntv in self.ntv_value]))
         return maxi
-      
+
     @property
     def name(self):
         '''return the ntv_name of the entity'''
         return self.ntv_name
-    
+
     @property
     def type_str(self):
         '''return a string with the value of the NtvType of the entity'''
@@ -316,7 +309,7 @@ class Ntv(ABC):
     def val(self):
         '''return the ntv_value of the entity'''
         return self.ntv_value
-    
+
     @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type and separator from string'''
@@ -353,7 +346,7 @@ class Ntv(ABC):
         if isinstance(self.ntv_value, list):
             return NtvList(self.ntv_value)
         return Ntv.obj(self.ntv_value)
-    
+
     def json_name(self, def_type=None, string=False, explicit=False):
         '''return the JSON name of the NTV entity (json-ntv format)
 
@@ -372,7 +365,7 @@ class Ntv(ABC):
         json_type = ''
         if self.ntv_type:
             json_type = relative_type(def_type, self.ntv_type.long_name)
-        if json_type == 'json' and (not def_type or def_type == 'json'):
+        if json_type == 'json' and (not def_type or def_type == 'json') and not explicit:
             json_type = ''
         json_sep = self._obj_sep(json_type, def_type)
         if string:
@@ -391,36 +384,43 @@ class Ntv(ABC):
         '''set a new type to the entity (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        #if self.__class__.__name__ != 'NtvSingle':
+        # if self.__class__.__name__ != 'NtvSingle':
         #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
-    def to_mermaid(self, title='', disp=False, row=False):
+    def to_mermaid(self, title='', disp=False, row=False, leaves=False):
         '''return a mermaid flowchart.
 
         *Parameters*
 
-        - **title**: String (default '') : title of the flowchart
-        - **disp**: Boolean (default False) : if true, return a display else return 
+        - **title**: String (default '') - title of the flowchart
+        - **disp**: Boolean (default False) - if true, return a display else return
+        - **row**: Boolean (default False) - if True, add the node row
+        - **leaves**: Boolean (default False) - if True, add the leaf row
         a mermaid text diagram
         '''
         from base64 import b64encode
         from IPython.display import Image, display
         from json_ntv.json_mermaid import diagram
-        
+
         ntv = Ntv.obj(self)
         node_list = []
         link_list = []
-        Ntv._mermaid_link(ntv, None, node_list, link_list, row)
-        mermaid_json = {title + ':$flowchart' : { 
+        dic_node = {}
+        if leaves:
+            nodes = [node for node in NtvTree(
+                ntv) if not isinstance(node.val, list)]
+            dic_node = {node: row for row, node in enumerate(nodes)}
+        Ntv._mermaid_link(ntv, None, node_list, link_list, row, dic_node)
+        mermaid_json = {title + ':$flowchart': {
             'orientation': 'top-down',
             'node::': {node[0]: node[1] for node in node_list},
             'link::': link_list}}
         if disp:
-            return display(Image(url="https://mermaid.ink/img/" + 
-                b64encode(diagram(mermaid_json).encode("ascii")).decode("ascii")))
-        return diagram(mermaid_json)        
-        
+            return display(Image(url="https://mermaid.ink/img/" +
+                                 b64encode(diagram(mermaid_json).encode("ascii")).decode("ascii")))
+        return diagram(mermaid_json)
+
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity.
 
@@ -458,7 +458,7 @@ class Ntv(ABC):
         if self.ntv_name == '':
             return default
         return self.ntv_name
-    
+
     def to_obj(self, def_type=None, **kwargs):
         '''return the JSON representation of the NTV entity (json-ntv format).
 
@@ -478,9 +478,9 @@ class Ntv(ABC):
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False, 'name': True, 'ntv_list': False} | kwargs
         if option['simpleval'] and isinstance(self, NtvList) and not self.ntv_list:
-            value = NtvList(self)._obj_value(def_type=def_type, **option)
+            value = NtvList(self).obj_value(def_type=def_type, **option)
         else:
-            value = self._obj_value(def_type=def_type, **option)
+            value = self.obj_value(def_type=def_type, **option)
         obj_name = self.json_name(def_type)
         if not option['name']:
             obj_name[0] = ''
@@ -529,7 +529,7 @@ class Ntv(ABC):
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxi]])
         raise NtvError('the ntv entity is not consistent')
 
-    def _obj_value(self):
+    def obj_value(self):
         return ''
 
     def _obj_sep(self, json_type, def_type=None):
@@ -559,9 +559,9 @@ class Ntv(ABC):
         '''return (name, type, value, separator) of the json value'''
         if json_value is None:
             return (None, None, None, None)
-        #if isinstance(json_value, tuple):
+        # if isinstance(json_value, tuple):
         #    return (None, None, list(json_value), None)
-        #if isinstance(json_value, (int, str, float, bool)):
+        # if isinstance(json_value, (int, str, float, bool)):
         if isinstance(json_value, (list, int, str, float, bool)):
             return (None, None, json_value, None)
         if isinstance(json_value, dict) and len(json_value) != 1:
@@ -598,7 +598,8 @@ class Ntv(ABC):
                     connec = NtvConnector.connector()[dic_connec[clas]]
                 if connec:
                     return connec.to_ntv(data)
-                raise NtvError('connector is not defined for NTV entity of class : ', clas)
+                raise NtvError(
+                    'connector is not defined for NTV entity of class : ', clas)
         return (None, None, None)
 
     def _uncast(self, **option):
@@ -611,7 +612,8 @@ class Ntv(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'IlistConnec', 'field': 'IindexConnec', 'other': None}
+        dic_obj = {'tab': 'IlistConnec',
+                   'field': 'IindexConnec', 'other': None}
         type_n = self.ntv_type.name
         if 'dicobj' in option:
             dic_obj |= option['dicobj']
@@ -639,7 +641,7 @@ class Ntv(ABC):
     @staticmethod
     def _is_json_ntv(val):
         ''' return True if val is a json type'''
-        #return val is None or isinstance(val, (list, int, str, float, bool, dict))
+        # return val is None or isinstance(val, (list, int, str, float, bool, dict))
         return val is None or isinstance(val, (list, int, str, float, bool, dict))
 
     @staticmethod
@@ -648,7 +650,7 @@ class Ntv(ABC):
         return [val if not isinstance(val, tuple) else Ntv._listed(val) for val in idx]
 
     @staticmethod
-    def _mermaid_node(ntv, def_typ_str, val):
+    def _mermaid_node(ntv, def_typ_str, num, dic_node):
         '''create and return a node'''
         j_name, j_sep, j_type = ntv.json_name(def_typ_str)
         name = ''
@@ -656,8 +658,10 @@ class Ntv(ABC):
             name += '<b>' + j_name + '</b>\n'
         if j_type:
             name += j_type + '\n'
-        if val:
-            name += '<i>' + val + '</i>\n'
+        if ntv in dic_node:
+            num += ' ' + str(dic_node[ntv])
+        if num:
+            name += '<i>' + num + '</i>\n'
         elif isinstance(ntv, NtvSingle):
             if isinstance(ntv.val, str):
                 name += '<i>' + ntv.val + '</i>\n'
@@ -667,18 +671,20 @@ class Ntv(ABC):
         if not name:
             name = '<b>::</b>\n'
         return [ntv.address_name, ['roundedge', name[:-1]]]
-        
-    @staticmethod
-    def _mermaid_link(ntv, def_typ_str, node_list, link_list, row):
-        '''add nodes and links from ntv in node_list and link_list '''
-        val = str(len(node_list)) if row else None
-        node_list.append(Ntv._mermaid_node(ntv, def_typ_str, val))
-        if isinstance(ntv, NtvList):
-            for r_node, ntv_val in enumerate(ntv):
-                Ntv._mermaid_link(ntv_val, ntv.type_str, node_list, link_list, row)
-                link_list.append([ntv.address_name, 'normalarrow', ntv_val.address_name])
 
-        
+    @staticmethod
+    def _mermaid_link(ntv, def_typ_str, node_list, link_list, row, dic_node):
+        '''add nodes and links from ntv in node_list and link_list '''
+        num = str(len(node_list)) if row else ''
+        node_list.append(Ntv._mermaid_node(ntv, def_typ_str, num, dic_node))
+        if isinstance(ntv, NtvList):
+            for ntv_val in ntv:
+                Ntv._mermaid_link(ntv_val, ntv.type_str,
+                                  node_list, link_list, row, dic_node)
+                link_list.append(
+                    [ntv.address_name, 'normalarrow', ntv_val.address_name])
+
+
 class NtvSingle(Ntv):
     ''' An NTV-single entity is a Ntv entity not composed with other entities.
 
@@ -717,8 +723,9 @@ class NtvSingle(Ntv):
         - **value**: value of the entity
         '''
         if not fast:
-            is_json_ntv = Ntv._is_json_ntv(value)  # or isinstance(value, NtvSingle)
-            
+            # or isinstance(value, NtvSingle)
+            is_json_ntv = Ntv._is_json_ntv(value)
+
             if not is_json_ntv:
                 name, typ, value = Ntv._cast(value)
             if not ntv_type:
@@ -744,7 +751,7 @@ class NtvSingle(Ntv):
     def __hash__(self):
         '''return hash(name) + hash(type) + hash(value)'''
         return hash(self.ntv_name) + hash(self.ntv_type) + hash(json.dumps(self.ntv_value))
-    
+
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
         if json_type or not def_type and \
@@ -753,7 +760,7 @@ class NtvSingle(Ntv):
             return ':'
         return ''
 
-    def _obj_value(self, def_type=None, **kwargs):
+    def obj_value(self, def_type=None, **kwargs):
         '''return the Json format of the ntv_value'''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False} | kwargs
@@ -762,6 +769,7 @@ class NtvSingle(Ntv):
         if option['encode_format'] == 'obj' and self.ntv_value == 'null':
             return None
         return Ntv._uncast(self, **option)
+
 
 class NtvList(Ntv):
     '''An NTV-list entity is a Ntv entity where:
@@ -774,7 +782,7 @@ class NtvList(Ntv):
     - **ntv_name** : String - name of the NTV entity
     - **ntv_type**: NtvType - type of the entity
     - **ntv_value**:  value of the entity
-    - **ntv_list**: Boolean - False if all the entity names are present and different 
+    - **ntv_list**: Boolean - False if all the entity names are present and different
     (dynamic value)
 
     The methods defined in this class are :
@@ -811,7 +819,8 @@ class NtvList(Ntv):
             ntv_type = list_ntv.ntv_type
             ntv_name = list_ntv.ntv_name
         elif fast and isinstance(list_ntv, list):
-            ntv_value = [NtvSingle(val, ntv_type=ntv_type, fast=True) for val in list_ntv]
+            ntv_value = [NtvSingle(val, ntv_type=ntv_type, fast=True)
+                         for val in list_ntv]
         elif not fast and isinstance(list_ntv, list):
             ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         else:
@@ -823,10 +832,10 @@ class NtvList(Ntv):
             ntv._parent = self
             ntv._row = row
 
-    @property 
+    @property
     def ntv_list(self):
         ''' return the ntv_list dynamic attribute'''
-        set_name = set([ntv.ntv_name for ntv in self])
+        set_name = {ntv.ntv_name for ntv in self}
         return '' in set_name or len(set_name) != len(self)
 
     def __eq__(self, other):
@@ -837,14 +846,14 @@ class NtvList(Ntv):
     def __hash__(self):
         '''return hash(name) + hash(value)'''
         return hash(self.ntv_name) + hash(tuple(self.ntv_value))
-    
+
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
         if json_type or (len(self.ntv_value) == 1 and not self.ntv_list):
             return '::'
         return ''
 
-    def _obj_value(self, def_type=None, **kwargs):
+    def obj_value(self, def_type=None, **kwargs):
         '''return the Json format of the ntv_value'''
         option = {'encoded': False, 'encode_format': 'json',
                   'simpleval': False, 'ntv_list': False} | kwargs
@@ -853,32 +862,36 @@ class NtvList(Ntv):
             def_type = self.ntv_type.long_name
         if self.ntv_list or option['simpleval'] or option['ntv_list']:
             return [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
-        values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
+        values = [ntv.to_obj(def_type=def_type, **option2)
+                  for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
 
+
 class NtvTree:
-    
+    ''' The NtvTree class is an iterator class used to traverse a NTV tree structure'''
+
     def __init__(self, ntv):
         self.ntv = ntv
         self.node = ntv
-        
+
     def __iter__(self):
         return self
-    
+
     def __next__(self):
-        #if self.node.__class__.__name__ == 'NtvList':
-        if isinstance(self.node, NtvList):
+        if isinstance(self.node.val, list):
             self.next_down()
         else:
             self.next_up()
         return self.node
-    
+
     def next_down(self):
+        ''' find the next subchild node'''
         self.node = self.node[0]
         if isinstance(self.node, NtvList):
             self.next_down()
-    
+
     def next_up(self):
+        ''' find the next sibling or ancestor node'''
         parent = self.node._parent
         ind = parent.val.index(self.node)
         if ind < len(parent) - 1:
@@ -888,8 +901,8 @@ class NtvTree:
                 raise StopIteration
             self.node = parent
             self.next_up()
-            
-            
+
+
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used for all NTV connectors.
     A NTV connector has two methods for conversion between NTV data and an object'''

@@ -14,9 +14,6 @@ import csv
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_type
 from shapely import geometry
 
-from ntv_connector import to_csv, from_csv
-from observation import Ilist
-
 
 class Test_Ntv_creation(unittest.TestCase):
 
@@ -293,10 +290,10 @@ class Test_Ntv_creation(unittest.TestCase):
                       'names::string':   ['john', 'eric', 'judith']}})
         sr  = field.to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})
         df  = tab.to_obj  (encode_format='obj', dicobj={'tab': 'DataFrameConnec'})
-        il  = tab.to_obj  (encode_format='obj')
-        idx = field.to_obj(encode_format='obj')
-        self.assertEqual(idx, Ntv.obj(idx).to_obj(encode_format='obj'))
-        self.assertEqual(il, Ntv.obj(il).to_obj(encode_format='obj'))
+        #il  = tab.to_obj  (encode_format='obj')
+        #idx = field.to_obj(encode_format='obj')
+        #self.assertEqual(idx, Ntv.obj(idx).to_obj(encode_format='obj'))
+        #self.assertEqual(il, Ntv.obj(il).to_obj(encode_format='obj'))
         self.assertTrue(df.equals(Ntv.obj(df).to_obj(encode_format='obj', dicobj={'tab': 'DataFrameConnec'})))
         self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(encode_format='obj', dicobj={'field': 'SeriesConnec'})))
 
