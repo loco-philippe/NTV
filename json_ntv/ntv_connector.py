@@ -68,6 +68,22 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
 
+class NfieldConnec(NtvConnector):
+    '''NTV connector for Iindex'''
+    
+    clas_obj = 'Nfield'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+        from observation.fields import Nfield
+        ntv = Ntv.obj(ntv_value)
+        return Nfield.from_ntv(ntv)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        return (None, 'field', self.to_ntv(name=True).to_obj())
+    
 class NtvfieldConnec(NtvConnector):
     '''NTV connector for Iindex'''
     

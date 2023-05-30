@@ -707,7 +707,7 @@ class NtvSingle(Ntv):
     - `to_repr`
     '''
 
-    def __init__(self, value, ntv_name=None, ntv_type=None):
+    def __init__(self, value, ntv_name=None, ntv_type=None, fast=False):
         '''NtvSingle constructor.
 
         *Parameters*
@@ -716,22 +716,23 @@ class NtvSingle(Ntv):
         - **ntv_type**: String (default None) - type of the entity
         - **value**: value of the entity
         '''
-        is_json_ntv = Ntv._is_json_ntv(value)  # or isinstance(value, NtvSingle)
-        
-        if not is_json_ntv:
-            name, typ, value = Ntv._cast(value)
-        if not ntv_type:
-            if is_json_ntv:
-                ntv_type = 'json'
+        if not fast:
+            is_json_ntv = Ntv._is_json_ntv(value)  # or isinstance(value, NtvSingle)
+            
+            if not is_json_ntv:
+                name, typ, value = Ntv._cast(value)
+            if not ntv_type:
+                if is_json_ntv:
+                    ntv_type = 'json'
+                else:
+                    ntv_type = typ
+                    if not ntv_name:
+                        ntv_name = name
             else:
-                ntv_type = typ
-                if not ntv_name:
-                    ntv_name = name
-        else:
-            if not is_json_ntv and NtvType(ntv_type) != NtvType(typ):
-                raise NtvError('ntv_value is not compatible with ntv_type')
-        if ntv_type and isinstance(ntv_type, str) and ntv_type[-1] == '.':
-            raise NtvError('the ntv_type is not valid')
+                if not is_json_ntv and NtvType(ntv_type) != NtvType(typ):
+                    raise NtvError('ntv_value is not compatible with ntv_type')
+            if ntv_type and isinstance(ntv_type, str) and ntv_type[-1] == '.':
+                raise NtvError('the ntv_type is not valid')
         super().__init__(value, ntv_name, ntv_type)
 
     def __eq__(self, other):
@@ -796,7 +797,7 @@ class NtvList(Ntv):
     - `to_repr`
     '''
 
-    def __init__(self, list_ntv, ntv_name=None, ntv_type=None):
+    def __init__(self, list_ntv, ntv_name=None, ntv_type=None, fast=False):
         '''NtvList constructor.
 
         *Parameters*
@@ -809,7 +810,9 @@ class NtvList(Ntv):
             ntv_value = list_ntv.ntv_value
             ntv_type = list_ntv.ntv_type
             ntv_name = list_ntv.ntv_name
-        elif isinstance(list_ntv, list):
+        elif fast and isinstance(list_ntv, list):
+            ntv_value = [NtvSingle(val, ntv_type=ntv_type, fast=True) for val in list_ntv]
+        elif not fast and isinstance(list_ntv, list):
             ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         else:
             raise NtvError('ntv_value is not a list')
@@ -853,6 +856,40 @@ class NtvList(Ntv):
         values = [ntv.to_obj(def_type=def_type, **option2) for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
 
+class NtvTree:
+    
+    def __init__(self, ntv):
+        self.ntv = ntv
+        self.node = ntv
+        
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        #if self.node.__class__.__name__ == 'NtvList':
+        if isinstance(self.node, NtvList):
+            self.next_down()
+        else:
+            self.next_up()
+        return self.node
+    
+    def next_down(self):
+        self.node = self.node[0]
+        if isinstance(self.node, NtvList):
+            self.next_down()
+    
+    def next_up(self):
+        parent = self.node._parent
+        ind = parent.val.index(self.node)
+        if ind < len(parent) - 1:
+            self.node = parent[ind + 1]
+        else:
+            if parent == self.ntv:
+                raise StopIteration
+            self.node = parent
+            self.next_up()
+            
+            
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used for all NTV connectors.
     A NTV connector has two methods for conversion between NTV data and an object'''
