@@ -142,18 +142,19 @@ class Ntv(ABC):
         self._row = None
 
     @staticmethod
-    def obj(data, no_typ=False):
+    def obj(data, no_typ=False, decode_str=False):
         ''' return an Ntv entity from data.
         **Data** can be :
         - a tuple with value, name, typ and cat (see `from_att` method)
         - a value to decode (see `from_obj`method)
-        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type'''
+        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
+        - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
         if isinstance(data, tuple):
-            return Ntv.from_att(*data)
-        return Ntv.from_obj(data, no_typ=no_typ)
+            return Ntv.from_att(*data, decode_str=decode_str)
+        return Ntv.from_obj(data, no_typ=no_typ, decode_str=decode_str)
 
     @staticmethod
-    def from_att(value, name, typ, cat):
+    def from_att(value, name, typ, cat, decode_str=False):
         ''' return an Ntv entity.
 
         *Parameters*
@@ -161,8 +162,9 @@ class Ntv(ABC):
         - **value**: Ntv entity or value to convert in an Ntv entity
         - **name** : string - name of the Ntv entity
         - **typ** : string or NtvType - type of the NTV entity
-        - **cat**: string - NTV category ('single', 'list')'''
-        value = Ntv._from_value(value)
+        - **cat**: string - NTV category ('single', 'list')
+        - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
+        value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         if isinstance(value, list) and cat == 'list':
@@ -172,17 +174,17 @@ class Ntv(ABC):
         return Ntv.from_obj(value, def_type=typ)
 
     @staticmethod
-    def from_obj(value, def_type=None, def_sep=None, no_typ=False):
+    def from_obj(value, def_type=None, def_sep=None, no_typ=False, decode_str=False):
         ''' return an Ntv entity from an object value.
 
         *Parameters*
 
         - **value**: Ntv value to convert in an Ntv entity
         - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
-        - **def_type** : NtvType or Namespace (default None) - default type of the NTV entity
-        - **def_sep**: ':', '::' or None (default None) - default separator of the Ntv entity'''
-        value = Ntv._from_value(value)
-        #notype = def_type == 'notype'
+        - **def_type** : NtvType or Namespace (default None) - default type of the value
+        - **def_sep**: ':', '::' or None (default None) - default separator of the value
+        - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
+        value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
         ntv_name, str_typ, ntv_value, sep = Ntv._decode(value)
@@ -221,7 +223,7 @@ class Ntv(ABC):
 
     def __len__(self):
         ''' len of ntv_value'''
-        if isinstance(self.ntv_value, (list, set)):
+        if isinstance(self.ntv_value, list):
             return len(self.ntv_value)
         return 1
 
@@ -235,10 +237,22 @@ class Ntv(ABC):
 
     def __contains__(self, item):
         ''' item of Ntv entities'''
-        return item in self.ntv_value
+        if isinstance(self.val, list):
+            return item in self.ntv_value
+        return item == self.ntv_value
+
+    def __iter__(self):
+        ''' iterator for Ntv entities'''
+        if isinstance(self, NtvSingle):
+            return iter([self.val])
+        return iter(self.val)
 
     def __getitem__(self, selector):
         ''' return ntv_value item '''
+        if isinstance(self, NtvSingle) and selector == 0:
+            return self.ntv_value
+        if isinstance(self, NtvSingle) and selector != 0:
+            raise NtvError('item not present')
         if isinstance(selector, tuple):
             return [self.ntv_value[i] for i in selector]
         if isinstance(selector, str) and isinstance(self, NtvList):
@@ -392,6 +406,18 @@ class Ntv(ABC):
         #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
+    def set_value(self, value):
+        '''set new ntv_value of 'Ntv Single' entities included
+
+        *Parameters*
+
+        - **value**: list / NtvList or value / NtvSingle'''
+        if isinstance(self, NtvSingle):
+            self.ntv_value = value.val if isinstance(
+                value, NtvSingle) else value
+        for val, ntv in zip(Ntv.obj(value), NtvTree(self).leaf_nodes):
+            ntv.ntv_value = val.val
+
     def to_mermaid(self, title='', disp=False, row=False, leaves=False):
         '''return a mermaid flowchart.
 
@@ -544,11 +570,11 @@ class Ntv(ABC):
         return ''
 
     @staticmethod
-    def _from_value(value):
+    def _from_value(value, decode_str):
         '''return a decoded value'''
         if isinstance(value, bytes):
             value = cbor2.loads(value)
-        elif isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
+        elif decode_str and isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
             try:
                 value = json.loads(value)
             except JSONDecodeError:
@@ -911,7 +937,7 @@ class NtvTree:
 
     def __next__(self):
         ''' return next node in the tree'''
-        if not self._node :
+        if not self._node:
             self._node = self.ntv
         elif isinstance(self._node.val, list):
             self._next_down()
@@ -957,14 +983,14 @@ class NtvTree:
     def _next_down(self):
         ''' find the next subchild node'''
         self._node = self._node[0]
-        #if isinstance(self._node, NtvList):
-        #    self._next_down()
 
     def _next_up(self):
         ''' find the next sibling or ancestor node'''
         parent = self._node.parent
+        if not parent:
+            raise StopIteration
         ind = parent.val.index(self._node)
-        if ind < len(parent) - 1: # if ind is not the last
+        if ind < len(parent) - 1:  # if ind is not the last
             self._node = parent[ind + 1]
         else:
             if parent == self.ntv:
