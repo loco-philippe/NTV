@@ -11,7 +11,7 @@ import unittest
 import datetime
 import csv
 
-from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_type
+from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_type, NtvTree
 from shapely import geometry
 
 
@@ -307,6 +307,18 @@ class Test_Ntv_creation(unittest.TestCase):
                       'names::string':   ['john', 'eric', 'judith']}})        
         self.assertEqual(tab, from_csv(to_csv('test.csv', tab)))
         self.assertEqual(tab, from_csv(to_csv('test.csv', tab, quoting=csv.QUOTE_ALL)))
+
+    def test_NtvTree(self):
+        ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 'b': 'ert'})
+        tree = NtvTree(ntv)
+        self.assertEqual(tree.nodes[0], tree.ntv)
+        self.assertEqual([node.address_name for node in tree.leaf_nodes][6], '0.1')
+        self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])
+        self.assertEqual(tree.height, 3)
+        self.assertEqual(tree.size, 11)
+        self.assertEqual(tree.breadth, 7)
+        self.assertEqual(len(tree.inner_nodes), 4)
         
+       
 if __name__ == '__main__':
     unittest.main(verbosity=2)

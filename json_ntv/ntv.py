@@ -684,7 +684,8 @@ class Ntv(ABC):
     def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node):
         '''add nodes and links from ntv in node_list and link_list '''
         num = str(len(node_link['nodes'])) if row else ''
-        node_link['nodes'].append(Ntv._mermaid_node(ntv, def_typ_str, num, dic_node))
+        node_link['nodes'].append(Ntv._mermaid_node(
+            ntv, def_typ_str, num, dic_node))
         if isinstance(ntv, NtvList):
             for ntv_val in ntv:
                 Ntv._mermaid_link(ntv_val, ntv.type_str,
@@ -875,77 +876,100 @@ class NtvList(Ntv):
             def_type = self.ntv_type.long_name
         if self.json_array or option['simpleval'] or option['json_array']:
             return [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value]
-        values = [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value]
+        values = [ntv.to_obj(def_type=def_type, **opt2)
+                  for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
 
 
 class NtvTree:
     ''' The NtvTree class is an iterator class used to traverse a NTV tree structure.
-    Some methods give tree indicators '''
+    Some other methods give tree indicators and data.
+
+    *Attributes :*
+
+    - **ntv** : Ntv entity
+    - **_node**:  Ntv entity - node pointer
+
+    *dynamic values (@property)*
+    - `breadth`
+    - `size`
+    - `height`
+    - `adjacency_list`
+    - `nodes`
+    - `leaf_nodes`
+    - `inner_nodes`
+    '''
 
     def __init__(self, ntv):
+        ''' the parameter of the constructor is the Ntv entity'''
         self.ntv = ntv
-        self.node = None
+        self._node = None
 
     def __iter__(self):
+        ''' iterator without initialization'''
         return self
 
     def __next__(self):
-        if self.node is None:
-            self.node = self.ntv
-        elif isinstance(self.node.val, list):
+        ''' return next node in the tree'''
+        if not self._node :
+            self._node = self.ntv
+        elif isinstance(self._node.val, list):
             self._next_down()
         else:
             self._next_up()
-        return self.node
+        return self._node
 
     @property
     def breadth(self):
         ''' return the number of leaves'''
-        return len(self.leaf_nodes())
+        return len(self.leaf_nodes)
 
     @property
     def size(self):
         ''' return the number of nodes'''
-        return len(self.nodes())
-    
+        return len(self.nodes)
+
     @property
     def height(self):
         ''' return the height of the tree'''
         return max(len(node.address) for node in self.__class__(self.ntv)) - 1
-    
+
+    @property
     def adjacency_list(self):
         ''' return a dict with the list of child nodes for each parent node'''
-        return {node: node.val for node in self.inner_nodes()}
-    
+        return {node: node.val for node in self.inner_nodes}
+
+    @property
     def nodes(self):
         ''' return the list of nodes'''
-        return [node for node in self.__class__(self.ntv)]
+        return list(self.__class__(self.ntv))
 
+    @property
     def leaf_nodes(self):
         ''' return the list of leaf nodes'''
         return [node for node in self.__class__(self.ntv) if not isinstance(node.val, list)]
-        
+
+    @property
     def inner_nodes(self):
         ''' return the list of inner nodes'''
         return [node for node in self.__class__(self.ntv) if isinstance(node.val, list)]
-        
+
     def _next_down(self):
         ''' find the next subchild node'''
-        self.node = self.node[0]
-        if isinstance(self.node, NtvList):
-            self._next_down()
+        self._node = self._node[0]
+        #if isinstance(self._node, NtvList):
+        #    self._next_down()
 
     def _next_up(self):
         ''' find the next sibling or ancestor node'''
-        parent = self.node.parent
-        ind = parent.val.index(self.node)
-        if ind < len(parent) - 1:
-            self.node = parent[ind + 1]
+        parent = self._node.parent
+        ind = parent.val.index(self._node)
+        if ind < len(parent) - 1: # if ind is not the last
+            self._node = parent[ind + 1]
         else:
             if parent == self.ntv:
                 raise StopIteration
-            self.node = parent
+            self._node = parent
             self._next_up()
 
 
