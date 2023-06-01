@@ -1,5 +1,4 @@
-### *JSON-NTV (named and typed value) : a semantic format for interoperability*
-
+### *JSON-NTV (named and typed value) : a semantic format for interoperability* <img src="https://loco-philippe.github.io/ES/json-ntv.PNG" alt="json-NTV" style="float:right;width:175px;height:48px;">
 *JSON-NTV is a universal representation format. It allows the sharing and conversion of any type of data (NTV format).*     
     
 *The NTV format is part of the [Environmental Sensing Project](https://github.com/loco-philippe/Environmental-Sensing#readme)*
