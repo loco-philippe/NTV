@@ -8,7 +8,7 @@
 Today, the semantic level of shared data remains low. It is very often limited to the type of data defined in the exchange formats (strings for CSV formats; 
 numbers, strings, arrays and objects for JSON formats).
 
-The proposed consists of adding a type and a name to the data exchanged (see also the [presentation document](./documentation) and [examples](./example).
+The proposed consists of adding a type and a name to the data exchanged (see also the [presentation documents](./documentation/readme.MD) and [examples](./example/readme.MD).
 
 With this evolution any data, whatever its semantic level, can be identified, shared and interpreted in a consistent way.
 The implementation of a type with a nested structure facilitates its appropriation.
