@@ -84,33 +84,49 @@ class NfieldConnec(NtvConnector):
         ''' convert object into the NTV entity (name, type, json-value)'''
         return (None, 'field', self.to_ntv(name=True).to_obj())
     
-class NtvfieldConnec(NtvConnector):
+class SfieldConnec(NtvConnector):
     '''NTV connector for Iindex'''
     
-    clas_obj = 'Ntvfield'
+    clas_obj = 'Sfield'
 
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
-        from observation import Ntvfield
+        from observation.fields import Sfield
         ntv = Ntv.obj(ntv_value)
-        return Ntvfield.from_ntv(ntv)
+        return Sfield.from_ntv(ntv)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, json-value)'''
         return (None, 'field', self.to_ntv(name=True).to_obj())
     
-class NtvdatasetConnec(NtvConnector):
-    '''NTV connector for Ntvdataset'''
+class NdatasetConnec(NtvConnector):
+    '''NTV connector for Ndataset'''
     
-    clas_obj = 'Ntvdataset'
+    clas_obj = 'Ndataset'
 
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
-        from observation import Ntvdataset
+        from observation.datasets import Ndataset
         ntv = Ntv.obj(ntv_value)
-        return Ntvdataset.from_ntv(ntv)
+        return Ndataset.from_ntv(ntv)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        return (None, 'tab', self.to_ntv().to_obj())
+
+class SdatasetConnec(NtvConnector):
+    '''NTV connector for Sdataset'''
+    
+    clas_obj = 'Sdataset'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+        from observation.datasets import Sdataset
+        ntv = Ntv.obj(ntv_value)
+        return Sdataset.from_ntv(ntv)
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, json-value)'''
