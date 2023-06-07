@@ -439,9 +439,6 @@ class Ntv(ABC):
         if not isinstance(value, list):
             value = [value] * NtvTree(self).breadth
         ntv_val = Ntv.obj(value)
-        '''if isinstance(self, NtvSingle):
-            self.ntv_value = value.val
-        if isinstance(value, list) and len()'''
         for val, ntv in zip(ntv_val, NtvTree(self).leaf_nodes):
             ntv.ntv_value = val.val
 
