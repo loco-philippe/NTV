@@ -390,14 +390,38 @@ class Ntv(ABC):
             return json_name + json_sep + json_type
         return [json_name, json_sep, json_type]
 
-    def set_name(self, name):
-        '''set a new name to the entity'''
-        if name and not isinstance(name, str):
-            raise NtvError('the name is not a string')
-        if not name:
-            name = ''
-        self.ntv_name = name
+    def set_name(self, name='', nodes='simple'):
+        '''set new names to the entity
+        
+        *Parameters*
 
+        - **name**: list or string (default '') - New name values
+        - **nodes**: string (default 'simple') - nodes to be changed
+            'simple': current entity
+            'leaves': NtvSingle entities
+            'inner': NtvList entities
+            'all': all entities  '''       
+        match nodes:
+            case 'simple':
+                self.ntv_name = str(name)                
+            case 'leaves':
+                if not isinstance(name, list):
+                    name = [str(name)] * NtvTree(self).breadth
+                for nam, ntv in zip(name, NtvTree(self).leaf_nodes):
+                    ntv.ntv_name = nam
+            case 'inner':
+                if not isinstance(name, list):
+                    name = [str(name)] * len(NtvTree(self).inner_nodes)
+                for nam, ntv in zip(name, NtvTree(self).inner_nodes):
+                    ntv.ntv_name = nam
+            case 'all':
+                if not isinstance(name, list):
+                    name = [str(name)] * NtvTree(self).size
+                for nam, ntv in zip(name, NtvTree(self).nodes):
+                    ntv.ntv_name = nam                    
+            case _:
+                raise NtvError('the nodes option is not valid')
+        
     def set_type(self, typ=None):
         '''set a new type to the entity (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
@@ -406,16 +430,19 @@ class Ntv(ABC):
         #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
-    def set_value(self, value):
+    def set_value(self, value=None):
         '''set new ntv_value of 'Ntv Single' entities included
 
         *Parameters*
 
         - **value**: list / NtvList or value / NtvSingle'''
-        if isinstance(self, NtvSingle):
-            self.ntv_value = value.val if isinstance(
-                value, NtvSingle) else value
-        for val, ntv in zip(Ntv.obj(value), NtvTree(self).leaf_nodes):
+        if not isinstance(value, list):
+            value = [value] * NtvTree(self).breadth
+        ntv_val = Ntv.obj(value)
+        '''if isinstance(self, NtvSingle):
+            self.ntv_value = value.val
+        if isinstance(value, list) and len()'''
+        for val, ntv in zip(ntv_val, NtvTree(self).leaf_nodes):
             ntv.ntv_value = val.val
 
     def to_mermaid(self, title='', disp=False, row=False, leaves=False):
@@ -945,6 +972,10 @@ class NtvTree:
             self._next_up()
         return self._node
 
+    """def __len__(self):
+        ''' size of the tree'''
+        return self.size"""
+    
     @property
     def breadth(self):
         ''' return the number of leaves'''
