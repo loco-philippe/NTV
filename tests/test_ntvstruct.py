@@ -30,6 +30,6 @@ sensor = NtvStruct('sensor', ['measure', 'date_meas:datetime'])
 sensor.setvalue([45.1, '2023-01-10'])
 
 print(sensor.to_objset())
-print(sensor.to_objset(encode_format='obj'))
+print(sensor.to_objset(format='obj'))
 print(sensor.to_objlist(simpleval=True))
-print(sensor.to_objlist(encode_format='obj', simpleval=True))
+print(sensor.to_objlist(format='obj', simpleval=True))

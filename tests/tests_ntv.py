@@ -15,7 +15,7 @@ from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_
 from shapely import geometry
 
 
-class Test_Ntv_creation(unittest.TestCase):
+class Test_Ntv(unittest.TestCase):
 
     def test_single_obj_name(self):
         list_obj = [['json', 4, ('', '', '')],
@@ -134,7 +134,7 @@ class Test_Ntv_creation(unittest.TestCase):
         for obj in list_obj:
             self.assertEqual(Ntv.from_obj(
                 NtvSingle(obj).to_obj()), NtvSingle(obj))
-            self.assertEqual(NtvSingle(obj).to_obj(encode_format='obj'), obj)
+            self.assertEqual(NtvSingle(obj).to_obj(format='obj'), obj)
 
     def test_from_att(self):
         self.assertEqual(
@@ -269,7 +269,7 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj(nstr), Ntv.obj(nstr2))
         self.assertEqual(Ntv.obj(nstr).to_obj(json_array=True), nstr)
         self.assertEqual(Ntv.obj(nstr).to_obj(json_array=False), nstr2)
-        self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(encode_format='obj'),
+        self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(format='obj'),
                          {'paris:point': None})
 
     def test_tab(self):
@@ -295,17 +295,17 @@ class Test_Ntv_creation(unittest.TestCase):
                         'res':             {'res1': 10, 'res2': 20, 'res3': 30},
                         'coord::point':    [[1, 2], [3, 4], [5, 6]],
                         'names::string':   ['john', 'eric', 'judith']}})
-        sr = field.to_obj(encode_format='obj', dicobj={
+        sr = field.to_obj(format='obj', dicobj={
                           'field': 'SeriesConnec'})
-        df = tab.to_obj(encode_format='obj', dicobj={'tab': 'DataFrameConnec'})
-        #il  = tab.to_obj  (encode_format='obj')
-        #idx = field.to_obj(encode_format='obj')
-        #self.assertEqual(idx, Ntv.obj(idx).to_obj(encode_format='obj'))
-        #self.assertEqual(il, Ntv.obj(il).to_obj(encode_format='obj'))
+        df = tab.to_obj(format='obj', dicobj={'tab': 'DataFrameConnec'})
+        #il  = tab.to_obj  (format='obj')
+        #idx = field.to_obj(format='obj')
+        #self.assertEqual(idx, Ntv.obj(idx).to_obj(format='obj'))
+        #self.assertEqual(il, Ntv.obj(il).to_obj(format='obj'))
         self.assertTrue(df.equals(Ntv.obj(df).to_obj(
-            encode_format='obj', dicobj={'tab': 'DataFrameConnec'})))
+            format='obj', dicobj={'tab': 'DataFrameConnec'})))
         self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(
-            encode_format='obj', dicobj={'field': 'SeriesConnec'})))
+            format='obj', dicobj={'field': 'SeriesConnec'})))
 
     def test_csv(self):
         tab = Ntv.obj({':tab':
@@ -319,6 +319,16 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(tab, from_csv(
             to_csv('test.csv', tab, quoting=csv.QUOTE_ALL)))
 
+    def test_iter(self):
+        ntv = Ntv.obj(0)
+        for int, val in enumerate(ntv):
+            self.assertEqual(val, int)
+        ntv = Ntv.obj([0, 1, 2, 3])
+        for int, val in enumerate(ntv):
+            self.assertEqual(val.val, int)
+
+class Test_NtvTree(unittest.TestCase):
+
     def test_NtvTree(self):
         ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 'b': 'ert'})
         tree = NtvTree(ntv)
@@ -330,15 +340,11 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(tree.size, 11)
         self.assertEqual(tree.breadth, 7)
         self.assertEqual(len(tree.inner_nodes), 4)
-
-    def test_iter(self):
-        ntv = Ntv.obj(0)
-        for int, val in enumerate(ntv):
-            self.assertEqual(val, int)
-        ntv = Ntv.obj([0, 1, 2, 3])
-        for int, val in enumerate(ntv):
-            self.assertEqual(val.val, int)
-
-
+        
+class Test_NtvConnector(unittest.TestCase):
+    
+    def test(self):
+        return
+    
 if __name__ == '__main__':
     unittest.main(verbosity=2)

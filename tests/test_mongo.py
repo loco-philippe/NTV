@@ -61,7 +61,7 @@ class Test_ntv_py(unittest.TestCase):
 
     def test_insert(self):
         ntv = Ntv.obj({'ntv':'essai1', 'test': {'date': datetime.datetime(2010,2,10), 'coord:point': [42.1, 3.2]}})
-        collec.insert_one(ntv.to_obj(encode_format='cbor'))
+        collec.insert_one(ntv.to_obj(format='cbor'))
         js = collec.find_one({'ntv':'essai1'})
         collec.delete_one({'_id': js['_id']})
         js.pop('_id')

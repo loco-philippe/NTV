@@ -219,7 +219,7 @@ class SeriesConnec(NtvConnector):
         if codes:
             cod = ntv[1].to_obj(simpleval=True)
             ntv = ntv[0]
-        ntv_obj = ntv.to_obj(encode_format='obj', simpleval=True)
+        ntv_obj = ntv.to_obj(format='obj', simpleval=True)
         if ntv.type_str in SeriesConnec.type_to_dtype:
             dtype = SeriesConnec.type_to_dtype[ntv.type_str]
         if isinstance(ntv, NtvSingle) and option['leng']:
