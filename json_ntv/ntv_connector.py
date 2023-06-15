@@ -175,7 +175,8 @@ class DataFrameConnec(NtvConnector):
         ''' convert ntv_value into the return object'''
         ntv = Ntv.obj(ntv_value)
         leng = max([len(ntvi) for ntvi in ntv.ntv_value])
-        list_series = [SeriesConnec.from_ntv(d, leng=leng) for d in ntv]
+        option = kwargs | {'leng': leng}
+        list_series = [SeriesConnec.from_ntv(d, **option) for d in ntv]
         df = pd.DataFrame({ser.name: ser for ser in list_series})
         if 'index' in df.columns:
             df = df.set_index('index')
@@ -203,7 +204,8 @@ class SeriesConnec(NtvConnector):
     clas_obj = 'Series'
     types = pd.DataFrame({'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime', 'int32', 'int64', 
                                         'float64', 'array', 'boolean'], 
-                          'name_type': [None, None, None, None, None, None, 'int64', 'float64', 'array', 'boolean'], 
+                          'name_type': [None, None, None, None, None, None, 'int64', 
+                                        'float64', 'array', 'boolean'], 
                           'dtype':     ['timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]', 'Int32', 'Int64', 
                                         'Float64', 'object', 'boolean']})
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32', 'int64': 'Int64', 'float64': 'Float64', 
@@ -213,7 +215,8 @@ class SeriesConnec(NtvConnector):
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
-        option = {'index':None, 'leng':None, 'alias':False} | kwargs 
+        option = {'index':None, 'leng':None, 'alias':False, 
+                  'annotated':False} | kwargs 
         types = SeriesConnec.types
         astype = SeriesConnec.astype
         deftype = SeriesConnec.deftype
@@ -234,15 +237,19 @@ class SeriesConnec(NtvConnector):
             if name_type == 'array':
                 ntv_obj = ntv.to_obj(format='obj', simpleval=True)
             else:
-                list_val = ntv.obj_value(simpleval=True)
+                #list_val = ntv.obj_value()
+                #list_val = ntv.obj_value(simpleval=True)
+                list_val = ntv.obj_value(simpleval=option['annotated']) 
                 ntv_list = NtvList(list_val) if isinstance(list_val, (list, dict)) else  NtvList([list_val])
-                #ntv_obj = ntv_list.to_obj() # add simpleval=True ?
-                ntv_obj = ntv_list.to_obj(simpleval=True)
+                ntv_obj = ntv_list.to_obj() # add simpleval=True ?
+                #ntv_obj = ntv_list.to_obj(simpleval=True)
         else:    
             dtype = 'object'
             name_type = ntv_type
             pd_name = ntv_name+'::'+name_type
             ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
+            #ntv_obj = ntv.to_obj(format='obj', simpleval=option['annotated'],
+            #                     def_type=ntv_type)
     
         if codes:
             if pd_convert and name_type != 'array':
