@@ -236,13 +236,23 @@ class SeriesConnec(NtvConnector):
             pd_name = pd_name if pd_name else None
             if name_type == 'array':
                 ntv_obj = ntv.to_obj(format='obj', simpleval=True)
+                #ntv_obj = ntv.to_obj(format='obj', simpleval=option['annotated'])
             else:
-                #list_val = ntv.obj_value()
+                #ntv_obj = ntv.to_obj(simpleval=option['annotated'],
+                #ntv_obj = ntv.to_obj(simpleval=True,
+                #                     json_array=True, def_type=ntv.type_str)
+                #ntv_obj = ntv.obj_value(simpleval=option['annotated'],
+                #                     json_array=True, def_type=ntv.type_str)
+                ntv_obj = ntv.obj_value(simpleval=option['annotated'],
+                                     json_array=False, def_type=ntv.type_str)
+                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else  [ntv_obj]
+                
+                '''#list_val = ntv.obj_value()
                 #list_val = ntv.obj_value(simpleval=True)
                 list_val = ntv.obj_value(simpleval=option['annotated']) 
                 ntv_list = NtvList(list_val) if isinstance(list_val, (list, dict)) else  NtvList([list_val])
                 ntv_obj = ntv_list.to_obj() # add simpleval=True ?
-                #ntv_obj = ntv_list.to_obj(simpleval=True)
+                #ntv_obj = ntv_list.to_obj(simpleval=True)'''
         else:    
             dtype = 'object'
             name_type = ntv_type
