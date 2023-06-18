@@ -41,7 +41,8 @@ def _fcLink(link):
 def _fcNode(node):
     shape_l  = {'rectangle' : '[', 'roundedge': '(', 'stadium': '(['}
     shape_r  = {'rectangle' : ']', 'roundedge': ')', 'stadium': '])'}
-    return '\n    ' + node.name + shape_l[node[0].val] + '"' + node[1].val + '"' + shape_r[node[0].val]
+    return '\n    ' + node.name + shape_l[node[0].val] + '"' + \
+           node[1].val.replace('"', "'") + '"' + shape_r[node[0].val]
 
 def _erDiagram(ntv):
     diag_txt = ''
