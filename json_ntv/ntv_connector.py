@@ -70,6 +70,23 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
 
+class ShapelyConnec(NtvConnector):
+    '''NTV connector for geographic location'''
+    
+    clas_obj = 'geometry'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+        from shapely import geometry
+        return geometry.shape({"type": kwargs['type_geo'],
+                               "coordinates": ntv_value})
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        import cbor2
+        return (None, '', cbor2.loads(self))
+
 class CborConnec(NtvConnector):
     '''NTV connector for Iindex'''
     
