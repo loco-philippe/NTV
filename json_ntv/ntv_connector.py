@@ -15,6 +15,8 @@ It contains :
         - `DataFrameConnec`: 'tab' connector 
         - `SeriesConnec`:    'field' connector 
         - `MermaidConnec`:   '$mermaid' connector 
+        - `ShapelyConnec`:   'geometry' connector 
+        - `CborConnec`:      '$cbor' connector 
 """
 import datetime
 import csv
@@ -84,8 +86,7 @@ class ShapelyConnec(NtvConnector):
 
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        import cbor2
-        return (None, '', cbor2.loads(self))
+        return (None, '', Ntv._listed(self.__geo_interface__['coordinates']))
 
 class CborConnec(NtvConnector):
     '''NTV connector for Iindex'''

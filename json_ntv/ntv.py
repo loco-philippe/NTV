@@ -60,13 +60,10 @@ This JSON-NTV format allows full compatibility with existing JSON structures:
    - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
 
 """
-from abc import ABC
+from abc import ABC, abstractmethod
 import datetime
 import json
 from json import JSONDecodeError
-
-from shapely import geometry
-#from observation import Ilist
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 
@@ -389,7 +386,7 @@ class Ntv(ABC):
 
     def set_name(self, name='', nodes='simple'):
         '''set new names to the entity
-        
+
         *Parameters*
 
         - **name**: list or string (default '') - New name values
@@ -397,10 +394,10 @@ class Ntv(ABC):
             'simple': current entity
             'leaves': NtvSingle entities
             'inner': NtvList entities
-            'all': all entities  '''       
+            'all': all entities  '''
         match nodes:
             case 'simple':
-                self.ntv_name = str(name)                
+                self.ntv_name = str(name)
             case 'leaves':
                 if not isinstance(name, list):
                     name = [str(name)] * NtvTree(self).breadth
@@ -415,10 +412,10 @@ class Ntv(ABC):
                 if not isinstance(name, list):
                     name = [str(name)] * NtvTree(self).size
                 for nam, ntv in zip(name, NtvTree(self).nodes):
-                    ntv.ntv_name = nam                    
+                    ntv.ntv_name = nam
             case _:
                 raise NtvError('the nodes option is not valid')
-        
+
     def set_type(self, typ=None):
         '''set a new type to the entity (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
@@ -450,12 +447,12 @@ class Ntv(ABC):
         - **leaves**: Boolean (default False) - if True, add the leaf row
         a mermaid text diagram
         '''
+        option = {'title': title, 'disp': disp, 'row': row, 'leaves': leaves}
         if disp:
-            Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', 
-                                title=title, disp=disp, row=row, leaves=leaves)
+            Ntv.obj({':$mermaid': self.to_obj()}).to_obj(
+                format='obj', **option)
             return None
-        return Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', 
-                                title=title, disp=disp, row=row, leaves=leaves)
+        return Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', **option)
 
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity.
@@ -530,7 +527,7 @@ class Ntv(ABC):
         if option['encoded'] and option['format'] == 'json':
             return json.dumps(json_obj)
         if option['encoded'] and option['format'] == 'cbor':
-            return  NtvConnector.uncast(Ntv.from_obj({':$cbor': json_obj}), format=None)
+            return NtvConnector.uncast(Ntv.from_obj({':$cbor': json_obj}), format=None)
         return json_obj
 
     def to_tuple(self, maxi=10):
@@ -563,26 +560,26 @@ class Ntv(ABC):
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxi]])
         raise NtvError('the ntv entity is not consistent')
 
+    @abstractmethod
     def obj_value(self):
-        '''abstract method'''
-        return ''
+        '''return the ntv_value with different formats defined by kwargs'''
 
     @property
+    @abstractmethod
     def json_array(self):
-        '''abstract method'''
-        return False
+        ''' return the json_array dynamic attribute'''
 
+    @abstractmethod
     def _obj_sep(self, json_type, def_type):
-        '''abstract method'''
-        return ''
+        ''' return separator to include in json_name'''
 
     @staticmethod
     def _from_value(value, decode_str):
         '''return a decoded value'''
         if isinstance(value, bytes):
-            #value = cbor2.loads(value)
-            value = Ntv.from_obj({'$cbor':value}).ntv_value
-        elif decode_str and isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
+            value = Ntv.from_obj({'$cbor': value}).ntv_value
+        elif decode_str and isinstance(value, str) and value.lstrip() and\
+            value.lstrip()[0] in '"-{[0123456789':
             try:
                 value = json.loads(value)
             except JSONDecodeError:
@@ -601,9 +598,6 @@ class Ntv(ABC):
         '''return (name, type, value, separator) of the json value'''
         if json_value is None:
             return (None, None, None, None)
-        # if isinstance(json_value, tuple):
-        #    return (None, None, list(json_value), None)
-        # if isinstance(json_value, (int, str, float, bool)):
         if isinstance(json_value, (list, int, str, float, bool)):
             return (None, None, json_value, None)
         if isinstance(json_value, dict) and len(json_value) != 1:
@@ -613,7 +607,7 @@ class Ntv(ABC):
             val = json_value[json_name]
             nam, typ, sep = Ntv.from_obj_name(json_name)
             return (nam, typ, val, sep)
-        return(*NtvConnector.cast(json_value), ':')
+        return (*NtvConnector.cast(json_value), ':')
 
     @staticmethod
     def _is_json_ntv(val):
@@ -852,10 +846,6 @@ class NtvTree:
             self._next_up()
         return self._node
 
-    """def __len__(self):
-        ''' size of the tree'''
-        return self.size"""
-    
     @property
     def breadth(self):
         ''' return the number of leaves'''
@@ -911,8 +901,23 @@ class NtvTree:
 
 
 class NtvConnector(ABC):
-    ''' The NtvConnector class is an abstract class used for all NTV connectors.
-    A NTV connector has two methods for conversion between NTV data and an object'''
+    ''' The NtvConnector class is an abstract class used by all NTV connectors
+    for conversion between NTV data and an object.
+
+    *class method :*
+    - `connector`
+    - `dic_connec`
+
+    *abstract method*
+    - `from_ntv`
+    - `to_ntv`
+
+    *static method*
+    - `cast`
+    - `uncast`
+    - `obj_to_json`
+    - `json_to_obj`
+    '''
 
     @classmethod
     def connector(cls):
@@ -924,6 +929,15 @@ class NtvConnector(ABC):
         '''return a dict with the clas associated to the connector:
         { clas_obj: classconnector }'''
         return {clas.clas_obj: clas.__name__ for clas in cls.__subclasses__()}
+
+    @staticmethod
+    @abstractmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+
+    @abstractmethod
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
 
     @staticmethod
     def cast(data):
@@ -941,7 +955,7 @@ class NtvConnector(ABC):
             case 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | \
                     'Polygon' | 'MultiPolygon':
                 return (None, dic_geo_cl[data.__class__.__name__],
-                        Ntv._listed(data.__geo_interface__['coordinates']))
+                        NtvConnector.connector()[dic_connec['geometry']].to_ntv(data)[2])
             case 'NtvSingle' | 'NtvSet' | 'NtvList':
                 return (None, 'ntv', data.to_obj())
             case _:
@@ -965,8 +979,11 @@ class NtvConnector(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec', 
+        dic_obj = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',
                    '$mermaid': 'MermaidConnec', '$cbor': 'CborConnec',
+                   'point': 'ShapelyConnec', 'multipoint': 'ShapelyConnec',
+                   'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
+                   'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
                    'other': None}
         type_n = ntv.ntv_type.name
         if 'dicobj' in option:
@@ -980,8 +997,7 @@ class NtvConnector(ABC):
         if type_n == 'ntv':
             return Ntv.obj(ntv.ntv_value)
         if type_n in dic_geo:
-            return geometry.shape({"type": dic_geo[type_n],
-                                   "coordinates": ntv.ntv_value})
+            option['type_geo'] = dic_geo[type_n]
         connec = None
         if type_n in dic_obj and \
                 dic_obj[type_n] in NtvConnector.connector():
@@ -992,15 +1008,29 @@ class NtvConnector(ABC):
             return connec.from_ntv(ntv.ntv_value, **option)
         return ntv.ntv_value
 
-    @staticmethod 
+    @staticmethod
     def obj_to_json(obj, complete=True):
+        '''conversion from an object to json or NTV object.
+
+        *Parameters*
+
+        - **complete** : Boolean (default True) - if True, return a NTV object with a type,
+        if False, return Json object without type
+        '''
         if complete:
             return Ntv.obj(obj)
         return NtvConnector.cast(obj)[2]
 
-    @staticmethod 
-    def json_to_obj(js, complete=True, class_name=None):
-        ntv = Ntv.obj(js)
+    @staticmethod
+    def json_to_obj(jsn, complete=True, class_name=None):
+        '''conversion from a json or NTV object to an object.
+
+        *Parameters*
+
+        - **complete** : Boolean (default True) - if True, the type is included
+        in the json or NTV object
+        - **class_name** : string (default None) - class of the object to create'''
+        ntv = Ntv.obj(jsn)
         ntv_type = ntv.type_str if complete else 'object'
         ntv.set_type(ntv_type)
         if class_name:
@@ -1009,7 +1039,8 @@ class NtvConnector(ABC):
         else:
             option = {'format': 'obj'}
         return NtvConnector.uncast(ntv, **option)
-    
+
+
 class NtvError(Exception):
     ''' NTV Exception'''
     # pass
