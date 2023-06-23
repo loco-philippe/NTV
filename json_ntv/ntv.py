@@ -64,12 +64,9 @@ from abc import ABC
 import datetime
 import json
 from json import JSONDecodeError
-#from base64 import b64encode
 
-import cbor2
 from shapely import geometry
 #from observation import Ilist
-#from IPython.display import Image, display
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 
@@ -533,9 +530,7 @@ class Ntv(ABC):
         if option['encoded'] and option['format'] == 'json':
             return json.dumps(json_obj)
         if option['encoded'] and option['format'] == 'cbor':
-            return cbor2.dumps(json_obj, datetime_as_timestamp=True,
-                               timezone=datetime.timezone.utc, canonical=True,
-                               date_as_datetime=True)
+            return  NtvConnector.uncast(Ntv.from_obj({':$cbor': json_obj}), format=None)
         return json_obj
 
     def to_tuple(self, maxi=10):
@@ -585,7 +580,8 @@ class Ntv(ABC):
     def _from_value(value, decode_str):
         '''return a decoded value'''
         if isinstance(value, bytes):
-            value = cbor2.loads(value)
+            #value = cbor2.loads(value)
+            value = Ntv.from_obj({'$cbor':value}).ntv_value
         elif decode_str and isinstance(value, str) and value.lstrip() and value.lstrip()[0] in '"-{[0123456789':
             try:
                 value = json.loads(value)
@@ -970,7 +966,8 @@ class NtvConnector(ABC):
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
         dic_obj = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec', 
-                   '$mermaid': 'MermaidConnec', 'other': None}
+                   '$mermaid': 'MermaidConnec', '$cbor': 'CborConnec',
+                   'other': None}
         type_n = ntv.ntv_type.name
         if 'dicobj' in option:
             dic_obj |= option['dicobj']

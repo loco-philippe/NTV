@@ -16,6 +16,7 @@ It contains :
         - `SeriesConnec`:    'field' connector 
         - `MermaidConnec`:   '$mermaid' connector 
 """
+import datetime
 import csv
 import json
 import pandas as pd
@@ -68,6 +69,24 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
             writer.writerow({name: field_ntv[i].to_obj(field_ntv.ntv_type, encoded=True)
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
+
+class CborConnec(NtvConnector):
+    '''NTV connector for Iindex'''
+    
+    clas_obj = 'bytes'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into the return object'''
+        import cbor2
+        return cbor2.dumps(ntv_value, datetime_as_timestamp=True,
+                           timezone=datetime.timezone.utc, canonical=True,
+                           date_as_datetime=True)
+
+    def to_ntv(self):
+        ''' convert object into the NTV entity (name, type, json-value)'''
+        import cbor2
+        return (None, '', cbor2.loads(self))
 
 class NfieldConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -303,7 +322,7 @@ class SeriesConnec(NtvConnector):
 class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
 
-    #clas_obj = 'Mermaid'
+    clas_obj = 'Mermaid'
 
     @staticmethod
     def from_ntv(ntv_value, **kwargs):
