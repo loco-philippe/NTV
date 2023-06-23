@@ -64,12 +64,12 @@ from abc import ABC
 import datetime
 import json
 from json import JSONDecodeError
-from base64 import b64encode
+#from base64 import b64encode
 
 import cbor2
 from shapely import geometry
 #from observation import Ilist
-from IPython.display import Image, display
+#from IPython.display import Image, display
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 
@@ -453,24 +453,12 @@ class Ntv(ABC):
         - **leaves**: Boolean (default False) - if True, add the leaf row
         a mermaid text diagram
         '''
-        from json_ntv.json_mermaid import diagram
-
-        ntv = Ntv.obj(self)
-        node_link = {'nodes': [], 'links': []}
-        dic_node = {}
-        if leaves:
-            nodes = [node for node in NtvTree(
-                ntv) if not isinstance(node.val, list)]
-            dic_node = {node: row for row, node in enumerate(nodes)}
-        Ntv._mermaid_link(ntv, None, node_link, row, dic_node)
-        mermaid_json = {title + ':$flowchart': {
-            'orientation': 'top-down',
-            'node::': {node[0]: node[1] for node in node_link['nodes']},
-            'link::': node_link['links']}}
         if disp:
-            return display(Image(url="https://mermaid.ink/img/" +
-                                 b64encode(diagram(mermaid_json).encode("ascii")).decode("ascii")))
-        return diagram(mermaid_json)
+            Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', 
+                                title=title, disp=disp, row=row, leaves=leaves)
+            return None
+        return Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', 
+                                title=title, disp=disp, row=row, leaves=leaves)
 
     def to_repr(self, nam=True, typ=True, val=True, maxi=10):
         '''return a simple json representation of the Ntv entity.
@@ -641,43 +629,6 @@ class Ntv(ABC):
     def _listed(idx):
         '''transform a tuple of tuple in a list of list'''
         return [val if not isinstance(val, tuple) else Ntv._listed(val) for val in idx]
-
-    @staticmethod
-    def _mermaid_node(ntv, def_typ_str, num, dic_node):
-        '''create and return a node'''
-        j_name, j_sep, j_type = ntv.json_name(def_typ_str)
-        name = ''
-        if j_name:
-            name += '<b>' + j_name + '</b>\n'
-        if j_type:
-            name += j_type + '\n'
-        if ntv in dic_node:
-            num += ' ' + str(dic_node[ntv])
-        if num:
-            name += '<i>' + num + '</i>\n'
-        elif isinstance(ntv, NtvSingle):
-            if isinstance(ntv.val, str):
-                name += '<i>' + ntv.val + '</i>\n'
-            else:
-                name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [ntv.address_name, ['rectangle', name[:-1]]]
-        if not name:
-            name = '<b>::</b>\n'
-        name = name.replace('"', "'")
-        return [ntv.address_name, ['roundedge', name[:-1]]]
-
-    @staticmethod
-    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node):
-        '''add nodes and links from ntv in node_list and link_list '''
-        num = str(len(node_link['nodes'])) if row else ''
-        node_link['nodes'].append(Ntv._mermaid_node(
-            ntv, def_typ_str, num, dic_node))
-        if isinstance(ntv, NtvList):
-            for ntv_val in ntv:
-                Ntv._mermaid_link(ntv_val, ntv.type_str,
-                                  node_link, row, dic_node)
-                node_link['links'].append(
-                    [ntv.address_name, 'normalarrow', ntv_val.address_name])
 
 
 class NtvSingle(Ntv):
@@ -1018,8 +969,8 @@ class NtvConnector(ABC):
         dic_cbor = {'point': False, 'multipoint': False, 'line': False,
                     'multiline': False, 'polygon': False, 'multipolygon': False,
                     'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'DataFrameConnec',
-                   'field': 'SeriesConnec', 'other': None}
+        dic_obj = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec', 
+                   '$mermaid': 'MermaidConnec', 'other': None}
         type_n = ntv.ntv_type.name
         if 'dicobj' in option:
             dic_obj |= option['dicobj']

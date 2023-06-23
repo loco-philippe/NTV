@@ -29,6 +29,7 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv_connector.SeriesConnec`
     - `NTV.json_ntv.ntv_connector.IlistConnec`
     - `NTV.json_ntv.ntv_connector.IindexConnec`
+    - `NTV.json_ntv.ntv_connector.MermaidConnec`
      
 The functions to convert a json object to Mermaid code are in the 
 `NTV.json_ntv.json_mermaid` submodule.    
@@ -95,6 +96,6 @@ This structuring of type makes it possible to reference any type of data that ha
 """
 from json_ntv.namespace import Namespace, NtvType, str_type, relative_type, agreg_type
 from json_ntv.ntv import Ntv, NtvSingle, NtvList, NtvConnector, NtvError, NtvTree
-from json_ntv.ntv_connector import DataFrameConnec, SeriesConnec, from_csv, to_csv
-from json_ntv.json_mermaid import diagram
+from json_ntv.ntv_connector import DataFrameConnec, SeriesConnec, from_csv, to_csv, MermaidConnec
+#from json_ntv.json_mermaid import diagram
 #print('package :', __package__)

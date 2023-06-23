@@ -14,12 +14,13 @@ It contains :
         - `IlistConnec`:     'tab' connector 
         - `DataFrameConnec`: 'tab' connector 
         - `SeriesConnec`:    'field' connector 
+        - `MermaidConnec`:   '$mermaid' connector 
 """
 import csv
 import json
 import pandas as pd
 
-from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
+from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
 
 def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     ''' return a 'tab' NtvSingle from a csv file
@@ -263,6 +264,7 @@ class SeriesConnec(NtvConnector):
             return sr.astype(astype.get(sr.dtype.name, sr.dtype.name))
         return sr.astype(deftype.get(sr.dtype.name, sr.dtype.name))
     
+    @staticmethod 
     def _ntv_type_val(name_type, sr):
         types = SeriesConnec.types
         dtype = sr.dtype.name
@@ -281,11 +283,11 @@ class SeriesConnec(NtvConnector):
                 ntv_value = json.loads(sr.to_json(orient='records', date_format='iso', default_handler=str))
         return (ntv_type, ntv_value)
     
-    def to_ntv(sr):
+    def to_ntv(self):
         ''' convert object into the NTV entity'''
         astype = SeriesConnec.astype
         ntv_type_val = SeriesConnec._ntv_type_val
-        sr = sr.astype(astype.get(sr.dtype.name, sr.dtype.name))
+        sr = self.astype(astype.get(self.dtype.name, self.dtype.name))
         sr_name = sr.name if sr.name else ''
         ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
         if sr.dtype.name == 'category':
@@ -297,3 +299,163 @@ class SeriesConnec(NtvConnector):
         else:
             ntv_type, ntv_value = ntv_type_val(name_type, sr)
         return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
+
+class MermaidConnec(NtvConnector):
+    '''NTV connector for Mermaid diagram'''
+
+    #clas_obj = 'Mermaid'
+
+    @staticmethod
+    def from_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into a mermaid flowchart
+
+        *Parameters*
+
+        - **title**: String (default '') - title of the flowchart
+        - **disp**: Boolean (default False) - if true, return a display else return
+        a mermaid text diagram
+        - **row**: Boolean (default False) - if True, add the node row
+        - **leaves**: Boolean (default False) - if True, add the leaf row
+        '''
+        #from json_ntv.json_mermaid import diagram
+        from base64 import b64encode
+        from IPython.display import Image, display
+        #from json_ntv.ntv_connector import MermaidConnec
+
+        option = {'title':'', 'disp':False, 'row':False, 
+                  'leaves':False} | kwargs 
+        diagram = MermaidConnec.diagram
+        link = MermaidConnec._mermaid_link
+        ntv = Ntv.obj(ntv_value)
+        node_link = {'nodes': [], 'links': []}
+        dic_node = {}
+        if option['leaves']:
+            nodes = [node for node in NtvTree(
+                ntv) if not isinstance(node.val, list)]
+            dic_node = {node: row for row, node in enumerate(nodes)}
+        link(ntv, None, node_link, option['row'], dic_node)
+        mermaid_json = {option['title'] + ':$flowchart': {
+            'orientation': 'top-down',
+            'node::': {node[0]: node[1] for node in node_link['nodes']},
+            'link::': node_link['links']}}
+        if option['disp']:
+            return display(Image(url="https://mermaid.ink/img/" +
+                                 b64encode(diagram(mermaid_json).encode("ascii")).decode("ascii")))
+        return diagram(mermaid_json)
+
+    @staticmethod
+    def diagram(json_diag):
+        '''create a mermaid code from a mermaid json'''
+        ntv = Ntv.obj(json_diag)
+        erdiagram = MermaidConnec._erDiagram
+        flowchart = MermaidConnec._flowchart
+        diag_type = ntv.type_str[1:]
+        diag_txt = '---\ntitle: ' + ntv.name + '\n---\n' if ntv.name else ''
+        diag_txt += diag_type
+        match diag_type:
+            case 'erDiagram':
+                diag_txt += erdiagram(ntv)
+            case 'flowchart':
+                diag_txt += flowchart(ntv)
+        return diag_txt
+
+    @staticmethod
+    def _mermaid_node(ntv, def_typ_str, num, dic_node):
+        '''create and return a node'''
+        j_name, j_sep, j_type = ntv.json_name(def_typ_str)
+        name = ''
+        if j_name:
+            name += '<b>' + j_name + '</b>\n'
+        if j_type:
+            name += j_type + '\n'
+        if ntv in dic_node:
+            num += ' ' + str(dic_node[ntv])
+        if num:
+            name += '<i>' + num + '</i>\n'
+        elif isinstance(ntv, NtvSingle):
+            if isinstance(ntv.val, str):
+                name += '<i>' + ntv.val + '</i>\n'
+            else:
+                name += '<i>' + json.dumps(ntv.val) + '</i>\n'
+            return [ntv.address_name, ['rectangle', name[:-1]]]
+        if not name:
+            name = '<b>::</b>\n'
+        name = name.replace('"', "'")
+        return [ntv.address_name, ['roundedge', name[:-1]]]
+
+    @staticmethod
+    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node):
+        '''add nodes and links from ntv in node_list and link_list '''
+        num = str(len(node_link['nodes'])) if row else ''
+        node_link['nodes'].append(MermaidConnec._mermaid_node(
+            ntv, def_typ_str, num, dic_node))
+        if isinstance(ntv, NtvList):
+            for ntv_val in ntv:
+                MermaidConnec._mermaid_link(ntv_val, ntv.type_str,
+                                            node_link, row, dic_node)
+                node_link['links'].append(
+                    [ntv.address_name, 'normalarrow', ntv_val.address_name])
+
+    @staticmethod
+    def _flowchart(ntv):
+        orientation  = {'top-down' : 'TD', 'top-bottom' : 'TB','bottom-top': 'BT', 'right-left': 'RL', 'left-right': 'LR'}
+        fcnode = MermaidConnec._fcNode
+        fclink = MermaidConnec._fcLink
+        fc = Ntv.obj(ntv.val)
+        diag_txt = ' ' + orientation[fc['orientation'].val]
+        for node in fc['node']:
+            diag_txt += fcnode(node)
+        for link in fc['link']:
+            diag_txt += fclink(link)
+        return diag_txt + '\n'    
+
+    @staticmethod
+    def _fcLink(link):
+        link_t  = {'normal' : ' ---', 'normalarrow': ' -->', 'dotted': ' -.-', 'dottedarrow': ' -.->'}
+        link_txt = '\n    ' + str(link[0].val) + link_t[link[1].val]
+        if len(link) == 4:
+            link_txt += '|' + link[3].val + '|'
+        return link_txt + ' ' + str(link[2].val)
+
+    @staticmethod
+    def _fcNode(node):
+        shape_l  = {'rectangle' : '[', 'roundedge': '(', 'stadium': '(['}
+        shape_r  = {'rectangle' : ']', 'roundedge': ')', 'stadium': '])'}
+        return '\n    ' + node.name + shape_l[node[0].val] + '"' + \
+               node[1].val.replace('"', "'") + '"' + shape_r[node[0].val]
+
+    @staticmethod
+    def _erDiagram(ntv):
+        erentity = MermaidConnec._erEntity
+        errelation = MermaidConnec._erRelation
+        diag_txt = ''
+        er = Ntv.obj(ntv.val)
+        for entity in er['entity']:
+            diag_txt += erentity(entity)
+        for relation in er['relationship']:
+            diag_txt += errelation(relation)
+        return diag_txt
+
+    @staticmethod
+    def _erEntity(entity):
+        ent_txt = '\n    ' + entity.name + ' {'
+        for att in entity:
+            ent_txt += '\n        ' + att[0].val + ' ' + att[1].val
+            if len(att) > 2:
+                if att[2].val in ('PK', 'FK', 'UK'):
+                    ent_txt += ' ' + att[2].val
+                else:
+                    ent_txt += ' "' + att[2].val + '"'
+            if len(att) > 3:
+                ent_txt += ' "' + att[3].val + '"'
+        return ent_txt + '\n    }'
+
+    @staticmethod
+    def _erRelation(rel):
+        rel_left  = {'exactly one' : ' ||', 'zero or one': ' |o', 'zero or more': ' }o', 'one or more': ' }|'}
+        rel_right = {'exactly one' : '|| ', 'zero or one': 'o| ', 'zero or more': 'o{ ', 'one or more': '|{ '}
+        identif   = {'identifying' : '--', 'non-identifying' : '..'}
+        rel_txt = '\n    ' + rel[0].val + rel_left[rel[1].val] + identif[rel[2].val] + rel_right[rel[3].val] + rel[4].val
+        if len(rel) > 5:
+            rel_txt += ' : ' + rel[5].val
+        return rel_txt
