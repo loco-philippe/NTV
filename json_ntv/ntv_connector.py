@@ -8,15 +8,17 @@ The `NTV.ntv_connector` module is part of the `NTV.json_ntv` package ([specifica
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
 It contains :
-    - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
-    - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
-        - `IindexConnec`:    'field' connector 
-        - `IlistConnec`:     'tab' connector 
-        - `DataFrameConnec`: 'tab' connector 
-        - `SeriesConnec`:    'field' connector 
-        - `MermaidConnec`:   '$mermaid' connector 
-        - `ShapelyConnec`:   'geometry' connector 
-        - `CborConnec`:      '$cbor' connector 
+    
+- methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
+- the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
+    - `IindexConnec`:    'field' connector 
+    - `IlistConnec`:     'tab' connector 
+    - `DataFrameConnec`: 'tab' connector 
+    - `SeriesConnec`:    'field' connector 
+    - `MermaidConnec`:   '$mermaid' connector 
+    - `ShapelyConnec`:   'geometry' connector 
+    - `CborConnec`:      '$cbor' connector
+    
 """
 import datetime
 import csv
