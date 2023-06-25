@@ -420,8 +420,6 @@ class Ntv(ABC):
         '''set a new type to the entity (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        # if self.__class__.__name__ != 'NtvSingle':
-        #    raise NtvError('set_type is available only for NtvSingle class')
         self.ntv_type = str_type(typ, True)
 
     def set_value(self, value=None):
