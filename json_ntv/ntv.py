@@ -604,12 +604,14 @@ class Ntv(ABC):
             return (None, None, None, None)
         if isinstance(json_value, (list, int, str, float, bool)):
             return (None, None, json_value, None)
-        if isinstance(json_value, dict) and len(json_value) != 1:
-            return (None, None, json_value, None)
-        if isinstance(json_value, dict) and len(json_value) == 1:
-            json_name = list(json_value.keys())[0]
-            val = json_value[json_name]
-            nam, typ, sep = Ntv.from_obj_name(json_name)
+        if isinstance(json_value, dict):
+            if len(json_value) != 1:
+                return (None, None, json_value, None)
+            key = list(json_value.keys())[0]
+            if len(json_value) == 1 and not isinstance(key, str):
+                return (None, None, json_value, None)
+            val = json_value[key]
+            nam, typ, sep = Ntv.from_obj_name(key)
             return (nam, typ, val, sep)
         return (*NtvConnector.cast(json_value), ':')
 
