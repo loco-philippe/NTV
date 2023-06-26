@@ -157,7 +157,8 @@ class Ntv(ABC):
         - **name** : string - name of the Ntv entity
         - **typ** : string or NtvType - type of the NTV entity
         - **cat**: string - NTV category ('single', 'list')
-        - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
+        - **decode_str**: boolean (default False) - if True, string are loaded as json data'''
+        
         value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
@@ -177,7 +178,7 @@ class Ntv(ABC):
         - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
         - **def_type** : NtvType or Namespace (default None) - default type of the value
         - **def_sep**: ':', '::' or None (default None) - default separator of the value
-        - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
+        - **decode_str**: boolean (default False) - if True, string are loaded as json data'''
         value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
@@ -572,8 +573,13 @@ class Ntv(ABC):
         ''' return separator to include in json_name'''
 
     @staticmethod
-    def _from_value(value, decode_str):
-        '''return a decoded value'''
+    def _from_value(value, decode_str=False):
+        '''return a decoded value
+        
+        *Parameters*
+
+        - **decode_str**: boolean (default False) - if True, string are loaded as json data'''
+
         if isinstance(value, bytes):
             value = Ntv.from_obj({'$cbor': value}).ntv_value
         elif decode_str and isinstance(value, str) and value.lstrip() and\
@@ -655,6 +661,8 @@ class NtvSingle(Ntv):
         - **ntv_name** : String (default None) - name of the NTV entity
         - **ntv_type**: String (default None) - type of the entity
         - **value**: value of the entity
+        - **fast**: boolean (default False) - Ntv is created with a list of json values 
+        without control
         '''
         if not fast:
             # or isinstance(value, NtvSingle)
@@ -750,8 +758,11 @@ class NtvList(Ntv):
         *Parameters*
 
         - **ntv_name** : String (default None) - name of the NTV entity
-        - **ntv_type**: String (default None) - default type or namespace of the included entities
-        - **list_ntv**: list - list of Ntv objects or obj_value of Ntv objectd
+        - **ntv_type**: String (default None) - default type or namespace of 
+        the included entities
+        - **list_ntv**: list - list of Ntv objects or obj_value of Ntv objects
+        - **fast**: boolean (default False) - if True, Ntv is created with a list 
+        of json values without control 
         '''
         if isinstance(list_ntv, NtvList):
             ntv_value = list_ntv.ntv_value
