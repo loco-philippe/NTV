@@ -667,25 +667,28 @@ class NtvSingle(Ntv):
         without control
         '''
         if not fast:
-            # or isinstance(value, NtvSingle)
-            is_json_ntv = Ntv._is_json_ntv(value)
-
-            if not is_json_ntv:
-                name, typ, value = NtvConnector.cast(value)
-            if not ntv_type:
-                if is_json_ntv:
-                    ntv_type = 'json'
-                else:
-                    ntv_type = typ
-                    if not ntv_name:
-                        ntv_name = name
-            else:
-                if not is_json_ntv and NtvType(ntv_type) != NtvType(typ):
-                    raise NtvError('ntv_value is not compatible with ntv_type')
+            value, ntv_name, ntv_type = NtvSingle._decode_s(value, ntv_name, ntv_type)
             if ntv_type and isinstance(ntv_type, str) and ntv_type[-1] == '.':
                 raise NtvError('the ntv_type is not valid')
         super().__init__(value, ntv_name, ntv_type)
-
+    
+    @staticmethod
+    def _decode_s(ntv_value, ntv_name, ntv_type):
+        '''return adjusted ntv_value, ntv_name, ntv_type'''
+        is_json_ntv = Ntv._is_json_ntv(ntv_value)
+        if not is_json_ntv:
+            name, typ, ntv_value = NtvConnector.cast(ntv_value)
+        if not ntv_type:
+            if is_json_ntv:
+                ntv_type = 'json'
+            else:
+                ntv_type = typ
+                if not ntv_name:
+                    ntv_name = name
+        elif not is_json_ntv and NtvType(ntv_type) != NtvType(typ):
+            raise NtvError('ntv_value is not compatible with ntv_type')
+        return (ntv_value, ntv_name, ntv_type)
+        
     def __eq__(self, other):
         ''' equal if name type and value are equal'''
         return self.__class__.__name__ == other.__class__.__name__ and\
@@ -806,7 +809,8 @@ class NtvList(Ntv):
         return ''
 
     def obj_value(self, def_type=None, **kwargs):
-        '''return the ntv_value with different formats defined by kwargs'''
+        '''return the ntv_value with different formats defined by kwargs
+        '''
         option = {'encoded': False, 'format': 'json',
                   'simpleval': False, 'json_array': False} | kwargs
         opt2 = option | {'encoded': False}
@@ -814,8 +818,7 @@ class NtvList(Ntv):
             def_type = self.ntv_type.long_name
         if self.json_array or option['simpleval'] or option['json_array']:
             return [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value]
-        values = [ntv.to_obj(def_type=def_type, **opt2)
-                  for ntv in self.ntv_value]
+        values = [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
 
 
@@ -949,7 +952,7 @@ class NtvConnector(ABC):
     @abstractmethod
     def to_ntv(self):
         ''' convert object into the NTV entity (name, type, json-value)'''
-
+            
     @staticmethod
     def cast(data):
         '''return (name, type, json_value) of the data'''
@@ -1004,6 +1007,8 @@ class NtvConnector(ABC):
         if ntv.ntv_type is None or not obj:
             return ntv.ntv_value
         if type_n in dic_fct:
+            #if isinstance(ntv.ntv_value, (tuple, list)):
+            #    return [dic_fct[type_n](val) for val in ntv.ntv_value]
             return dic_fct[type_n](ntv.ntv_value)
         if type_n == 'ntv':
             return Ntv.obj(ntv.ntv_value)
