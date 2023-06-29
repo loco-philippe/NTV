@@ -97,7 +97,8 @@ This structuring of type makes it possible to reference any type of data that ha
 
 """
 from json_ntv.namespace import Namespace, NtvType, str_type, relative_type, agreg_type
-from json_ntv.ntv import Ntv, NtvSingle, NtvList, NtvConnector, NtvError, NtvTree
+from json_ntv.ntv import Ntv, NtvSingle, NtvList, NtvConnector, NtvError
+from json_ntv.ntv import NtvTree, NtvJsonEncoder
 from json_ntv.ntv_connector import DataFrameConnec, SeriesConnec, from_csv, to_csv
 from json_ntv.ntv_connector import MermaidConnec, CborConnec, ShapelyConnec
 
