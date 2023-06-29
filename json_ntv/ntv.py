@@ -136,7 +136,7 @@ class Ntv(ABC):
         self._row = None
 
     @staticmethod
-    def obj(data, no_typ=False, decode_str=False):
+    def obj(data, no_typ=False, decode_str=False, typ_auto=False):
         ''' return an Ntv entity from data.
         **Data** can be :
         - a tuple with value, name, typ and cat (see `from_att` method)
@@ -145,7 +145,7 @@ class Ntv(ABC):
         - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
         if isinstance(data, tuple):
             return Ntv.from_att(*data, decode_str=decode_str)
-        return Ntv.from_obj(data, no_typ=no_typ, decode_str=decode_str)
+        return Ntv.from_obj(data, no_typ=no_typ, decode_str=decode_str, typ_auto=typ_auto)
 
     @staticmethod
     def from_att(value, name, typ, cat, decode_str=False):
@@ -189,10 +189,11 @@ class Ntv(ABC):
             sep = None if sep and not def_type else sep
             sep = ':' if sep else sep
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
-            '''if typ_auto and not def_type and ntv_list:
-                def_type = ntv_list[0].ntv_type'''
+            #if not def_type and ntv_list:
+            if typ_auto and not def_type and ntv_list:
+                def_type = ntv_list[0].ntv_type
             def_type = 'json' if no_typ else def_type
-            return NtvList(ntv_list, ntv_name, def_type)
+            return NtvList(ntv_list, ntv_name, def_type, typ_auto)
         if sep == ':' or (sep is None and isinstance(ntv_value, dict) and
                           len(ntv_value) == 1):
             ntv_type = agreg_type(str_typ, def_type, False)
@@ -210,10 +211,11 @@ class Ntv(ABC):
             sep = ':' if sep else sep
             ntv_list = [Ntv.from_obj({key: val}, def_type, sep)
                         for key, val in zip(keys, values)]
-            if not def_type and ntv_list:
+            #if not def_type and ntv_list:
+            if typ_auto and not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
             def_type = 'json' if no_typ else def_type
-            return NtvList(ntv_list, ntv_name, def_type)
+            return NtvList(ntv_list, ntv_name, def_type, typ_auto)
         raise NtvError('separator ":" is not compatible with value')
 
     def __len__(self):
@@ -315,7 +317,8 @@ class Ntv(ABC):
     def type_str(self):
         '''return a string with the value of the NtvType of the entity'''
         if not self.ntv_type:
-            return None
+            #return None
+            return ''
         return self.ntv_type.long_name
 
     @property
@@ -766,7 +769,7 @@ class NtvList(Ntv):
     - `to_repr`
     '''
 
-    def __init__(self, list_ntv, ntv_name=None, ntv_type=None, fast=False):
+    def __init__(self, list_ntv, ntv_name=None, ntv_type=None, typ_auto=False, fast=False):
         '''NtvList constructor.
 
         *Parameters*
@@ -789,7 +792,8 @@ class NtvList(Ntv):
             ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         else:
             raise NtvError('ntv_value is not a list')
-        if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
+        #if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
+        if typ_auto and not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
         for row, ntv in enumerate(self):
@@ -995,7 +999,8 @@ class NtvConnector(ABC):
     def uncast(ntv, **option):
         '''return object from ntv entity'''
         dic_fct = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
-                   'datetime': datetime.datetime.fromisoformat, 'array': tuple}
+                   #'datetime': datetime.datetime.fromisoformat, 'array': tuple}
+                   'datetime': datetime.datetime.fromisoformat}
         dic_geo = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
                    'multiline': 'multilinestring', 'polygon': 'polygon',
                    'multipolygon': 'multipolygon'}
@@ -1019,6 +1024,8 @@ class NtvConnector(ABC):
             if isinstance(ntv.ntv_value, (tuple, list)):
                 return [dic_fct[type_n](val) for val in ntv.ntv_value]
             return dic_fct[type_n](ntv.ntv_value)
+        if type_n == 'array':
+            return tuple(ntv.ntv_value)
         if type_n == 'ntv':
             return Ntv.obj(ntv.ntv_value)
         if type_n in dic_geo:

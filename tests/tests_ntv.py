@@ -177,7 +177,8 @@ class Test_Ntv(unittest.TestCase):
                    ['NtvSingle', {':': NtvSingle(1, 'test')}, {
                        ':ntv': {'test': 1}}],
                    ['NtvSingle', {'set': NtvList([{'l1': 21}, {'l2': [2, 3]}])},
-                    {'set:ntv': {'l1': 21, 'l2': [2, 3]}}],
+                    #{'set:ntv': {'l1': 21, 'l2': [2, 3]}}],
+                    {'set:ntv': {'l1': 21, 'l2:': [2, 3]}}],
                    ['NtvSingle', {'lis:': NtvList([1, 2, 3])}, {
                        'lis:ntv': [1, 2, 3]}],
                    ['NtvSingle', {'Ntv1': datetime.date(2021, 2, 1)},
@@ -197,10 +198,10 @@ class Test_Ntv(unittest.TestCase):
                    ['NtvSingle', {'set:': NtvList([{'l1': 21}, {'l2': datetime.date(2021, 2, 1)}])},
                     {'set:ntv': {'l1': 21, 'l2:date': '2021-02-01'}}],
                    ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10), 22]}],
-                    [[4, [5, 6]], {'heure::time': ['10:25:10', {':json': 22}]}]],
+                    [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, 22]}]],
                    ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10),
                                                         geometry.point.Point((3, 4))]}],
-                    [[4, [5, 6]], {'heure::time': ['10:25:10', {':point': [3, 4]}]}]],
+                    [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, {':point': [3.0, 4.0]}]}]],
                    ['NtvList', [], {}],
                    ['NtvList', {'::': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]},
                     {'paris': [2.1, 40.3], 'lyon': [2.1, 40.3]}],
@@ -262,10 +263,12 @@ class Test_Ntv(unittest.TestCase):
         lis2 = NtvList([10, 2.5, 30, 40], 'lis2')
         il_lis1 = NtvList([lis1, lis2, unic], 'ilis1')
         il_lis2 = NtvList([lis2, lis1, unic], 'ilis2')
+        il_lis1_a = NtvList([lis1, lis2, unic], 'ilis1', typ_auto=True)
+        il_lis2_a = NtvList([lis2, lis1, unic], 'ilis2', typ_auto=True)
         self.assertEqual(il_lis2[0].ntv_type, il_lis1[1].ntv_type)
         self.assertEqual(il_lis2[1].ntv_type, il_lis1[0].ntv_type)
-        self.assertNotEqual(il_lis2.ntv_type, il_lis1.ntv_type)
-
+        self.assertEqual(il_lis2.ntv_type, il_lis1.ntv_type)
+        self.assertNotEqual(il_lis2_a.ntv_type, il_lis1_a.ntv_type)
     def test_to_obj(self):
         nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
         nstr2 = {'cities':  {'paris': [2.1, 40.3],   'lyon': [2.1, 40.3]}}
