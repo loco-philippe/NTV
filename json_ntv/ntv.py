@@ -178,7 +178,9 @@ class Ntv(ABC):
         - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
         - **def_type** : NtvType or Namespace (default None) - default type of the value
         - **def_sep**: ':', '::' or None (default None) - default separator of the value
-        - **decode_str**: boolean (default False) - if True, string are loaded as json data'''
+        - **decode_str**: boolean (default False) - if True, string are loaded as json data
+        - **type_auto**: boolean (default False) - if True, default type for NtvList 
+        is the ntv_type of the first Ntv in the ntv_value'''
         value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
@@ -189,7 +191,6 @@ class Ntv(ABC):
             sep = None if sep and not def_type else sep
             sep = ':' if sep else sep
             ntv_list = [Ntv.from_obj(val, def_type, sep) for val in ntv_value]
-            #if not def_type and ntv_list:
             if typ_auto and not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
             def_type = 'json' if no_typ else def_type
@@ -211,7 +212,6 @@ class Ntv(ABC):
             sep = ':' if sep else sep
             ntv_list = [Ntv.from_obj({key: val}, def_type, sep)
                         for key, val in zip(keys, values)]
-            #if not def_type and ntv_list:
             if typ_auto and not def_type and ntv_list:
                 def_type = ntv_list[0].ntv_type
             def_type = 'json' if no_typ else def_type
@@ -532,7 +532,6 @@ class Ntv(ABC):
             return json.dumps(json_obj, cls=NtvJsonEncoder)
         if option['encoded'] and option['format'] == 'cbor':
             return NtvConnector.connector()['CborConnec'].from_ntv(json_obj)
-            #return NtvConnector.uncast(Ntv.from_obj({':$cbor': json_obj}), format=None)
         return json_obj
 
     def to_tuple(self, maxi=10):
@@ -624,7 +623,6 @@ class Ntv(ABC):
     @staticmethod
     def _is_json_ntv(val):
         ''' return True if val is a json type'''
-        # return val is None or isinstance(val, (list, int, str, float, bool, dict))
         return val is None or isinstance(val, (list, int, str, float, bool, dict))
 
     @staticmethod
@@ -780,7 +778,8 @@ class NtvList(Ntv):
         - **list_ntv**: list - list of Ntv objects or obj_value of Ntv objects
         - **fast**: boolean (default False) - if True, Ntv is created with a list 
         of json values without control 
-        '''
+        - **type_auto**: boolean (default False) - if True, default type for NtvList 
+        is the ntv_type of the first Ntv in the ntv_value'''
         if isinstance(list_ntv, NtvList):
             ntv_value = list_ntv.ntv_value
             ntv_type = list_ntv.ntv_type
@@ -792,7 +791,6 @@ class NtvList(Ntv):
             ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]
         else:
             raise NtvError('ntv_value is not a list')
-        #if not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
         if typ_auto and not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
