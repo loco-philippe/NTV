@@ -514,10 +514,7 @@ class Ntv(ABC):
         '''
         option = {'encoded': False, 'format': 'json',
                   'simpleval': False, 'name': True, 'json_array': False} | kwargs
-        if option['simpleval'] and isinstance(self, NtvList) and not self.json_array:
-            value = NtvList(self).obj_value(def_type=def_type, **option)
-        else:
-            value = self.obj_value(def_type=def_type, **option)
+        value = self.obj_value(def_type=def_type, **option)
         obj_name = self.json_name(def_type)
         if not option['name']:
             obj_name[0] = ''
@@ -997,7 +994,6 @@ class NtvConnector(ABC):
     def uncast(ntv, **option):
         '''return object from ntv entity'''
         dic_fct = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
-                   #'datetime': datetime.datetime.fromisoformat, 'array': tuple}
                    'datetime': datetime.datetime.fromisoformat}
         dic_geo = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
                    'multiline': 'multilinestring', 'polygon': 'polygon',
