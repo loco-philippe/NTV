@@ -100,7 +100,7 @@ class CborConnec(NtvConnector):
         ''' convert ntv_value into the return object'''
         import cbor2
         return cbor2.dumps(ntv_value, datetime_as_timestamp=True,
-                           timezone=datetime.timezone.utc, canonical=True,
+                           timezone=datetime.timezone.utc, canonical=False,
                            date_as_datetime=True)
 
     def to_ntv(self):
