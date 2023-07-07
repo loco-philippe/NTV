@@ -149,6 +149,7 @@ class NdatasetConnec(NtvConnector):
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         from observation.datasets import Ndataset
+        
         ntv = Ntv.obj(ntv_value)
         return Ndataset.from_ntv(ntv)
 
@@ -165,6 +166,7 @@ class SdatasetConnec(NtvConnector):
     def from_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         from observation.datasets import Sdataset
+        
         ntv = Ntv.obj(ntv_value)
         return Sdataset.from_ntv(ntv)
 
@@ -229,6 +231,17 @@ class DataFrameConnec(NtvConnector):
         #js = NtvList([SeriesConnec.to_ntv(df2[col])[2] for col in df2.columns]).to_obj()
         js = Ntv.obj([SeriesConnec.to_ntv(df2[col])[2] for col in df2.columns]).to_obj()
         return (None, 'tab', js) 
+
+    def to_listidx(self):
+        ''' convert object in dataset parameters '''
+        listidx = []
+        for name, idx in self.astype('category').items():
+            lis = list(idx.cat.categories)
+            if lis and isinstance(lis[0], pd._libs.tslibs.timestamps.Timestamp):
+                lis = [ts.to_pydatetime().astimezone(datetime.timezone.utc)
+                       for ts in lis]
+            listidx.append({'codec': lis, 'name': name, 'keys': list(idx.cat.codes)})
+        return (listidx, len(self))
 
 
 class SeriesConnec(NtvConnector):
