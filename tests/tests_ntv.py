@@ -222,6 +222,7 @@ class Test_Ntv(unittest.TestCase):
             self.assertEqual(nstr, ntv.to_obj())
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.from_obj(Ntv.to_obj(ntv)))
+            self.assertEqual(ntv, Ntv.obj(ntv.to_obj(encoded=False)))
 
         lis = list(zip(*dictstr2))
         listres = list(lis[2])

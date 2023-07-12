@@ -145,6 +145,11 @@ class Ntv(ABC):
         - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
         if isinstance(data, tuple):
             return Ntv.from_att(*data, decode_str=decode_str)
+        if isinstance(data, str) and data.lstrip() and data.lstrip()[0] in '{[':
+            try: 
+                data = json.loads(data)
+            except:
+                pass
         return Ntv.from_obj(data, no_typ=no_typ, decode_str=decode_str, typ_auto=typ_auto)
 
     @staticmethod
