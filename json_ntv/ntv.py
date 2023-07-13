@@ -148,7 +148,7 @@ class Ntv(ABC):
         if isinstance(data, str) and data.lstrip() and data.lstrip()[0] in '{[':
             try: 
                 data = json.loads(data)
-            except:
+            except JSONDecodeError:
                 pass
         return Ntv.from_obj(data, no_typ=no_typ, decode_str=decode_str, typ_auto=typ_auto)
 
