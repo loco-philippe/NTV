@@ -270,6 +270,7 @@ class Test_Ntv(unittest.TestCase):
         self.assertEqual(il_lis2[1].ntv_type, il_lis1[0].ntv_type)
         self.assertEqual(il_lis2.ntv_type, il_lis1.ntv_type)
         self.assertNotEqual(il_lis2_a.ntv_type, il_lis1_a.ntv_type)
+        
     def test_to_obj(self):
         nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
         nstr2 = {'cities':  {'paris': [2.1, 40.3],   'lyon': [2.1, 40.3]}}
