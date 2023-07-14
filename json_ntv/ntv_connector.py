@@ -226,10 +226,10 @@ class DataFrameConnec(NtvConnector):
         return df
 
     def to_json_ntv(self):
-        ''' convert object into the NTV entity (name, type, value)'''
+        ''' convert object into the NTV entity (value, name, type)'''
         df2 = self.reset_index()
         #js = NtvList([SeriesConnec.to_json_ntv(df2[col])[2] for col in df2.columns]).to_obj()
-        js = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[2] for col in df2.columns]).to_obj()
+        js = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0] for col in df2.columns]).to_obj()
         return (js, None, 'tab') 
 
     def to_listidx(self):
