@@ -14,7 +14,35 @@ import csv
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_type, NtvTree
 from shapely import geometry
 
+class Test_Ntv_fast(unittest.TestCase):
 
+    def test_from_obj_repr(self):
+        list_repr = [[1, '"s"'],
+                     [{"truc":  1}, '"sN"'],
+                     [{":point": 1}, '"sT"'],
+                     [{"truc:":  1}, '"sN"'],
+                     [{":": 1}, '"s"'],
+                     [[1, 2], '{"l": ["s", "s"]}'],
+                     [{"truc": [1, 2]}, '{"lN": ["s", "s"]}'],
+                     [{":point": [1, 2]}, '"sT"'],
+                     [{"truc:":  [1, 2]}, '"sN"'],
+                     [{":": [1, 2]}, '"s"'],
+                     [{"::": [1, 2]}, '{"l": ["s", "s"]}'],
+                     [{"::": {"a": 2}}, '{"l": ["sN"]}'],
+                     [{"::": [[1, 2], [3, 4]]},
+                         '{"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}'],
+                     [{"::point": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
+                     [{"::array": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
+                     [{"::array": [{'a': 3, 'e':5}, {'a': 4, 'e':6}]}, '{"lT": ["sT", "sT"]}'],
+                     [{"a": 2}, '"sN"'],
+                     #[{"truc": {"a": 2}}, '{"sN": "sN"}'],
+                     [{":point": {"a": 2}}, '"sT"'],
+                     [{"truc:": {"a": 2}}, '"sN"'],
+                     [{":": {"a": 2}}, '"s"']]
+        for test in list_repr:
+            # print(test)
+            self.assertEqual(repr(Ntv.from_obj(test[0], fast=True)), test[1])
+    
 class Test_Ntv(unittest.TestCase):
 
     def test_single_obj_name(self):

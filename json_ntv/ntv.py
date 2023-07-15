@@ -716,12 +716,13 @@ class Ntv(ABC):
         if isinstance(json_value, dict):
             if len(json_value) != 1:
                 return (json_value, None, None, None)
-            key = list(json_value.keys())[0]
-            if len(json_value) == 1 and not isinstance(key, str):
+            json_name = list(json_value.keys())[0]
+            if len(json_value) == 1 and not isinstance(json_name, str):
                 return (json_value, None, None, None)
-            val = json_value[key]
+            '''val = json_value[key]
             nam, typ, sep = Ntv.from_obj_name(key)
-            return (val, nam, typ, sep)
+            return (val, nam, typ, sep)'''
+            return (json_value[json_name], *Ntv.from_obj_name(json_name))
         if fast:
             return (json_value, None, None, None)
         return (*NtvConnector.cast(json_value), ':')
