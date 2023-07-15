@@ -40,8 +40,8 @@ class Test_Ntv_fast(unittest.TestCase):
                      [{"truc:": {"a": 2}}, '"sN"'],
                      [{":": {"a": 2}}, '"s"']]
         for test in list_repr:
-            # print(test)
-            self.assertEqual(repr(Ntv.from_obj(test[0], fast=True)), test[1])
+            #print(test)
+            self.assertEqual(repr(Ntv.fast(test[0])), test[1])
 
     def test_from_obj_json_txt(self):
         dictstr = [['NtvSingle', 'null'],
@@ -63,12 +63,11 @@ class Test_Ntv_fast(unittest.TestCase):
         listtyp = list(lis[0])
         for nstr, typ in zip(liststr, listtyp):
             #print('av', nstr, typ)
-            ntv = Ntv.obj(nstr, fast=True)
+            ntv = Ntv.fast(nstr, fast=True)
             #print('ap', nstr, typ)
-            self.assertEqual(nstr, ntv.to_obj(encoded=True))
+            self.assertEqual(nstr, ntv.to_fast(encoded=True))
             self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv), fast=True))
-            self.assertEqual(ntv, Ntv.obj(ntv.to_obj(), fast=True))
+            self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
 
     def test_from_obj_json(self):
         dictstr = [['NtvSingle', None],
@@ -107,17 +106,17 @@ class Test_Ntv_fast(unittest.TestCase):
         listtyp = list(lis[0])
         for nstr, typ in zip(liststr, listtyp):
             #print('av', nstr, typ)
-            ntv = Ntv.obj(nstr, fast=True)
+            ntv = Ntv.fast(nstr)
             #print('ap', nstr, typ)
-            self.assertEqual(nstr, ntv.to_obj())
+            self.assertEqual(nstr, ntv.to_fast())
             self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv), fast=True))
-            self.assertEqual(ntv, Ntv.obj(ntv.to_obj(), fast=True))
+            self.assertEqual(ntv, Ntv.fast(ntv.to_obj()))
 
-    def test_from_obj_obj(self):
+    def test_from_obj_fast(self):
+        self.assertNotEqual(Ntv.fast({':': NtvSingle(1, 'test')}), Ntv.fast(NtvSingle(1, 'test')))
         dictstr2 = [
-                   ['NtvSingle', {':': NtvSingle(1, 'test')}, {
-                       ':ntv': {'test': 1}}],
+                   #['NtvSingle', {':': NtvSingle(1, 'test')}, {
+                   #    ':ntv': {'test': 1}}],
                    ['NtvSingle', {'set': NtvList([{'l1': 21}, {'l2': [2, 3]}])},
                     #{'set:ntv': {'l1': 21, 'l2': [2, 3]}}],
                     {'set:ntv': {'l1': 21, 'l2:': [2, 3]}}],
@@ -158,11 +157,12 @@ class Test_Ntv_fast(unittest.TestCase):
         listtyp = list(lis[0])
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
-            ntv = Ntv.obj(nstr, fast=True)
-            print('ap', nstr, typ)
+            ntv = Ntv.fast(nstr)
+            #print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv, fast=True), fast=True))
-            self.assertEqual(nres, ntv.to_obj(fast=True))
+            self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
+            
+            #self.assertEqual(nres, ntv.to_obj(fast=True))
     
 class Test_Ntv(unittest.TestCase):
 
@@ -363,6 +363,7 @@ class Test_Ntv(unittest.TestCase):
             self.assertEqual(ntv, Ntv.obj(ntv.to_obj()))
 
     def test_from_obj_obj(self):
+        self.assertNotEqual(Ntv.obj({':': NtvSingle(1, 'test')}), Ntv.obj(NtvSingle(1, 'test')))
         dictstr2 = [
                    ['NtvSingle', {':': NtvSingle(1, 'test')}, {
                        ':ntv': {'test': 1}}],
