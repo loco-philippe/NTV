@@ -163,7 +163,8 @@ class Ntv(ABC):
         - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
         if isinstance(data, tuple):
             return Ntv.from_att(*data, decode_str=decode_str, fast=fast)
-        if isinstance(data, str) and data.lstrip() and data.lstrip()[0] in '{[':
+        #if isinstance(data, str) and data.lstrip() and data.lstrip()[0] in '{[':
+        if isinstance(data, str):
             try: 
                 data = json.loads(data)
             except JSONDecodeError:
@@ -224,7 +225,8 @@ class Ntv(ABC):
         raise NtvError('separator ":" is not compatible with value')
 
     @staticmethod
-    def from_obj(value, def_type=None, def_sep=None, no_typ=False, decode_str=False, typ_auto=False, fast=False):
+    def from_obj(value, def_type=None, def_sep=None, no_typ=False, decode_str=False,
+                 typ_auto=False, fast=False):
         ''' return an Ntv entity from an object value.
 
         *Parameters*
@@ -679,19 +681,19 @@ class Ntv(ABC):
         if isinstance(value, bytes):
             value = Ntv.from_obj({'$cbor': value}).ntv_value
         elif decode_str and isinstance(value, str) and value.lstrip() and\
-            value.lstrip()[0] in '"-{[0123456789':
+            value.lstrip()[0] in '"-{[0123456789tfn':
             try:
                 value = json.loads(value)
             except JSONDecodeError:
                 pass
-        string = isinstance(value, str)
+        '''string = isinstance(value, str)
         if not fast:
             if value is None or (string and value == 'null'):
                 return NtvSingle(None)
             if string and value == 'true':
                 return NtvSingle(True)
             if string and value == 'false':
-                return NtvSingle(False)
+                return NtvSingle(False)'''
         return value
 
     @staticmethod

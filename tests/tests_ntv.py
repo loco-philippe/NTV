@@ -42,6 +42,127 @@ class Test_Ntv_fast(unittest.TestCase):
         for test in list_repr:
             # print(test)
             self.assertEqual(repr(Ntv.from_obj(test[0], fast=True)), test[1])
+
+    def test_from_obj_json_txt(self):
+        dictstr = [['NtvSingle', 'null'],
+                   ['NtvSingle', '{"none": null}'],
+                   ['NtvSingle', '1'],
+                   ['NtvSingle', '"test"'],
+                   ['NtvSingle', '{"Single": 1}'],
+                   ['NtvSingle', '{"Ntv1:ntv": {"Ntv2": 2}}'],
+                   ['NtvSingle', '{"Ntv1": true}'],
+                   ['NtvSingle', 'true'],
+                   ['NtvSingle', '{"Ntv1:array": [1, 2]}'],
+                   ['NtvSingle', '"{ner"'],
+                   ['NtvList', '{}'],
+                   ['NtvList', '{"::": {" a": 2}}'],
+                   ['NtvList', '{"test::": {"a": 2}}']]
+
+        lis = list(zip(*dictstr))
+        liststr = list(lis[1])
+        listtyp = list(lis[0])
+        for nstr, typ in zip(liststr, listtyp):
+            #print('av', nstr, typ)
+            ntv = Ntv.obj(nstr, fast=True)
+            #print('ap', nstr, typ)
+            self.assertEqual(nstr, ntv.to_obj(encoded=True))
+            self.assertTrue(ntv.__class__.__name__ == typ)
+            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv), fast=True))
+            self.assertEqual(ntv, Ntv.obj(ntv.to_obj(), fast=True))
+
+    def test_from_obj_json(self):
+        dictstr = [['NtvSingle', None],
+                   ['NtvSingle', {'none': None}],
+                   ['NtvSingle', 1],
+                   ['NtvSingle', 'test'],
+                   ['NtvSingle', {'Single': 1}],
+                   ['NtvSingle', {'Ntv1:ntv': {'Ntv2': 2}}],
+                   ['NtvSingle', {'Ntv1': {'Ntv2': 2}}],
+                   ['NtvSingle', {'Ntv1:fr.reg': {'Ntv2:fr.BAN.lon': 2}}],
+                   ['NtvSingle', {'Ntv1': True}],
+                   ['NtvSingle', True],
+                   ['NtvSingle', {'Ntv1:array': [1, 2]}],
+                   ['NtvSingle', {'Ntv1:dat': [1, 2]}],
+                   ['NtvSingle', '{ner'],
+                   ['NtvSingle', {':$point': {'a': [1, 2], 'b': [3, 4]}}],
+                   ['NtvSingle', {
+                       ':': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}],
+                   ['NtvList', [[4, [5, 6]], {'heure': [21, 22]}]],
+                   ['NtvList', [[4, 5], {'heure': 21}]],
+                   ['NtvList', [[4, 5], 21]],
+                   ['NtvList', [[4, 5], [1, 2, 3]]],
+                   ['NtvList', {'Ntv1::fr.reg': [
+                       [4, [5, 6]], {'heure': [21, 22]}]}],
+                   ['NtvList', {'Ntv1::fr.reg': [4]}],
+                   ['NtvList', {'Ntv1::fr.': [4]}],
+                   ['NtvList', {'cities::point': [[2.1, 40.3], [2.1, 40.3]]}],
+                   ['NtvList', {}],
+                   ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
+                   ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
+                   ['NtvList', {"::": {" a": 2}}],
+                   ['NtvList', {"test::": {"a": 2}}]]
+
+        lis = list(zip(*dictstr))
+        liststr = list(lis[1])
+        listtyp = list(lis[0])
+        for nstr, typ in zip(liststr, listtyp):
+            #print('av', nstr, typ)
+            ntv = Ntv.obj(nstr, fast=True)
+            #print('ap', nstr, typ)
+            self.assertEqual(nstr, ntv.to_obj())
+            self.assertTrue(ntv.__class__.__name__ == typ)
+            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv), fast=True))
+            self.assertEqual(ntv, Ntv.obj(ntv.to_obj(), fast=True))
+
+    def test_from_obj_obj(self):
+        dictstr2 = [
+                   ['NtvSingle', {':': NtvSingle(1, 'test')}, {
+                       ':ntv': {'test': 1}}],
+                   ['NtvSingle', {'set': NtvList([{'l1': 21}, {'l2': [2, 3]}])},
+                    #{'set:ntv': {'l1': 21, 'l2': [2, 3]}}],
+                    {'set:ntv': {'l1': 21, 'l2:': [2, 3]}}],
+                   ['NtvSingle', {'lis:': NtvList([1, 2, 3])}, {
+                       'lis:ntv': [1, 2, 3]}],
+                   ['NtvSingle', {'Ntv1': datetime.date(2021, 2, 1)},
+                    {'Ntv1:date': '2021-02-01'}],
+                   ['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
+                    {'Ntv1:date': '2021-02-01'}],
+                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                                                [datetime.date(2020, 3, 4), 
+                                                 datetime.date(2020, 4, 4)]]},
+                    {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
+                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                                                {'a': datetime.date(2020, 3, 4), 
+                                                 'b': datetime.date(2020, 4, 4)}]},
+                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
+                   ['NtvSingle', datetime.date(2021, 2, 1), {
+                       ':date': '2021-02-01'}],
+                   ['NtvSingle', {'set:': NtvList([{'l1': 21}, {'l2': datetime.date(2021, 2, 1)}])},
+                    {'set:ntv': {'l1': 21, 'l2:date': '2021-02-01'}}],
+                   ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10), 22]}],
+                    [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, 22]}]],
+                   ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10),
+                                                        geometry.point.Point((3, 4))]}],
+                    [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, {':point': [3.0, 4.0]}]}]],
+                   ['NtvList', [], {}],
+                   ['NtvList', {'::': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]},
+                    {'paris': [2.1, 40.3], 'lyon': [2.1, 40.3]}],
+                   ['NtvList', {'Ntv3::fr.reg': {'Ntv1': 1, 'Ntv2:fr.reg': '2'}},
+                    {'Ntv3::fr.reg': {'Ntv1': 1, 'Ntv2': '2'}}],
+                   ['NtvList', {'Ntv3::fr.reg': {'Ntv1': [1, 2], 'Ntv2:fr.reg': '2'}},
+                    {'Ntv3::fr.reg': {'Ntv1': [1, 2], 'Ntv2': '2'}}],
+        ]
+        lis = list(zip(*dictstr2))
+        listres = list(lis[2])
+        liststr = list(lis[1])
+        listtyp = list(lis[0])
+        for nstr, typ, nres in zip(liststr, listtyp, listres):
+            #print('av', nstr, typ)
+            ntv = Ntv.obj(nstr, fast=True)
+            print('ap', nstr, typ)
+            self.assertTrue(ntv.__class__.__name__ == typ)
+            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv, fast=True), fast=True))
+            self.assertEqual(nres, ntv.to_obj(fast=True))
     
 class Test_Ntv(unittest.TestCase):
 
@@ -170,7 +291,34 @@ class Test_Ntv(unittest.TestCase):
         self.assertEqual(
             repr(Ntv.obj(([[1, 2], [3, 4]], None, 'point', 'list'))), '{"lT": ["sT", "sT"]}')
 
-    def test_from_obj(self):
+    def test_from_obj_json_txt(self):
+        dictstr = [['NtvSingle', 'null'],
+                   ['NtvSingle', '{"none": null}'],
+                   ['NtvSingle', '1'],
+                   ['NtvSingle', '"test"'],
+                   ['NtvSingle', '{"Single": 1}'],
+                   ['NtvSingle', '{"Ntv1:ntv": {"Ntv2": 2}}'],
+                   ['NtvSingle', '{"Ntv1": true}'],
+                   ['NtvSingle', 'true'],
+                   ['NtvSingle', '{"Ntv1:array": [1, 2]}'],
+                   ['NtvSingle', '"{ner"'],
+                   ['NtvList', '{}'],
+                   ['NtvList', '{"::": {" a": 2}}'],
+                   ['NtvList', '{"test::": {"a": 2}}']]
+
+        lis = list(zip(*dictstr))
+        liststr = list(lis[1])
+        listtyp = list(lis[0])
+        for nstr, typ in zip(liststr, listtyp):
+            #print('av', nstr, typ)
+            ntv = Ntv.obj(nstr)
+            #print('ap', nstr, typ)
+            self.assertEqual(nstr, ntv.to_obj(encoded=True))
+            self.assertTrue(ntv.__class__.__name__ == typ)
+            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
+            self.assertEqual(ntv, Ntv.obj(ntv.to_obj()))
+
+    def test_from_obj_json(self):
         dictstr = [['NtvSingle', None],
                    ['NtvSingle', {'none': None}],
                    ['NtvSingle', 1],
@@ -201,6 +349,20 @@ class Test_Ntv(unittest.TestCase):
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
                    ['NtvList', {"::": {" a": 2}}],
                    ['NtvList', {"test::": {"a": 2}}]]
+
+        lis = list(zip(*dictstr))
+        liststr = list(lis[1])
+        listtyp = list(lis[0])
+        for nstr, typ in zip(liststr, listtyp):
+            #print('av', nstr, typ)
+            ntv = Ntv.obj(nstr)
+            #print('ap', nstr, typ)
+            self.assertEqual(nstr, ntv.to_obj())
+            self.assertTrue(ntv.__class__.__name__ == typ)
+            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
+            self.assertEqual(ntv, Ntv.obj(ntv.to_obj()))
+
+    def test_from_obj_obj(self):
         dictstr2 = [
                    ['NtvSingle', {':': NtvSingle(1, 'test')}, {
                        ':ntv': {'test': 1}}],
@@ -238,32 +400,16 @@ class Test_Ntv(unittest.TestCase):
                    ['NtvList', {'Ntv3::fr.reg': {'Ntv1': [1, 2], 'Ntv2:fr.reg': '2'}},
                     {'Ntv3::fr.reg': {'Ntv1': [1, 2], 'Ntv2': '2'}}],
         ]
-        lis = list(zip(*dictstr))
-        liststr = list(lis[1])
-        listtyp = list(lis[0])
-        for nstr, typ in zip(liststr, listtyp):
-            #print('av', nstr, typ)
-            ntv = Ntv.from_obj(nstr)
-            ntv2 = Ntv.obj(nstr)
-            self.assertEqual(ntv, ntv2)
-            #print('ap', nstr, typ)
-            self.assertEqual(nstr, ntv.to_obj())
-            self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.from_obj(Ntv.to_obj(ntv)))
-            self.assertEqual(ntv, Ntv.obj(ntv.to_obj(encoded=False)))
-
         lis = list(zip(*dictstr2))
         listres = list(lis[2])
         liststr = list(lis[1])
         listtyp = list(lis[0])
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
-            ntv = Ntv.from_obj(nstr)
-            ntv2 = Ntv.obj(nstr)
-            self.assertEqual(ntv, ntv2)
+            ntv = Ntv.obj(nstr)
             #print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.from_obj(Ntv.to_obj(ntv)))
+            self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
             self.assertEqual(nres, ntv.to_obj())
 
     def test_default_type(self):
