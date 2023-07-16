@@ -86,9 +86,10 @@ class ShapelyConnec(NtvConnector):
         return geometry.shape({"type": kwargs['type_geo'],
                                "coordinates": ntv_value})
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (Ntv._listed(self.__geo_interface__['coordinates']), None, '')
+        return (Ntv._listed(value.__geo_interface__['coordinates']), name, typ)
 
 class CborConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -103,10 +104,11 @@ class CborConnec(NtvConnector):
                            timezone=datetime.timezone.utc, canonical=False,
                            date_as_datetime=True)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
         import cbor2
-        return (cbor2.loads(self), None, '')
+        return (cbor2.loads(value), name, typ)
 
 class NfieldConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -120,9 +122,10 @@ class NfieldConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value)
         return Nfield.from_ntv(ntv)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.to_ntv(name=True).to_obj(), None, 'field')
+        return (value.to_ntv(name=True).to_obj(), name, 'field')
     
 class SfieldConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -136,9 +139,10 @@ class SfieldConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value)
         return Sfield.from_ntv(ntv)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.to_ntv(name=True).to_obj(), None, 'field')
+        return (value.to_ntv(name=True).to_obj(), name, 'field')
     
 class NdatasetConnec(NtvConnector):
     '''NTV connector for Ndataset'''
@@ -153,9 +157,10 @@ class NdatasetConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value)
         return Ndataset.from_ntv(ntv)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.to_ntv().to_obj(), None, 'tab')
+        return (value.to_ntv().to_obj(), name, 'tab')
 
 class SdatasetConnec(NtvConnector):
     '''NTV connector for Sdataset'''
@@ -170,9 +175,10 @@ class SdatasetConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value)
         return Sdataset.from_ntv(ntv)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.to_ntv().to_obj(), None, 'tab')
+        return (value.to_ntv().to_obj(), name, 'tab')
 
 class IindexConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -186,9 +192,10 @@ class IindexConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value)
         return Iindex.from_ntv(ntv)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.to_ntv(name=True).to_obj(), None, 'field')
+        return (value.to_ntv(name=True).to_obj(), name, 'field')
     
 class IlistConnec(NtvConnector):
     '''NTV connector for Ilist'''
@@ -202,9 +209,10 @@ class IlistConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value)
         return Ilist.from_ntv(ntv)
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (self.to_ntv().to_obj(), None, 'tab')
+        return (value.to_ntv().to_obj(), name, 'tab')
 
 
 class DataFrameConnec(NtvConnector):
@@ -225,12 +233,13 @@ class DataFrameConnec(NtvConnector):
             df.index.rename(None, inplace=True)
         return df
 
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (value, name, type)'''
-        df2 = self.reset_index()
+        df2 = value.reset_index()
         #js = NtvList([SeriesConnec.to_json_ntv(df2[col])[2] for col in df2.columns]).to_obj()
         js = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0] for col in df2.columns]).to_obj()
-        return (js, None, 'tab') 
+        return (js, name, 'tab') 
 
     def to_listidx(self):
         ''' convert object in dataset parameters '''
@@ -336,11 +345,12 @@ class SeriesConnec(NtvConnector):
                 ntv_value = json.loads(sr.to_json(orient='records', date_format='iso', default_handler=str))
         return (ntv_type, ntv_value)
     
-    def to_json_ntv(self):
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity'''
         astype = SeriesConnec.astype
         ntv_type_val = SeriesConnec._ntv_type_val
-        sr = self.astype(astype.get(self.dtype.name, self.dtype.name))
+        sr = value.astype(astype.get(value.dtype.name, value.dtype.name))
         sr_name = sr.name if sr.name else ''
         ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
         if sr.dtype.name == 'category':
@@ -351,7 +361,7 @@ class SeriesConnec(NtvConnector):
             ntv_type = 'json'
         else:
             ntv_type, ntv_value = ntv_type_val(name_type, sr)
-        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), None, 'field')
+        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name, 'field')
 
 class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''

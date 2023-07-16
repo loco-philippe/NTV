@@ -209,6 +209,7 @@ class Ntv(ABC):
                           len(ntv_value) == 1):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
+            #return Ntv.from_obj(ntv_value, ntv_name, def_type=ntv_type, def_sep=':', decode_str=decode_str, fast=fast)
         if sep is None and not isinstance(ntv_value, dict):
             is_json = isinstance(value, (int, str, float, bool))
             ntv_type = agreg_type(str_typ, def_type, is_json)
@@ -555,7 +556,7 @@ class Ntv(ABC):
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
             if not isinstance(leaf.ntv_value, (list, int, str, float, bool, dict)):
-                leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.cast(leaf)
+                leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.cast(leaf.ntv_value, leaf.ntv_name, leaf.type_str)
                 leaf.ntv_type = NtvType.add(type_str)
         return ntv
 
@@ -821,7 +822,7 @@ class NtvSingle(Ntv):
             elif isinstance(ntv_value, (dict)):
                 ntv_value = {key: NtvSingle._decode_s(val, '', ntv_type)[0] for key, val in ntv_value.items()}
         else:
-            ntv_value, name, typ = NtvConnector.cast(ntv_value)
+            ntv_value, name, typ = NtvConnector.cast(ntv_value, ntv_name, ntv_type)
         if not ntv_type:
             if is_json_ntv:
                 ntv_type = 'json'
@@ -1119,26 +1120,26 @@ class NtvConnector(ABC):
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
         if clas in ('NtvList', 'NtvSingle'):
-            name = data.name
-            data = data.ntv_value
+            #name = data.ntv_name
+            #data = data.ntv_value
             clas = data.__class__.__name__            
         match clas:
             case 'tuple':
-                return (list(data), None, 'array')
+                return (list(data), name, 'array')
             case 'date' | 'time' | 'datetime':
-                return (data.isoformat(), None, clas)
+                return (data.isoformat(), name, clas)
             case 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | \
                     'Polygon' | 'MultiPolygon':
                 return (NtvConnector.connector()[dic_connec['geometry']].to_json_ntv(data)[0],
-                            None, dic_geo_cl[data.__class__.__name__])
+                            name, dic_geo_cl[data.__class__.__name__])
             case 'NtvSingle' | 'NtvList':
-                return (data.to_obj(), None, 'ntv')
+                return (data.to_obj(), name, 'ntv')
             case _:
                 connec = None
                 if clas in dic_connec and dic_connec[clas] in NtvConnector.connector():
                     connec = NtvConnector.connector()[dic_connec[clas]]
                 if connec:
-                    return connec.to_json_ntv(data)
+                    return connec.to_json_ntv(data, name, type_str)
                 raise NtvError(
                     'connector is not defined for NTV entity of class : ', clas)
         return (None, None, None)

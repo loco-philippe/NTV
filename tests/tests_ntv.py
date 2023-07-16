@@ -162,8 +162,10 @@ class Test_Ntv_fast(unittest.TestCase):
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
             
-            #self.assertEqual(nres, ntv.to_obj(fast=True))
-    
+    def test_to_json_ntv_to_obj_ntv(self):
+        js_obj = {'test': [datetime.date(2020, 1, 2), 45, {'paris': geometry.Point(4,5)}]}
+        self.assertEqual(Ntv.fast(js_obj).to_json_ntv(), Ntv.obj(js_obj))
+        
 class Test_Ntv(unittest.TestCase):
 
     def test_single_obj_name(self):
