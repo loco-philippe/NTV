@@ -165,7 +165,7 @@ class Test_Ntv_fast(unittest.TestCase):
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
             ntv = Ntv.fast(nstr)
-            print('ap', nstr, typ)
+            #print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
             self.assertEqual(ntv.to_json_ntv(), Ntv.obj(nstr))

@@ -1007,10 +1007,10 @@ class NtvTree:
 
     def __next__(self):
         ''' return next node in the tree'''
-        if not self._node:
+        if self._node is None:
             self._node = self._ntv
-            #print(type(self._node), self._node.val)
-            #elif isinstance(self._node.val, list):
+        elif len(self._node) == 0:
+            raise StopIteration
         elif isinstance(self._node, NtvList):
             self._next_down()
         else:
@@ -1054,6 +1054,7 @@ class NtvTree:
 
     def _next_down(self):
         ''' find the next subchild node'''
+        
         self._node = self._node[0]
 
     def _next_up(self):
@@ -1162,7 +1163,7 @@ class NtvConnector(ABC):
                    'other': None}
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
         dic_obj |= option['dicobj']
-        type_n = ntv.ntv_type.name
+        type_n = ntv.type_str
         type_o = type_n if option['type_obj'] else None
         obj = not option['format'] == 'cbor' or \
             (ntv.ntv_type and type_n in dic_cbor and dic_cbor[type_n])
