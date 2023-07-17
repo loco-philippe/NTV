@@ -125,7 +125,7 @@ class NfieldConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (value.to_ntv(name=True).to_obj(), name, 'field')
+        return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
     
 class SfieldConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -142,7 +142,7 @@ class SfieldConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (value.to_ntv(name=True).to_obj(), name, 'field')
+        return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
     
 class NdatasetConnec(NtvConnector):
     '''NTV connector for Ndataset'''
@@ -160,7 +160,7 @@ class NdatasetConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (value.to_ntv().to_obj(), name, 'tab')
+        return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
 
 class SdatasetConnec(NtvConnector):
     '''NTV connector for Sdataset'''
@@ -178,7 +178,7 @@ class SdatasetConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (value.to_ntv().to_obj(), name, 'tab')
+        return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
 
 class IindexConnec(NtvConnector):
     '''NTV connector for Iindex'''
@@ -195,7 +195,7 @@ class IindexConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (value.to_ntv(name=True).to_obj(), name, 'field')
+        return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
     
 class IlistConnec(NtvConnector):
     '''NTV connector for Ilist'''
@@ -212,7 +212,7 @@ class IlistConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (name, type, json-value)'''
-        return (value.to_ntv().to_obj(), name, 'tab')
+        return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
 
 
 class DataFrameConnec(NtvConnector):
@@ -240,7 +240,7 @@ class DataFrameConnec(NtvConnector):
         df2 = value.reset_index()
         #js = NtvList([SeriesConnec.to_json_ntv(df2[col])[2] for col in df2.columns]).to_obj()
         js = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0] for col in df2.columns]).to_obj()
-        return (js, name, 'tab') 
+        return (js, name, 'tab' if not typ else typ) 
 
     def to_listidx(self):
         ''' convert object in dataset parameters '''
@@ -306,7 +306,7 @@ class SeriesConnec(NtvConnector):
             name_type = ntv_type
             pd_name = ntv_name+'::'+name_type
             ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
-            #ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)
+            #ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
         
         # calcul de sr
         if codes:
@@ -365,7 +365,8 @@ class SeriesConnec(NtvConnector):
             ntv_type = 'json'
         else:
             ntv_type, ntv_value = ntv_type_val(name_type, sr)
-        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name, 'field')
+        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name, 
+                'field' if not typ else typ)
 
 class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
