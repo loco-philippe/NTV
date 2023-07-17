@@ -1119,10 +1119,10 @@ class NtvConnector(ABC):
                       'MultiPolygon': 'multipolygon'}
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
-        if clas in ('NtvList', 'NtvSingle'):
+        #if clas in ('NtvList', 'NtvSingle'):
             #name = data.ntv_name
             #data = data.ntv_value
-            clas = data.__class__.__name__            
+            #clas = data.__class__.__name__            
         match clas:
             case 'tuple':
                 return (list(data), name, 'array')

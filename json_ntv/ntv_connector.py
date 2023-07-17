@@ -223,7 +223,8 @@ class DataFrameConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
-        ntv = Ntv.obj(ntv_value)
+        #ntv = Ntv.obj(ntv_value)
+        ntv = Ntv.fast(ntv_value)
         leng = max([len(ntvi) for ntvi in ntv.ntv_value])
         option = kwargs | {'leng': leng}
         list_series = [SeriesConnec.to_obj_ntv(d, **option) for d in ntv]
@@ -276,11 +277,13 @@ class SeriesConnec(NtvConnector):
         types = SeriesConnec.types
         astype = SeriesConnec.astype
         deftype = SeriesConnec.deftype
-        ntv = Ntv.obj(ntv_value)
+        #ntv = Ntv.obj(ntv_value)
+        ntv = Ntv.fast(ntv_value)
         ntv_name = ntv.name
         codes = len(ntv) == 2 and len(ntv[1]) > 1 # categorical
         if codes:
-            cod = ntv[1].to_obj(simpleval=True)
+            cod = ntv[1].to_obj(simpleval=True, fast=True)
+            #cod = ntv[1].to_obj(simpleval=True)
             ntv = ntv[0]
         ntv_type = ntv.type_str if ntv.type_str != 'json' else ''
         pd_convert = ntv_type in types['ntv_type'].values or ntv_type == ''
@@ -303,6 +306,7 @@ class SeriesConnec(NtvConnector):
             name_type = ntv_type
             pd_name = ntv_name+'::'+name_type
             ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
+            #ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)
         
         # calcul de sr
         if codes:
