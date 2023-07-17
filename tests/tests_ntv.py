@@ -158,13 +158,19 @@ class Test_Ntv_fast(unittest.TestCase):
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
             ntv = Ntv.fast(nstr)
-            #print('ap', nstr, typ)
+            print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
+            self.assertEqual(ntv.to_json_ntv(), Ntv.obj(nstr))
+            self.assertEqual(ntv.to_json_ntv().to_obj_ntv(), ntv)
             
     def test_to_json_ntv_to_obj_ntv(self):
-        js_obj = {'test': [datetime.date(2020, 1, 2), 45, {'paris': geometry.Point(4,5)}]}
-        self.assertEqual(Ntv.fast(js_obj).to_json_ntv(), Ntv.obj(js_obj))
+        js_obj = [{'test': [datetime.date(2020, 1, 2), 45, {'paris': geometry.Point(4,5)}]},
+                  {'test': [datetime.date(2020, 1, 2), 45, {'paris': geometry.Point(4,5), 
+                            'dates': [datetime.date(2021, 1, 2),datetime.date(2022, 1, 2)]}]}]
+        for js in js_obj:
+            self.assertEqual(Ntv.fast(js_obj).to_json_ntv(), Ntv.obj(js_obj))
+            self.assertEqual(Ntv.fast(js_obj).to_json_ntv().to_obj_ntv(), Ntv.fast(js_obj))
         
 class Test_Ntv(unittest.TestCase):
 
