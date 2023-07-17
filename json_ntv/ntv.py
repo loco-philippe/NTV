@@ -1169,8 +1169,8 @@ class NtvConnector(ABC):
         if ntv.ntv_type is None or not obj:
             return (ntv.ntv_value, ntv.name, type_n)
         if type_n in dic_fct:
-            if isinstance(ntv.ntv_value, (tuple, list)):
-                return ([dic_fct[type_n](val) for val in ntv.ntv_value], ntv.name, type_o)
+            #if isinstance(ntv.ntv_value, (tuple, list)):
+            #    return ([dic_fct[type_n](val) for val in ntv.ntv_value], ntv.name, type_o)
             return (dic_fct[type_n](ntv.ntv_value), ntv.name, type_o)
         if type_n == 'array':
             return (tuple(ntv.ntv_value), ntv.name, type_n)

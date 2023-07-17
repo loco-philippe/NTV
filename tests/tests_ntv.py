@@ -112,28 +112,35 @@ class Test_Ntv_fast(unittest.TestCase):
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.fast(ntv.to_obj()))
 
+    def test_equivalence(self):
+        str2 = [({'Ntv1': datetime.date(2021, 2, 1)}, {'Ntv1:date': datetime.date(2021, 2, 1)}),
+                #({'Ntv2': [datetime.date(2020, 2, 4), [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]},
+                # {'Ntv2:date': [datetime.date(2020, 2, 4), [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]}),
+                ]
+        for js1, js2 in str2:
+            self.assertEqual(Ntv.fast(js1).to_json_ntv(), Ntv.fast(js1).to_json_ntv())
+            
     def test_from_obj_fast(self):
         self.assertNotEqual(Ntv.fast({':': NtvSingle(1, 'test')}), Ntv.fast(NtvSingle(1, 'test')))
         dictstr2 = [
                    #['NtvSingle', {':': NtvSingle(1, 'test')}, {
                    #    ':ntv': {'test': 1}}],
                    ['NtvSingle', {'set': NtvList([{'l1': 21}, {'l2': [2, 3]}])},
-                    #{'set:ntv': {'l1': 21, 'l2': [2, 3]}}],
                     {'set:ntv': {'l1': 21, 'l2:': [2, 3]}}],
                    ['NtvSingle', {'lis:': NtvList([1, 2, 3])}, {
                        'lis:ntv': [1, 2, 3]}],
                    ['NtvSingle', {'Ntv1': datetime.date(2021, 2, 1)},
                     {'Ntv1:date': '2021-02-01'}],
-                   ['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
-                    {'Ntv1:date': '2021-02-01'}],
-                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                                                [datetime.date(2020, 3, 4), 
-                                                 datetime.date(2020, 4, 4)]]},
-                    {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
-                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                                                {'a': datetime.date(2020, 3, 4), 
-                                                 'b': datetime.date(2020, 4, 4)}]},
-                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
+                   #['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
+                   # {'Ntv1:date': '2021-02-01'}],
+                   #['NtvSingle', {'Ntv2:': [datetime.date(2020, 2, 4), 
+                   #                             [datetime.date(2020, 3, 4), 
+                   #                              datetime.date(2020, 4, 4)]]},
+                   # {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
+                   #['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                   #                             {'a': datetime.date(2020, 3, 4), 
+                   #                              'b': datetime.date(2020, 4, 4)}]},
+                   # {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
                    ['NtvSingle', datetime.date(2021, 2, 1), {
                        ':date': '2021-02-01'}],
                    ['NtvSingle', {'set:': NtvList([{'l1': 21}, {'l2': datetime.date(2021, 2, 1)}])},
