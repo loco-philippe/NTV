@@ -522,7 +522,7 @@ class Test_NtvTree(unittest.TestCase):
     def test_NtvTree(self):
         ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 'b': 'ert'})
         tree = NtvTree(ntv)
-        self.assertEqual(tree.nodes[0], tree.ntv)
+        self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
             [node.address_name for node in tree.leaf_nodes][6], '0.1')
         self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])

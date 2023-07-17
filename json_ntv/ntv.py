@@ -209,7 +209,6 @@ class Ntv(ABC):
                           len(ntv_value) == 1):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
-            #return Ntv.from_obj(ntv_value, ntv_name, def_type=ntv_type, def_sep=':', decode_str=decode_str, fast=fast)
         if sep is None and not isinstance(ntv_value, dict):
             is_json = isinstance(value, (int, str, float, bool))
             ntv_type = agreg_type(str_typ, def_type, is_json)
@@ -560,6 +559,13 @@ class Ntv(ABC):
                 leaf.ntv_type = NtvType.add(type_str)
         return ntv
 
+    def to_obj_ntv(self, def_type=None, **kwargs):
+        ntv = copy.copy(self)
+        for leaf in ntv.tree.leaf_nodes:
+            leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.uncast(leaf)
+            leaf.ntv_type = NtvType.add(type_str) if type_str else None
+        return ntv
+    
     def to_tuple(self, maxi=10):
         '''return the JSON representation of the NTV entity (json-ntv format).
 
@@ -623,14 +629,6 @@ class Ntv(ABC):
                 value = json.loads(value)
             except JSONDecodeError:
                 pass
-        '''string = isinstance(value, str)
-        if not fast:
-            if value is None or (string and value == 'null'):
-                return NtvSingle(None)
-            if string and value == 'true':
-                return NtvSingle(True)
-            if string and value == 'false':
-                return NtvSingle(False)'''
         return value
 
     @staticmethod
@@ -657,15 +655,14 @@ class Ntv(ABC):
     @staticmethod
     def _create_NtvList(str_typ, def_type, sep, ntv_value, typ_auto, no_typ, ntv_name, fast):
         def_type = agreg_type(str_typ, def_type, False)
-        sep = None if sep and not def_type else sep
-        sep = ':' if sep else sep
+        sep_val = ':' if sep and def_type else None
         if isinstance(ntv_value, dict):
             keys = list(ntv_value.keys())
             values = list(ntv_value.values())
-            ntv_list = [Ntv.from_obj({key: val}, def_type, sep, fast=fast)
+            ntv_list = [Ntv.from_obj({key: val}, def_type, sep_val, fast=fast)
                         for key, val in zip(keys, values)]  
         else:
-            ntv_list = [Ntv.from_obj(val, def_type, sep, fast=fast) for val in ntv_value]
+            ntv_list = [Ntv.from_obj(val, def_type, sep_val, fast=fast) for val in ntv_value]
         if typ_auto and not def_type and ntv_list:
             def_type = ntv_list[0].ntv_type
         def_type = 'json' if no_typ else def_type
@@ -1001,7 +998,7 @@ class NtvTree:
 
     def __init__(self, ntv):
         ''' the parameter of the constructor is the Ntv entity'''
-        self.ntv = ntv
+        self._ntv = ntv
         self._node = None
 
     def __iter__(self):
@@ -1011,8 +1008,10 @@ class NtvTree:
     def __next__(self):
         ''' return next node in the tree'''
         if not self._node:
-            self._node = self.ntv
-        elif isinstance(self._node.val, list):
+            self._node = self._ntv
+            #print(type(self._node), self._node.val)
+            #elif isinstance(self._node.val, list):
+        elif isinstance(self._node, NtvList):
             self._next_down()
         else:
             self._next_up()
@@ -1031,7 +1030,7 @@ class NtvTree:
     @property
     def height(self):
         ''' return the height of the tree'''
-        return max(len(node.address) for node in self.__class__(self.ntv)) - 1
+        return max(len(node.address) for node in self.__class__(self._ntv)) - 1
 
     @property
     def adjacency_list(self):
@@ -1041,17 +1040,17 @@ class NtvTree:
     @property
     def nodes(self):
         ''' return the list of nodes'''
-        return list(self.__class__(self.ntv))
+        return list(self.__class__(self._ntv))
 
     @property
     def leaf_nodes(self):
         ''' return the list of leaf nodes'''
-        return [node for node in self.__class__(self.ntv) if not isinstance(node.val, list)]
+        return [node for node in self.__class__(self._ntv) if not isinstance(node, NtvList)]
 
     @property
     def inner_nodes(self):
         ''' return the list of inner nodes'''
-        return [node for node in self.__class__(self.ntv) if isinstance(node.val, list)]
+        return [node for node in self.__class__(self._ntv) if isinstance(node, NtvList)]
 
     def _next_down(self):
         ''' find the next subchild node'''
@@ -1066,7 +1065,7 @@ class NtvTree:
         if ind < len(parent) - 1:  # if ind is not the last
             self._node = parent[ind + 1]
         else:
-            if parent == self.ntv:
+            if parent == self._ntv:
                 raise StopIteration
             self._node = parent
             self._next_up()
@@ -1145,7 +1144,7 @@ class NtvConnector(ABC):
         return (None, None, None)
 
     @staticmethod
-    def uncast(ntv, **option):
+    def uncast(ntv, **kwargs):
         '''return object from ntv entity'''
         dic_fct = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
                    'datetime': datetime.datetime.fromisoformat}
@@ -1161,21 +1160,22 @@ class NtvConnector(ABC):
                    'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
                    'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
                    'other': None}
+        option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
+        dic_obj |= option['dicobj']
         type_n = ntv.ntv_type.name
-        if 'dicobj' in option:
-            dic_obj |= option['dicobj']
+        type_o = type_n if option['type_obj'] else None
         obj = not option['format'] == 'cbor' or \
             (ntv.ntv_type and type_n in dic_cbor and dic_cbor[type_n])
         if ntv.ntv_type is None or not obj:
-            return (ntv.ntv_value, type_n, ntv.name)
+            return (ntv.ntv_value, ntv.name, type_n)
         if type_n in dic_fct:
             if isinstance(ntv.ntv_value, (tuple, list)):
-                return [dic_fct[type_n](val) for val in ntv.ntv_value]
-            return (dic_fct[type_n](ntv.ntv_value), type_n, ntv.name)
+                return ([dic_fct[type_n](val) for val in ntv.ntv_value], ntv.name, type_o)
+            return (dic_fct[type_n](ntv.ntv_value), ntv.name, type_o)
         if type_n == 'array':
-            return (tuple(ntv.ntv_value), type_n, ntv.name)
+            return (tuple(ntv.ntv_value), ntv.name, type_n)
         if type_n == 'ntv':
-            return (Ntv.from_obj(ntv.ntv_value), type_n, ntv.name)
+            return (Ntv.from_obj(ntv.ntv_value), ntv.name, type_o)
         if type_n in dic_geo:
             option['type_geo'] = dic_geo[type_n]
         connec = None
@@ -1185,8 +1185,8 @@ class NtvConnector(ABC):
         elif dic_obj['other'] in NtvConnector.connector():
             connec = NtvConnector.connector()['other']
         if connec:
-            return (connec.to_obj_ntv(ntv.ntv_value, **option), type_n, ntv.name)
-        return (ntv.ntv_value, type_n, ntv.name)
+            return (connec.to_obj_ntv(ntv.ntv_value, **option), ntv.name, type_o)
+        return (ntv.ntv_value, ntv.name, type_n)
 
     @staticmethod
     def obj_to_json(obj, complete=True):
