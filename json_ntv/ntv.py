@@ -552,9 +552,12 @@ class Ntv(ABC):
 
     @staticmethod
     def obj_ntv(value, name='', typ='', single=False):
+        value = {} if not value else value
+        name = '' if not name else name
+        typ = '' if not typ else typ
         ntv_list = isinstance(value, dict) and len(value) != 1 or isinstance(value, list)
-        if not single and not isinstance(value, list):
-            raise NtvError('the value is not compatible with "single" boolean')
+        if not single and not ntv_list :
+            raise NtvError('the value is not compatible with not single NTV data')
         sep = ':' if single else '::'
         sep = '' if not typ and (not single or single and not ntv_list) else sep
         name += sep + typ
@@ -564,7 +567,8 @@ class Ntv(ABC):
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
             #if not isinstance(leaf.ntv_value, (list, int, str, float, bool, dict)):
-            if not Ntv._is_json(leaf.ntv_value):
+            #if not Ntv._is_json(leaf.ntv_value):
+            if not leaf.is_json:
                 leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.cast(leaf.ntv_value, leaf.ntv_name, leaf.type_str)
                 leaf.ntv_type = NtvType.add(type_str)
                 leaf.is_json = True
@@ -857,6 +861,9 @@ class NtvList(Ntv):
                          for val in list_ntv]
             elif not fast and isinstance(list_ntv, list):
                 ntv_value = [Ntv.from_obj(ntv, ntv_type, ':') for ntv in list_ntv]'''
+        elif isinstance(list_ntv, dict):
+            ntv_value = [Ntv.from_obj({key: val}, ntv_type, ':', fast=fast) 
+                         for key, val in list_ntv.items()]
         else:
             raise NtvError('ntv_value is not a list')
         if typ_auto and not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:

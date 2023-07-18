@@ -430,13 +430,15 @@ class SeriesConnec(NtvConnector):
         if sr.dtype.name == 'category':
             cdc = pd.Series(sr.cat.categories)  
             ntv_type, cat_value = ntv_type_val(name_type, cdc)
-            #cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
+            cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
+            #cat_value = Ntv.obj_ntv(cat_value, '', ntv_type, False)
+            ntv_value = [cat_value, list(sr.cat.codes)]
             #ntv_value = [cat_value, NtvList(list(sr.cat.codes))]
-            #ntv_value = [ #!!!
             ntv_type = 'json'
         else:
             ntv_type, ntv_value = ntv_type_val(name_type, sr)
         return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name, 
+        #return (Ntv.obj_ntv(ntv_value, ntv_name, ntv_type, False), name, 
                 'field' if not typ else typ)
 
     @staticmethod

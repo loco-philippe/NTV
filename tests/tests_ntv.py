@@ -10,6 +10,7 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 import unittest
 import datetime
 import csv
+from itertools import product
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_type, NtvTree
 from shapely import geometry
@@ -179,72 +180,7 @@ class Test_Ntv_fast(unittest.TestCase):
             self.assertEqual(Ntv.fast(js_obj).to_json_ntv(), Ntv.obj(js_obj))
             self.assertEqual(Ntv.fast(js_obj).to_json_ntv().to_obj_ntv(), Ntv.fast(js_obj))
         
-class Test_Ntv(unittest.TestCase):
-
-    def test_single_obj_name(self):
-        list_obj = [['json', 4, ('', '', '')],
-                    ['fr.', 4, ('', ':', 'json')],
-                    ['point', 4, ('', ':', 'json')],
-                    ['', 4, ('', '', '')],
-                    ['point', {":point": [1, 2]}, ('', '', '')],
-                    ['', {":point": [1, 2]}, ('', ':', 'point')],
-                    ['fr.', {":point": [1, 2]}, ('', ':', 'point')],
-                    ['json', {":": [1, 2]}, ('', '', '')],
-                    ['', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
-                    ['fr.', {":fr.reg": [1, 2]}, ('', ':', 'reg')],
-                    ['json', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
-                    ['point', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
-                    ['point', {"::point": [1, 2]}, ('', '', '')],
-                    ['', {"::point": [1, 2]}, ('', '::', 'point')],
-                    ['fr.', {"::fr.reg": [1, 2]}, ('', '::', 'reg')],
-                    #['', {"::json": [1, 2]}, ('', '::', 'json')],
-                    ['', {"::json": [1, 2]}, ('', '', '')],
-                    ['json', {"::json": [1, 2]}, ('', '', '')],
-                    #['json', {"::": [1, 2]}, ('', '::', 'json')],
-                    ['json', {"::": [1, 2]}, ('', '', '')],
-                    ['array', {":array": [1, 2]}, ('', '', '')],
-                    ]
-        for data in list_obj:
-            ntv = Ntv.obj(data[1])
-            # print(ntv)
-            self.assertEqual(ntv.json_name(data[0]), list(data[2]))
-
-    def test_agreg_type(self):
-        list_type = [[[None, None, True], 'json'],
-                     [['point', None, True], 'point'],
-                     [[None, 'fr.', True], 'json'],
-                     [['json', None, True], 'json'],
-                     [['point', 'date', True], 'point'],
-                     [['fr.reg', 'fr.', True], 'fr.reg'],
-                     [['point', 'fr.', True], 'point'],
-
-                     [[None, None, False], None],
-                     [['point', None, False], 'point'],
-                     [[None, 'fr.', False], 'fr.'],
-                     [['json', None, False], 'json'],
-                     [['point', 'date', False], 'point'],
-                     [['fr.reg', 'fr.', False], 'fr.reg'],
-                     [['reg', 'fr.', False], 'fr.reg'],
-                     [['point', 'fr.', False], 'point']]
-        for typ in list_type:
-            # print(typ[0])
-            if typ[0] == [None, None, False]:
-                self.assertEqual(agreg_type(
-                    typ[0][0], typ[0][1], typ[0][2]), typ[1])
-            else:
-                self.assertEqual(agreg_type(
-                    typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
-
-    def test_address(self):
-        a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
-        self.assertTrue(a.parent is None)
-        self.assertEqual(a.address, [0])
-        self.assertEqual(a.address_name, '0')
-        self.assertEqual(a['t3'].address, [0, 2])
-        self.assertEqual(a['t3'].address_name, '0.2')
-        self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(a['t3'][0].address, [0, 2, 0])
-        self.assertEqual(a['t3'][0].address_name, '0.2.0')
+class Test_Ntv_creation(unittest.TestCase):
 
     def test_from_obj_repr(self):
         list_repr = [[1, '"s"'],
@@ -278,27 +214,6 @@ class Test_Ntv(unittest.TestCase):
         for nstr in liststr:
             with self.assertRaises(NtvError):
                 Ntv.from_obj(nstr)
-
-    def test_cast(self):
-        point = []
-        line = []
-        pol = []
-        for i in range(6):
-            point.append(geometry.point.Point((i, i+1)))
-        for i in range(3):
-            line.append(geometry.linestring.LineString(
-                (point[i], point[i+1], point[i+2])))
-            pol.append(geometry.polygon.Polygon((line[i])))
-        list_obj = [datetime.datetime(2021, 2, 1, 0, 0), datetime.time(21, 2, 1),
-                    datetime.date(2021, 2, 1), point[0], line[0], pol[0],
-                    geometry.multipoint.MultiPoint((point[0], point[1])),
-                    geometry.multilinestring.MultiLineString(
-                        (line[0], line[1])),
-                    geometry.multipolygon.MultiPolygon((pol[0], pol[1]))]
-        for obj in list_obj:
-            self.assertEqual(Ntv.from_obj(
-                NtvSingle(obj).to_obj()), NtvSingle(obj))
-            self.assertEqual(NtvSingle(obj).to_obj(format='obj'), obj)
 
     def test_from_att(self):
         self.assertEqual(
@@ -428,39 +343,6 @@ class Test_Ntv(unittest.TestCase):
             self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
             self.assertEqual(nres, ntv.to_obj())
 
-    def test_default_type(self):
-        list_test = [[('', ':', 'fr.BAN.lon'), {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
-                     [('', ':', 'fr.BAN.lon'), {
-                         'ntv1::fr.BAN.': [{':lon': 4}, 5, 6]}],
-                     [('', ':', 'fr.reg'), {'ntv1::fr.': [{':reg': 4}, 5, 6]}],
-                     [('', ':', 'fr.reg'), {
-                         'ntv1::fr.': [{':fr.reg': 4}, 5, 6]}],
-                     [('', ':', 'fr.reg'), {
-                         'ntv1::fr.reg': [{':fr.reg': 4}, 5, 6]}],
-                     [('', ':', 'fr.reg'), {'ntv1::fr.reg': [4, 5, 6]}],
-                     [('', ':', 'fr.reg'), {
-                         'ntv1::fr.BAN.lon': [{':fr.reg': 4}, 5, 6]}],
-                     [('', ':', 'fr.reg'), {'ntv1::fr.BAN.': [{':fr.reg': 4}, 5, 6]}]]
-        for test in list_test:
-            # print(test[1])
-            self.assertEqual(Ntv.from_obj(
-                test[1]).ntv_value[0].json_name(), list(test[0]))
-            self.assertEqual(
-                Ntv.obj(test[1]).ntv_value[0].json_name(), list(test[0]))
-
-    def test_default_list(self):
-        unic = NtvSingle({'un': 1, 'deux': 2}, 'param')
-        lis1 = NtvList([1, 2, 3, 4], 'lis1', 'int')
-        lis2 = NtvList([10, 2.5, 30, 40], 'lis2')
-        il_lis1 = NtvList([lis1, lis2, unic], 'ilis1')
-        il_lis2 = NtvList([lis2, lis1, unic], 'ilis2')
-        il_lis1_a = NtvList([lis1, lis2, unic], 'ilis1', typ_auto=True)
-        il_lis2_a = NtvList([lis2, lis1, unic], 'ilis2', typ_auto=True)
-        self.assertEqual(il_lis2[0].ntv_type, il_lis1[1].ntv_type)
-        self.assertEqual(il_lis2[1].ntv_type, il_lis1[0].ntv_type)
-        self.assertEqual(il_lis2.ntv_type, il_lis1.ntv_type)
-        self.assertNotEqual(il_lis2_a.ntv_type, il_lis1_a.ntv_type)
-        
     def test_to_obj(self):
         nstr = {'cities': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]}
         nstr2 = {'cities':  {'paris': [2.1, 40.3],   'lyon': [2.1, 40.3]}}
@@ -474,6 +356,8 @@ class Test_Ntv(unittest.TestCase):
         self.assertEqual(Ntv.obj(nstr).to_obj(json_array=False), nstr2)
         self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(format='obj'),
                          {'paris:point': None})
+
+class Test_Ntv_tabular(unittest.TestCase):
 
     def test_tab(self):
         tab = Ntv.obj({'index':           [1, 2, 3],
@@ -522,6 +406,142 @@ class Test_Ntv(unittest.TestCase):
         self.assertEqual(tab, from_csv(
             to_csv('test.csv', tab, quoting=csv.QUOTE_ALL)))
 
+class Test_Ntv_function(unittest.TestCase):
+
+    def test_obj_ntv(self):
+        l_val_s = [{'tst':[1,2,3]}, {'tst':[1,2,3], 'tst2':5}, [1,2,3], 5, 'test']
+        l_name = ['tst', '']
+        l_typ = ['int32', '']
+        test_s = list(product(l_val_s, l_name, l_typ))
+        for tst in test_s:
+            self.assertEqual(Ntv.obj_ntv(*tst, True), NtvSingle(*tst).to_obj(), 
+                             Ntv.obj({tst[1]+':'+tst[2]:tst[0]}).to_obj())
+        l_val_l = [{}, {'tst':1, 'tst2':5}, [], [1,2]]
+        test_l = list(product(l_val_l, l_name, l_typ))
+        for tst in test_l:
+            #print(tst)
+            self.assertEqual(Ntv.obj_ntv(*tst, False), NtvList(*tst).to_obj(), 
+                             Ntv.obj({tst[1]+'::'+tst[2]:tst[0]}).to_obj())
+            
+    def test_single_obj_name(self):
+        list_obj = [['json', 4, ('', '', '')],
+                    ['fr.', 4, ('', ':', 'json')],
+                    ['point', 4, ('', ':', 'json')],
+                    ['', 4, ('', '', '')],
+                    ['point', {":point": [1, 2]}, ('', '', '')],
+                    ['', {":point": [1, 2]}, ('', ':', 'point')],
+                    ['fr.', {":point": [1, 2]}, ('', ':', 'point')],
+                    ['json', {":": [1, 2]}, ('', '', '')],
+                    ['', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
+                    ['fr.', {":fr.reg": [1, 2]}, ('', ':', 'reg')],
+                    ['json', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
+                    ['point', {":fr.reg": [1, 2]}, ('', ':', 'fr.reg')],
+                    ['point', {"::point": [1, 2]}, ('', '', '')],
+                    ['', {"::point": [1, 2]}, ('', '::', 'point')],
+                    ['fr.', {"::fr.reg": [1, 2]}, ('', '::', 'reg')],
+                    #['', {"::json": [1, 2]}, ('', '::', 'json')],
+                    ['', {"::json": [1, 2]}, ('', '', '')],
+                    ['json', {"::json": [1, 2]}, ('', '', '')],
+                    #['json', {"::": [1, 2]}, ('', '::', 'json')],
+                    ['json', {"::": [1, 2]}, ('', '', '')],
+                    ['array', {":array": [1, 2]}, ('', '', '')],
+                    ]
+        for data in list_obj:
+            ntv = Ntv.obj(data[1])
+            # print(ntv)
+            self.assertEqual(ntv.json_name(data[0]), list(data[2]))
+
+    def test_cast(self):
+        point = []
+        line = []
+        pol = []
+        for i in range(6):
+            point.append(geometry.point.Point((i, i+1)))
+        for i in range(3):
+            line.append(geometry.linestring.LineString(
+                (point[i], point[i+1], point[i+2])))
+            pol.append(geometry.polygon.Polygon((line[i])))
+        list_obj = [datetime.datetime(2021, 2, 1, 0, 0), datetime.time(21, 2, 1),
+                    datetime.date(2021, 2, 1), point[0], line[0], pol[0],
+                    geometry.multipoint.MultiPoint((point[0], point[1])),
+                    geometry.multilinestring.MultiLineString(
+                        (line[0], line[1])),
+                    geometry.multipolygon.MultiPolygon((pol[0], pol[1]))]
+        for obj in list_obj:
+            self.assertEqual(Ntv.from_obj(
+                NtvSingle(obj).to_obj()), NtvSingle(obj))
+            self.assertEqual(NtvSingle(obj).to_obj(format='obj'), obj)
+
+    def test_agreg_type(self):
+        list_type = [[[None, None, True], 'json'],
+                     [['point', None, True], 'point'],
+                     [[None, 'fr.', True], 'json'],
+                     [['json', None, True], 'json'],
+                     [['point', 'date', True], 'point'],
+                     [['fr.reg', 'fr.', True], 'fr.reg'],
+                     [['point', 'fr.', True], 'point'],
+
+                     [[None, None, False], None],
+                     [['point', None, False], 'point'],
+                     [[None, 'fr.', False], 'fr.'],
+                     [['json', None, False], 'json'],
+                     [['point', 'date', False], 'point'],
+                     [['fr.reg', 'fr.', False], 'fr.reg'],
+                     [['reg', 'fr.', False], 'fr.reg'],
+                     [['point', 'fr.', False], 'point']]
+        for typ in list_type:
+            # print(typ[0])
+            if typ[0] == [None, None, False]:
+                self.assertEqual(agreg_type(
+                    typ[0][0], typ[0][1], typ[0][2]), typ[1])
+            else:
+                self.assertEqual(agreg_type(
+                    typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
+    
+    def test_address(self):
+        a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
+        self.assertTrue(a.parent is None)
+        self.assertEqual(a.address, [0])
+        self.assertEqual(a.address_name, '0')
+        self.assertEqual(a['t3'].address, [0, 2])
+        self.assertEqual(a['t3'].address_name, '0.2')
+        self.assertEqual(a['t3'][0].parent.parent, a)
+        self.assertEqual(a['t3'][0].address, [0, 2, 0])
+        self.assertEqual(a['t3'][0].address_name, '0.2.0')
+
+    def test_default_type(self):
+        list_test = [[('', ':', 'fr.BAN.lon'), {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
+                     [('', ':', 'fr.BAN.lon'), {
+                         'ntv1::fr.BAN.': [{':lon': 4}, 5, 6]}],
+                     [('', ':', 'fr.reg'), {'ntv1::fr.': [{':reg': 4}, 5, 6]}],
+                     [('', ':', 'fr.reg'), {
+                         'ntv1::fr.': [{':fr.reg': 4}, 5, 6]}],
+                     [('', ':', 'fr.reg'), {
+                         'ntv1::fr.reg': [{':fr.reg': 4}, 5, 6]}],
+                     [('', ':', 'fr.reg'), {'ntv1::fr.reg': [4, 5, 6]}],
+                     [('', ':', 'fr.reg'), {
+                         'ntv1::fr.BAN.lon': [{':fr.reg': 4}, 5, 6]}],
+                     [('', ':', 'fr.reg'), {'ntv1::fr.BAN.': [{':fr.reg': 4}, 5, 6]}]]
+        for test in list_test:
+            # print(test[1])
+            self.assertEqual(Ntv.from_obj(
+                test[1]).ntv_value[0].json_name(), list(test[0]))
+            self.assertEqual(
+                Ntv.obj(test[1]).ntv_value[0].json_name(), list(test[0]))                
+
+    def test_default_list(self):
+        unic = NtvSingle({'un': 1, 'deux': 2}, 'param')
+        lis1 = NtvList([1, 2, 3, 4], 'lis1', 'int')
+        lis2 = NtvList([10, 2.5, 30, 40], 'lis2')
+        il_lis1 = NtvList([lis1, lis2, unic], 'ilis1')
+        il_lis2 = NtvList([lis2, lis1, unic], 'ilis2')
+        il_lis1_a = NtvList([lis1, lis2, unic], 'ilis1', typ_auto=True)
+        il_lis2_a = NtvList([lis2, lis1, unic], 'ilis2', typ_auto=True)
+        self.assertEqual(il_lis2[0].ntv_type, il_lis1[1].ntv_type)
+        self.assertEqual(il_lis2[1].ntv_type, il_lis1[0].ntv_type)
+        self.assertEqual(il_lis2.ntv_type, il_lis1.ntv_type)
+        self.assertNotEqual(il_lis2_a.ntv_type, il_lis1_a.ntv_type)
+        
     def test_iter(self):
         ntv = Ntv.obj(0)
         for int, val in enumerate(ntv):
