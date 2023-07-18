@@ -81,24 +81,37 @@ class ShapelyConnec(NtvConnector):
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert ntv_value into a shapely geometry object defined by 'type_geo'.
+        
+        *Parameters*
+
+        - **type_geo** : type of geometry (point, multipoint, line, multiline',
+        polygon, multipolygon)
+        - **ntv_value** : array - coordinates'''
         from shapely import geometry
         return geometry.shape({"type": kwargs['type_geo'],
                                "coordinates": ntv_value})
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert NTV object (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - NTV type of geometry (point, multipoint, 
+        line, multiline', polygon, multipolygon),
+        - **name** : string (default None) - name of the NTV object
+        - **value** : shapely geometry'''
         return (Ntv._listed(value.__geo_interface__['coordinates']), name, typ)
 
 class CborConnec(NtvConnector):
-    '''NTV connector for Iindex'''
+    '''NTV connector for binary data'''
     
     clas_obj = 'bytes'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert json ntv_value into a binary CBOR object (no parameters).'''
         import cbor2
         return cbor2.dumps(ntv_value, datetime_as_timestamp=True,
                            timezone=datetime.timezone.utc, canonical=False,
@@ -106,52 +119,70 @@ class CborConnec(NtvConnector):
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert NTV binary object (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : binary data'''
         import cbor2
         return (cbor2.loads(value), name, typ)
 
 class NfieldConnec(NtvConnector):
-    '''NTV connector for Iindex'''
+    '''NTV connector for NTV Field data'''
     
     clas_obj = 'Nfield'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert json ntv_value into a NTV Field object (no parameters).'''
         from observation.fields import Nfield
         ntv = Ntv.obj(ntv_value)
         return Nfield.from_ntv(ntv)
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert NTV Field object (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : NTV Field values (default format)'''
         return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
     
 class SfieldConnec(NtvConnector):
-    '''NTV connector for Iindex'''
+    '''NTV connector for simple Field data'''
     
     clas_obj = 'Sfield'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert json ntv_value into a simple Field object (no parameters).'''
         from observation.fields import Sfield
         ntv = Ntv.obj(ntv_value)
         return Sfield.from_ntv(ntv)
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert simple Field object (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : simple Field values (default format)'''
         return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
     
 class NdatasetConnec(NtvConnector):
-    '''NTV connector for Ndataset'''
+    '''NTV connector for NTV Dataset data'''
     
     clas_obj = 'Ndataset'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert json ntv_value into a NTV Dataset object (no parameters).'''
         from observation.datasets import Ndataset
         
         ntv = Ntv.obj(ntv_value)
@@ -159,17 +190,23 @@ class NdatasetConnec(NtvConnector):
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert NTV Dataset object (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : NTV Dataset values'''
         return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
 
 class SdatasetConnec(NtvConnector):
-    '''NTV connector for Sdataset'''
+    '''NTV connector for simple Dataset data'''
     
     clas_obj = 'Sdataset'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert json ntv_value into a simple Dataset object (no parameters).'''
         from observation.datasets import Sdataset
         
         ntv = Ntv.obj(ntv_value)
@@ -177,7 +214,13 @@ class SdatasetConnec(NtvConnector):
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert simple Dataset object (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : simple Dataset values'''
         return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
 
 class IindexConnec(NtvConnector):
@@ -194,7 +237,7 @@ class IindexConnec(NtvConnector):
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert object into the NTV entity (json-value, name, type).'''
         return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
     
 class IlistConnec(NtvConnector):
@@ -211,7 +254,7 @@ class IlistConnec(NtvConnector):
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+        ''' convert object into the NTV entity (json-value, name, type).'''
         return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
 
 
@@ -222,7 +265,14 @@ class DataFrameConnec(NtvConnector):
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' convert json ntv_value into a DataFrame.
+                
+        *Parameters*
+ 
+          '':False
+        - **index** : list (default None) - list of index values,
+        - **alias** : boolean (default False) - name of the NTV object
+        - **annotated** : boolean (default False) -simple Dataset values (default format).'''
         #ntv = Ntv.obj(ntv_value)
         ntv = Ntv.fast(ntv_value)
         leng = max([len(ntvi) for ntvi in ntv.ntv_value])
@@ -236,7 +286,13 @@ class DataFrameConnec(NtvConnector):
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (value, name, type)'''
+        ''' convert a DataFrame (value, name, type) into NTV json (json-value, name, type).
+        
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : DataFrame values'''
         df2 = value.reset_index()
         #js = NtvList([SeriesConnec.to_json_ntv(df2[col])[2] for col in df2.columns]).to_obj()
         js = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0] for col in df2.columns]).to_obj()
