@@ -138,7 +138,7 @@ class Ntv(ABC):
         self._row = None
 
     @staticmethod
-    def fast(data, no_typ=False, typ_auto=False, fast=False):
+    def fast(data, no_typ=False, typ_auto=False):
         ''' return an Ntv entity from data.
         **Data** can be :
         - a tuple with value, name, typ and cat (see `from_att` method)
@@ -376,12 +376,8 @@ class Ntv(ABC):
             def_type = ''
         elif isinstance(def_type, (NtvType, Namespace)):
             def_type = def_type.long_name
-        json_name = ''
-        if self.ntv_name:
-            json_name = self.ntv_name
-        json_type = ''
-        if self.ntv_type:
-            json_type = relative_type(def_type, self.ntv_type.long_name)
+        json_name = self.ntv_name if self.ntv_name else ''
+        json_type = relative_type(def_type, self.type_str) if self.ntv_type else ''          
         implicit = (json_type == 'json' and (not def_type or def_type == 'json') or
                     not self.is_json)
         if implicit and not explicit:
@@ -554,6 +550,16 @@ class Ntv(ABC):
             return NtvConnector.connector()['CborConnec'].to_obj_ntv(json_obj)
         return json_obj
 
+    @staticmethod
+    def obj_ntv(value, name='', typ='', single=False):
+        ntv_list = isinstance(value, dict) and len(value) != 1 or isinstance(value, list)
+        if not single and not isinstance(value, list):
+            raise NtvError('the value is not compatible with "single" boolean')
+        sep = ':' if single else '::'
+        sep = '' if not typ and (not single or single and not ntv_list) else sep
+        name += sep + typ
+        return {name: value} if name else value
+        
     def to_json_ntv(self, def_type=None, **kwargs):
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:

@@ -63,7 +63,7 @@ class Test_Ntv_fast(unittest.TestCase):
         listtyp = list(lis[0])
         for nstr, typ in zip(liststr, listtyp):
             #print('av', nstr, typ)
-            ntv = Ntv.fast(nstr, fast=True)
+            ntv = Ntv.fast(nstr)
             #print('ap', nstr, typ)
             self.assertEqual(nstr, ntv.to_fast(encoded=True))
             self.assertTrue(ntv.__class__.__name__ == typ)
