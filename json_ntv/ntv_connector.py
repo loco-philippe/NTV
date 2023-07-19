@@ -12,7 +12,11 @@ It contains :
 - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
 - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
     - `IindexConnec`:    'field' connector 
-    - `IlistConnec`:     'tab' connector 
+    - `IlistConnec`:     'tab' connector  
+    - `SfieldConnec`:    'field' connector 
+    - `SdatasetConnec`:  'tab' connector  
+    - `NfieldConnec`:    'field' connector 
+    - `NdatasetConnec`:  'tab' connector  
     - `DataFrameConnec`: 'tab' connector 
     - `SeriesConnec`:    'field' connector 
     - `MermaidConnec`:   '$mermaid' connector 

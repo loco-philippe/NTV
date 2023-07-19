@@ -294,6 +294,15 @@ class Test_Ntv_creation(unittest.TestCase):
 
     def test_from_obj_obj(self):
         self.assertNotEqual(Ntv.obj({':': NtvSingle(1, 'test')}), Ntv.obj(NtvSingle(1, 'test')))
+        '''['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                                                [datetime.date(2020, 3, 4), 
+                                                 datetime.date(2020, 4, 4)]]},
+                    {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
+                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                                                {'a': datetime.date(2020, 3, 4), 
+                                                 'b': datetime.date(2020, 4, 4)}]},
+                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],'''
+
         dictstr2 = [
                    ['NtvSingle', {':': NtvSingle(1, 'test')}, {
                        ':ntv': {'test': 1}}],
@@ -306,14 +315,6 @@ class Test_Ntv_creation(unittest.TestCase):
                     {'Ntv1:date': '2021-02-01'}],
                    ['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
                     {'Ntv1:date': '2021-02-01'}],
-                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                                                [datetime.date(2020, 3, 4), 
-                                                 datetime.date(2020, 4, 4)]]},
-                    {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
-                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                                                {'a': datetime.date(2020, 3, 4), 
-                                                 'b': datetime.date(2020, 4, 4)}]},
-                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
                    ['NtvSingle', datetime.date(2021, 2, 1), {
                        ':date': '2021-02-01'}],
                    ['NtvSingle', {'set:': NtvList([{'l1': 21}, {'l2': datetime.date(2021, 2, 1)}])},
@@ -331,6 +332,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', {'Ntv3::fr.reg': {'Ntv1': [1, 2], 'Ntv2:fr.reg': '2'}},
                     {'Ntv3::fr.reg': {'Ntv1': [1, 2], 'Ntv2': '2'}}],
         ]
+        
         lis = list(zip(*dictstr2))
         listres = list(lis[2])
         liststr = list(lis[1])
