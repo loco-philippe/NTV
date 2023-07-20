@@ -1209,6 +1209,29 @@ class NtvConnector(ABC):
             option = {'format': 'obj'}
         return NtvConnector.uncast(ntv, **option)
 
+    @staticmethod
+    def is_json(obj, ntvobj=False):
+        ''' check if obj is a json structure and return a boolean 
+        
+        *Parameters*
+
+        - **obj** : object to check
+        - **ntvobj** : boolean (default False) - if True NTV class value are accepted'''
+        if not obj:
+            return True
+        is_js = NtvConnector.is_json
+        match obj:
+            case str() | int() | float() | bool() as obj:
+                return True
+            case list() | tuple() as obj:
+                return min([is_js(obj_in, ntvobj) for obj_in in obj])
+            case dict() as obj:
+                return (min([isinstance(key, str) for key in obj.keys()]) and 
+                        min([is_js(obj_in, ntvobj) for obj_in in obj.values()]))
+            case _:
+                return ntvobj and obj.__class__.__name__ in NtvConnector.castable
+
+        
 class NtvJsonEncoder(json.JSONEncoder):
     """json encoder for Ntv data"""
     def default(self, obj):

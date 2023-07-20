@@ -12,7 +12,8 @@ import datetime
 import csv
 from itertools import product
 
-from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, agreg_type, NtvTree
+from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv
+from json_ntv import agreg_type, NtvTree, NtvConnector
 from shapely import geometry
 
 class Test_Ntv_fast(unittest.TestCase):
@@ -568,8 +569,17 @@ class Test_NtvTree(unittest.TestCase):
         
 class Test_NtvConnector(unittest.TestCase):
     
-    def test(self):
-        return
+    def test_is_json(self):
+        is_json = NtvConnector.is_json
+        self.assertTrue(is_json({'tst':[1, 2, 'test', None, True, {'test': 1}, [1, 'tst']]}))
+        self.assertTrue(is_json({'tst':[1, 2, 'test', None, True, {'test': datetime.time()}, 
+                              [1, 'tst', geometry.Point(1,2)]]}, True))
+        
+        self.assertFalse(is_json({'tst':[1, 2, 'test', None, True, {'test': datetime.time()}, 
+                      [1, 'tst', geometry.Point(1,2)]]}))
+        self.assertFalse(is_json({'tst':[1, 2, 'test', None, True, {23: 1}, [1, 'tst']]}))
+        self.assertFalse(is_json({'tst':[1, 2, 'test', None, True, {'test': datetime.time()}, [1, 'tst']]}))
+
     
 if __name__ == '__main__':
     unittest.main(verbosity=2)
