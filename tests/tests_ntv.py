@@ -295,10 +295,7 @@ class Test_Ntv_creation(unittest.TestCase):
 
     def test_from_obj_obj(self):
         self.assertNotEqual(Ntv.obj({':': NtvSingle(1, 'test')}), Ntv.obj(NtvSingle(1, 'test')))
-        '''['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                                                [datetime.date(2020, 3, 4), 
-                                                 datetime.date(2020, 4, 4)]]},
-                    {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
+        '''
                    ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
                                                 {'a': datetime.date(2020, 3, 4), 
                                                  'b': datetime.date(2020, 4, 4)}]},
@@ -320,6 +317,12 @@ class Test_Ntv_creation(unittest.TestCase):
                        ':date': '2021-02-01'}],
                    ['NtvSingle', {'set:': NtvList([{'l1': 21}, {'l2': datetime.date(2021, 2, 1)}])},
                     {'set:ntv': {'l1': 21, 'l2:date': '2021-02-01'}}],
+                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                       [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]},
+                               {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
+                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                        {'a': datetime.date(2020, 3, 4), 'b': datetime.date(2020, 4, 4)}]},
+                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
                    ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10), 22]}],
                     [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, 22]}]],
                    ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10),
@@ -387,6 +390,8 @@ class Test_Ntv_tabular(unittest.TestCase):
                         'names::string':   ['john', 'eric', 'judith']}})
         sr = field.to_obj(format='obj', dicobj={
                           'field': 'SeriesConnec'})
+        self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(
+            format='obj', dicobj={'field': 'SeriesConnec'})))
         df = tab.to_obj(format='obj', dicobj={'tab': 'DataFrameConnec'})
         #il  = tab.to_obj  (format='obj')
         #idx = field.to_obj(format='obj')
@@ -394,8 +399,6 @@ class Test_Ntv_tabular(unittest.TestCase):
         #self.assertEqual(il, Ntv.obj(il).to_obj(format='obj'))
         self.assertTrue(df.equals(Ntv.obj(df).to_obj(
             format='obj', dicobj={'tab': 'DataFrameConnec'})))
-        self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(
-            format='obj', dicobj={'field': 'SeriesConnec'})))
 
     def test_csv(self):
         tab = Ntv.obj({':tab':
@@ -572,13 +575,13 @@ class Test_NtvConnector(unittest.TestCase):
     def test_is_json(self):
         is_json = NtvConnector.is_json
         self.assertTrue(is_json({'tst':[1, 2, 'test', None, True, {'test': 1}, [1, 'tst']]}))
-        self.assertTrue(is_json({'tst':[1, 2, 'test', None, True, {'test': datetime.time()}, 
-                              [1, 'tst', geometry.Point(1,2)]]}, True))
-        
         self.assertFalse(is_json({'tst':[1, 2, 'test', None, True, {'test': datetime.time()}, 
-                      [1, 'tst', geometry.Point(1,2)]]}))
-        self.assertFalse(is_json({'tst':[1, 2, 'test', None, True, {23: 1}, [1, 'tst']]}))
-        self.assertFalse(is_json({'tst':[1, 2, 'test', None, True, {'test': datetime.time()}, [1, 'tst']]}))
+                              [1, 'tst', geometry.Point(1,2)]]}))
+        with self.assertRaises(NtvError):
+            is_json({'tst':[1, 2, 'test', None, True, {23: 1}, [1, 'tst']]})
+        with self.assertRaises(NtvError):
+            is_json({'tst':[1, 2, 'test', None, True, {'test': NtvTree(None)}, [1, 'tst']]})
+
 
     
 if __name__ == '__main__':
