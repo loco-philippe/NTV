@@ -1067,6 +1067,33 @@ class NtvConnector(ABC):
     - `json_to_obj`
     '''
 
+    DIC_GEO_CL = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
+                  'MultiLineString': 'multiline', 'Polygon': 'polygon',
+                  'MultiPolygon': 'multipolygon'}
+    DIC_FCT = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
+               'datetime': datetime.datetime.fromisoformat}
+    DIC_GEO = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
+               'multiline': 'multilinestring', 'polygon': 'polygon',
+               'multipolygon': 'multipolygon'}
+    DIC_CBOR = {'point': False, 'multipoint': False, 'line': False,
+                'multiline': False, 'polygon': False, 'multipolygon': False,
+                'date': True, 'time': False, 'datetime': True}
+    DIC_OBJ = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',
+               '$mermaid': 'MermaidConnec', '$cbor': 'CborConnec',
+               'point': 'ShapelyConnec', 'multipoint': 'ShapelyConnec',
+               'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
+               'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
+               'other': None}
+    
+    @classmethod
+    @property
+    def castable(cls):
+        return ['str', 'int', 'bool', 'float', 'dict', 'tuple', 'NoneType', 
+                'NtvSingle', 'NtvList'] \
+               + list(NtvConnector.DIC_GEO_CL.keys()) \
+               + list(NtvConnector.DIC_FCT.keys()) \
+               + list(NtvConnector.dic_connec().keys())
+        
     @classmethod
     def connector(cls):
         '''return a dict with the connectors: { name: class }'''
@@ -1090,15 +1117,9 @@ class NtvConnector(ABC):
     @staticmethod
     def cast(data, name=None, type_str=None):
         '''return (json_value, name, type_str) of the data'''
-        dic_geo_cl = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
-                      'MultiLineString': 'multiline', 'Polygon': 'polygon',
-                      'MultiPolygon': 'multipolygon'}
+        dic_geo_cl = NtvConnector.DIC_GEO_CL
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
-        #if clas in ('NtvList', 'NtvSingle'):
-            #name = data.ntv_name
-            #data = data.ntv_value
-            #clas = data.__class__.__name__            
         match clas:
             case 'tuple':
                 return (list(data), name, 'array' if not type_str else type_str)
@@ -1124,20 +1145,10 @@ class NtvConnector(ABC):
     @staticmethod
     def uncast(ntv, **kwargs):
         '''return object from ntv entity'''
-        dic_fct = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
-                   'datetime': datetime.datetime.fromisoformat}
-        dic_geo = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
-                   'multiline': 'multilinestring', 'polygon': 'polygon',
-                   'multipolygon': 'multipolygon'}
-        dic_cbor = {'point': False, 'multipoint': False, 'line': False,
-                    'multiline': False, 'polygon': False, 'multipolygon': False,
-                    'date': True, 'time': False, 'datetime': True}
-        dic_obj = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',
-                   '$mermaid': 'MermaidConnec', '$cbor': 'CborConnec',
-                   'point': 'ShapelyConnec', 'multipoint': 'ShapelyConnec',
-                   'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
-                   'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
-                   'other': None}
+        dic_fct = NtvConnector.DIC_FCT
+        dic_geo = NtvConnector.DIC_GEO
+        dic_cbor = NtvConnector.DIC_CBOR
+        dic_obj = NtvConnector.DIC_OBJ
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
         dic_obj |= option['dicobj']
         type_n = ntv.type_str
