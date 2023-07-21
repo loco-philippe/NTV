@@ -306,6 +306,8 @@ class NtvType():
     @classmethod
     def add(cls, long_name):
         '''activate and return a valid NtvType defined by the long name'''
+        if long_name == '':
+            return None
         if long_name in NtvType.types():
             return cls._types_[long_name]
         split_name = long_name.rsplit('.', 1)

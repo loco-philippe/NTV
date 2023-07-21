@@ -133,16 +133,16 @@ class Test_Ntv_fast(unittest.TestCase):
                        'lis:ntv': [1, 2, 3]}],
                    ['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
                     {'Ntv1:date': '2021-02-01'}],
-                   #['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
-                   # {'Ntv1:date': '2021-02-01'}],
-                   #['NtvSingle', {'Ntv2:': [datetime.date(2020, 2, 4), 
-                   #                             [datetime.date(2020, 3, 4), 
-                   #                              datetime.date(2020, 4, 4)]]},
-                   # {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
-                   #['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                   #                             {'a': datetime.date(2020, 3, 4), 
-                   #                              'b': datetime.date(2020, 4, 4)}]},
-                   # {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
+                   ['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
+                    {'Ntv1:date': '2021-02-01'}],
+                   ['NtvSingle', {'Ntv2:': [datetime.date(2020, 2, 4), 
+                                                [datetime.date(2020, 3, 4), 
+                                                 datetime.date(2020, 4, 4)]]},
+                    {'Ntv2:date': ['2020-02-04', ['2020-03-04', '2020-04-04']]}],
+                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
+                                                {'a': datetime.date(2020, 3, 4), 
+                                                 'b': datetime.date(2020, 4, 4)}]},
+                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],
                    ['NtvSingle', datetime.date(2021, 2, 1), {
                        ':date': '2021-02-01'}],
                    ['NtvSingle', {'set:': NtvList([{'l1': 21}, {'l2': datetime.date(2021, 2, 1)}])},
@@ -166,10 +166,10 @@ class Test_Ntv_fast(unittest.TestCase):
         listtyp = list(lis[0])
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
-            ntv = Ntv.fast(nstr).to_obj_ntv()
+            ntv = Ntv.fast(nstr)
             #print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.fast(ntv.to_fast()).to_obj_ntv())
+            self.assertEqual(ntv.to_obj_ntv(), Ntv.fast(ntv.to_fast()).to_obj_ntv())
             self.assertEqual(ntv.to_json_ntv(), Ntv.obj(nstr))
             self.assertEqual(ntv.to_json_ntv().to_obj_ntv(), ntv.to_obj_ntv())
             
@@ -202,6 +202,7 @@ class Test_Ntv_creation(unittest.TestCase):
                      [{"::array": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
                      [{"::array": [{'a': 3, 'e':5}, {'a': 4, 'e':6}]}, '{"lT": ["sT", "sT"]}'],
                      [{"a": 2}, '"sN"'],
+                     [{"truc": {"a": 2}}, '"sN"'],
                      #[{"truc": {"a": 2}}, '{"sN": "sN"}'],
                      [{":point": {"a": 2}}, '"sT"'],
                      [{"truc:": {"a": 2}}, '"sN"'],
@@ -295,11 +296,6 @@ class Test_Ntv_creation(unittest.TestCase):
 
     def test_from_obj_obj(self):
         self.assertNotEqual(Ntv.obj({':': NtvSingle(1, 'test')}), Ntv.obj(NtvSingle(1, 'test')))
-        '''
-                   ['NtvSingle', {'Ntv2:date': [datetime.date(2020, 2, 4), 
-                                                {'a': datetime.date(2020, 3, 4), 
-                                                 'b': datetime.date(2020, 4, 4)}]},
-                    {'Ntv2:date': ['2020-02-04', {'a': '2020-03-04', 'b': '2020-04-04'}]}],'''
 
         dictstr2 = [
                    ['NtvSingle', {':': NtvSingle(1, 'test')}, {
@@ -344,9 +340,11 @@ class Test_Ntv_creation(unittest.TestCase):
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
             ntv = Ntv.obj(nstr)
+            ntvf = Ntv.fast(nstr).to_json_ntv()
             #print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
+            self.assertEqual(ntv, ntvf)
             self.assertEqual(nres, ntv.to_obj())
 
     def test_to_obj(self):
@@ -582,7 +580,12 @@ class Test_NtvConnector(unittest.TestCase):
         with self.assertRaises(NtvError):
             is_json({'tst':[1, 2, 'test', None, True, {'test': NtvTree(None)}, [1, 'tst']]})
 
-
-    
+    def test_uncast_typ(self):
+        self.assertEqual(NtvConnector._typ_obj([21, ['ser', 25],
+                         [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]),
+                         NtvConnector._typ_obj(datetime.date(2020, 3, 4)), 'date')
+        self.assertEqual(NtvConnector._typ_obj([21, ['ser', 25],
+                         {'a': datetime.date(2020, 3, 4), 'b': datetime.date(2020, 4, 4)}]),
+                         NtvConnector._typ_obj(datetime.date(2020, 3, 4)), 'date')        
 if __name__ == '__main__':
     unittest.main(verbosity=2)
