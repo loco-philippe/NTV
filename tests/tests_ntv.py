@@ -116,8 +116,8 @@ class Test_Ntv_fast(unittest.TestCase):
 
     def test_equivalence(self):
         str2 = [({'Ntv1': datetime.date(2021, 2, 1)}, {'Ntv1:date': datetime.date(2021, 2, 1)}),
-                #({'Ntv2': [datetime.date(2020, 2, 4), [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]},
-                # {'Ntv2:date': [datetime.date(2020, 2, 4), [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]}),
+                ({'Ntv2': [datetime.date(2020, 2, 4), [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]},
+                 {'Ntv2:date': [datetime.date(2020, 2, 4), [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]}),
                 ]
         for js1, js2 in str2:
             self.assertEqual(Ntv.fast(js1).to_json_ntv(), Ntv.fast(js1).to_json_ntv())
@@ -166,20 +166,20 @@ class Test_Ntv_fast(unittest.TestCase):
         listtyp = list(lis[0])
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
-            ntv = Ntv.fast(nstr)
-            print('ap', nstr, typ)
+            ntv = Ntv.fast(nstr).to_obj_ntv()
+            #print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
-            self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
+            self.assertEqual(ntv, Ntv.fast(ntv.to_fast()).to_obj_ntv())
             self.assertEqual(ntv.to_json_ntv(), Ntv.obj(nstr))
-            self.assertEqual(ntv.to_json_ntv().to_obj_ntv(), ntv)
+            self.assertEqual(ntv.to_json_ntv().to_obj_ntv(), ntv.to_obj_ntv())
             
     def test_to_json_ntv_to_obj_ntv(self):
         js_obj = [{'test': [datetime.date(2020, 1, 2), 45, {'paris': geometry.Point(4,5)}]},
                   {'test': [datetime.date(2020, 1, 2), 45, {'paris': geometry.Point(4,5), 
-                            'dates': [datetime.date(2021, 1, 2),datetime.date(2022, 1, 2)]}]}]
+                            'dates': [datetime.date(2021, 1, 2), datetime.date(2022, 1, 2)]}]}]
         for js in js_obj:
-            self.assertEqual(Ntv.fast(js_obj).to_json_ntv(), Ntv.obj(js_obj))
-            self.assertEqual(Ntv.fast(js_obj).to_json_ntv().to_obj_ntv(), Ntv.fast(js_obj))
+            self.assertEqual(Ntv.fast(js).to_json_ntv(), Ntv.obj(js))
+            self.assertEqual(Ntv.fast(js).to_json_ntv().to_obj_ntv(), Ntv.fast(js).to_obj_ntv() )
         
 class Test_Ntv_creation(unittest.TestCase):
 
