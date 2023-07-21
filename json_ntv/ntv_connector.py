@@ -82,6 +82,7 @@ class ShapelyConnec(NtvConnector):
     '''NTV connector for geographic location'''
     
     clas_obj = 'geometry'
+    clas_typ = 'geometry'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -112,6 +113,7 @@ class CborConnec(NtvConnector):
     '''NTV connector for binary data'''
     
     clas_obj = 'bytes'
+    clas_typ = 'bytes'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -137,6 +139,7 @@ class NfieldConnec(NtvConnector):
     '''NTV connector for NTV Field data'''
     
     clas_obj = 'Nfield'
+    clas_typ = 'field'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -154,12 +157,14 @@ class NfieldConnec(NtvConnector):
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
         - **value** : NTV Field values (default format)'''
-        return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
+        return (value.to_ntv(name=True).to_obj(), name, 
+                NfieldConnec.clas_typ if not typ else typ)
     
 class SfieldConnec(NtvConnector):
     '''NTV connector for simple Field data'''
     
     clas_obj = 'Sfield'
+    clas_typ = 'field'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -177,12 +182,14 @@ class SfieldConnec(NtvConnector):
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
         - **value** : simple Field values (default format)'''
-        return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
+        return (value.to_ntv(name=True).to_obj(), name, 
+                NfieldConnec.clas_typ if not typ else typ)
     
 class NdatasetConnec(NtvConnector):
     '''NTV connector for NTV Dataset data'''
     
     clas_obj = 'Ndataset'
+    clas_typ = 'tab'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -201,12 +208,14 @@ class NdatasetConnec(NtvConnector):
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
         - **value** : NTV Dataset values'''
-        return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
+        return (value.to_ntv().to_obj(), name, 
+                NdatasetConnec.clas_typ if not typ else typ)
 
 class SdatasetConnec(NtvConnector):
     '''NTV connector for simple Dataset data'''
     
     clas_obj = 'Sdataset'
+    clas_typ = 'tab'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -225,12 +234,14 @@ class SdatasetConnec(NtvConnector):
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
         - **value** : simple Dataset values'''
-        return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
+        return (value.to_ntv().to_obj(), name, 
+                SdatasetConnec.clas_typ if not typ else typ)
 
 class IindexConnec(NtvConnector):
     '''NTV connector for Iindex'''
     
     clas_obj = 'Iindex'
+    clas_typ = 'field'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -242,12 +253,14 @@ class IindexConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (json-value, name, type).'''
-        return (value.to_ntv(name=True).to_obj(), name, 'field' if not typ else typ)
+        return (value.to_ntv(name=True).to_obj(), name,
+                IindexConnec.clas_typ if not typ else typ)
     
 class IlistConnec(NtvConnector):
     '''NTV connector for Ilist'''
     
     clas_obj = 'Ilist'
+    clas_typ = 'tab'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -259,13 +272,15 @@ class IlistConnec(NtvConnector):
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert object into the NTV entity (json-value, name, type).'''
-        return (value.to_ntv().to_obj(), name, 'tab' if not typ else typ)
+        return (value.to_ntv().to_obj(), name,
+                IlistConnec.clas_typ if not typ else typ)
 
 
 class DataFrameConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
 
     clas_obj = 'DataFrame'
+    clas_typ = 'tab'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -298,7 +313,7 @@ class DataFrameConnec(NtvConnector):
         - **value** : DataFrame values'''
         df2 = value.reset_index()
         js = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0] for col in df2.columns]).to_obj()
-        return (js, name, 'tab' if not typ else typ) 
+        return (js, name, DataFrameConnec.clas_typ if not typ else typ)
 
     @staticmethod
     def to_listidx(dtf):
@@ -312,6 +327,8 @@ class SeriesConnec(NtvConnector):
     '''NTV connector for pandas Series'''
     
     clas_obj = 'Series'
+    clas_typ = 'field'
+    
     types = pd.DataFrame(
         {'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime',  
                        'int32', 'int64', 'float64', 'array', 'boolean'], 
@@ -443,7 +460,7 @@ class SeriesConnec(NtvConnector):
             ntv_type, ntv_value = ntv_type_val(name_type, sr)
         return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name, 
         #return (Ntv.obj_ntv(ntv_value, ntv_name, ntv_type, False), name, 
-                'field' if not typ else typ)
+                SeriesConnec.clas_typ if not typ else typ)
 
     @staticmethod
     def to_idx(ser):
@@ -458,6 +475,7 @@ class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
 
     clas_obj = 'Mermaid'
+    clas_typ = 'mermaid'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):

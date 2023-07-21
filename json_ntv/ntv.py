@@ -614,9 +614,10 @@ class Ntv(ABC):
     def to_obj_ntv(self, def_type=None, **kwargs):
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
-            leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.uncast(leaf)
-            leaf.ntv_type = NtvType.add(type_str) if type_str else None
-            leaf.is_json = NtvConnector.is_json(leaf.ntv_value)            
+            if leaf.is_json or leaf.ntv_type is None:
+                leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.uncast(leaf, **kwargs)
+                leaf.ntv_type = NtvType.add(type_str) if type_str else None
+                leaf.is_json = NtvConnector.is_json(leaf.ntv_value)            
         return ntv
     
     def to_tuple(self, maxi=10):
@@ -1074,6 +1075,7 @@ class NtvConnector(ABC):
     DIC_GEO_CL = {'Point': 'point', 'MultiPoint': 'multipoint', 'LineString': 'line',
                   'MultiLineString': 'multiline', 'Polygon': 'polygon',
                   'MultiPolygon': 'multipolygon'}
+    DIC_DAT_CL = {'date': 'date', 'time': 'time', 'datetime': 'datetime'}
     DIC_FCT = {'date': datetime.date.fromisoformat, 'time': datetime.time.fromisoformat,
                'datetime': datetime.datetime.fromisoformat}
     DIC_GEO = {'point': 'point', 'multipoint': 'multipoint', 'line': 'linestring',
@@ -1098,6 +1100,13 @@ class NtvConnector(ABC):
                + list(NtvConnector.DIC_FCT.keys()) \
                + list(NtvConnector.dic_connec().keys())
         
+    @classmethod
+    @property
+    def dic_type(cls):
+        '''return a dict with the connectors: { name: class }'''
+        return {clas.clas_obj: clas.clas_typ for clas in cls.__subclasses__()} |\
+            NtvConnector.DIC_GEO_CL | NtvConnector.DIC_DAT_CL
+
     @classmethod
     def connector(cls):
         '''return a dict with the connectors: { name: class }'''
@@ -1128,9 +1137,9 @@ class NtvConnector(ABC):
             case 'int' | 'float' | 'bool' | 'str':
                 return (data, name, type_str)              
             case 'dict' :
-                return ({key: NtvConnector.cast(val)[0] for key, val in data.items()}, name, type_str)                         
+                return ({key: NtvConnector.cast(val, name, type_str)[0] for key, val in data.items()}, name, type_str)                         
             case 'list' :
-                return ([NtvConnector.cast(val)[0] for val in data], name, type_str)                
+                return ([NtvConnector.cast(val, name, type_str)[0] for val in data], name, type_str)                
             case 'tuple':
                 return (list(data), name, 'array' if not type_str else type_str)
             case 'date' | 'time' | 'datetime':
@@ -1153,7 +1162,7 @@ class NtvConnector(ABC):
         #return (None, None, None)
 
     @staticmethod
-    def uncast(ntv, **kwargs):
+    def uncast_old(ntv, **kwargs):
         '''return object from ntv entity'''
         dic_fct = NtvConnector.DIC_FCT
         dic_geo = NtvConnector.DIC_GEO
@@ -1168,8 +1177,8 @@ class NtvConnector(ABC):
         if ntv.ntv_type is None or not obj:
             return (ntv.ntv_value, ntv.name, type_n)
         if type_n in dic_fct:
-            #if isinstance(ntv.ntv_value, (tuple, list)):
-            #    return ([dic_fct[type_n](val) for val in ntv.ntv_value], ntv.name, type_o)
+            if isinstance(ntv.ntv_value, (tuple, list)):
+                return ([dic_fct[type_n](val) for val in ntv.ntv_value], ntv.name, type_o)
             return (dic_fct[type_n](ntv.ntv_value), ntv.name, type_o)
         if type_n == 'array':
             return (tuple(ntv.ntv_value), ntv.name, type_n)
@@ -1187,6 +1196,69 @@ class NtvConnector(ABC):
             return (connec.to_obj_ntv(ntv.ntv_value, **option), ntv.name, type_o)
         return (ntv.ntv_value, ntv.name, type_n)
 
+    @staticmethod
+    def uncast(ntv, **kwargs):
+        '''return object from ntv entity'''
+        if not ntv.is_json and isinstance(ntv, NtvSingle):
+            return (ntv.ntv_value, ntv.name, ntv.type_str)
+        dic_cbor = NtvConnector.DIC_CBOR
+        dic_obj = NtvConnector.DIC_OBJ
+        option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
+        dic_obj |= option['dicobj']
+        type_n = ntv.type_str
+        #type_o = type_n if option['type_obj'] else None
+        type_o = type_n
+        obj = not option['format'] == 'cbor' or \
+            (ntv.ntv_type and type_n in dic_cbor and dic_cbor[type_n])
+        if ntv.ntv_type is None or not obj:
+            return (ntv.ntv_value, ntv.name, type_n)
+        return (NtvConnector.uncast_val(ntv.ntv_value, type_o, **option), ntv.name, type_o)
+        '''if type_n in dic_fct:
+            if isinstance(ntv.ntv_value, (tuple, list)):
+                return ([dic_fct[type_n](val) for val in ntv.ntv_value], ntv.name, type_o)
+            return (dic_fct[type_n](ntv.ntv_value), ntv.name, type_o)
+        if type_n == 'array':
+            return (tuple(ntv.ntv_value), ntv.name, type_n)
+        if type_n == 'ntv':
+            return (Ntv.from_obj(ntv.ntv_value), ntv.name, type_o)
+        if type_n in dic_geo:
+            option['type_geo'] = dic_geo[type_n]
+        connec = None
+        if type_n in dic_obj and \
+                dic_obj[type_n] in NtvConnector.connector():
+            connec = NtvConnector.connector()[dic_obj[type_n]]
+        elif dic_obj['other'] in NtvConnector.connector():
+            connec = NtvConnector.connector()['other']
+        if connec:
+            return (connec.to_obj_ntv(ntv.ntv_value, **option), ntv.name, type_o)
+        return (ntv.ntv_value, ntv.name, type_n)'''
+
+    @staticmethod
+    def uncast_val(value, type_n, **option):
+        '''return value from ntv value'''
+        dic_fct = NtvConnector.DIC_FCT
+        dic_geo = NtvConnector.DIC_GEO
+        dic_obj = NtvConnector.DIC_OBJ
+        if type_n in dic_fct:
+            if isinstance(value, (tuple, list)):
+                return [NtvConnector.uncast_val(val, type_n, **option) for val in value]
+            return dic_fct[type_n](value)
+        if type_n == 'array':
+            return tuple(value)
+        if type_n == 'ntv':
+            return Ntv.from_obj(value)
+        if type_n in dic_geo:
+            option['type_geo'] = dic_geo[type_n]
+        connec = None
+        if type_n in dic_obj and \
+                dic_obj[type_n] in NtvConnector.connector():
+            connec = NtvConnector.connector()[dic_obj[type_n]]
+        elif dic_obj['other'] in NtvConnector.connector():
+            connec = NtvConnector.connector()['other']
+        if connec:
+            return connec.to_obj_ntv(value, **option)            
+        #return value
+    
     @staticmethod
     def obj_to_json(obj, complete=True):
         '''conversion from an object to json or NTV object.

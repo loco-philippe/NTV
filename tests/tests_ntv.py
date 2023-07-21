@@ -131,7 +131,7 @@ class Test_Ntv_fast(unittest.TestCase):
                     {'set:ntv': {'l1': 21, 'l2:': [2, 3]}}],
                    ['NtvSingle', {'lis:': NtvList([1, 2, 3])}, {
                        'lis:ntv': [1, 2, 3]}],
-                   ['NtvSingle', {'Ntv1': datetime.date(2021, 2, 1)},
+                   ['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
                     {'Ntv1:date': '2021-02-01'}],
                    #['NtvSingle', {'Ntv1:date': datetime.date(2021, 2, 1)},
                    # {'Ntv1:date': '2021-02-01'}],
@@ -167,7 +167,7 @@ class Test_Ntv_fast(unittest.TestCase):
         for nstr, typ, nres in zip(liststr, listtyp, listres):
             #print('av', nstr, typ)
             ntv = Ntv.fast(nstr)
-            #print('ap', nstr, typ)
+            print('ap', nstr, typ)
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.fast(ntv.to_fast()))
             self.assertEqual(ntv.to_json_ntv(), Ntv.obj(nstr))
