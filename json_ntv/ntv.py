@@ -448,13 +448,17 @@ class Ntv(ABC):
                 raise NtvError('the nodes option is not valid')
 
     def set_type(self, typ=None):
-        '''set a new type to the entity (default None)'''
+        '''set a new type to the entity 
+        
+        *Parameters*
+
+        - **typ**: string, NtvType, Namespace (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
         self.ntv_type = str_type(typ, True)
 
     def set_value(self, value=None):
-        '''set new ntv_value of 'Ntv Single' entities included
+        '''set new ntv_value of a single entity or of a list of entities included
 
         *Parameters*
 
@@ -518,13 +522,17 @@ class Ntv(ABC):
         raise NtvError('the ntv entity is not consistent')
 
     def to_name(self, default=''):
-        '''return the name of the NTV entity'''
+        '''return the name of the NTV entity
+        
+        *Parameters*
+
+        - **default**: string (default ''): returned value if name is not present '''
         if self.ntv_name == '':
             return default
         return self.ntv_name
     
     def to_fast(self, def_type=None, **kwargs):
-        '''return the JSON representation of the NTV entity (json-ntv format) without conversion.
+        '''return the JSON representation of the NTV entity (json-ntv format) without value conversion.
 
         *Parameters*
 
@@ -588,8 +596,8 @@ class Ntv(ABC):
         - **value** : ntv-value of the json-ntv
         - **name** : string (default '') - ntv-name of the json-ntv
         - **typ** : string (default '') - ntv_type of the json-ntv
-        - **single** : boolean (default False) - if True, NtvSingle object is 
-        created else NtvList.
+        - **single** : boolean (default False) - if True, value is a single object
+        else value is a set of objetcs.
         '''
         value = {} if not value else value
         name = '' if not name else name
@@ -602,7 +610,7 @@ class Ntv(ABC):
         name += sep + typ
         return {name: value} if name else value
         
-    def to_json_ntv(self, def_type=None, **kwargs):
+    def to_json_ntv(self):
         ''' create a copy where ntv-value is converted in json-value'''
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
@@ -612,7 +620,12 @@ class Ntv(ABC):
                 leaf.is_json = True
         return ntv
 
-    def to_obj_ntv(self, def_type=None, **kwargs):
+    def to_obj_ntv(self, **kwargs):
+        ''' create a copy where ntv-value is converted in object-value
+
+        *Parameters*
+
+        - **kwargs** : parameters used in NtvConnector class (specific for each Connector)'''
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
             if (leaf.is_json and leaf.type_str in set(NtvConnector.dic_type.values())
