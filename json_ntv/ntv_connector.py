@@ -113,7 +113,7 @@ class CborConnec(NtvConnector):
     '''NTV connector for binary data'''
     
     clas_obj = 'bytes'
-    clas_typ = 'bytes'
+    clas_typ = '$cbor'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -475,7 +475,7 @@ class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
 
     clas_obj = 'Mermaid'
-    clas_typ = 'mermaid'
+    clas_typ = '$mermaid'
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):

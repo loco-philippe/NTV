@@ -75,9 +75,10 @@ class Ntv(ABC):
     - **ntv_name** :  String - name of the NTV entity
     - **ntv_type**:   NtvType - type of the entity
     - **ntv_value**:  value of the entity
+
+    *Internal attributes :*
     - **parent**:     parent NtvList entity
     - **is_json**:    True if ntv_value is a json_value
-    - **_row**:       row in the parent NtvList
 
     *dynamic values (@property)*
     - `address`
@@ -150,10 +151,8 @@ class Ntv(ABC):
             ntv_name = ''
         self.ntv_name = ntv_name
         self.ntv_value = ntv_value
-        #self.is_json = Ntv._is_json(ntv_value)
         self.is_json = NtvConnector.is_json(ntv_value)
         self.parent = None
-        self._row = None
 
     @staticmethod
     def fast(data, no_typ=False, typ_auto=False):
@@ -305,7 +304,7 @@ class Ntv(ABC):
         '''return a list of parent row from root'''
         if not self.parent:
             return [0]
-        return self.parent.address + [self._row]
+        return self.parent.address + [self.parent.ntv_value.index(self)]
 
     @property
     def address_name(self):
@@ -845,31 +844,15 @@ class NtvList(Ntv):
     - ntv_type is a default type available for included NTV entities
 
     *Attributes :*
-
-    - **ntv_name** : String - name of the NTV entity
-    - **ntv_type**: NtvType - type of the entity
-    - **ntv_value**:  value of the entity
-    - **json_array**: Boolean - False if all the entity names are present and different
-    (dynamic value)
-
-    The methods defined in this class are :
-
-    *Ntv constructor*
-    - `obj`
-    - `from_obj`
-    - `from_att`
+    - no additional attributes to those of parent class `Ntv`
 
     *dynamic values (@property)*
-    - `type_str`
-    - `code_ntv`
     - `json_array`
 
+    The additional methods defined in this class are :
+
     *instance methods*
-    - `set_name`
-    - `set_type`
-    - `set_value`
-    - `to_obj`
-    - `to_repr`
+    - `obj_value`
     '''
 
     def __init__(self, list_ntv, ntv_name=None, ntv_type=None, typ_auto=False, fast=False):
@@ -900,9 +883,8 @@ class NtvList(Ntv):
         if typ_auto and not ntv_type and len(ntv_value) > 0 and ntv_value[0].ntv_type:
             ntv_type = ntv_value[0].ntv_type
         super().__init__(ntv_value, ntv_name, ntv_type)
-        for row, ntv in enumerate(self):
+        for ntv in self:
             ntv.parent = self
-            ntv._row = row
 
     @property
     def json_array(self):
@@ -1047,6 +1029,10 @@ class NtvConnector(ABC):
     *class method :*
     - `connector`
     - `dic_connec`
+    - `castable` (@property)
+    - `dic_obj` (@property)
+    - `dic_type` (@property)
+    
 
     *abstract method*
     - `to_obj_ntv`
@@ -1057,6 +1043,8 @@ class NtvConnector(ABC):
     - `uncast`
     - `obj_to_json`
     - `json_to_obj`
+    - `is_json_class`
+    - `is_json`
     '''
 
     DIC_NTV_CL = {'NtvSingle': 'ntv', 'NtvList': 'ntv'}
@@ -1072,13 +1060,11 @@ class NtvConnector(ABC):
     DIC_CBOR = {'point': False, 'multipoint': False, 'line': False,
                 'multiline': False, 'polygon': False, 'multipolygon': False,
                 'date': True, 'time': False, 'datetime': True}
-    DIC_OBJ = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',
-               '$mermaid': 'MermaidConnec', '$cbor': 'CborConnec',
+    DIC_OBJ = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',              
                'point': 'ShapelyConnec', 'multipoint': 'ShapelyConnec',
                'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
                'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
                'other': None}
-
     @classmethod
     @property
     def castable(cls):
@@ -1091,8 +1077,15 @@ class NtvConnector(ABC):
 
     @classmethod
     @property
+    def dic_obj(cls):
+        '''return a dict with the connectors: { type: class }'''
+        return {clas.clas_typ: clas.__name__ for clas in cls.__subclasses__()} |\
+            NtvConnector.DIC_OBJ
+            
+    @classmethod
+    @property
     def dic_type(cls):
-        '''return a dict with the connectors: { name: class }'''
+        '''return a dict with the connectors: { clas_obj: type }'''
         return {clas.clas_obj: clas.clas_typ for clas in cls.__subclasses__()} |\
             NtvConnector.DIC_GEO_CL | NtvConnector.DIC_DAT_CL | NtvConnector.DIC_NTV_CL
 
@@ -1158,7 +1151,7 @@ class NtvConnector(ABC):
                 or ntv.ntv_type is None) and isinstance(ntv, NtvSingle):
             return (ntv.ntv_value, ntv.name, ntv.type_str)
 
-        dic_obj = NtvConnector.DIC_OBJ
+        dic_obj = NtvConnector.dic_obj
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
         dic_obj |= option['dicobj']
         type_n = ntv.type_str
@@ -1184,10 +1177,11 @@ class NtvConnector(ABC):
     @staticmethod
     def _uncast_val(value, type_n, **option):
         '''return value from ntv value'''
-        dic_fct = NtvConnector.DIC_FCT
-        dic_geo = NtvConnector.DIC_GEO
-        dic_obj = NtvConnector.DIC_OBJ
-        if not type_n:
+        dic_fct  = NtvConnector.DIC_FCT
+        dic_geo  = NtvConnector.DIC_GEO
+        dic_obj  = NtvConnector.dic_obj
+        dic_cbor = NtvConnector.DIC_CBOR
+        if not type_n or (option['format'] == 'cbor' and not dic_cbor.get(type_n, False)) :
             return value
         if type_n in dic_fct:
             if isinstance(value, (tuple, list)):
