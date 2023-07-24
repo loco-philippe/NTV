@@ -7,7 +7,7 @@ Created on Feb 27 2023
 The `ntv_util` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the classes `NtvConnector`, `NtvTree`, `NtvJsonEncoder` and `NtvError` 
+It contains the classes `NtvConnector`, `NtvTree`, `NtvJsonEncoder` and `NtvError`
 for NTV entities.
 """
 from abc import ABC, abstractmethod
@@ -112,7 +112,7 @@ class NtvConnector(ABC):
         - **data**: NtvSingle entity or NTVvalue of the NTV entity
         - **name** : String (default None) - name of the NTV entity
         - **type_str**: String (default None) - type of the NTV entity
-        '''        
+        '''
         clas = data.__class__.__name__
         if clas == 'NtvSingle':
             name = data.ntv_name
@@ -160,26 +160,15 @@ class NtvConnector(ABC):
         - **type_str**: String (default None) - type of the NTV entity
         '''
         if value.__class__.__name__ == 'NtvSingle':
-            if not (NtvConnector.is_json(value) and type_str in set(NtvConnector.dic_type.values())
-                    or type_str is None):
+            if not (type_str in set(NtvConnector.dic_type.values()) and 
+                    NtvConnector.is_json(value) or type_str is None):
                 return (value.ntv_value, value.name, value.type_str)
             type_str = value.type_str if value.ntv_type else None
             name = value.ntv_name
             value = value.ntv_value
-
-        
-        '''ntv = data if isinstance(data, NtvSingle) else NtvSingle(
-            data, name, type_str, True)
-        if not (ntv.is_json and ntv.type_str in set(NtvConnector.dic_type.values())
-                or ntv.ntv_type is None) and isinstance(ntv, NtvSingle):
-            return (ntv.ntv_value, ntv.name, ntv.type_str)'''
-
         dic_obj = NtvConnector.dic_obj
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
         dic_obj |= option['dicobj']
-        #type_n = ntv.type_str
-        #value_obj = NtvConnector._uncast_val(ntv.ntv_value, type_n, **option)
-        #return (value_obj, ntv.name, type_n if type_n else NtvConnector._typ_obj(value_obj))
         value_obj = NtvConnector._uncast_val(value, type_str, **option)
         return (value_obj, name, type_str if type_str else NtvConnector._typ_obj(value_obj))
 
@@ -335,13 +324,13 @@ class NtvTree:
     def leaf_nodes(self):
         ''' return the list of leaf nodes'''
         #return [node for node in self.__class__(self._ntv) if not isinstance(node, NtvList)]
-        return [node for node in self.__class__(self._ntv) 
+        return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvSingle']
 
     @property
     def inner_nodes(self):
         ''' return the list of inner nodes'''
-        return [node for node in self.__class__(self._ntv) 
+        return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvList']
 
     def _next_down(self):
@@ -380,5 +369,3 @@ class NtvJsonEncoder(json.JSONEncoder):
 class NtvError(Exception):
     ''' NTV Exception'''
     # pass
-
-
