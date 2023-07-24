@@ -18,23 +18,27 @@ This package contains the following classes:
 
     - `NTV.json_ntv.ntv.NtvSingle`
     - `NTV.json_ntv.ntv.NtvList`
-    - `NTV.json_ntv.ntv.NtvTree`
     - `NTV.json_ntv.ntv.Ntv` (abstract class)
+    
+- `NTV.json_ntv.ntv_util` :
+    - `NTV.json_ntv.ntv.NtvTree`
+    - `NTV.json_ntv.ntv.NtvJsonEncoder`
+    - `NTV.json_ntv.ntv.NtvError`
     - `NTV.json_ntv.ntv.NtvConnector` (abstract class)    
-          
           
 - `NTV.json_ntv.ntv_connector` :
     
     - `NTV.json_ntv.ntv_connector.DataFrameConnec`
     - `NTV.json_ntv.ntv_connector.SeriesConnec`
     - `NTV.json_ntv.ntv_connector.IlistConnec`
+    - `NTV.json_ntv.ntv_connector.NfieldConnec`
+    - `NTV.json_ntv.ntv_connector.SfieldConnec`
+    - `NTV.json_ntv.ntv_connector.NdatasetConnec`
+    - `NTV.json_ntv.ntv_connector.SdatasetConnec`
     - `NTV.json_ntv.ntv_connector.IindexConnec`
     - `NTV.json_ntv.ntv_connector.MermaidConnec`
     - `NTV.json_ntv.ntv_connector.CborConnec`
-    - `NTV.json_ntv.ntv_connector.ShapelyConnec`
-     
-The functions to convert a json object to Mermaid code are in the 
-`NTV.json_ntv.json_mermaid` submodule.    
+    - `NTV.json_ntv.ntv_connector.ShapelyConnec` 
        
 # 0 - Abstract
 
@@ -97,9 +101,11 @@ This structuring of type makes it possible to reference any type of data that ha
 
 """
 from json_ntv.namespace import Namespace, NtvType, str_type, relative_type, agreg_type
-from json_ntv.ntv import Ntv, NtvSingle, NtvList, NtvConnector, NtvError
-from json_ntv.ntv import NtvTree, NtvJsonEncoder
+from json_ntv.ntv import Ntv, NtvSingle, NtvList
+from json_ntv.ntv_util import NtvTree, NtvJsonEncoder, NtvConnector, NtvError
 from json_ntv.ntv_connector import DataFrameConnec, SeriesConnec, from_csv, to_csv
 from json_ntv.ntv_connector import MermaidConnec, CborConnec, ShapelyConnec
+from json_ntv.ntv_connector import NfieldConnec, SfieldConnec
+from json_ntv.ntv_connector import NdatasetConnec, SdatasetConnec
 
 #print('package :', __package__)

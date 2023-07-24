@@ -191,7 +191,6 @@ class SfieldConnec(NtvConnector):
         return (value.to_ntv(name=True).to_obj(), name,
                 NfieldConnec.clas_typ if not typ else typ)
 
-
 class NdatasetConnec(NtvConnector):
     '''NTV connector for NTV Dataset data'''
 
@@ -396,8 +395,7 @@ class SeriesConnec(NtvConnector):
         else:
             name_type = ntv_type
             pd_name = ntv_name+'::'+name_type
-            ntv_obj = ntv.to_obj(
-                format='obj', simpleval=True, def_type=ntv_type)
+            ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
             # ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
 
         # calcul de srs
