@@ -8,17 +8,21 @@ The `NTV.ntv_connector` module is part of the `NTV.json_ntv` package ([specifica
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
 It contains :
-    
+
 - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
 - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
-    - `IindexConnec`:    'field' connector 
-    - `IlistConnec`:     'tab' connector 
-    - `DataFrameConnec`: 'tab' connector 
-    - `SeriesConnec`:    'field' connector 
-    - `MermaidConnec`:   '$mermaid' connector 
-    - `ShapelyConnec`:   'geometry' connector 
+    - `IindexConnec`:    'field' connector
+    - `IlistConnec`:     'tab' connector
+    - `SfieldConnec`:    'field' connector
+    - `SdatasetConnec`:  'tab' connector
+    - `NfieldConnec`:    'field' connector
+    - `NdatasetConnec`:  'tab' connector
+    - `DataFrameConnec`: 'tab' connector
+    - `SeriesConnec`:    'field' connector
+    - `MermaidConnec`:   '$mermaid' connector
+    - `ShapelyConnec`:   'geometry' connector
     - `CborConnec`:      '$cbor' connector
-    
+
 """
 import datetime
 import csv
@@ -27,17 +31,18 @@ import pandas as pd
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
 
+
 def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     ''' return a 'tab' NtvSingle from a csv file
-    
+
     *parameters*
-    
+
     - **file_name** : name of the csv file
     - **single_tab** : boolean (default True) - if True return a 'tab' NtvSingle,
     else return a NtvSet.
     - **dialect, fmtparams** : parameters of csv.DictReader object'''
     with open(file_name, newline='') as csvfile:
-        reader = csv.DictReader(csvfile, dialect='excel', **fmtparams)
+        reader = csv.DictReader(csvfile, dialect=dialect, **fmtparams)
         names = reader.fieldnames
         list_ntv_value = [[] for nam in names]
         for row in reader:
@@ -45,20 +50,21 @@ def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
                 list_ntv_value[ind_field].append(json.loads(val))
     list_ntv = []
     for ind_field, field in enumerate(names):
-        list_ntv.append(NtvList(list_ntv_value[ind_field], *Ntv.from_obj_name(field)[:2]))
+        list_ntv.append(
+            NtvList(list_ntv_value[ind_field], *Ntv.from_obj_name(field)[:2]))
     if single_tab:
         return NtvSingle(NtvList(list_ntv, None, None).to_obj(), None, 'tab')
     return NtvList(list_ntv, None, None)
 
 
-def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *args, **kwds):
+def to_csv(file_name, ntv, *args, restval='', extrasaction='raise', dialect='excel', **kwds):
     ''' convert a 'tab' NtvSingle into csv file and return the file name
-    
+
     *parameters*
-    
+
     - **file_name** : name of the csv file
     - **ntv** : 'tab' NtvSingle to convert
-    - **restval, extrasaction, dialect, args, kwds** : parameters of csv.DictWriter object'''
+    - **args, restval, extrasaction, dialect, kwds** : parameters of csv.DictWriter object'''
     if isinstance(ntv, NtvSingle):
         ntv_set = Ntv.obj(ntv.ntv_value)
     else:
@@ -66,300 +72,436 @@ def to_csv(file_name, ntv, restval='', extrasaction='raise', dialect='excel', *a
     list_ntv = [Ntv.obj(field) for field in ntv_set]
     fieldnames = [ntv_field.json_name(string=True) for ntv_field in list_ntv]
     with open(file_name, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval=restval, extrasaction=extrasaction, 
-                                dialect=dialect, *args, **kwds)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval=restval,
+                                extrasaction=extrasaction, dialect=dialect, *args, **kwds)
         writer.writeheader()
         for i in range(len(list_ntv[0])):
             writer.writerow({name: field_ntv[i].to_obj(field_ntv.ntv_type, encoded=True)
                              for name, field_ntv in zip(fieldnames, list_ntv)})
     return file_name
 
+
 class ShapelyConnec(NtvConnector):
     '''NTV connector for geographic location'''
-    
+
     clas_obj = 'geometry'
+    clas_typ = 'geometry'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert ntv_value into a shapely geometry object defined by 'type_geo'.
+
+        *Parameters*
+
+        - **type_geo** : type of geometry (point, multipoint, line, multiline',
+        polygon, multipolygon)
+        - **ntv_value** : array - coordinates'''
         from shapely import geometry
         return geometry.shape({"type": kwargs['type_geo'],
                                "coordinates": ntv_value})
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, '', Ntv._listed(self.__geo_interface__['coordinates']))
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert NTV object (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - NTV type of geometry (point, multipoint,
+        line, multiline', polygon, multipolygon),
+        - **name** : string (default None) - name of the NTV object
+        - **value** : shapely geometry'''
+        return (Ntv._listed(value.__geo_interface__['coordinates']), name, typ)
+
 
 class CborConnec(NtvConnector):
-    '''NTV connector for Iindex'''
-    
+    '''NTV connector for binary data'''
+
     clas_obj = 'bytes'
+    clas_typ = '$cbor'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a binary CBOR object (no parameters).'''
         import cbor2
         return cbor2.dumps(ntv_value, datetime_as_timestamp=True,
                            timezone=datetime.timezone.utc, canonical=False,
                            date_as_datetime=True)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert NTV binary object (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : binary data'''
         import cbor2
-        return (None, '', cbor2.loads(self))
+        return (cbor2.loads(value), name, typ)
+
 
 class NfieldConnec(NtvConnector):
-    '''NTV connector for Iindex'''
-    
+    '''NTV connector for NTV Field data'''
+
     clas_obj = 'Nfield'
+    clas_typ = 'field'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a NTV Field object (no parameters).'''
         from observation.fields import Nfield
         ntv = Ntv.obj(ntv_value)
         return Nfield.from_ntv(ntv)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'field', self.to_ntv(name=True).to_obj())
-    
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert NTV Field object (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : NTV Field values (default format)'''
+        return (value.to_ntv(name=True).to_obj(), name,
+                NfieldConnec.clas_typ if not typ else typ)
+
+
 class SfieldConnec(NtvConnector):
-    '''NTV connector for Iindex'''
-    
+    '''NTV connector for simple Field data'''
+
     clas_obj = 'Sfield'
+    clas_typ = 'field'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a simple Field object (no parameters).'''
         from observation.fields import Sfield
         ntv = Ntv.obj(ntv_value)
         return Sfield.from_ntv(ntv)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'field', self.to_ntv(name=True).to_obj())
-    
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert simple Field object (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : simple Field values (default format)'''
+        return (value.to_ntv(name=True).to_obj(), name,
+                NfieldConnec.clas_typ if not typ else typ)
+
+
 class NdatasetConnec(NtvConnector):
-    '''NTV connector for Ndataset'''
-    
+    '''NTV connector for NTV Dataset data'''
+
     clas_obj = 'Ndataset'
+    clas_typ = 'tab'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a NTV Dataset object (no parameters).'''
         from observation.datasets import Ndataset
-        
+
         ntv = Ntv.obj(ntv_value)
         return Ndataset.from_ntv(ntv)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'tab', self.to_ntv().to_obj())
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert NTV Dataset object (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : NTV Dataset values'''
+        return (value.to_ntv().to_obj(), name,
+                NdatasetConnec.clas_typ if not typ else typ)
+
 
 class SdatasetConnec(NtvConnector):
-    '''NTV connector for Sdataset'''
-    
+    '''NTV connector for simple Dataset data'''
+
     clas_obj = 'Sdataset'
+    clas_typ = 'tab'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a simple Dataset object (no parameters).'''
         from observation.datasets import Sdataset
-        
+
         ntv = Ntv.obj(ntv_value)
         return Sdataset.from_ntv(ntv)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'tab', self.to_ntv().to_obj())
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert simple Dataset object (value, name, type) into NTV json
+        (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : simple Dataset values'''
+        return (value.to_ntv().to_obj(), name,
+                SdatasetConnec.clas_typ if not typ else typ)
+
 
 class IindexConnec(NtvConnector):
     '''NTV connector for Iindex'''
-    
+
     clas_obj = 'Iindex'
+    clas_typ = 'field'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
+    def to_obj_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         from observation import Iindex
         ntv = Ntv.obj(ntv_value)
         return Iindex.from_ntv(ntv)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'field', self.to_ntv(name=True).to_obj())
-    
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert object into the NTV entity (json-value, name, type).'''
+        return (value.to_ntv(name=True).to_obj(), name,
+                IindexConnec.clas_typ if not typ else typ)
+
+
 class IlistConnec(NtvConnector):
     '''NTV connector for Ilist'''
-    
+
     clas_obj = 'Ilist'
+    clas_typ = 'tab'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
+    def to_obj_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into the return object'''
         from observation import Ilist
         ntv = Ntv.obj(ntv_value)
         return Ilist.from_ntv(ntv)
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
-        return (None, 'tab', self.to_ntv().to_obj())
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert object into the NTV entity (json-value, name, type).'''
+        return (value.to_ntv().to_obj(), name,
+                IlistConnec.clas_typ if not typ else typ)
 
 
 class DataFrameConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
 
     clas_obj = 'DataFrame'
+    clas_typ = 'tab'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
-        ntv = Ntv.obj(ntv_value)
-        leng = max([len(ntvi) for ntvi in ntv.ntv_value])
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a DataFrame.
+
+        *Parameters*
+
+        - **index** : list (default None) - list of index values,
+        - **alias** : boolean (default False) - if True dtype alias else default dtype
+        - **annotated** : boolean (default False) - if True, NTV names are not included.'''
+        #ntv = Ntv.obj(ntv_value)
+        ntv = Ntv.fast(ntv_value)
+        leng = max(len(ntvi) for ntvi in ntv.ntv_value)
         option = kwargs | {'leng': leng}
-        list_series = [SeriesConnec.from_ntv(d, **option) for d in ntv]
-        df = pd.DataFrame({ser.name: ser for ser in list_series})
-        if 'index' in df.columns:
-            df = df.set_index('index')
-            df.index.rename(None, inplace=True)
-        return df
+        list_series = [SeriesConnec.to_obj_ntv(d, **option) for d in ntv]
+        dfr = pd.DataFrame({ser.name: ser for ser in list_series})
+        if 'index' in dfr.columns:
+            dfr = dfr.set_index('index')
+            dfr.index.rename(None, inplace=True)
+        return dfr
 
-    def to_ntv(self):
-        ''' convert object into the NTV entity (name, type, value)'''
-        df2 = self.reset_index()
-        #js = NtvList([SeriesConnec.to_ntv(df2[col])[2] for col in df2.columns]).to_obj()
-        js = Ntv.obj([SeriesConnec.to_ntv(df2[col])[2] for col in df2.columns]).to_obj()
-        return (None, 'tab', js) 
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert a DataFrame (value, name, type) into NTV json (json-value, name, type).
 
-    def to_listidx(self):
-        ''' convert object in dataset parameters '''
-        listidx = []
-        for name, idx in self.astype('category').items():
-            lis = list(idx.cat.categories)
-            if lis and isinstance(lis[0], pd._libs.tslibs.timestamps.Timestamp):
-                lis = [ts.to_pydatetime().astimezone(datetime.timezone.utc)
-                       for ts in lis]
-            listidx.append({'codec': lis, 'name': name, 'keys': list(idx.cat.codes)})
-        return (listidx, len(self))
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : DataFrame values'''
+        df2 = value.reset_index()
+        jsn = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0]
+                     for col in df2.columns]).to_obj()
+        return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
+
+    @staticmethod
+    def to_listidx(dtf):
+        ''' convert a DataFrame in categorical data (list of dict for each column
+        with keys : 'codec', 'name, 'keys' and length of the DataFrame)'''
+        return ([SeriesConnec.to_idx(ser) for name, ser in dtf.items()], len(dtf))
 
 
 class SeriesConnec(NtvConnector):
     '''NTV connector for pandas Series'''
-    
+
     clas_obj = 'Series'
+    clas_typ = 'field'
+
     types = pd.DataFrame(
-        {'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime',  
-                       'int32', 'int64', 'float64', 'array', 'boolean'], 
-         'name_type': [None, None, None, None, None, 
-                       None, 'int64', 'float64', 'array', 'boolean'], 
+        {'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime',
+                       'int32', 'int64', 'float64', 'array', 'boolean'],
+         'name_type': [None, None, None, None, None,
+                       None, 'int64', 'float64', 'array', 'boolean'],
          'dtype': ['timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
                    'Int32', 'Int64', 'Float64', 'object', 'boolean']})
-    astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32', 
+    astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
               'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'}
-    deftype = { val: key for key, val in astype.items()}
-    
+    deftype = {val: key for key, val in astype.items()}
+
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
-        option = {'index':None, 'leng':None, 'alias':False, 
-                  'annotated':False} | kwargs 
+    def to_obj_ntv(ntv_value, **kwargs):
+        ''' convert json ntv_value into a Series.
+
+        *Parameters*
+
+        - **index** : list (default None) - list of index values,
+        - **leng** : integer (default None) - leng of the series
+        - **alias** : boolean (default False) - if True dtype alias else default dtype
+        - **annotated** : boolean (default False) - if True, NTV names are not included.'''
+        option = {'index': None, 'leng': None, 'alias': False,
+                  'annotated': False} | kwargs
         types = SeriesConnec.types
         astype = SeriesConnec.astype
         deftype = SeriesConnec.deftype
-        ntv = Ntv.obj(ntv_value)
+        #ntv = Ntv.obj(ntv_value)
+        ntv = Ntv.fast(ntv_value)
         ntv_name = ntv.name
-        codes = len(ntv) == 2 and len(ntv[1]) > 1 # categorical
+        codes = len(ntv) == 2 and len(ntv[1]) > 1  # categorical
         if codes:
-            cod = ntv[1].to_obj(simpleval=True)
+            cod = ntv[1].to_obj(simpleval=True, fast=True)
+            #cod = ntv[1].to_obj(simpleval=True)
             ntv = ntv[0]
         ntv_type = ntv.type_str if ntv.type_str != 'json' else ''
         pd_convert = ntv_type in types['ntv_type'].values or ntv_type == ''
         dtype = 'object'
-        if pd_convert: #pandas conversion
-            dtype = types.set_index('ntv_type').loc[ntv_type]['dtype'] if ntv_type != '' else None
-           
+        if pd_convert:  # pandas conversion
+            dtype = types.set_index(
+                'ntv_type').loc[ntv_type]['dtype'] if ntv_type != '' else None
+
         # calcul name_type, pd_name, ntv_obj
         if pd_convert:
-            name_type = types.set_index('ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            name_type = types.set_index(
+                'ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
             pd_name = ntv_name + '::' + name_type if name_type else ntv_name
             pd_name = pd_name if pd_name else None
             if name_type == 'array':
                 ntv_obj = ntv.to_obj(format='obj', simpleval=True)
             else:
                 ntv_obj = ntv.obj_value(simpleval=option['annotated'],
-                                     json_array=False, def_type=ntv.type_str)
-                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else  [ntv_obj]
-        else:    
+                                        json_array=False, def_type=ntv.type_str)
+                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
+        else:
             name_type = ntv_type
             pd_name = ntv_name+'::'+name_type
-            ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
-        
-        # calcul de sr
+            ntv_obj = ntv.to_obj(
+                format='obj', simpleval=True, def_type=ntv_type)
+            # ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
+
+        # calcul de srs
         if codes:
             if pd_convert and name_type != 'array':
-                categories = pd.read_json(json.dumps(ntv_obj), dtype=dtype, typ='series')
+                categories = pd.read_json(json.dumps(
+                    ntv_obj), dtype=dtype, typ='series')
                 cat_type = categories.dtype.name
                 categories = categories.astype(astype.get(cat_type, cat_type))
             else:
                 categories = pd.Series(ntv_obj, dtype='object')
             cat = pd.CategoricalDtype(categories=categories)
             data = pd.Categorical.from_codes(codes=cod, dtype=cat)
-            sr = pd.Series(data, name=pd_name, index=option['index'] , dtype='category')
-        else:   
-            data = ntv_obj * option['leng'] if len(ntv) == 1 and option['leng'] else ntv_obj
+            srs = pd.Series(data, name=pd_name,
+                           index=option['index'], dtype='category')
+        else:
+            data = ntv_obj * \
+                option['leng'] if len(ntv) == 1 and option['leng'] else ntv_obj
             if pd_convert:
-                sr = pd.read_json(json.dumps(data), dtype=dtype, typ='series').rename(pd_name)
+                srs = pd.read_json(json.dumps(data), dtype=dtype,
+                                  typ='series').rename(pd_name)
             else:
-                sr = pd.Series(data, name=pd_name, dtype=dtype) 
-        
+                srs = pd.Series(data, name=pd_name, dtype=dtype)
+
         if option['alias']:
-            return sr.astype(astype.get(sr.dtype.name, sr.dtype.name))
-        return sr.astype(deftype.get(sr.dtype.name, sr.dtype.name))
-    
-    @staticmethod 
-    def _ntv_type_val(name_type, sr):
+            return srs.astype(astype.get(srs.dtype.name, srs.dtype.name))
+        return srs.astype(deftype.get(srs.dtype.name, srs.dtype.name))
+
+    @staticmethod
+    def _ntv_type_val(name_type, srs):
+        ''' convert a simple Series into (NTV type, NTV json-value). If name_type is None and
+        dtype is 'object', the NTV value is the srs values.
+
+        *Parameters*
+
+        - **name_type** : string - NTV type to be used. If None, dtype is converted in NTV type,
+        - **srs** : Series to be converted.'''
         types = SeriesConnec.types
-        dtype = sr.dtype.name
+        dtype = srs.dtype.name
         if not name_type:
             types_none = types.set_index('name_type').loc[None]
             if dtype in types_none.dtype.values:
                 ntv_type = types_none.set_index('dtype').loc[dtype].ntv_type
             else:
                 ntv_type = 'json'
-            ntv_value = json.loads(sr.to_json(orient='records', date_format='iso', default_handler=str))
+            ntv_value = json.loads(srs.to_json(
+                orient='records', date_format='iso', default_handler=str))
         else:
             ntv_type = name_type
             if dtype == 'object':
-                ntv_value = sr.to_list()   
+                ntv_value = srs.to_list()
             else:
-                ntv_value = json.loads(sr.to_json(orient='records', date_format='iso', default_handler=str))
+                ntv_value = json.loads(srs.to_json(
+                    orient='records', date_format='iso', default_handler=str))
         return (ntv_type, ntv_value)
-    
-    def to_ntv(self):
-        ''' convert object into the NTV entity'''
+
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert a Series (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : DataFrame values'''
         astype = SeriesConnec.astype
         ntv_type_val = SeriesConnec._ntv_type_val
-        sr = self.astype(astype.get(self.dtype.name, self.dtype.name))
-        sr_name = sr.name if sr.name else ''
+        srs = value.astype(astype.get(value.dtype.name, value.dtype.name))
+        sr_name = srs.name if srs.name else ''
         ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
-        if sr.dtype.name == 'category':
-            cdc = pd.Series(sr.cat.categories)  
+        if srs.dtype.name == 'category':
+            cdc = pd.Series(srs.cat.categories)
             ntv_type, cat_value = ntv_type_val(name_type, cdc)
             cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
-            ntv_value = [cat_value, NtvList(list(sr.cat.codes))]
+            #cat_value = Ntv.obj_ntv(cat_value, '', ntv_type, False)
+            ntv_value = [cat_value, list(srs.cat.codes)]
+            #ntv_value = [cat_value, NtvList(list(sr.cat.codes))]
             ntv_type = 'json'
         else:
-            ntv_type, ntv_value = ntv_type_val(name_type, sr)
-        return (None, 'field', NtvList(ntv_value, ntv_name, ntv_type).to_obj())
+            ntv_type, ntv_value = ntv_type_val(name_type, srs)
+        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name,
+                SeriesConnec.clas_typ if not typ else typ)
+        # return (Ntv.obj_ntv(ntv_value, ntv_name, ntv_type, False), name,
+        # SeriesConnec.clas_typ if not typ else typ)
+
+    @staticmethod
+    def to_idx(ser):
+        ''' convert a Series in categorical data '''
+        idx = ser.astype('category')
+        lis = list(idx.cat.categories)
+        if lis and isinstance(lis[0], pd._libs.tslibs.timestamps.Timestamp):
+            lis = [ts.to_pydatetime().astimezone(datetime.timezone.utc)
+                   for ts in lis]
+        return {'codec': lis, 'name': ser .name, 'keys': list(idx.cat.codes)}
+
 
 class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
 
     clas_obj = 'Mermaid'
+    clas_typ = '$mermaid'
 
     @staticmethod
-    def from_ntv(ntv_value, **kwargs):
+    def to_obj_ntv(ntv_value, **kwargs):
         ''' convert ntv_value into a mermaid flowchart
 
         *Parameters*
@@ -370,13 +512,11 @@ class MermaidConnec(NtvConnector):
         - **row**: Boolean (default False) - if True, add the node row
         - **leaves**: Boolean (default False) - if True, add the leaf row
         '''
-        #from json_ntv.json_mermaid import diagram
         from base64 import b64encode
         from IPython.display import Image, display
-        #from json_ntv.ntv_connector import MermaidConnec
 
-        option = {'title':'', 'disp':False, 'row':False, 
-                  'leaves':False} | kwargs 
+        option = {'title': '', 'disp': False, 'row': False,
+                  'leaves': False} | kwargs
         diagram = MermaidConnec.diagram
         link = MermaidConnec._mermaid_link
         ntv = Ntv.obj(ntv_value)
@@ -400,7 +540,7 @@ class MermaidConnec(NtvConnector):
     def diagram(json_diag):
         '''create a mermaid code from a mermaid json'''
         ntv = Ntv.obj(json_diag)
-        erdiagram = MermaidConnec._erDiagram
+        erdiagram = MermaidConnec._er_diagram
         flowchart = MermaidConnec._flowchart
         diag_type = ntv.type_str[1:]
         diag_txt = '---\ntitle: ' + ntv.name + '\n---\n' if ntv.name else ''
@@ -451,46 +591,48 @@ class MermaidConnec(NtvConnector):
 
     @staticmethod
     def _flowchart(ntv):
-        orientation  = {'top-down' : 'TD', 'top-bottom' : 'TB','bottom-top': 'BT', 'right-left': 'RL', 'left-right': 'LR'}
-        fcnode = MermaidConnec._fcNode
-        fclink = MermaidConnec._fcLink
-        fc = Ntv.obj(ntv.val)
-        diag_txt = ' ' + orientation[fc['orientation'].val]
-        for node in fc['node']:
+        orientation = {'top-down': 'TD', 'top-bottom': 'TB',
+                       'bottom-top': 'BT', 'right-left': 'RL', 'left-right': 'LR'}
+        fcnode = MermaidConnec._fc_node
+        fclink = MermaidConnec._fc_link
+        flc = Ntv.obj(ntv.val)
+        diag_txt = ' ' + orientation[flc['orientation'].val]
+        for node in flc['node']:
             diag_txt += fcnode(node)
-        for link in fc['link']:
+        for link in flc['link']:
             diag_txt += fclink(link)
-        return diag_txt + '\n'    
+        return diag_txt + '\n'
 
     @staticmethod
-    def _fcLink(link):
-        link_t  = {'normal' : ' ---', 'normalarrow': ' -->', 'dotted': ' -.-', 'dottedarrow': ' -.->'}
+    def _fc_link(link):
+        link_t = {'normal': ' ---', 'normalarrow': ' -->',
+                  'dotted': ' -.-', 'dottedarrow': ' -.->'}
         link_txt = '\n    ' + str(link[0].val) + link_t[link[1].val]
         if len(link) == 4:
             link_txt += '|' + link[3].val + '|'
         return link_txt + ' ' + str(link[2].val)
 
     @staticmethod
-    def _fcNode(node):
-        shape_l  = {'rectangle' : '[', 'roundedge': '(', 'stadium': '(['}
-        shape_r  = {'rectangle' : ']', 'roundedge': ')', 'stadium': '])'}
+    def _fc_node(node):
+        shape_l = {'rectangle': '[', 'roundedge': '(', 'stadium': '(['}
+        shape_r = {'rectangle': ']', 'roundedge': ')', 'stadium': '])'}
         return '\n    ' + node.name + shape_l[node[0].val] + '"' + \
                node[1].val.replace('"', "'") + '"' + shape_r[node[0].val]
 
     @staticmethod
-    def _erDiagram(ntv):
-        erentity = MermaidConnec._erEntity
-        errelation = MermaidConnec._erRelation
+    def _er_diagram(ntv):
+        erentity = MermaidConnec._er_entity
+        errelation = MermaidConnec._er_relation
         diag_txt = ''
-        er = Ntv.obj(ntv.val)
-        for entity in er['entity']:
+        erd = Ntv.obj(ntv.val)
+        for entity in erd['entity']:
             diag_txt += erentity(entity)
-        for relation in er['relationship']:
+        for relation in erd['relationship']:
             diag_txt += errelation(relation)
         return diag_txt
 
     @staticmethod
-    def _erEntity(entity):
+    def _er_entity(entity):
         ent_txt = '\n    ' + entity.name + ' {'
         for att in entity:
             ent_txt += '\n        ' + att[0].val + ' ' + att[1].val
@@ -504,11 +646,14 @@ class MermaidConnec(NtvConnector):
         return ent_txt + '\n    }'
 
     @staticmethod
-    def _erRelation(rel):
-        rel_left  = {'exactly one' : ' ||', 'zero or one': ' |o', 'zero or more': ' }o', 'one or more': ' }|'}
-        rel_right = {'exactly one' : '|| ', 'zero or one': 'o| ', 'zero or more': 'o{ ', 'one or more': '|{ '}
-        identif   = {'identifying' : '--', 'non-identifying' : '..'}
-        rel_txt = '\n    ' + rel[0].val + rel_left[rel[1].val] + identif[rel[2].val] + rel_right[rel[3].val] + rel[4].val
+    def _er_relation(rel):
+        rel_left = {'exactly one': ' ||', 'zero or one': ' |o',
+                    'zero or more': ' }o', 'one or more': ' }|'}
+        rel_right = {'exactly one': '|| ', 'zero or one': 'o| ',
+                     'zero or more': 'o{ ', 'one or more': '|{ '}
+        identif = {'identifying': '--', 'non-identifying': '..'}
+        rel_txt = '\n    ' + rel[0].val + rel_left[rel[1].val] + \
+            identif[rel[2].val] + rel_right[rel[3].val] + rel[4].val
         if len(rel) > 5:
             rel_txt += ' : ' + rel[5].val
         return rel_txt
