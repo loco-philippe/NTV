@@ -298,8 +298,7 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertNotEqual(Ntv.obj({':': NtvSingle(1, 'test')}), Ntv.obj(NtvSingle(1, 'test')))
 
         dictstr2 = [
-                   ['NtvSingle', {':': NtvSingle(1, 'test')}, {
-                       ':ntv': {'test': 1}}],
+                   ['NtvSingle', {':': NtvSingle(1, 'test')}, {':ntv': {'test': 1}}],
                    ['NtvSingle', {'set': NtvList([{'l1': 21}, {'l2': [2, 3]}])},
                     #{'set:ntv': {'l1': 21, 'l2': [2, 3]}}],
                     {'set:ntv': {'l1': 21, 'l2:': [2, 3]}}],
@@ -342,6 +341,8 @@ class Test_Ntv_creation(unittest.TestCase):
             ntv = Ntv.obj(nstr)
             ntvf = Ntv.fast(nstr).to_json_ntv()
             #print('ap', nstr, typ)
+            #print(ntv, ntv.val, ntv.name, ntv.type_str)
+            #print(Ntv.obj(Ntv.to_obj(ntv)))
             self.assertTrue(ntv.__class__.__name__ == typ)
             self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
             self.assertEqual(ntv, ntvf)
@@ -580,12 +581,18 @@ class Test_NtvConnector(unittest.TestCase):
         with self.assertRaises(NtvError):
             is_json({'tst':[1, 2, 'test', None, True, {'test': NtvTree(None)}, [1, 'tst']]})
 
-    def test_uncast_typ(self):
+    def test_cast_uncast(self):
         self.assertEqual(NtvConnector._typ_obj([21, ['ser', 25],
                          [datetime.date(2020, 3, 4), datetime.date(2020, 4, 4)]]),
                          NtvConnector._typ_obj(datetime.date(2020, 3, 4)), 'date')
         self.assertEqual(NtvConnector._typ_obj([21, ['ser', 25],
                          {'a': datetime.date(2020, 3, 4), 'b': datetime.date(2020, 4, 4)}]),
                          NtvConnector._typ_obj(datetime.date(2020, 3, 4)), 'date')        
+
+        list_obj = [datetime.date(2020, 1,1), geometry.point.Point((3, 4)),
+                    datetime.time(10,3,30)]
+        for obj in list_obj:
+            self.assertEqual(obj, NtvConnector.uncast(*NtvConnector.cast(obj))[0])
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

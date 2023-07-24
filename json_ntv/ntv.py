@@ -607,8 +607,7 @@ class Ntv(ABC):
         value = {} if not value else value
         name = '' if not name else name
         typ = '' if not typ else typ
-        ntv_list = isinstance(value, dict) and len(
-            value) != 1 or isinstance(value, list)
+        ntv_list = len(value) != 1 if isinstance(value, dict) else isinstance(value, list)
         if not single and not ntv_list:
             raise NtvError(
                 'the value is not compatible with not single NTV data')
@@ -622,7 +621,10 @@ class Ntv(ABC):
         ''' create a copy where ntv-value is converted in json-value'''
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
-            if not leaf.is_json:
+            if isinstance(leaf.ntv_value, (NtvSingle, NtvList)):
+                leaf.ntv_value = leaf.ntv_value.to_obj()
+                leaf.ntv_type = NtvType('ntv')
+            elif not leaf.is_json:
                 leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.cast(
                     leaf.ntv_value, leaf.ntv_name, leaf.type_str)
                 leaf.ntv_type = NtvType.add(type_str)
@@ -822,6 +824,10 @@ class NtvSingle(Ntv):
             elif isinstance(ntv_value, (dict)):
                 ntv_value = {key: NtvSingle._decode_s(val, '', ntv_type)[
                     0] for key, val in ntv_value.items()}
+        elif isinstance(ntv_value, NtvSingle):
+            ntv_value = ntv_value.to_obj()
+            return (ntv_value, ntv_name, 'ntv')
+
         else:
             ntv_value, name, typ = NtvConnector.cast(
                 ntv_value, ntv_name, ntv_type)
@@ -1024,7 +1030,7 @@ class NtvTree:
 
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
-    for conversion between NTV data and an object.
+    for conversion between NTV-JSON data and NTV-OBJ data.
 
     *class method :*
     - `connector`
@@ -1032,7 +1038,6 @@ class NtvConnector(ABC):
     - `castable` (@property)
     - `dic_obj` (@property)
     - `dic_type` (@property)
-    
 
     *abstract method*
     - `to_obj_ntv`
@@ -1041,8 +1046,6 @@ class NtvConnector(ABC):
     *static method*
     - `cast`
     - `uncast`
-    - `obj_to_json`
-    - `json_to_obj`
     - `is_json_class`
     - `is_json`
     '''
@@ -1060,11 +1063,12 @@ class NtvConnector(ABC):
     DIC_CBOR = {'point': False, 'multipoint': False, 'line': False,
                 'multiline': False, 'polygon': False, 'multipolygon': False,
                 'date': True, 'time': False, 'datetime': True}
-    DIC_OBJ = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',              
+    DIC_OBJ = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',
                'point': 'ShapelyConnec', 'multipoint': 'ShapelyConnec',
                'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
                'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
                'other': None}
+
     @classmethod
     @property
     def castable(cls):
@@ -1078,40 +1082,54 @@ class NtvConnector(ABC):
     @classmethod
     @property
     def dic_obj(cls):
-        '''return a dict with the connectors: { type: class }'''
+        '''return a dict with the connectors: { type: class_connec_name }'''
         return {clas.clas_typ: clas.__name__ for clas in cls.__subclasses__()} |\
             NtvConnector.DIC_OBJ
-            
+
     @classmethod
     @property
     def dic_type(cls):
-        '''return a dict with the connectors: { clas_obj: type }'''
+        '''return a dict with the connectors: { class_obj_name: type }'''
         return {clas.clas_obj: clas.clas_typ for clas in cls.__subclasses__()} |\
             NtvConnector.DIC_GEO_CL | NtvConnector.DIC_DAT_CL | NtvConnector.DIC_NTV_CL
 
     @classmethod
     def connector(cls):
-        '''return a dict with the connectors: { name: class }'''
+        '''return a dict with the connectors: { class_connec_name: class_connec }'''
         return {clas.__name__: clas for clas in cls.__subclasses__()}
 
     @classmethod
     def dic_connec(cls):
         '''return a dict with the clas associated to the connector:
-        { clas_obj: classconnector }'''
+        { class_obj_name: class_connec_name }'''
         return {clas.clas_obj: clas.__name__ for clas in cls.__subclasses__()}
 
     @staticmethod
     @abstractmethod
     def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
+        ''' abstract - convert ntv_value into the return object'''
 
+    @staticmethod
     @abstractmethod
-    def to_json_ntv(self):
-        ''' convert object into the NTV entity (name, type, json-value)'''
+    def to_json_ntv(value, name=None, typ=None):
+        ''' abstract - convert NTV object (value, name, type) into the NTV json
+        (json-value, name, type)'''
 
     @staticmethod
     def cast(data, name=None, type_str=None):
-        '''return (json_value, name, type_str) of the data'''
+        '''return JSON-NTV conversion (json_value, name, type_str) of the NTV entity
+        defined in parameters.
+
+        *Parameters*
+
+        - **data**: NtvSingle entity or NTVvalue of the NTV entity
+        - **name** : String (default None) - name of the NTV entity
+        - **type_str**: String (default None) - type of the NTV entity
+        '''
+        if isinstance(data, NtvSingle):
+            name = data.ntv_name
+            type_str = data.type_str
+            data = data.ntv_value
         dic_geo_cl = NtvConnector.DIC_GEO_CL
         dic_connec = NtvConnector.dic_connec()
         clas = data.__class__.__name__
@@ -1141,12 +1159,21 @@ class NtvConnector(ABC):
                 if connec:
                     return connec.to_json_ntv(data, name, type_str)
                 raise NtvError(
-                    'connector is not defined for NTV entity of class : ', clas)
+                    'connector is not defined for the class : ', clas)
         return (data, name, type_str)
 
     @staticmethod
-    def uncast(ntv, **kwargs):
-        '''return object from ntv entity'''
+    def uncast(data, name=None, type_str=None, **kwargs):
+        '''return OBJ-NTV conversion (obj_value, name, type_str) of a NTV entity
+
+        *Parameters*
+
+        - **data**: NtvSingle entity or NTVvalue of the NTV entity
+        - **name** : String (default None) - name of the NTV entity
+        - **type_str**: String (default None) - type of the NTV entity
+        '''
+        ntv = data if isinstance(data, NtvSingle) else NtvSingle(
+            data, name, type_str, True)
         if not (ntv.is_json and ntv.type_str in set(NtvConnector.dic_type.values())
                 or ntv.ntv_type is None) and isinstance(ntv, NtvSingle):
             return (ntv.ntv_value, ntv.name, ntv.type_str)
@@ -1169,19 +1196,16 @@ class NtvConnector(ABC):
                 if typ:
                     return typ
             return None
-        try:
-            return NtvConnector.dic_type[value.__class__.__name__]
-        except:
-            return None
+        return NtvConnector.dic_type.get(value.__class__.__name__)
 
     @staticmethod
     def _uncast_val(value, type_n, **option):
         '''return value from ntv value'''
-        dic_fct  = NtvConnector.DIC_FCT
-        dic_geo  = NtvConnector.DIC_GEO
-        dic_obj  = NtvConnector.dic_obj
+        dic_fct = NtvConnector.DIC_FCT
+        dic_geo = NtvConnector.DIC_GEO
+        dic_obj = NtvConnector.dic_obj
         dic_cbor = NtvConnector.DIC_CBOR
-        if not type_n or (option['format'] == 'cbor' and not dic_cbor.get(type_n, False)) :
+        if not type_n or (option['format'] == 'cbor' and not dic_cbor.get(type_n, False)):
             return value
         if type_n in dic_fct:
             if isinstance(value, (tuple, list)):
@@ -1208,38 +1232,6 @@ class NtvConnector(ABC):
         # return value
 
     @staticmethod
-    def obj_to_json(obj, complete=True):
-        '''conversion from an object to json or NTV object.
-
-        *Parameters*
-
-        - **complete** : Boolean (default True) - if True, return a NTV object with a type,
-        if False, return Json object without type
-        '''
-        if complete:
-            return Ntv.obj(obj)
-        return NtvConnector.cast(obj)[0]
-
-    @staticmethod
-    def json_to_obj(jsn, complete=True, class_name=None):
-        '''conversion from a json or NTV object to an object.
-
-        *Parameters*
-
-        - **complete** : Boolean (default True) - if True, the type is included
-        in the json or NTV object
-        - **class_name** : string (default None) - class of the object to create'''
-        ntv = Ntv.obj(jsn)
-        ntv_type = ntv.type_str if complete else 'object'
-        ntv.set_type(ntv_type)
-        if class_name:
-            connector = NtvConnector.dic_connec()[class_name]
-            option = {'format': 'obj', 'dicobj': {ntv_type: connector}}
-        else:
-            option = {'format': 'obj'}
-        return NtvConnector.uncast(ntv, **option)
-
-    @staticmethod
     def is_json_class(val):
         ''' return True if val is a json type'''
         return val is None or isinstance(val, (list, int, str, float, bool, dict))
@@ -1261,13 +1253,13 @@ class NtvConnector(ABC):
             case list() | tuple() as obj:
                 if not obj:
                     return True
-                return min([is_js(obj_in) for obj_in in obj])
+                return min(is_js(obj_in) for obj_in in obj)
             case dict() as obj:
                 if not obj:
                     return True
-                if not min([isinstance(key, str) for key in obj.keys()]):
+                if not min(isinstance(key, str) for key in obj.keys()):
                     raise NtvError('key in dict in not string')
-                return min([is_js(obj_in) for obj_in in obj.values()])
+                return min(is_js(obj_in) for obj_in in obj.values())
             case _:
                 if not obj.__class__.__name__ in NtvConnector.castable:
                     raise NtvError(obj.__class__.__name__ +
@@ -1281,7 +1273,7 @@ class NtvJsonEncoder(json.JSONEncoder):
     def default(self, o):
         try:
             return NtvConnector.cast(o)[0]
-        except:
+        except NtvError:
             return json.JSONEncoder.default(self, o)
         if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
             return o.isoformat()
