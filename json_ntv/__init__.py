@@ -21,10 +21,10 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv.Ntv` (abstract class)
     
 - `NTV.json_ntv.ntv_util` :
-    - `NTV.json_ntv.ntv.NtvTree`
-    - `NTV.json_ntv.ntv.NtvJsonEncoder`
-    - `NTV.json_ntv.ntv.NtvError`
-    - `NTV.json_ntv.ntv.NtvConnector` (abstract class)    
+    - `NTV.json_ntv.ntv_util.NtvTree`
+    - `NTV.json_ntv.ntv_util.NtvJsonEncoder`
+    - `NTV.json_ntv.ntv_util.NtvError`
+    - `NTV.json_ntv.ntv_util.NtvConnector` (abstract class)    
           
 - `NTV.json_ntv.ntv_connector` :
     

@@ -168,7 +168,6 @@ class NtvConnector(ABC):
             value = value.ntv_value
         dic_obj = NtvConnector.dic_obj
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
-        dic_obj |= option['dicobj']
         value_obj = NtvConnector._uncast_val(value, type_str, **option)
         return (value_obj, name, type_str if type_str else NtvConnector._typ_obj(value_obj))
 
@@ -189,7 +188,7 @@ class NtvConnector(ABC):
         '''return value from ntv value'''
         dic_fct = NtvConnector.DIC_FCT
         dic_geo = NtvConnector.DIC_GEO
-        dic_obj = NtvConnector.dic_obj
+        dic_obj = NtvConnector.dic_obj | option['dicobj']
         dic_cbor = NtvConnector.DIC_CBOR
         if not type_n or (option['format'] == 'cbor' and not dic_cbor.get(type_n, False)):
             return value
