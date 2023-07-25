@@ -11,8 +11,6 @@ It contains :
 
 - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
 - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
-    - `IindexConnec`:    'field' connector
-    - `IlistConnec`:     'tab' connector
     - `SfieldConnec`:    'field' connector
     - `SdatasetConnec`:  'tab' connector
     - `NfieldConnec`:    'field' connector
@@ -244,46 +242,6 @@ class SdatasetConnec(NtvConnector):
         - **value** : simple Dataset values'''
         return (value.to_ntv().to_obj(), name,
                 SdatasetConnec.clas_typ if not typ else typ)
-
-
-class IindexConnec(NtvConnector):
-    '''NTV connector for Iindex'''
-
-    clas_obj = 'Iindex'
-    clas_typ = 'field'
-
-    @staticmethod
-    def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
-        from observation import Iindex
-        ntv = Ntv.obj(ntv_value)
-        return Iindex.from_ntv(ntv)
-
-    @staticmethod
-    def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (json-value, name, type).'''
-        return (value.to_ntv(name=True).to_obj(), name,
-                IindexConnec.clas_typ if not typ else typ)
-
-
-class IlistConnec(NtvConnector):
-    '''NTV connector for Ilist'''
-
-    clas_obj = 'Ilist'
-    clas_typ = 'tab'
-
-    @staticmethod
-    def to_obj_ntv(ntv_value, **kwargs):
-        ''' convert ntv_value into the return object'''
-        from observation import Ilist
-        ntv = Ntv.obj(ntv_value)
-        return Ilist.from_ntv(ntv)
-
-    @staticmethod
-    def to_json_ntv(value, name=None, typ=None):
-        ''' convert object into the NTV entity (json-value, name, type).'''
-        return (value.to_ntv().to_obj(), name,
-                IlistConnec.clas_typ if not typ else typ)
 
 
 class DataFrameConnec(NtvConnector):

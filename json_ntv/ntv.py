@@ -708,7 +708,6 @@ class Ntv(ABC):
     @staticmethod
     def _decode(json_value):
         '''return (value, name, type, separator, isjson) of the json value'''
-        #is_json = NtvConnector.is_json(json_value)
         if isinstance(json_value, dict) and len(json_value) == 1:
             json_name = list(json_value.keys())[0]
             val = json_value[json_name]
