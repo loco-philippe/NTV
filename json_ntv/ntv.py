@@ -235,8 +235,8 @@ class Ntv(ABC):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
         if sep is None and not isinstance(ntv_value, dict):
-            is_json = isinstance(value, (int, str, float, bool))
-            ntv_type = agreg_type(str_typ, def_type, is_json)
+            is_single_json = isinstance(value, (int, str, float, bool))
+            ntv_type = agreg_type(str_typ, def_type, is_single_json)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
         if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
                                             sep is None):
@@ -708,12 +708,12 @@ class Ntv(ABC):
     @staticmethod
     def _decode(json_value):
         '''return (value, name, type, separator, isjson) of the json value'''
-        is_json = NtvConnector.is_json(json_value)
+        #is_json = NtvConnector.is_json(json_value)
         if isinstance(json_value, dict) and len(json_value) == 1:
             json_name = list(json_value.keys())[0]
             val = json_value[json_name]
             return (val, *Ntv.from_obj_name(json_name), NtvConnector.is_json(val))
-        return (json_value, None, None, None, is_json)
+        return (json_value, None, None, None, NtvConnector.is_json(json_value))
 
     @staticmethod
     def _create_ntvlist(str_typ, def_type, sep, ntv_value, typ_auto, no_typ, ntv_name, fast):
