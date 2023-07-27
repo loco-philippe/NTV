@@ -309,6 +309,27 @@ class SeriesConnec(NtvConnector):
     deftype = {val: key for key, val in astype.items()}
 
     @staticmethod
+    def _val_nam_typ(ntv, ntv_type, ntv_name, pd_convert, types, annotated):
+        # calcul name_type, pd_name, ntv_obj à partir de pd_convert, ntv_type, ntv_name, ntv
+        if pd_convert:
+            name_type = types.set_index(
+                'ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
+            pd_name = pd_name if pd_name else None
+            if name_type == 'array':
+                ntv_obj = ntv.to_obj(format='obj', simpleval=True)
+            else:
+                ntv_obj = ntv.obj_value(simpleval=annotated,
+                                        json_array=False, def_type=ntv.type_str)
+                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
+        else:
+            name_type = ntv_type
+            pd_name = ntv_name+'::'+name_type
+            ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
+            # ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
+        return (ntv_obj, pd_name, name_type)   
+    
+    @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a Series.
 
@@ -322,7 +343,6 @@ class SeriesConnec(NtvConnector):
                   'annotated': False} | kwargs
         types = SeriesConnec.types
         astype = SeriesConnec.astype
-        deftype = SeriesConnec.deftype
         #ntv = Ntv.obj(ntv_value)
         ntv = Ntv.fast(ntv_value)
         ntv_name = ntv.name
@@ -331,32 +351,17 @@ class SeriesConnec(NtvConnector):
             cod = ntv[1].to_obj(simpleval=True, fast=True)
             #cod = ntv[1].to_obj(simpleval=True)
             ntv = ntv[0]
+        len_unique = option['leng'] if len(ntv) == 1 and option['leng'] else 1
         ntv_type = ntv.type_str if ntv.type_str != 'json' else ''
         pd_convert = ntv_type in types['ntv_type'].values or ntv_type == ''
         dtype = 'object'
         if pd_convert:  # pandas conversion
             dtype = types.set_index(
                 'ntv_type').loc[ntv_type]['dtype'] if ntv_type != '' else None
-
-        # calcul name_type, pd_name, ntv_obj
-        if pd_convert:
-            name_type = types.set_index(
-                'ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
-            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-            pd_name = pd_name if pd_name else None
-            if name_type == 'array':
-                ntv_obj = ntv.to_obj(format='obj', simpleval=True)
-            else:
-                ntv_obj = ntv.obj_value(simpleval=option['annotated'],
-                                        json_array=False, def_type=ntv.type_str)
-                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
-        else:
-            name_type = ntv_type
-            pd_name = ntv_name+'::'+name_type
-            ntv_obj = ntv.to_obj(format='obj', simpleval=True, def_type=ntv_type)
-            # ntv_obj = ntv.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
-
-        # calcul de srs
+        ntv_obj, pd_name, name_type = SeriesConnec._val_nam_typ(
+            ntv, ntv_type, ntv_name, pd_convert, types, option['annotated'])
+        
+        # calcul de srs à partir de codes, pd_convert, name_type, ntv_obj, dtype, cod, pd_name, option, len_unique
         if codes:
             if pd_convert and name_type != 'array':
                 categories = pd.read_json(json.dumps(
@@ -370,8 +375,9 @@ class SeriesConnec(NtvConnector):
             srs = pd.Series(data, name=pd_name,
                            index=option['index'], dtype='category')
         else:
-            data = ntv_obj * \
-                option['leng'] if len(ntv) == 1 and option['leng'] else ntv_obj
+            data = ntv_obj * len_unique
+            #data = ntv_obj * \
+            #    option['leng'] if len(ntv) == 1 and option['leng'] else ntv_obj
             if pd_convert:
                 srs = pd.read_json(json.dumps(data), dtype=dtype,
                                   typ='series').rename(pd_name)
@@ -380,7 +386,7 @@ class SeriesConnec(NtvConnector):
 
         if option['alias']:
             return srs.astype(astype.get(srs.dtype.name, srs.dtype.name))
-        return srs.astype(deftype.get(srs.dtype.name, srs.dtype.name))
+        return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
 
     @staticmethod
     def _ntv_type_val(name_type, srs):
