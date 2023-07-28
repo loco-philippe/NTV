@@ -224,8 +224,8 @@ class Ntv(ABC):
         value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
-        #ntv_value, ntv_name, str_typ, sep, is_json = Ntv._decode(value, fast=fast)
-        ntv_value, ntv_name, str_typ, sep, is_json = Ntv._decode(value)
+        #ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value, fast=fast)
+        ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value)
         sep = def_sep if not sep else sep
         if isinstance(ntv_value, list) and sep in (None, '::'):
             return Ntv._create_ntvlist(str_typ, def_type, sep, ntv_value,
@@ -706,8 +706,8 @@ class Ntv(ABC):
         return value
 
     @staticmethod
-    def _decode(json_value):
-        '''return (value, name, type, separator, isjson) of the json value'''
+    def decode_json(json_value):
+        '''return (value, name, type, separator, isjson) of a json object'''
         if isinstance(json_value, dict) and len(json_value) == 1:
             json_name = list(json_value.keys())[0]
             val = json_value[json_name]
@@ -920,11 +920,9 @@ class NtvList(Ntv):
         option = {'encoded': False, 'format': 'json', 'simpleval': False,
                   'json_array': False, 'fast': False, 'maxi': -1} | kwargs
         opt2 = option | {'encoded': False}
-        maxv = len(self.ntv_value) if option['maxi'] < 1 else option['maxi']
-        if self.ntv_type:
-            def_type = self.ntv_type.long_name
+        maxv = len(self.ntv_value) if option['maxi'] < 1 else option['maxi']      
+        def_type = self.ntv_type.long_name if self.ntv_type else def_type
         if self.json_array or option['simpleval'] or option['json_array']:
             return [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value[:maxv]]
-        values = [ntv.to_obj(def_type=def_type, **opt2)
-                  for ntv in self.ntv_value[:maxv]]
+        values = [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value[:maxv]]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}

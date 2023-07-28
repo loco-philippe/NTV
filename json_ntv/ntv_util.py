@@ -217,8 +217,8 @@ class NtvConnector(ABC):
             connec = NtvConnector.connector()['other']
         if connec:
             return connec.to_obj_ntv(value, **option)
-        raise NtvError('type of value not allowed for conversion')
-        # return value
+        #raise NtvError('type of value not allowed for conversion')
+        return value
 
     @staticmethod
     def is_json_class(val):
