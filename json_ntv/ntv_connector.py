@@ -378,7 +378,7 @@ class SeriesConnec(NtvConnector):
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
 
     @staticmethod
-    def to_obj_ntv2(ntv_value=None, extkeys=None, decode_str=False, **kwargs):
+    def to_obj_ntv(ntv_value=None, extkeys=None, decode_str=False, **kwargs):
         '''Generate a Field Object from a Ntv field object'''
         from observation import Sfield
         if ntv_value is None:
@@ -400,7 +400,7 @@ class SeriesConnec(NtvConnector):
                                       name, keys, **kwargs)
         
     @staticmethod
-    def to_obj_ntv(ntv_value, **kwargs):
+    def to_obj_ntv_old(ntv_value, **kwargs):
         ''' convert Ntv entity or json ntv_value into a Series.
 
         *Parameters*
