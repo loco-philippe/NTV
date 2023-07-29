@@ -386,7 +386,7 @@ class SeriesConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value, decode_str=decode_str)
         #ntv = NtvList(ntv_value)
 
-        name, typ, codec, parent, keys, coef, leng = Sfield.decode_ntv(ntv, format='json')
+        name, typ, codec, parent, keys, coef, leng = Sfield.decode_ntv(ntv, fast=True)
         if (parent and not extkeys) or coef:
             return None
         if extkeys and parent:
@@ -395,6 +395,8 @@ class SeriesConnec(NtvConnector):
             keys = extkeys
         #keys = list(range(len(codec))) if keys is None else keys
         #name = ntv.json_name(string=True) if add_type else name
+        #return (Ntv.fast(Ntv.obj_ntv(codec, typ=typ, single=len(codec)==1)),
+        #                              name, keys)
         return SeriesConnec.to_series(Ntv.fast(Ntv.obj_ntv(codec, typ=typ, 
                                                            single=len(codec)==1)),
                                       name, keys, **kwargs)
@@ -517,7 +519,7 @@ class SeriesConnec(NtvConnector):
 
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
-        - **value** : DataFrame values'''
+        - **value** : Series values'''
         astype = SeriesConnec.astype
         ntv_type_val = SeriesConnec._ntv_type_val
         srs = value.astype(astype.get(value.dtype.name, value.dtype.name))
