@@ -594,5 +594,92 @@ class Test_NtvConnector(unittest.TestCase):
         for obj in list_obj:
             self.assertEqual(obj, NtvConnector.uncast(*NtvConnector.cast(obj))[0])
 
+class Test_Pandas_Connector(unittest.TestCase):
+    
+    def test_series(self):
+        import pandas as pd
+        Point = geometry.point.Point
+        
+        # json interface ok
+        srs = [# without ntv_type, without dtype
+               pd.Series([{'a': 2, 'e':4}, {'a': 3, 'e':5}, {'a': 4, 'e':6}]),  
+               pd.Series([[1,2], [3,4], [5,6]]),  
+               pd.Series([[1,2], [3,4], {'a': 3, 'e':5}]),  
+               pd.Series([True, False, True]),
+               pd.Series(['az', 'er', 'cd']),
+               pd.Series([1,2,3]),
+               pd.Series([1.1,2,3]),
+               
+               # without ntv_type, with dtype
+               pd.Series([10,20,30], dtype='Int64'),
+               pd.Series([True, False, True], dtype='boolean'),
+               pd.Series([1,2,3], dtype='Int64'), 
+            
+               # with ntv_type only in json data
+               pd.Series([pd.NaT, pd.NaT, pd.NaT]),
+               pd.Series([datetime.datetime(2022, 1, 1), datetime.datetime(2022, 1, 2)],
+                         dtype='datetime64[ns]'),
+               pd.Series(pd.to_timedelta(['1D', '2D'])),
+               pd.Series([1,2,3], dtype='Int32'), 
+               pd.Series(['az', 'er', 'cd'], dtype='string'), 
+               pd.Series([1,2,3], dtype='UInt64'),
+            
+               # with ntv_type in Series name and in json data
+               pd.Series([1,2,3], name='::int64'),
+               pd.Series([1,2,3], dtype='Float64', name='::float64'), # force dtype dans la conversion json
+               pd.Series([[1,2], [3,4], [5,6]], name='::array'),  
+               pd.Series([None, None, None], name='::null'), 
+               
+               # with ntv_type unknown in pandas
+               pd.Series([datetime.date(2022, 1, 1), datetime.date(2022, 1, 2)], name='::date'),
+               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2)], name='::point'),
+               pd.Series([1,2,3], dtype='object', name='::day')
+        ]
+        for sr in srs:
+            #print(Ntv.obj(sr))
+            self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(format='obj')) or sr.equals(Ntv.obj(sr).to_obj(format='obj', alias=True)))
+            self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
+
+    def test_json_sfield_full(self):
+
+        # json interface ok
+        for a in [{'test::int32': [1,2,3]},
+                  {'test': [1,2,3]},
+                  [1.0, 2.1, 3.0],
+                  ['er', 'et', 'ez'],
+                  [True, False, True],
+                  {'::boolean': [True, False, True]},
+                  {'::string': ['er', 'et', 'ez']},
+                  {'test::float32': [1.0, 2.5, 3.0]},
+                  {'::int64': [1,2,3]},
+                  {'::datetime': ["2021-12-31T23:00:00.000","2022-01-01T23:00:00.000"] },
+                  {'::object': [{'a': 3, 'e':5}, {'a': 4, 'e':6}]},
+                  {'::array': [[1,2], [3,4], [5,6]]}
+                 ]:
+            ntv = Ntv.from_obj({':field': a})
+            #print(ntv)
+            self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
+            
+    def test_json_sfield_default(self):
+
+        # json interface ok (categorical data)
+        for a in [{'test': [{'::int32': [1, 2, 3]}, [0,1,2,0,1]]},
+                  {'test': [[1, 2, 3], [0,1,2,0,1]]},
+                  [[1.0, 2.1, 3.0], [0,1,2,0,1]],
+                  [['er', 'et', 'ez'], [0,1,2,0,1]],
+                  [[True, False], [0,1,0,1,0]],
+                  [{'::string': ['er', 'et', 'ez']}, [0,1,2,0,1]],
+                  {'test':[{'::float32': [1.0, 2.5, 3.0]}, [0,1,2,0,1]]},
+                  [{'::int64': [1, 2, 3]}, [0,1,2,0,1]],
+                  [{'::datetime': ["2021-12-31T23:00:00.000", "2022-01-01T23:00:00.000"] }, [0,1,0,1,0]],
+                  {'test_date': [{'::datetime': ["2021-12-31T23:00:00.000", "2022-01-01T23:00:00.000"] }, [0,1,0,1,0]]},
+                  [{'::boolean': [True, False]}, [0,1,0,1,0]],
+                  {'quantity': [['1 kg', '10 kg'], [4]]}]:  # periodic Series
+            ntv = Ntv.from_obj({':field': a})
+            #print(ntv)
+            self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
+
+                        
 if __name__ == '__main__':
+    
     unittest.main(verbosity=2)

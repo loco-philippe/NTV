@@ -270,7 +270,7 @@ class DataFrameConnec(NtvConnector):
         
         leng = max(len(ntvi) for ntvi in ntv.ntv_value)
         option = kwargs | {'leng': leng}
-        list_series = [SeriesConnec.to_obj_ntv(d, **option) for d in ntv]
+        list_series = [SeriesConnec.to_obj_ntv(d, lengkeys=leng, **option) for d in ntv]
         dfr = pd.DataFrame({ser.name: ser for ser in list_series})
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
@@ -388,10 +388,15 @@ class SeriesConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value, decode_str=decode_str)
 
         name, typ, codec, parent, keys, coef, leng = Sfield.decode_ntv(ntv, fast=True)
+        print(Sfield.decode_ntv(ntv, fast=True))
+        #codec = [codec] if not isinstance(codec, list) else codec
+        print('codec : ', codec)
         if parent and not extkeys:
             return None
         if coef:
             keys = Sfield.keysfromcoef(coef, leng//coef, lengkeys)
+        #elif leng == 1 and lengkeys:
+        #    keys = [0] * lengkeys
         elif extkeys and parent:
             keys = Sfield.keysfromderkeys(extkeys, keys)
         elif extkeys and not parent:
