@@ -26,6 +26,7 @@ import datetime
 import csv
 import json
 import pandas as pd
+import numpy as np
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
 #from observation import Sfield
@@ -262,12 +263,6 @@ class DataFrameConnec(NtvConnector):
         - **annotated** : boolean (default False) - if True, NTV names are not included.'''
         #ntv = Ntv.obj(ntv_value)
         ntv = Ntv.fast(ntv_value)
-        
-        '''value, ntv_name, str_type = Ntv.decode_json(ntv_value)[:3]
-        length = max(len(val) for val in Ntv.decode_json(value)[0])
-        print(length, max(len(ntvi) for ntvi in ntv.ntv_value))'''
-        
-        
         leng = max(len(ntvi) for ntvi in ntv.ntv_value)
         option = kwargs | {'leng': leng}
         list_series = [SeriesConnec.to_obj_ntv(d, lengkeys=leng, **option) for d in ntv]
@@ -276,6 +271,10 @@ class DataFrameConnec(NtvConnector):
             dfr = dfr.set_index('index')
             dfr.index.rename(None, inplace=True)
         return dfr
+
+    @staticmethod 
+    def _unic(srs):
+        return  srs[:1] if np.array_equal(srs.values, [srs.values[0]]* len(srs)) else srs
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
@@ -287,7 +286,7 @@ class DataFrameConnec(NtvConnector):
         - **name** : string (default None) - name of the NTV object
         - **value** : DataFrame values'''
         df2 = value.reset_index()
-        jsn = Ntv.obj([SeriesConnec.to_json_ntv(df2[col])[0]
+        jsn = Ntv.obj([SeriesConnec.to_json_ntv(DataFrameConnec._unic(df2[col]))[0]
                      for col in df2.columns]).to_obj()
         return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
 
@@ -379,28 +378,24 @@ class SeriesConnec(NtvConnector):
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
 
     @staticmethod
-    def to_obj_ntv(ntv_value=None, extkeys=None, decode_str=False, lengkeys=None, **kwargs):
+    def to_obj_ntv(ntv_value, **kwargs):
         '''Generate a Series Object from a Ntv field object'''
         from observation import Sfield
         
+        option = {'extkeys': None, 'decode_str': False, 'leng': None} | kwargs
         if ntv_value is None:
             return None
-        ntv = Ntv.obj(ntv_value, decode_str=decode_str)
+        ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
-        name, typ, codec, parent, keys, coef, leng = Sfield.decode_ntv(ntv, fast=True)
-        print(Sfield.decode_ntv(ntv, fast=True))
-        #codec = [codec] if not isinstance(codec, list) else codec
-        print('codec : ', codec)
-        if parent and not extkeys:
+        name, typ, codec, parent, keys, coef, leng_field = Sfield.decode_ntv(ntv, fast=True)
+        if parent and not option['extkeys']:
             return None
         if coef:
-            keys = Sfield.keysfromcoef(coef, leng//coef, lengkeys)
-        #elif leng == 1 and lengkeys:
-        #    keys = [0] * lengkeys
-        elif extkeys and parent:
-            keys = Sfield.keysfromderkeys(extkeys, keys)
-        elif extkeys and not parent:
-            keys = extkeys
+            keys = Sfield.keysfromcoef(coef, leng_field//coef, option['leng'])
+        elif option['extkeys'] and parent:
+            keys = Sfield.keysfromderkeys(option['extkeys'], keys)
+        elif option['extkeys'] and not parent:
+            keys = option['extkeys']     
         ntv_codec = Ntv.fast(Ntv.obj_ntv(codec, typ=typ, single=len(codec)==1))
         return SeriesConnec.to_series(ntv_codec, name, keys, **kwargs)
 
@@ -459,6 +454,9 @@ class SeriesConnec(NtvConnector):
             ntv_type = 'json'
         else:
             ntv_type, ntv_value = ntv_type_val(name_type, srs)
+        if len(ntv_value) == 1:
+            return (NtvSingle(ntv_value[0], ntv_name, ntv_type).to_obj(), name,
+                    SeriesConnec.clas_typ if not typ else typ)
         return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name,
                 SeriesConnec.clas_typ if not typ else typ)
 
