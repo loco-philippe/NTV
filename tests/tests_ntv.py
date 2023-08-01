@@ -607,6 +607,7 @@ class Test_Pandas_Connector(unittest.TestCase):
                pd.Series([[1,2], [3,4], {'a': 3, 'e':5}]),  
                pd.Series([True, False, True]),
                pd.Series(['az', 'er', 'cd']),
+               pd.Series(['az', 'az', 'az']),
                pd.Series([1,2,3]),
                pd.Series([1.1,2,3]),
                
@@ -654,7 +655,9 @@ class Test_Pandas_Connector(unittest.TestCase):
                   {'::int64': [1,2,3]},
                   {'::datetime': ["2021-12-31T23:00:00.000","2022-01-01T23:00:00.000"] },
                   {'::object': [{'a': 3, 'e':5}, {'a': 4, 'e':6}]},
-                  {'::array': [[1,2], [3,4], [5,6]]}
+                  {'::array': [[1,2], [3,4], [5,6]]},
+                  True,
+                  {':boolean': True}
                  ]:
             ntv = Ntv.from_obj({':field': a})
             #print(ntv)
@@ -674,6 +677,7 @@ class Test_Pandas_Connector(unittest.TestCase):
                   [{'::datetime': ["2021-12-31T23:00:00.000", "2022-01-01T23:00:00.000"] }, [0,1,0,1,0]],
                   {'test_date': [{'::datetime': ["2021-12-31T23:00:00.000", "2022-01-01T23:00:00.000"] }, [0,1,0,1,0]]},
                   [{'::boolean': [True, False]}, [0,1,0,1,0]],
+                  [[True], [2]], # periodic Series
                   {'quantity': [['1 kg', '10 kg'], [4]]}]:  # periodic Series
             ntv = Ntv.from_obj({':field': a})
             #print(ntv)
