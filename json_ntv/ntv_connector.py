@@ -272,11 +272,6 @@ class DataFrameConnec(NtvConnector):
             dfr.index.rename(None, inplace=True)
         return dfr
 
-    @staticmethod 
-    def _unic(srs):
-        ''' return simple value if the Series contains a single value'''
-        return  srs[:1] if np.array_equal(srs.values, [srs.values[0]]* len(srs)) else srs
-
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
         ''' convert a DataFrame (value, name, type) into NTV json (json-value, name, type).
@@ -297,6 +292,11 @@ class DataFrameConnec(NtvConnector):
         with keys : 'codec', 'name, 'keys' and length of the DataFrame)'''
         return ([SeriesConnec.to_idx(ser) for name, ser in dtf.items()], len(dtf))
 
+    @staticmethod 
+    def _unic(srs):
+        ''' return simple value if the Series contains a single value'''
+        return  srs[:1] if np.array_equal(srs.values, [srs.values[0]]* len(srs)) else srs
+
 
 class SeriesConnec(NtvConnector):
     '''NTV connector for pandas Series'''
@@ -316,42 +316,92 @@ class SeriesConnec(NtvConnector):
     deftype = {val: key for key, val in astype.items()}
 
     @staticmethod
-    def _val_nam_typ(ntv_codec, ntv_type, ntv_name, pd_convert, annotated):
-        ''' return Series data from ntv data
+    def to_obj_ntv(ntv_value, **kwargs):
+        '''Generate a Series Object from a Ntv field object
         
-        *parameters*
+        *Parameters*
+
+        - **ntv_value**: Ntv object or Ntv value - value to convert in Series
+
+        *parameters (kwargs)*
         
-        - **ntv_codec**: Ntv object - codec value to convert in Series values
-        - **ntv_type**: string - default type to apply to convert in dtype
-        - **ntv_name**: string - name of the Series
-        - **pd_convert**: boolean - if True, use pandas json conversion
+        - **extkeys**: list (default None) - keys to use if not present in ntv_value
+        - **decode_str**: boolean (default False) - if True, string values are converted
+        in object values
+        - **index**: list (default None) - if present, add the index in Series
+        - **leng**: integer (default None) - leng of the Series (used with single codec value)
+        - **alias**: boolean (default False) - if True, convert dtype in alias dtype
         - **annotated**: boolean - if True, ntv_codec names are ignored
-        
-        *return (tuple)*
-        
-        - ntv_obj : list with ntv_codec json values converted to object values
-        - pd_name : string with the Serie name
-        - name_type : string - pandas types to be converted in 'json' Ntv-type 
         '''
-        types = SeriesConnec.types
-        if pd_convert:
-            name_type = types.set_index(
-                'ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
-            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-            pd_name = pd_name if pd_name else None
-            if name_type == 'array':
-                ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True)
-            else:
-                ntv_obj = ntv_codec.obj_value(simpleval=annotated,
-                                        json_array=False, def_type=ntv_codec.type_str)
-                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
+        from observation import Sfield
+        
+        option = {'extkeys': None, 'decode_str': False, 'leng': None} | kwargs
+        if ntv_value is None:
+            return None
+        ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
+
+        ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = Sfield.decode_ntv(ntv, fast=True)
+        if parent and not option['extkeys']:
+            return None
+        if coef:
+            ntv_keys = Sfield.keysfromcoef(coef, leng_field//coef, option['leng'])
+        elif option['extkeys'] and parent:
+            ntv_keys = Sfield.keysfromderkeys(option['extkeys'], ntv_keys)
+        elif option['extkeys'] and not parent:
+            ntv_keys = option['extkeys']     
+        ntv_codec = Ntv.fast(Ntv.obj_ntv(codec, typ=typ, single=len(codec)==1))
+        return SeriesConnec.to_series(ntv_codec, ntv_name, ntv_keys, **kwargs)
+
+    @staticmethod
+    def to_json_ntv(value, name=None, typ=None):
+        ''' convert a Series (value, name, type) into NTV json (json-value, name, type).
+
+        *Parameters*
+
+        - **typ** : string (default None) - type of the NTV object,
+        - **name** : string (default None) - name of the NTV object
+        - **value** : Series values'''
+        from observation import Sfield
+
+        astype = SeriesConnec.astype
+        ntv_type_val = SeriesConnec._ntv_type_val
+        srs = value.astype(astype.get(value.dtype.name, value.dtype.name))
+        sr_name = srs.name if srs.name else ''
+        ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
+        
+        if srs.dtype.name == 'category':
+            cdc = pd.Series(srs.cat.categories)
+            ntv_type, cat_value = ntv_type_val(name_type, cdc)
+            cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
+            cod_value = list(srs.cat.codes)
+            coef = Sfield.encode_coef(cod_value)
+            ntv_value = [cat_value, [coef] if coef else cod_value]
+            ntv_type = 'json'
         else:
-            name_type = ntv_type
-            pd_name = ntv_name+'::'+name_type
-            ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True, def_type=ntv_type)
-            # ntv_obj = ntv_codec.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
-        return (ntv_obj, pd_name, name_type)   
-    
+            ntv_type, ntv_value = ntv_type_val(name_type, srs)
+        if len(ntv_value) == 1:
+            return (NtvSingle(ntv_value[0], ntv_name, ntv_type).to_obj(), name,
+                    SeriesConnec.clas_typ if not typ else typ)
+        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name,
+                SeriesConnec.clas_typ if not typ else typ)
+
+    @staticmethod
+    def to_idx(ser):
+        ''' convert a Series in categorical data 
+        
+        *return (dict)*
+        
+        - 'codec': list of pandas categories
+        - 'name': name of the series
+        - 'keys': list of pandas codes
+        '''
+        idx = ser.astype('category')
+        lis = list(idx.cat.categories)
+        if lis and isinstance(lis[0], pd._libs.tslibs.timestamps.Timestamp):
+            lis = [ts.to_pydatetime().astimezone(datetime.timezone.utc)
+                   for ts in lis]
+        return {'codec': lis, 'name': ser .name, 'keys': list(idx.cat.codes)}
+
     @staticmethod 
     def to_series(ntv_codec, ntv_name, ntv_keys, **kwargs):
         ''' return a pd.Series from Field data (codec, name, keys)
@@ -410,41 +460,41 @@ class SeriesConnec(NtvConnector):
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
 
     @staticmethod
-    def to_obj_ntv(ntv_value, **kwargs):
-        '''Generate a Series Object from a Ntv field object
+    def _val_nam_typ(ntv_codec, ntv_type, ntv_name, pd_convert, annotated):
+        ''' return Series data from ntv data
         
-        *Parameters*
-
-        - **ntv_value**: Ntv object or Ntv value - value to convert in Series
-
-        *parameters (kwargs)*
+        *parameters*
         
-        - **extkeys**: list (default None) - keys to use if not present in ntv_value
-        - **decode_str**: boolean (default False) - if True, string values are converted
-        in object values
-        - **index**: list (default None) - if present, add the index in Series
-        - **leng**: integer (default None) - leng of the Series (used with single codec value)
-        - **alias**: boolean (default False) - if True, convert dtype in alias dtype
+        - **ntv_codec**: Ntv object - codec value to convert in Series values
+        - **ntv_type**: string - default type to apply to convert in dtype
+        - **ntv_name**: string - name of the Series
+        - **pd_convert**: boolean - if True, use pandas json conversion
         - **annotated**: boolean - if True, ntv_codec names are ignored
-        '''
-        from observation import Sfield
         
-        option = {'extkeys': None, 'decode_str': False, 'leng': None} | kwargs
-        if ntv_value is None:
-            return None
-        ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
-
-        ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = Sfield.decode_ntv(ntv, fast=True)
-        if parent and not option['extkeys']:
-            return None
-        if coef:
-            ntv_keys = Sfield.keysfromcoef(coef, leng_field//coef, option['leng'])
-        elif option['extkeys'] and parent:
-            ntv_keys = Sfield.keysfromderkeys(option['extkeys'], ntv_keys)
-        elif option['extkeys'] and not parent:
-            ntv_keys = option['extkeys']     
-        ntv_codec = Ntv.fast(Ntv.obj_ntv(codec, typ=typ, single=len(codec)==1))
-        return SeriesConnec.to_series(ntv_codec, ntv_name, ntv_keys, **kwargs)
+        *return (tuple)*
+        
+        - ntv_obj : list with ntv_codec json values converted to object values
+        - pd_name : string with the Serie name
+        - name_type : string - pandas types to be converted in 'json' Ntv-type 
+        '''
+        types = SeriesConnec.types
+        if pd_convert:
+            name_type = types.set_index(
+                'ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
+            pd_name = pd_name if pd_name else None
+            if name_type == 'array':
+                ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True)
+            else:
+                ntv_obj = ntv_codec.obj_value(simpleval=annotated,
+                                        json_array=False, def_type=ntv_codec.type_str)
+                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
+        else:
+            name_type = ntv_type
+            pd_name = ntv_name+'::'+name_type
+            ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True, def_type=ntv_type)
+            # ntv_obj = ntv_codec.to_obj_ntv(simpleval=True, def_type=ntv_type)  #!!!
+        return (ntv_obj, pd_name, name_type)   
 
     @staticmethod
     def _ntv_type_val(name_type, srs):
@@ -473,58 +523,7 @@ class SeriesConnec(NtvConnector):
                 ntv_value = json.loads(srs.to_json(
                     orient='records', date_format='iso', default_handler=str))
         return (ntv_type, ntv_value)
-
-    @staticmethod
-    def to_json_ntv(value, name=None, typ=None):
-        ''' convert a Series (value, name, type) into NTV json (json-value, name, type).
-
-        *Parameters*
-
-        - **typ** : string (default None) - type of the NTV object,
-        - **name** : string (default None) - name of the NTV object
-        - **value** : Series values'''
-        from observation import Sfield
-
-        astype = SeriesConnec.astype
-        ntv_type_val = SeriesConnec._ntv_type_val
-        srs = value.astype(astype.get(value.dtype.name, value.dtype.name))
-        sr_name = srs.name if srs.name else ''
-        ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
-        
-        if srs.dtype.name == 'category':
-            cdc = pd.Series(srs.cat.categories)
-            ntv_type, cat_value = ntv_type_val(name_type, cdc)
-            cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
-            cod_value = list(srs.cat.codes)
-            coef = Sfield.encode_coef(cod_value)
-            ntv_value = [cat_value, [coef] if coef else cod_value]
-            ntv_type = 'json'
-        else:
-            ntv_type, ntv_value = ntv_type_val(name_type, srs)
-        if len(ntv_value) == 1:
-            return (NtvSingle(ntv_value[0], ntv_name, ntv_type).to_obj(), name,
-                    SeriesConnec.clas_typ if not typ else typ)
-        return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name,
-                SeriesConnec.clas_typ if not typ else typ)
-
-    @staticmethod
-    def to_idx(ser):
-        ''' convert a Series in categorical data 
-        
-        *return (dict)*
-        
-        - 'codec': list of pandas categories
-        - 'name': name of the series
-        - 'keys': list of pandas codes
-        '''
-        idx = ser.astype('category')
-        lis = list(idx.cat.categories)
-        if lis and isinstance(lis[0], pd._libs.tslibs.timestamps.Timestamp):
-            lis = [ts.to_pydatetime().astimezone(datetime.timezone.utc)
-                   for ts in lis]
-        return {'codec': lis, 'name': ser .name, 'keys': list(idx.cat.codes)}
-
-
+    
 class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
 
