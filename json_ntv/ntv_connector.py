@@ -265,7 +265,7 @@ class DataFrameConnec(NtvConnector):
         ntv = Ntv.fast(ntv_value)
         leng = max(len(ntvi) for ntvi in ntv.ntv_value)
         option = kwargs | {'leng': leng}
-        list_series = [SeriesConnec.to_obj_ntv(d, lengkeys=leng, **option) for d in ntv]
+        list_series = [SeriesConnec.to_obj_ntv(d, **option) for d in ntv]
         dfr = pd.DataFrame({ser.name: ser for ser in list_series})
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
@@ -498,12 +498,12 @@ class SeriesConnec(NtvConnector):
 
     @staticmethod
     def _ntv_type_val(name_type, srs):
-        ''' convert a simple Series into (NTV type, NTV json-value). If name_type is None and
+        ''' convert a simple Series into NTV data (NTV type, NTV json-value). If name_type is None and
         dtype is 'object', the NTV value is the srs values.
 
         *Parameters*
 
-        - **name_type** : string - NTV type to be used. If None, dtype is converted in NTV type,
+        - **name_type** : string - default NTV type to be used. If None, dtype is converted in NTV type,
         - **srs** : Series to be converted.'''
         types = SeriesConnec.types
         dtype = srs.dtype.name

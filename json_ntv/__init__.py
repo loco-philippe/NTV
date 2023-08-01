@@ -30,12 +30,10 @@ This package contains the following classes:
     
     - `NTV.json_ntv.ntv_connector.DataFrameConnec`
     - `NTV.json_ntv.ntv_connector.SeriesConnec`
-    - `NTV.json_ntv.ntv_connector.IlistConnec`
     - `NTV.json_ntv.ntv_connector.NfieldConnec`
     - `NTV.json_ntv.ntv_connector.SfieldConnec`
     - `NTV.json_ntv.ntv_connector.NdatasetConnec`
     - `NTV.json_ntv.ntv_connector.SdatasetConnec`
-    - `NTV.json_ntv.ntv_connector.IindexConnec`
     - `NTV.json_ntv.ntv_connector.MermaidConnec`
     - `NTV.json_ntv.ntv_connector.CborConnec`
     - `NTV.json_ntv.ntv_connector.ShapelyConnec` 
