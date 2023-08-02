@@ -253,7 +253,7 @@ class DataFrameConnec(NtvConnector):
     clas_typ = 'tab'
 
     @staticmethod
-    def to_obj_ntv(ntv_value, **kwargs):
+    def to_obj_ntv(ntv_value, **kwargs): # reindex=True, decode_str=False):
         ''' convert json ntv_value into a DataFrame.
 
         *Parameters*
@@ -261,11 +261,22 @@ class DataFrameConnec(NtvConnector):
         - **index** : list (default None) - list of index values,
         - **alias** : boolean (default False) - if True, alias dtype else default dtype
         - **annotated** : boolean (default False) - if True, NTV names are not included.'''
-        #ntv = Ntv.obj(ntv_value)
+        from observation import Sfield, Sdataset
+        series = SeriesConnec.to_series
+        
         ntv = Ntv.fast(ntv_value)
-        leng = max(len(ntvi) for ntvi in ntv.ntv_value)
+        lidx = [list(Sfield.decode_ntv(ntvf, fast=True)) for ntvf in ntv]
+        leng = max([idx[6] for idx in lidx])
         option = kwargs | {'leng': leng}
-        list_series = [SeriesConnec.to_obj_ntv(d, **option) for d in ntv]
+        no_keys = []
+        for ind in range(len(lidx)):
+            no_keys.append(not lidx[ind][3] and not lidx[ind][4] and not lidx[ind][5])
+            Sdataset._init_ntv_keys(ind, lidx, leng)
+            lidx[ind][2] = Ntv.fast(Ntv.obj_ntv(lidx[ind][2], typ=lidx[ind][1], 
+                                                single=len(lidx[ind][2])==1))
+        list_series = [series(lidx[ind][2], lidx[ind][0],  
+                              None if no_keys[ind] else lidx[ind][4], **option) 
+                       for ind in range(len(lidx))]
         dfr = pd.DataFrame({ser.name: ser for ser in list_series})
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
