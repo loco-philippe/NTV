@@ -35,6 +35,7 @@ class NtvConnector(ABC):
     - `uncast`
     - `is_json_class`
     - `is_json`
+    - `init_ntv_keys`
     '''
 
     DIC_NTV_CL = {'NtvSingle': 'ntv', 'NtvList': 'ntv'}
@@ -255,7 +256,57 @@ class NtvConnector(ABC):
                                    'is not valid for NTV')
                 return False
 
+    @staticmethod
+    def keysfromderkeys(parentkeys, derkeys):
+        '''return keys from parent keys and derkeys
 
+        *Parameters*
+
+        - **parentkeys** : list of keys from parent
+        - **derkeys** : list of derived keys
+
+        *Returns* : list of keys'''
+        return [derkeys[pkey] for pkey in parentkeys]
+
+    @staticmethod 
+    def keysfromcoef(coef, period, leng=None):
+        ''' return a list of keys with periodic structure'''
+        if not leng:
+            leng = coef * period
+        return None if not coef or not period else [ (ikey % (coef * period)) // coef 
+                                                    for ikey in range(leng)]    
+    @staticmethod
+    def init_ntv_keys(ind, lidx, leng):
+        ''' initialization of explicit keys data in lidx object of tabular data'''
+        # name: 0, type: 1, codec: 2, parent: 3, keys: 4, coef: 5, leng: 6
+        name, typ, codec, parent, keys, coef, length = lidx[ind]
+        if (keys, parent, coef) == (None, None, None):  # full or unique
+            if len(codec) == 1: # unique
+                lidx[ind][4] = [0] * leng
+            elif len(codec) == leng:    # full
+                lidx[ind][4] = list(range(leng))
+            else:
+                raise NtvError('impossible to generate keys')
+            return
+        if keys and len(keys) > 1 and parent is None:  #complete
+            return
+        if coef:  #primary
+            lidx[ind][4] = [(ikey % (coef * len(codec))) // coef for ikey in range(leng)]
+            lidx[ind][3] = None
+            return  
+        if parent is None:
+            raise NtvError('keys not referenced')          
+        if not lidx[parent][4] or len(lidx[parent][4]) != leng:
+            NtvConnector.init_ntv_keys(parent, lidx, leng)
+        if not keys and len(codec) == len(lidx[parent][2]):    # implicit
+            lidx[ind][4] = lidx[parent][4]
+            lidx[ind][3] = None
+            return
+        lidx[ind][4] = NtvConnector.keysfromderkeys(lidx[parent][4], keys)  # relative
+        #lidx[ind][4] = [keys[pkey] for pkey in lidx[parent][4]]  # relative
+        lidx[ind][3] = None
+        return    
+    
 class NtvTree:
     ''' The NtvTree class is an iterator class used to traverse a NTV tree structure.
     Some other methods give tree indicators and data.

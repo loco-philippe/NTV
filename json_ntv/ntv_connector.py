@@ -28,7 +28,7 @@ import json
 import pandas as pd
 import numpy as np
 
-from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
+from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree, NtvError
 #from observation import Sfield
 
 
@@ -261,17 +261,18 @@ class DataFrameConnec(NtvConnector):
         - **index** : list (default None) - list of index values,
         - **alias** : boolean (default False) - if True, alias dtype else default dtype
         - **annotated** : boolean (default False) - if True, NTV names are not included.'''
-        from observation import Sfield, Sdataset
+        #from observation import Sfield, Sdataset
         series = SeriesConnec.to_series
         
         ntv = Ntv.fast(ntv_value)
-        lidx = [list(Sfield.decode_ntv(ntvf, fast=True)) for ntvf in ntv]
+        lidx = [list(DataFrameConnec.decode_ntv_tab(ntvf, fast=True)) for ntvf in ntv]
+        #lidx = [list(NtvConnector.decode_ntv_tab(ntvf, fast=True)) for ntvf in ntv]
         leng = max([idx[6] for idx in lidx])
         option = kwargs | {'leng': leng}
         no_keys = []
         for ind in range(len(lidx)):
             no_keys.append(not lidx[ind][3] and not lidx[ind][4] and not lidx[ind][5])
-            Sdataset._init_ntv_keys(ind, lidx, leng)
+            NtvConnector.init_ntv_keys(ind, lidx, leng)
             lidx[ind][2] = Ntv.fast(Ntv.obj_ntv(lidx[ind][2], typ=lidx[ind][1], 
                                                 single=len(lidx[ind][2])==1))
         list_series = [series(lidx[ind][2], lidx[ind][0],  
@@ -308,6 +309,53 @@ class DataFrameConnec(NtvConnector):
         ''' return simple value if the Series contains a single value'''
         return  srs[:1] if np.array_equal(srs.values, [srs.values[0]]* len(srs)) else srs
 
+    @staticmethod 
+    def decode_ntv_tab(field, fast=False):
+        '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
+
+        *Parameters*
+
+        - **field** : bytes, string json or Ntv object to convert
+        - **format** : string (default 'json') - format to convert ntv_value
+        - **fast**: boolean (default False) - if True, codec is created without 
+        conversion, else codec is created with json structure
+
+        *Returns* 
+
+        - **tuple** : name, dtype, codec, parent, keys, coef, leng
+            name (None or string): name of the Field
+            dtype (None or string): type of data
+            codec (list): list of Field codec values
+            parent (None or int): Field parent or None
+            keys (None or list): Field keys
+            coef (None or int): coef if primary Field else None
+            leng (int): length of the Field
+        '''
+        ntv = Ntv.obj(field)
+        typ = ntv.type_str if ntv.ntv_type else None
+        nam = ntv.name
+        val = ntv.to_obj(simpleval=True)
+        if isinstance(ntv, NtvSingle):
+            return (nam, typ, [val], None, None, None, 1)
+        if len(ntv) < 2 or len(ntv) > 3 or isinstance(ntv[0], NtvSingle):
+            return (nam, typ, val, None, None, None, len(ntv))
+
+        ntvc = ntv[0]
+        leng = max(len(ind) for ind in ntv)
+        typc = ntvc.type_str if ntvc.ntv_type else None
+        valc = ntvc.to_obj(simpleval=True)
+        if len(ntv) == 3 and isinstance(ntv[1], NtvSingle) and \
+            isinstance(ntv[1].val, (int, str)) and not isinstance(ntv[2], NtvSingle) and \
+            isinstance(ntv[2][0].val, int):
+            return (nam, typc, valc, ntv[1].val, ntv[2].to_obj(), None, leng)
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, (int, str)):
+            return (nam, typc, valc, ntv[1].val, None, None, leng) 
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list):
+            leng = leng * ntv[1][0].val
+            return (nam, typc, valc, None, None, ntv[1][0].val, leng) 
+        if len(ntv) == 2 and len(ntv[1]) > 1  and isinstance(ntv[1][0].val, int):
+            return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
+        return (nam, typ, val, None, None, None, len(ntv))
 
 class SeriesConnec(NtvConnector):
     '''NTV connector for pandas Series'''
@@ -352,12 +400,15 @@ class SeriesConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
         ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = Sfield.decode_ntv(ntv, fast=True)
+        #ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = DataFrameConnec.decode_ntv_tab(ntv, fast=True)
         if parent and not option['extkeys']:
             return None
         if coef:
-            ntv_keys = Sfield.keysfromcoef(coef, leng_field//coef, option['leng'])
+            #ntv_keys = Sfield.keysfromcoef(coef, leng_field//coef, option['leng'])
+            ntv_keys = NtvConnector.keysfromcoef(coef, leng_field//coef, option['leng'])
         elif option['extkeys'] and parent:
-            ntv_keys = Sfield.keysfromderkeys(option['extkeys'], ntv_keys)
+            #ntv_keys = Sfield.keysfromderkeys(option['extkeys'], ntv_keys)
+            ntv_keys = NtvConnector.keysfromderkeys(option['extkeys'], ntv_keys)
         elif option['extkeys'] and not parent:
             ntv_keys = option['extkeys']     
         ntv_codec = Ntv.fast(Ntv.obj_ntv(codec, typ=typ, single=len(codec)==1))
