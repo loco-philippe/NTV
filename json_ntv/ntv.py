@@ -64,7 +64,8 @@ from abc import ABC, abstractmethod
 import json
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
-from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree
+from .ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree
+
 
 class Ntv(ABC):
     ''' The Ntv class is an abstract class used by `NtvSingle`and `NtvList` classes.
@@ -605,7 +606,8 @@ class Ntv(ABC):
         value = {} if not value else value
         name = '' if not name else name
         typ = '' if not typ else typ
-        ntv_list = len(value) != 1 if isinstance(value, dict) else isinstance(value, list)
+        ntv_list = len(value) != 1 if isinstance(
+            value, dict) else isinstance(value, list)
         if not single and not ntv_list:
             raise NtvError(
                 'the value is not compatible with not single NTV data')
@@ -920,9 +922,10 @@ class NtvList(Ntv):
         option = {'encoded': False, 'format': 'json', 'simpleval': False,
                   'json_array': False, 'fast': False, 'maxi': -1} | kwargs
         opt2 = option | {'encoded': False}
-        maxv = len(self.ntv_value) if option['maxi'] < 1 else option['maxi']      
+        maxv = len(self.ntv_value) if option['maxi'] < 1 else option['maxi']
         def_type = self.ntv_type.long_name if self.ntv_type else def_type
         if self.json_array or option['simpleval'] or option['json_array']:
             return [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value[:maxv]]
-        values = [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value[:maxv]]
+        values = [ntv.to_obj(def_type=def_type, **opt2)
+                  for ntv in self.ntv_value[:maxv]]
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
