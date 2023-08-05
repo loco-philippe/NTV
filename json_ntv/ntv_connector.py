@@ -262,13 +262,11 @@ class DataFrameConnec(NtvConnector):
         - **index** : list (default None) - list of index values,
         - **alias** : boolean (default False) - if True, alias dtype else default dtype
         - **annotated** : boolean (default False) - if True, NTV names are not included.'''
-        #from observation import Sfield, Sdataset
         series = SeriesConnec.to_series
 
         ntv = Ntv.fast(ntv_value)
         lidx = [list(DataFrameConnec.decode_ntv_tab(ntvf, fast=True))
                 for ntvf in ntv]
-        #lidx = [list(NtvConnector.decode_ntv_tab(ntvf, fast=True)) for ntvf in ntv]
         leng = max([idx[6] for idx in lidx])
         option = kwargs | {'leng': leng}
         no_keys = []
@@ -337,9 +335,11 @@ class DataFrameConnec(NtvConnector):
         ntv = Ntv.obj(field)
         typ = ntv.type_str if ntv.ntv_type else None
         nam = ntv.name
-        val = ntv.to_obj(simpleval=True)
+        #val = ntv.to_obj(simpleval=True)
         if isinstance(ntv, NtvSingle):
-            return (nam, typ, [val], None, None, None, 1)
+            #return (nam, typ, [val], None, None, None, 1)
+            return (nam, typ, [ntv.to_obj(simpleval=True)], None, None, None, 1)
+        val = [ntv_val.to_obj() for ntv_val in ntv]
         if len(ntv) < 2 or len(ntv) > 3 or isinstance(ntv[0], NtvSingle):
             return (nam, typ, val, None, None, None, len(ntv))
 
@@ -396,24 +396,18 @@ class SeriesConnec(NtvConnector):
         - **alias**: boolean (default False) - if True, convert dtype in alias dtype
         - **annotated**: boolean - if True, ntv_codec names are ignored
         '''
-        from observation import Sfield
-
         option = {'extkeys': None, 'decode_str': False, 'leng': None} | kwargs
         if ntv_value is None:
             return None
         ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
-        ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = Sfield.decode_ntv(
-            ntv, fast=True)
-        #ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = DataFrameConnec.decode_ntv_tab(ntv, fast=True)
+        ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = DataFrameConnec.decode_ntv_tab(ntv, fast=True)
         if parent and not option['extkeys']:
             return None
         if coef:
-            #ntv_keys = Sfield.keysfromcoef(coef, leng_field//coef, option['leng'])
             ntv_keys = NtvConnector.keysfromcoef(
                 coef, leng_field//coef, option['leng'])
         elif option['extkeys'] and parent:
-            #ntv_keys = Sfield.keysfromderkeys(option['extkeys'], ntv_keys)
             ntv_keys = NtvConnector.keysfromderkeys(
                 option['extkeys'], ntv_keys)
         elif option['extkeys'] and not parent:
