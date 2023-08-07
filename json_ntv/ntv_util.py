@@ -370,19 +370,19 @@ class NtvTree:
 
     @property
     def nodes(self):
-        ''' return the list of nodes'''
+        ''' return the list of nodes according to the DFS preordering algorithm'''
         return list(self.__class__(self._ntv))
 
     @property
     def leaf_nodes(self):
-        ''' return the list of leaf nodes'''
+        ''' return the list of leaf nodes according to the DFS preordering algorithm'''
         #return [node for node in self.__class__(self._ntv) if not isinstance(node, NtvList)]
         return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvSingle']
 
     @property
     def inner_nodes(self):
-        ''' return the list of inner nodes'''
+        ''' return the list of inner nodes according to the DFS preordering algorithm'''
         return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvList']
 
