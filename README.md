@@ -30,7 +30,7 @@ The easiest way to add this information into a JSON-value is to use a JSON-objec
 
 With this approach, two NTV entities are defined:
 - a primitive entity which is not composed of any other entity (NTV-single),
-- a structured entity which is an ordered sequence of NTV entities (Ntv-list).
+- a structured entity which is an ordered sequence of NTV entities (NTV-list).
       
 as well as two JSON formats:
 - simple format when the name and the type are not present (this is the usual case of CSV data),
@@ -68,6 +68,12 @@ flowchart LR
     nat--->|to NTV|ntv
 
 ```
+*Properties :*
+- each NTV object has a unique JSON representation
+- each JSON data corresponds to a unique NTV entity
+- an NTV entity is a tree where each node is an NTV entity and each leaf an NTV-Single entity
+- an NTV entity is a neutral representation (independent of a software or hardware platform)
+
 # Documentation and installation
 
 - [Specification](https://github.com/loco-philippe/NTV/tree/main/documentation/README.md)
