@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
-     draft-rfcxml-general-template-standard-00
-  
-     This template includes examples of the most commonly used features of RFCXML with comments 
-     explaining how to customise them. This template can be quickly turned into an I-D by editing 
-     the examples provided. Look for [REPLACE], [REPLACE/DELETE], [CHECK] and edit accordingly.
-     Note - 'DELETE' means delete the element or attribute, not just the contents.
-     
-     Documentation is at https://authors.ietf.org/en/templates-and-schemas
--->
-<?xml-model href="rfc7991bis.rnc"?>  <!-- Required for schema validation and schema-aware editing -->
-<!-- <?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?> -->
-<!-- This third-party XSLT can be enabled for direct transformations in XML processors, including most browsers -->
+
+<?xml-model href="rfc7991bis.rnc"?>  
 
 
 <!DOCTYPE rfc [
@@ -20,89 +9,102 @@
   <!ENTITY nbhy   "&#8209;">
   <!ENTITY wj     "&#8288;">
 ]>
-<!-- If further character entities are required then they should be added to the DOCTYPE above.
-     Use of an external entity file is not recommended. -->
 
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="info"
-  docName="draft-rfcxml-ntv"
+  docName="draft-thomy-json-ntv"
   ipr="trust200902"
   obsoletes=""
   updates=""
   submissionType="IETF"
   xml:lang="en"
   version="0">
-<!-- [REPLACE] 
-       * docName with name of your draft
-     [CHECK] 
-       * category should be one of std, bcp, info, exp, historic
-       * ipr should be one of trust200902, noModificationTrust200902, noDerivativesTrust200902, pre5378Trust200902
-       * updates can be an RFC number as NNNN
-       * obsoletes can be an RFC number as NNNN 
--->
 
   <front>
     <title abbrev="JSON-NTV">JSON-NTV semantic format</title>
-    <!--  [REPLACE/DELETE] abbrev. The abbreviated title is required if the full title is longer than 39 characters -->
-
-    <seriesInfo name="Internet-Draft" value="draft-rfcxml-ntv"/>
-   
+    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv"/>
     <author fullname="THOMY" initials="PT" role="editor" surname="Philippe">
-      <!-- [CHECK]
-             * initials should not include an initial for the surname
-             * role="editor" is optional -->
-    <!-- Can have more than one author -->
-      
-    <!-- all of the following elements are optional -->
       <organization>Loco-labs</organization>
       <address>
         <postal>
-          <!-- Reorder these if your country does things differently -->
           <street>476 chemin du gaf de Famian</street>
           <city>BOLLENE</city>
           <code>84 500</code>
           <country>FR</country>
-          <!-- Uses two letter country code -->
         </postal>        
         <email>philippe@loco-labs.io</email>  
-        <!-- Can have more than one <email> element -->
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
-    </author>
-   
+    </author> 
     <date year="2023"/>
-    <!-- On draft subbmission:
-         * If only the current year is specified, the current day and month will be used.
-         * If the month and year are both specified and are the current ones, the current day will
-           be used
-         * If the year is not the current one, it is necessary to specify at least a month and day="1" will be used.
-    -->
-
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
-    <!-- "Internet Engineering Task Force" is fine for individual submissions.  If this element is 
-          not present, the default is "Network Working Group", which is used by the RFC Editor as 
-          a nod to the history of the RFC Series. -->
-
     <keyword>JSON SEMANTIC</keyword>
-    <!-- [REPLACE/DELETE]. Multiple allowed.  Keywords are incorporated into HTML output files for 
-         use by search engines. -->
 
     <abstract>
-      <t>This document describes a set of simple rules for unambiguously and concisely encoding semantic data into JSON Data Interchange Format (RFC 8259).  
-These rules and framework, called JSON-NTV (JSON with Named and Typed Values), relies on the rules defined in the 
-            <xref target="JSON-ND" />.
+      <t>This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
+      JSON Data Interchange Format <xref target="RFC8259" />. These rules and framework, called JSON-NTV (JSON with 
+      Named and Typed Values), relies on the rules defined in the <xref target="JSON-ND" />.
       </t>
     </abstract>
- 
   </front>
 
   <middle>
-    
     <section>
       <name>Introduction</name>
-      <t>Introductory text [REPLACE]</t>
+      <section>
+        <name>Presentation</name>
+        <t>Today, the semantic level of shared data remains low. It is very often limited to the type of data defined 
+        in the exchange formats (strings for CSV formats; numbers, strings, arrays and objects for JSON formats).</t>
+        <t>JSON-NTV proposes to increase the semantic level of the JSON entities by adding two additional pieces of information
+         to a JSON entity :
+            <ul>
+            <li><strong>name</strong>: interpretation of the value in human language or detailed information (e.g., “beginning of the observation”)
+             or link to external information(e.g., “https://github.com/loco-philippe/Environmental-Sensing/tree/main”),</li>
+            <li><strong>type</strong>: interpretation of the value in a data standard (e.g. GeoJSON, datetime) or in a data catalog or 
+            in a software language.</li></ul></t>
+
+        <t>The NTV entity is thus a triplet with a mandatory element (value) and two additional elements (name, type). </t>
+          <ul empty="true">
+            <li><em>For example, Paris location can be represented by : </em>
+              <ul spacing="compact">
+                <li><em>a name : “paris”,</em></li>
+                <li><em>a type : geoJSON Point coordinates,</em></li>
+                <li><em>a value : [2.3522, 48.8566]</em></li>
+              </ul>
+            </li>
+          </ul>
+        
+        
+        <t>The easiest way to add that information into a JSON-value is to use a JSON-object with a single member using 
+        the syntax JSON-ND for the first term of the member and the JSON-value for the second term of the member.</t>
+        
+        <ul empty="true">
+          <li><em>The JSON value of the previous example is:</em>
+            <ul spacing="compact" empty="true">
+              <li><em>{ “paris:point” : [2.3522, 48.8566] }</em></li>
+            </ul>
+          </li>
+        </ul>
+        
+        
+        <t>With this approach, two NTV entities are defined :
+          a primitive entity which is not composed of any other entity,
+          a structured entity which is an ordered sequence of NTV entities.
+        as well as two JSON formats depending on the presence of the additional elements : 
+          simple format when name and type are not present
+          named format when name or type is present </t>
+        
+        <t>Example (entity composed of two other primitive entities): 
+          { “cities::point”: [[2.3522, 48.8566], [4.8357, 45.7640]] } 
+          {“cities::point”: {“paris”:[2.3522, 48.8566], “lyon”:[4.8357, 45.7640]}}</t>
+        
+        <t>A JSON-NTV generator produces a JSON-value from a NTV entity and vice versa a JSON-NTV parser transforms a 
+        JSON-value into a NTV entity. </t>
+        
+        <t>The conversion between NTV entity and software object is not the subject of this note.</t>
+      </section>
       
       <section>
         <name>Requirements Language</name>
@@ -196,6 +198,8 @@ source code goes here [REPLACE]
         
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
         <!-- The recommended and simplest way to include a well known reference -->
         
       </references>
