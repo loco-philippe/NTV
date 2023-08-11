@@ -157,6 +157,13 @@
         </tbody>
       </table>
 
+      <figure align="left" suppress-title="false" pn="figure-5"><name>example ABNF</name>
+        <sourcecode type="abnf" markers="false" pn="section-3-5">
+          CRLF = %x0A / %x0D.0A
+          truc = machin
+        </sourcecode>
+      </figure>
+
       <figure>
         <name>Source [REPLACE]</name>
         <sourcecode name="suggested filename [REPLACE/DELETE]" type="language [REPLACE/DELETE]" markers="true">
