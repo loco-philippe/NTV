@@ -24,7 +24,7 @@
   <front>
     <title abbrev="JSON-NTV">JSON-NTV semantic format</title>
     <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv"/>
-    <author fullname="THOMY" initials="PT" role="editor" surname="Philippe">
+    <author fullname="Philippe THOMY" initials="PT" role="editor" surname="Philippe">
       <organization>Loco-labs</organization>
       <address>
         <postal>
@@ -51,63 +51,74 @@
   </front>
 
   <middle>
-    <section>
-      <name>Introduction</name>
-      <section>
-        <name>Presentation</name>
+    <section><name>Introduction</name>
+      <section><name>Presentation</name>
         <t>Today, the semantic level of shared data remains low. It is very often limited to the type of data defined 
         in the exchange formats (strings for CSV formats; numbers, strings, arrays and objects for JSON formats).</t>
         <t>JSON-NTV proposes to increase the semantic level of the JSON entities by adding two additional pieces of information
-         to a JSON entity :
-            <ul>
-            <li><strong>name</strong>: interpretation of the value in human language or detailed information (e.g., “beginning of the observation”)
-             or link to external information(e.g., “https://github.com/loco-philippe/Environmental-Sensing/tree/main”),</li>
-            <li><strong>type</strong>: interpretation of the value in a data standard (e.g. GeoJSON, datetime) or in a data catalog or 
-            in a software language.</li></ul></t>
-
+         to a JSON entity :<ul>
+          <li><strong>name</strong>: interpretation of the value in human language or detailed information (e.g., “beginning of the observation”)
+            or link to external information(e.g., “https://github.com/loco-philippe/Environmental-Sensing/tree/main”),</li>
+          <li><strong>type</strong>: interpretation of the value in a data standard (e.g. GeoJSON, datetime) or in a data catalog or 
+          in a software language.</li></ul>
+        </t>
         <t>The NTV entity is thus a triplet with a mandatory element (value) and two additional elements (name, type). </t>
-          <ul empty="true">
-            <li><em>For example, Paris location can be represented by : </em>
-              <ul spacing="compact">
-                <li><em>a name : “paris”,</em></li>
-                <li><em>a type : geoJSON Point coordinates,</em></li>
-                <li><em>a value : [2.3522, 48.8566]</em></li>
-              </ul>
-            </li>
-          </ul>
-        
-        
+        <ul empty="true">
+          <li><em>For example, Paris location can be represented by : </em><ul spacing="compact">
+            <li><em>a name : “paris”,</em></li>
+            <li><em>a type : geoJSON Point coordinates,</em></li>
+            <li><em>a value : [2.3522, 48.8566]</em></li>
+          </ul></li>
+        </ul>
         <t>The easiest way to add that information into a JSON-value is to use a JSON-object with a single member using 
         the syntax JSON-ND for the first term of the member and the JSON-value for the second term of the member.</t>
-        
         <ul empty="true">
-          <li><em>The JSON value of the previous example is:</em>
-            <ul spacing="compact" empty="true">
-              <li><em>{ “paris:point” : [2.3522, 48.8566] }</em></li>
-            </ul>
-          </li>
+          <li><em>The JSON value of the previous example is:</em><ul spacing="compact" empty="true">
+            <li><em>{ “paris:point” : [2.3522, 48.8566] }</em></li>
+          </ul></li>
         </ul>
-        
-        
-        <t>With this approach, two NTV entities are defined :
-          a primitive entity which is not composed of any other entity,
-          a structured entity which is an ordered sequence of NTV entities.
-        as well as two JSON formats depending on the presence of the additional elements : 
-          simple format when name and type are not present
-          named format when name or type is present </t>
-        
-        <t>Example (entity composed of two other primitive entities): 
-          { “cities::point”: [[2.3522, 48.8566], [4.8357, 45.7640]] } 
-          {“cities::point”: {“paris”:[2.3522, 48.8566], “lyon”:[4.8357, 45.7640]}}</t>
-        
+        <t>With this approach, two NTV entities are defined :<ul>
+          <li><strong>a primitive entity</strong> which is not composed of any other entity,</li>
+          <li><strong>a structured entity</strong> which is an ordered sequence of NTV entities.</li></ul>
+        as well as two JSON formats depending on the presence of the additional elements : <ul>
+          <li><strong>simple format</strong> when name and type are not present</li>
+          <li><strong>named format</strong> when name or type is present </li></ul></t>
+        <ul empty="true">
+          <li><em>Example (entity composed of two other primitive entities): </em><ul spacing="compact" empty="true">
+            <li><em>{ “cities::point”: [[2.3522, 48.8566], [4.8357, 45.7640]] } </em></li>
+            <li><em>{“cities::point”: {“paris”:[2.3522, 48.8566], “lyon”:[4.8357, 45.7640]}}</em></li>
+          </ul></li>
+        </ul>
         <t>A JSON-NTV generator produces a JSON-value from a NTV entity and vice versa a JSON-NTV parser transforms a 
         JSON-value into a NTV entity. </t>
-        
         <t>The conversion between NTV entity and software object is not the subject of this note.</t>
       </section>
       
-      <section>
-        <name>Requirements Language</name>
+      <section><name>Key design features</name>
+        <t>The format’s focus is on simplicity, lightness and web usage.</t>
+        <t>The key features of this format are the following: <ul>
+          <li>JSON as the base format<ul>
+            <li>JSON is simple and readable as simple text</li>
+            <li>JSON supports rich structure including nesting and basic types</li>
+            <li>JSON is web-native and very widely used and supported</li>
+            <li>JSON format has binary representation (i.e. CBOR format)</li></ul></li>
+          <li>high semantic level of data<ul>
+            <li>wide variety of data typing</li>
+            <li>tree-like and customisable data typing </li></ul></li>
+          <li>compatibility with existing formats<ul>
+            <li>JSON data is a JSON-NTV data</li>
+            <li>most of NTV types are existing types</li>
+            <li>the defined types integrate the data catalogs (i.e.  schemaorg, darwincore)</li></ul></li>
+          <li>compatibility with any type of platform<ul>
+            <li>types and structures are independent of software and hardware platforms</li>
+            <li>the NTV concept is applicable to all types of software and data</li></ul></li>
+          <li>reversibility<ul>
+            <li>the NTV entity coming from a Json is identical to the NTV entity from which the Json comes</li>
+            <li>the Json representation of an NTV entity is the same as the Json value used to construct the NTV entity</li></ul></li>
+        </ul></t>
+      </section>
+      
+      <section><name>Requirements Language</name>
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
           "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
           RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
@@ -115,12 +126,9 @@
           <xref target="RFC8174"/> when, and only when, they appear in
           all capitals, as shown here.</t>
       </section>
-      <!-- [CHECK] The 'Requirements Language' section is optional -->
-
     </section>
     
-    <section>
-      <name>Body [REPLACE]</name>
+    <section><name>NTV structure</name>
       <t>Body text [REPLACE]</t>
       
       <ol>
@@ -175,15 +183,13 @@ source code goes here [REPLACE]
       </figure>
     </section>   
     
-    <section anchor="IANA">
+    <section anchor="IANA"><name>IANA Considerations</name>
     <!-- All drafts are required to have an IANA considerations section. See RFC 8126 for a guide.-->
-      <name>IANA Considerations</name>
       <t>This memo includes no request to IANA. [CHECK]</t>
     </section>
     
-    <section anchor="Security">
+    <section anchor="Security"><name>Security Considerations</name>
       <!-- All drafts are required to have a security considerations section. See RFC 3552 for a guide. -->
-      <name>Security Considerations</name>
       <t>This document should not affect the security of the Internet. [CHECK]</t>
     </section>
     
@@ -191,46 +197,19 @@ source code goes here [REPLACE]
   </middle>
 
   <back>
-    <references>
-      <name>References</name>
-      <references>
-        <name>Normative References</name>
-        
+    <references><name>References</name>
+      <references><name>Normative References</name>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
-        <!-- The recommended and simplest way to include a well known reference -->
-        
       </references>
- 
-      <references>
-        <name>Informative References</name>
-       
-        <reference anchor="exampleRefMin">
-        <!-- [REPLACE/DELETE] Example minimum reference -->
-          <front>
-            <title>Title [REPLACE]</title>
-            <author initials="Initials [REPLACE]" surname="Surname [REPLACE]">
-              <organization/>
-            </author>
-            <date year="2006"/>
-            <!-- [CHECK] -->
-          </front>
-        </reference>
-
-        <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND">
-        <!-- [REPLACE/DELETE] Example reference written by an organization not a person -->
-          <front>
-            <title>JSON-ND</title>
-            <author>
-              <organization>Organization [REPLACE]</organization>
-            </author>
-            <date year="1984"/>
-            <!-- [CHECK] -->
-          </front>
-        </reference>       
-       
+      <references><name>Informative References</name>
+        <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
+          <title>JSON-ND</title>
+          <author initials="GK" surname="Kleidon"></author>
+          <date year="2020"/>
+        </front></reference>      
       </references>
     </references>
     
@@ -239,18 +218,13 @@ source code goes here [REPLACE]
       <t>This becomes an Appendix [REPLACE]</t>
     </section>
 
-    <section anchor="Acknowledgements" numbered="false">
-      <!-- [REPLACE/DELETE] an Acknowledgements section is optional -->
-      <name>Acknowledgements</name>
+    <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>This template uses extracts from templates written by Pekka Savola, Elwyn Davies and 
         Henrik Levkowetz. [REPLACE]</t>
     </section>
     
-    <section anchor="Contributors" numbered="false">
-      <!-- [REPLACE/DELETE] a Contributors section is optional -->
-      <name>Contributors</name>
+    <section anchor="Contributors" numbered="false"><name>Contributors</name> 
       <t>Thanks to all of the contributors. [REPLACE]</t>
-      <!-- [CHECK] it is optional to add a <contact> record for some or all contributors -->
     </section>
     
  </back>
