@@ -1,58 +1,55 @@
+
+; notation:
+;     "Object(" *param ")" represent an Object defined by a list of parameters (param)
+;     JsonArray(*param) represent a Json-array as defined in the Json grammar, *param is a list of Json-elements
+;     JsonObject(*param) represent a Json-object as defined in the Json grammar, *param is a list of Json-members
+;     JsonValue represent a Json-value as defined in the Json grammar
+
 ; NTVentity
+;     NTVsingle object is defined by a NTVsingleValue, a NTVname and a NTVType
+;     NTVlist   object is defined by a NTVlistValue,   a NTVname and a NTVType
 NTVentity = NTVsingle / NTVlist
-NTVsingle = (NTVsingleValue NTVname NTVsingleType)
-NTVlist   = (NTVlistValue   NTVname NTVlistType)
+NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
+NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
 
 NTVlistType     = NTVtype / Namespace
 NTVsingleType   = NTVtype 
 NTVlistValue    = *NTVentity
-NTVsingleValue  = JsonNTVvalue / NTVsingle
+NTVsingleValue  = JsonValue
 NTVname         = string
+JsonValue       = string
 
 ; Namespace and NtvType
-NameSpace       = (NamespaceName NamespaceParent *NTVtype *NamespaceChild]) ; Namespace is nested
-NTVtype         = (NTVtypeName NamespaceParent [NTVtypeGen] ) ; NTVtype is included in a Namespace
-NTVtypeGen      = NtvType
-NTVtypeName     = string
+;    Namespace object is defined by a name and a Namespace parent
+;    NTVtype   object is defined by a name, a Namespace parent and optionaly by a generic NTVtype
+Namespace       = "Namespace(" NamespaceName  NamespaceParent ")" ; Namespace is nested
 NamespaceParent = Namespace
-NamespaceChild  = Namespace
+NamespaceName   = [string "."]  ; the global namespace is represented by an empty string
+JsonNamespace   = JsonNamespaceParent NamespaceName
+JsonNamespaceParent = JsonNamespace
+
+NTVtype         = "NTVtype(" NTVtypeName  NamespaceParent [NTVtypeGen] ")"
+NTVtypeGen      = NTVtype
+NTVtypeName     = string
 JsonNTVtype     = JsonNamespace NTVtypeName   ; JsonNamespace is the JsonNamespace of the NamespaceParent
-JsonNamespace   = JsonNamespace NamespaceName ; JsonNamespace is the JsonNamespace of the NamespaceParent
-NamespaceName   = (string ".") / ""  ; the global namespace is represented by an empty string
 
 ; Json representation of NTV entities
 JsonNTVrepr     = JsonNTVnamed / JsonNTVsimple
-JsonNTVnamed    = beginObject JsonNTVname memSep JsonNTVvalue endObject
+JsonNTVnamed    = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")"  ; Json-object with a single member
 JsonNTVsimple   = JsonNTVvalue
 JsonNTVname     = NTVname / (NTVname JsonType) / JsonType
-JsonType        = (singleSep / listSep) JsonNTVtype
+JsonType        = [singleSep / listSep] JsonNTVtype
 
 ; Json representation of NTVvalue
 JsonNTVvalue    = JsonSingleValue / JsonListValue
-JsonSingleValue = NTVsingleValue
+JsonSingleValue = NTVsingleValue 
 JsonListValue   = JsonArrayValue / JsonObjectValue
-JsonArrayValue  = beginArray  [JsonNTVrepr  *(valSep JsonNTVrepr) ] endArray
-JsonObjectValue = beginObject [JsonNTVnamed *(valSep JsonNTVnamed)] endObject
+JsonArrayValue  = "JsonArray(" *JsonNTVrepr ")"
+JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
 
-
-
-singleSep   = COLON      ; : NTVsingle separator 
-listSep     = 2COLON     ; : NTVlist separator 
-
+singleSep   = ":"      ; NTVsingle separator 
+listSep     = "::"     ; NTVlist separator 
 string      = DQUOTE *CHAR DQUOTE
-beginArray  = WS %x5B WS ; [ left square bracket
-beginObject = WS %x7B WS ; { left curly bracket
-endArray    = WS %x5D WS ; ] right square bracket
-endObject   = WS %x7D WS ; } right curly bracket
-memSep      = WS %x3A WS ; : JSON-member separator
-valSep      = WS %x2C WS ; , JSON-Array separator 
 
-
-COLON    = %x3A          ; : colon
-POINT    = %x2E          ; . point
 DQUOTE   = %x22          ; " double quote
 CHAR     = %x01-7F
-WS       = *( %x20 /     ; Space
-              %x09 /     ; Horizontal tab
-              %x0A /     ; Line feed or New line
-              %x0D )     ; Carriage return
