@@ -24,7 +24,7 @@
   <front>
     <title abbrev="JSON-NTV">JSON-NTV semantic format</title>
     <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv"/>
-    <author fullname="Philippe THOMY" initials="PT" role="editor" surname="Philippe">
+    <author fullname="Philippe THOMY" initials="P" role="editor" surname="THOMY">
       <organization>Loco-labs</organization>
       <address>
         <postal>
@@ -126,74 +126,132 @@
           <xref target="RFC8174"/> when, and only when, they appear in
           all capitals, as shown here.</t>
         <t>This document also uses the following terms:</t><dl newline="true">    
-        <dt>First term: [REPLACE/DELETE]</dt>
-        <dd>Definition of the first term [REPLACE/DELETE]</dd>
-        <dt>Second term: [REPLACE/DELETE]</dt>
-        <dd>Definition of the second term [REPLACE/DELETE]</dd>
-      </dl>
+          <dt><strong>JsonType, JsonText, JsonName, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber, JsonString, JsonFalse, JsonNull, JsonTrue:</strong></dt>
+          <dd>These terms are defined as type, text, name, value, object, member, element, array, number, string, false, null, true in the JSON grammar.</dd>
+          <dt><strong>JsonPrimitive:</strong></dt>
+          <dd>A JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull.</dd>
+          <dt><strong>NTVsingle, NTVlist:</strong></dt>
+          <dd>NTVlist and NTVsingle entities can be abbreviated as:<ul>
+                <li>NVsingle, NVlist : entity without NTVtype</li>
+                <li>TVsingle, TVlist : entity without NTVname</li>
+                <li>Vsingle, Vlist : entity without NTVtype and without NTVname</li></ul>
+          </dd>
+        </dl>
       </section>
     </section>
     
     <section><name>NTV structure</name>
-      <t>Body text [REPLACE]</t>
-      
-      <ol>
-        <li>Ordered list item [REPLACE/DELETE]</li>
-      </ol>
-      
-      <ul>
-        <li>Bulleted list item [REPLACE/DELETE]</li>
-      </ul>
-      
-      <dl newline="true">
-        <!-- Omit newline="true" if you want each definition to start on the same line as the corresponding term -->
-        <dt>JSON-type, JSON-text, JSON-name, JSON-value, JSON-object, JSON-member, JSON-element, JSON-array, JSON-number, JSON-string, JSON-false, JSON-null, JSON-true:</dt>
-        <dd>These terms are defined as type, text, name, value, object, member, element, array, number, string, false, null, true in the JSON grammar.</dd>
-        <dt>JSON-primitive:</dt>
-        <dd>A JSON-number, JSON-string, JSON-false, JSON-true or JSON-null.</dd>
-      </dl>
-      
-      <table>
-        <thead>
-        <!-- [REPLACE/DELETE] a table header is optional -->
-          <tr><th>Column 1 [REPLACE]</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Cell [REPLACE]</td></tr>
-        </tbody>
-      </table>
+      <section><name>NTV entities</name>
+        <t>The NTV entity is a triplet (NTVvalue, NTVtype, NTVname).</t>
+        <t>The triplet contains all the data needed to reconstruct the software object.</t>
+        <t>Two categories of entities (one primitive and one structured) are defined:<ul>
+          <li>NTVsingle for the primitive entity,</li>
+          <li>NTVlist for an ordered sequence of NTV entities</li></ul></t>
+        <t>Entities are defined in <xref target="NTVentities-abnf" format="default" sectionFormat="of" derivedContent="Figure 1"/>, 
+        which uses ABNF from <xref target="RFC3339" format="default" sectionFormat="of" derivedContent="RFC3339"/>.</t>
+        <figure anchor="NTVentities-abnf" align="left" suppress-title="false" pn="figure-1">
+          <name>NTV entities - ABNF</name>
+          <sourcecode type="abnf" markers="false" pn="section-1">
+  ; notation:
+  ;   "Object(" *param ")" represent an Object defined by a list of parameters (param)
+  
+  ;   JsonArray(*param) represent a JsonArray as defined in the Json grammar, 
+  ;   *param is a list of JsonElement
+  ;   JsonObject(*param) represent a JsonObject as defined in the Json grammar, 
+  ;   *param is a list of JsonMember
+  ;   JsonValue represent a JsonValue as defined in the Json grammar
 
-      <figure align="left" suppress-title="false" pn="figure-5"><name>example ABNF</name>
-        <sourcecode type="abnf" markers="false" pn="section-3-5">
-          CRLF = %x0A / %x0D.0A
-          truc = machin
-        </sourcecode>
-      </figure>
+  NTVentity = NTVsingle / NTVlist
+  
+  NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
+  NTVsingleType   = NTVtype 
+  NTVsingleValue  = JsonValue / NTVsingle
 
-      <figure>
-        <name>Source [REPLACE]</name>
-        <sourcecode name="suggested filename [REPLACE/DELETE]" type="language [REPLACE/DELETE]" markers="true">
-          <![CDATA[
-source code goes here [REPLACE]
-          ]]>
-        </sourcecode>
-        <!-- [CHECK] markers="true" means that the rendered file will have <CODE BEGINS> and <CODE ENDS> added -->
-      </figure>
+  NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
+  NTVlistType     = NTVtype / Namespace
+  NTVlistValue    = *NTVentity
+  
+  NTVname         = string
+  JsonValue       = string
 
-      <figure>
-        <name>Diagram [REPLACE]</name>
-        <artset>
-        <!-- This <artset> includes two <artwork> elements, each of a different type -->
-          <artwork type="svg" src="https://www.rfc-editor.org/materials/format/svg/stream.svg" />
-          <!-- [REPLACE] src points to either a local file or a URI. -->
-          <artwork type="ascii-art" name="stream.txt">
-            <!-- [REPLACE/DELETE] name recommends a filename to use if the diagram is extracted -->  
+  string      = DQUOTE *CHAR DQUOTE
+  DQUOTE   = %x22          ; " double quote
+  CHAR     = %x01-7F
+          </sourcecode>
+        </figure>
+        <section><name>NTVsingle</name>
+          <t>The NTVvalue (NTVsingleValue) is the JSON representation of the NTV entity (JsonValue) or another NTVsingle entity.</t>
+          <t>The NTVtype (NTVsingleType) defines the type of entity and the conversion rules between the NTV entity and the NTVvalue. The default value is the "json" type.</t>
+          <t>The NTVname is a string</t>
+          <t><strong>In other words, any entity that has on the one hand a function of encoding it into a json value and on the other hand a function of creating from a json value can be taken into account.
+          This approach is very general because the majority of computer objects are defined by a list of parameters (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
+          which simply translate into a JSON-Array or a JSON-Object.</strong></t>
+        </section>
+        <section><name>NTVlist</name>
+          <t>The NTVvalue (NTVlistValue) is the list of included NTV entities.</t>
+          <t>The NTVtype (NTVlistType) is a Namespace or a default NTVtype to apply to the NTV entities included. This NTVtype avoids having to include a type (if default NTVtype) 
+          or reduce the length (if Namespace) in the JSON representation of the included NTV entities. The default value is "None".</t>
+          <t>The NTVname is a string.</t>
+          <ul empty="true">
+            <li><em>Example of equivalent JSON representations:</em><ul spacing="compact" empty="true">
+              <li><em>where NTVtype is None for the NTVlist</em><ul spacing="compact" empty="true">
+                <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] </em></li>
+              </ul></li>
+              <li><em>where NTVtype is "point" for the NTVlist</em><ul spacing="compact" empty="true">
+                <li><em>{ ":point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }</em></li>
+              </ul></li>
+            </ul></li>
+            <li><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1, 2] ] } }, 
+            the parsers deduce that the first NTVvalue has a  "dat" NTVtype and the second a "point" NTVtype.</em></li>
+          </ul>
+        </section>
+      </section>
+      <section><name>NTVtype</name>
+      </section>      
+      <section><name>examples</name>
+        <ol>
+          <li>Ordered list item [REPLACE/DELETE]</li>
+        </ol>
+        
+        <ul>
+          <li>Bulleted list item [REPLACE/DELETE]</li>
+        </ul>
+        
+        <table>
+          <thead>
+          <!-- [REPLACE/DELETE] a table header is optional -->
+            <tr><th>Column 1 [REPLACE]</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Cell [REPLACE]</td></tr>
+          </tbody>
+        </table>
+
+        <figure>
+          <name>Source [REPLACE]</name>
+          <sourcecode name="suggested filename [REPLACE/DELETE]" type="language [REPLACE/DELETE]" markers="true">
             <![CDATA[
- ascii-art diagram goes here [REPLACE]
+  source code goes here [REPLACE]
             ]]>
-          </artwork>
-        </artset>
-      </figure>
+          </sourcecode>
+          <!-- [CHECK] markers="true" means that the rendered file will have <CODE BEGINS> and <CODE ENDS> added -->
+        </figure>
+
+        <figure>
+          <name>Diagram [REPLACE]</name>
+          <artset>
+          <!-- This <artset> includes two <artwork> elements, each of a different type -->
+            <artwork type="svg" src="https://www.rfc-editor.org/materials/format/svg/stream.svg" />
+            <!-- [REPLACE] src points to either a local file or a URI. -->
+            <artwork type="ascii-art" name="stream.txt">
+              <!-- [REPLACE/DELETE] name recommends a filename to use if the diagram is extracted -->  
+              <![CDATA[
+  ascii-art diagram goes here [REPLACE]
+              ]]>
+            </artwork>
+          </artset>
+        </figure>
+      </section>
     </section>   
     
     <section anchor="IANA"><name>IANA Considerations</name>
@@ -213,6 +271,7 @@ source code goes here [REPLACE]
     <references><name>References</name>
       <references><name>Normative References</name>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
@@ -220,7 +279,7 @@ source code goes here [REPLACE]
       <references><name>Informative References</name>
         <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
           <title>JSON-ND</title>
-          <author initials="GK" surname="Kleidon"></author>
+          <author initials="G" surname="Kleidon"></author>
           <date year="2020"/>
         </front></reference>      
       </references>
