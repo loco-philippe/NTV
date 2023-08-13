@@ -177,6 +177,7 @@
   string      = DQUOTE *CHAR DQUOTE
   DQUOTE   = %x22          ; " double quote
   CHAR     = %x01-7F
+
           </sourcecode>
         </figure>
         <section><name>NTVsingle</name>
@@ -207,6 +208,78 @@
         </section>
       </section>
       <section><name>NTVtype</name>
+        <t>NTVtype and associated Namespace  are defined in <xref target="NTVtype-abnf" format="default" sectionFormat="of" derivedContent="Figure 2"/>, 
+        which uses ABNF from <xref target="RFC3339" format="default" sectionFormat="of" derivedContent="RFC3339"/>.</t>
+        <figure anchor="NTVtype-abnf" align="left" suppress-title="false" pn="figure-2">
+          <name>NTVtype - ABNF</name>
+          <sourcecode type="abnf" markers="false" pn="section-2">
+  ; Namespace and NtvType
+
+Namespace       = "Namespace(" NamespaceName  NamespaceParent ")" 
+NamespaceParent = Namespace  ; Namespace is nested
+NamespaceName   = [ ["$"] string "." ]  ; global namespace has an empty name
+JsonNamespace   = JsonNamespaceParent NamespaceName
+JsonNamespaceParent = JsonNamespace
+
+NTVtype         = "NTVtype(" NTVtypeName  NamespaceParent [NTVtypeGen] ")"
+NTVtypeGen      = NTVtype
+NTVtypeName     = ["$"] string
+JsonNTVtype     = JsonNamespaceParent NTVtypeName  
+
+          </sourcecode>
+        </figure>
+        <t>A NTVtype is defined by a name (NTVtypeName) and a Namespace parent (NamespaceParent). 
+        The NTVtype is unique in the Namespace parent.</t>
+
+        <t>NTVtype and the rules to encode or decode NTVvalues MUST be understood by data producers and data consumers.</t>
+        <t>So NTVtype and rules associated have to be defined in a specification shared by a large community.
+        On the other hand, it must be possible for everyone to share data according to their own data structure.
+        There are therefore two categories of data: 
+        custom NTVtype (and Namespace) which can be created by anyone without control,
+        shared NTVtype (and Namespace) that are defined and used in a single, shared repository.
+        The corresponding rules are as follows:
+        NTVtype (or Namespace) whose name begins with '$' is of type 'custom'
+        NTVtype (or Namespace) included in a Namespace of type 'custom' is also of type 'custom'
+        Each 'shared' Namespace or NTVtype is uniquely managed.
+        Example: 
+        If "fr." is a Namespace attached to the global Namespace and containing the Namespace 'BAN.' and the NTVtype 'dep', then: 
+        "fr.dep" is a shared NTVtype,
+        "fr.$test" is a custom NTVtype,
+        "fr.$example.one" is a custom NTVtype
+        "fr.BAN.$test" is a custom NTVtype
+
+        A Namespace is represented by a string followed by a point (NamespaceName).
+        Namespaces may be nested: a Namespace is included in a Namespace parent (NamespaceParent) and may contain Namespace child  
+        The global Namespace (root node in the Namespace tree) is represented by an empty string and its NamespaceParent is None. 
+
+        The Namespace representations are added to the value of an NTVtype to have an absolute representation of an NTVtype (JsonNTVtype).
+
+        Example for an absolute representation of an NTVtype defined in two nested Namespace in the global Namespace:
+        "ns1.ns2.type" 
+        where:
+        ns1. is a Namespace defined in the global Namespace,
+        ns2. is a Namespace defined in the ns1. Namespace,
+        type is a NTVtype defined in the ns2. Namespace
+
+        Example for a NVTtype defined in the global Namespace : 
+        "type"
+        where:
+        type is a NTVtype defined in the global Namespace
+
+        Three categories of NTVtype are defined (None, Simple, Generic).
+        The "None" NTVtype is used with NTVlist to indicate the absence of a default Type.
+        If NTVtype is Simple, the rules associated with the NTVtype are used  for the conversion between an entity and a NTVvalue.
+        The Generic NTVtype (NTVtypeGen) is equivalent to a set of Simple NTVtype. 
+        This indicates that parsers can use an associated simple NTV type to decode the JsonNTVvalue.
+
+        Example : 
+        "dat" is the generic NTVtype for "datetime" and "timeposix"
+        If a JSONvalue is { "::dat" : ["2022-01-28T18-23-54", 123456.78] }, the parser deduce that the NTVvalue of included entities has a NTVtype with a "dat" NTVtypeGen. 
+        The parser of included NTV entities deduces that the first object has an equivalent "datetime" NTVtype and the second an equivalent "timeposix" NTVtype.
+
+        This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate 
+        all the shared data structures within the same tree of types.</t>
+
       </section>      
       <section><name>examples</name>
         <ol>

@@ -20,17 +20,16 @@ NTVname         = string
 JsonValue       = string
 
 ; Namespace and NtvType
-;    Namespace object is defined by a name and a Namespace parent
-;    NTVtype   object is defined by a name, a Namespace parent and optionaly by a generic NTVtype
+
 Namespace       = "Namespace(" NamespaceName  NamespaceParent ")" ; Namespace is nested
 NamespaceParent = Namespace
-NamespaceName   = [string "."]  ; the global namespace is represented by an empty string
+NamespaceName   = [ ["$"] string "." ]  ; the global namespace is represented by an empty string
 JsonNamespace   = JsonNamespaceParent NamespaceName
 JsonNamespaceParent = JsonNamespace
 
 NTVtype         = "NTVtype(" NTVtypeName  NamespaceParent [NTVtypeGen] ")"
 NTVtypeGen      = NTVtype
-NTVtypeName     = string
+NTVtypeName     = ["$"] string
 JsonNTVtype     = JsonNamespace NTVtypeName   ; JsonNamespace is the JsonNamespace of the NamespaceParent
 
 ; Json representation of NTV entities
