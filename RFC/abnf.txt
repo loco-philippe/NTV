@@ -33,7 +33,7 @@ NTVtypeName     = ["$"] string
 JsonNTVtype     = JsonNamespace NTVtypeName   ; JsonNamespace is the JsonNamespace of the NamespaceParent
 
 ; Json representation of NTV entities
-JsonNTVrepr     = JsonNTVnamed / JsonNTVsimple
+JsonNTV         = JsonNTVnamed / JsonNTVsimple
 JsonNTVnamed    = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")"  ; Json-object with a single member
 JsonNTVsimple   = JsonNTVvalue
 JsonNTVname     = NTVname / (NTVname JsonType) / JsonType
