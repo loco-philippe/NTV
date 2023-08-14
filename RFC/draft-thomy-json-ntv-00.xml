@@ -268,8 +268,10 @@ JsonNTVtype     = JsonNamespaceParent NTVtypeName
 ; JsonValue representation of NTV entities
 
 JsonNTV         = JsonNTVnamed / JsonNTVsimple
+
 JsonNTVnamed    = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")"  ; Json-object with a single member
 JsonNTVsimple   = JsonNTVvalue
+
 JsonNTVname     = NTVname / (NTVname JsonType) / JsonType
 JsonType        = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
 
@@ -293,27 +295,55 @@ JsonType        = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]
           <li><em>a NTVlist with a single included entity has a JsonNTVname with a pair of colons e.g. { "::" : { "age" : 21 } }</em></li>
         </ul></t>
       </section>
-      <section><name>JsonType</name>
-        <t>The JsonType is composed with the separator singleSep or listSep and the JsonNTVtype.</t>
-        <t>For NTVsingle entities:</t><ul>
-          <li>The JsonType is identical to the singleSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
-          <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is empty.</li>
-          <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonType is ":".</li></ul>
-        <t>For NTVlist entities:</t><ul>
-          <li>The JsonType is identical to the listSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
-          <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is "::".</li>
-          <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonType is empty.</li></ul>
-        <t>For NTV entities included in another entity, the JsonType MAY be set to :</t><ul>
-          <li>The empty string if the NTVtype of the structured NTV entity is identical to the NTVtype of the NTV entity,</li>
-          <li>relative NTVtype if the NTVtype of the structured NTV entity is a Namespace shared with the NTVtype of the NTV entity.</li></ul>
-      </section>
       <section><name>JsonNTVname</name>
+        <t><strong>JsonNTVname</strong></t><ul empty="true">
+          <li>JsonNTVname is the concatenation of NTVname and JsonType.</li>
+          <li>If the JsonNTVname contains one colon, the entity is a NTV-single.</li>
+          <li>If the JsonNTVname contains two adjacent colons, the entity is an NTV-list.</li></ul>
+        <t><strong>JsonType</strong></t><ul empty="true">
+          <li>The JsonType is composed with the separator singleSep or listSep and the JsonNTVtype.</li>
+          <li>For NTVsingle entities:<ul>
+            <li>The JsonType is identical to the singleSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is empty.</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonType is ":".</li></ul></li>
+          <li>For NTVlist entities:<ul>
+            <li>The JsonType is identical to the listSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is "::".</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonType is empty.</li></ul></li>
+          <li>For NTV entities included in another entity, the JsonType MAY be set to :<ul>
+            <li>The empty string if the NTVtype of the structured NTV entity is identical to the NTVtype of the NTV entity,</li>
+            <li>relative NTVtype if the NTVtype of the structured NTV entity is a Namespace shared with the NTVtype of the NTV entity.</li></ul></li></ul>
       </section>
       <section><name>JsonNTVvalue</name>
+        <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in <xref target="JsonNTVvalue-abnf" format="default" sectionFormat="of" derivedContent="Figure 4"/>, 
+        which uses ABNF from <xref target="RFC3339"/>.</t>
+        <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-4">
+          <name>JsonNTVvalue - ABNF</name>
+          <sourcecode type="abnf" markers="false" pn="section-4">
+; Json representation of NTVvalue
+
+JsonNTVvalue    = JsonSingleValue / JsonListValue
+
+JsonSingleValue = NTVsingleValue / JsonSingleValue
+JsonListValue   = JsonArrayValue / JsonObjectValue
+JsonArrayValue  = "JsonArray(" *JsonNTV ")"
+JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
+
+          </sourcecode>
+        </figure>
+        <t>For a NTVsingle, JsonNTVvalue is the NTVvalue (if NTVvalue is not a NTVsingle entity) or the JsonSingleValue of NTVsingle included.</t>
+        <t>For a NTVlist, JsonNTValue has two representations:<ul>
+          <li>a JsonArray where JsonElements are the JsonNTV of included NTV entities,</li>
+          <li>a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.</li></ul></t>
+        <t><em>Note:</em><ul empty="true">
+          <li><em>The JsonObject option is available only if all the NTV entities included have a JsonNTVname and all the JsonNTVname are different 
+          (e.g. {":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640]} is not a valid  JSON-value)</em></li></ul></t>
       </section>
     </section>
-    <section><name>examples a virer</name>
+    <section><name>examples</name>
         <section><name>examples</name>
+        </section>
+        <section><name>a virer</name>
         <ol>
           <li>Ordered list item [REPLACE/DELETE]</li>
         </ol>
