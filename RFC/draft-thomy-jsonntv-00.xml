@@ -45,8 +45,8 @@
       <section><name>Presentation</name>
         <t>Today, the semantic level of shared data remains low. It is very often limited to the type of data defined 
         in the exchange formats (strings for CSV formats; numbers, strings, arrays and objects for JSON formats).</t>
-        <t>JSON-NTV proposes to increase the semantic level of the JSON entities <xref target="RFC8259"/> by adding two additional pieces of information
-         to a JSON entity :<ul>
+        <t>JSON-NTV proposes to increase the semantic level of the JSON entities <xref target="RFC8259"/> 
+        by adding two additional pieces of information to a JSON entity :<ul>
           <li><strong>name</strong>: interpretation of the value in human language or detailed information or link to external information,</li>
           <li><strong>type</strong>: interpretation of the value in a data standard (e.g. GeoJSON, datetime), in a data catalog or 
           in a software language.</li></ul>
@@ -119,6 +119,10 @@
           null, true in the JSON grammar.</dd>
           <dt><strong>JsonPrimitive:</strong></dt>
           <dd>A JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull.</dd>
+          <dt><strong>JsonUnnamed:</strong></dt>
+          <dd>A JSON-object without a single member.</dd>
+          <dt><strong>JsonNamed:</strong></dt>
+          <dd>A JSON-object with a single member.</dd>
           <dt><strong>NTVsingle, NTVlist:</strong></dt>
           <dd>NTVlist and NTVsingle entities can be abbreviated as:<ul>
                 <li>NVsingle : entity with default NTVtype "json",</li>
@@ -141,28 +145,30 @@
           <name>NTV entities - ABNF</name>
           <sourcecode type="abnf" markers="false">
   ; notation:
-  ;   "Object(" *param ")" represent an Object defined by a list of parameters (param)
+  ;   "Object(" *param ")" represent an Object defined 
+  ;   by a list of parameters (param)
   
-  ;   JsonArray(*param) represent a JsonArray as defined in the Json grammar, 
-  ;   *param is a list of JsonElement
-  ;   JsonObject(*param) represent a JsonObject as defined in the Json grammar, 
-  ;   *param is a list of JsonMember
-  ;   JsonValue represent a JsonValue as defined in the Json grammar
+  ;   JsonArray(*param) represent a JsonArray as defined 
+  ;   in the Json grammar, *param is a list of JsonElement
+  ;   JsonObject(*param) represent a JsonObject as defined 
+  ;   in the Json grammar, *param is a list of JsonMember
+  ;   JsonValue represent a JsonValue as defined 
+  ;   in the Json grammar
 
   NTVentity = NTVsingle / NTVlist
   
   NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
-  NTVsingleType   = NTVtype 
-  NTVsingleValue  = JsonValue
+  NTVsingleType  = NTVtype 
+  NTVsingleValue = JsonValue
 
   NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
-  NTVlistType     = NTVtype / Namespace
-  NTVlistValue    = *NTVentity
+  NTVlistType    = NTVtype / Namespace
+  NTVlistValue   = *NTVentity
   
-  NTVname         = string
-  JsonValue       = string
+  NTVname        = string
+  JsonValue      = string
 
-  string      = DQUOTE *CHAR DQUOTE
+  string   = DQUOTE *CHAR DQUOTE
   DQUOTE   = %x22          ; " double quote
   CHAR     = %x01-7F
 
@@ -193,7 +199,7 @@
                 <li><em>{ ":point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }</em></li>
               </ul></li>
             </ul></li>
-            <li><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1, 2] ] } }, 
+            <li><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1.1, 2.2] ] } }, 
             the parsers deduce that the first NTVvalue has a  "dat" NTVtype and the second a "point" NTVtype.</em></li>
           </ul>
         </section>
@@ -207,16 +213,16 @@
           <sourcecode type="abnf" markers="false">
 ; Namespace and NtvType
 
-Namespace       = "Namespace(" NamespaceName  NamespaceParent ")" 
+Namespace       = "Namespace(" NamespaceName NamespaceParent ")" 
 NamespaceParent = Namespace  ; Namespace is nested
-NamespaceName   = [ ["$"] string "." ]  ; global namespace has an empty name
+NamespaceName   = [ ["$"] string "." ] 
 JsonNamespace   = JsonNamespaceParent NamespaceName
 JsonNamespaceParent = JsonNamespace
 
-NTVtype         = "NTVtype(" NTVtypeName  NamespaceParent [NTVtypeGen] ")"
-NTVtypeGen      = NTVtype
-NTVtypeName     = ["$"] string
-JsonNTVtype     = JsonNamespaceParent NTVtypeName  
+NTVtype     = "NTVtype(" NTVtypeName NamespaceParent [NTVtypeGen] ")"
+NTVtypeGen  = NTVtype
+NTVtypeName = ["$"] string
+JsonNTVtype = JsonNamespaceParent NTVtypeName  
 
           </sourcecode>
         </figure>
@@ -275,14 +281,16 @@ JsonNTVtype     = JsonNamespaceParent NTVtypeName
           <sourcecode type="abnf" markers="false">
 ; JsonValue representation of NTV entities
 
-JsonNTV         = JsonNTVnamed / JsonNTVsimple
+JsonNTV        = JsonNTVnamed / JsonNTVsimple
 
-JsonNTVnamed    = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")"  ; Json-object with a single member
-JsonNTVsimple   = JsonNTVvalue
+JsonNTVnamed   = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")" 
+JsonNTVsimple  = JsonNTVvalue
 
-JsonNTVname     = NTVname / (NTVname JsonType) / JsonType
-JsonType        = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
+JsonNTVname    = NTVname / (NTVname JsonType) / JsonType
+JsonType       = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
 
+singleSep   = ":"      ; NTVsingle separator 
+listSep     = "::"     ; NTVlist separator
           </sourcecode>
         </figure>
         <t>The JsonNTV format is built with the NTVname, NTVvalue and the JsonNTVtype.</t>
@@ -335,8 +343,9 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
+
 JsonArrayValue     = "JsonArray(" *JsonNTV ")"
-JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
+JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
 
           </sourcecode>
         </figure>
@@ -346,105 +355,151 @@ JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <li>a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.</li></ul></t>
         <t><em>Note:</em><ul empty="true">
           <li><em>The JsonObject option is available only if all the NTV entities included have a JsonNTVname and 
-          all the JsonNTVname are different (e.g. {":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640]} is not a valid  JSON-value)</em></li></ul></t>
+          all the JsonNTVname are different (e.g. {":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640]} 
+          is not a valid  JSON-value)</em></li></ul></t>
       </section>
     </section>
     <section><name>examples</name>
-        <section><name>examples</name>
-          <t>Examples of JsonNTV representation of NTV entities:</t>
-          <t><strong>Vsingle :</strong></t><ul empty="true">
-            <li><em>"lyon"</em></li>
-            <li><em>52.5</em></li>
-            <li><em>{ ":" : [4.8357, 45.7640] }</em></li></ul>
-          <t><strong>NVsingle : </strong></t><ul empty="true">
-            <li><em>{ "city" : "paris" }</em></li>
-            <li><em>{ "paris:" : [4.8357, 45.7640] }</em></li></ul>
-          <t><strong>TVsingle: </strong></t><ul empty="true">
-            <li><em>{ ":point" : [4.8357, 45.7640] }</em></li></ul>
-          <t><strong>NTVsingle: </strong></t><ul empty="true">
-            <li><em>{ "paris:point" : [2.3522, 48.8566] }</em></li>
-            <li><em>{ "paris:ntv" : { "coordinate:point" : [4.8357, 45.7640] } }</em></li></ul>
-          <t><strong>Vlist (composed with JsonArray): </strong></t><ul empty="true">
-            <li><em>[4, 45]</em></li>
-            <li><em>["paris"]</em></li>
-            <li><em>[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]</em></li>
-            <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]</em></li>
-            <li><em>[]</em></li></ul>
-          <t><strong>Vlist (composed with JsonObject) :</strong></t><ul empty="true">
-            <li><em>{ "name": "white", "firstname":"walter", "surname":"heisenberg" }</em></li>
-            <li><em>{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}</em></li>
-            <li><em>{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640]}</em></li>
-            <li><em>{ }</em></li></ul>
-          <t><strong>NVlist : </strong></t><ul empty="true">
-            <li><em>{ "simple list" : [4, 45.7] }</em></li>
-            <li><em>{ "cities" : [ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] }</em></li></ul>
-          <t><strong>TVlist : </strong></t><ul empty="true">
-            <li><em>{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }</em></li>
-            <li><em>{ "::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li></ul>
-          <t><strong>NTVlist : </strong></t><ul empty="true">
-            <li><em>{ "cities::point" : [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
-            <li><em>{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li>
-            <li><em>{ "various::point" : [ [2.3522, 48.8566], { ":date": "2022-01-28"}</em></li>
-            <li><em>{"json": 25 }, { "another NTVlist":: [ 1,2,3]} ] }</em></li></ul>
-          <t><strong>NTVlist and NVlist (composed with JsonObject) :</strong></t><ul empty="true">
-            <li><em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em></li>
-            <li><em>{ "cities" : { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}  }</em></li>
-            <li><em>{ "city::" : { "paris" : [2.3522, 48.8566] } }</em></li></ul>
-
-        </section>
-        <section><name>a virer</name>
-        
-        <table>
-          <thead>
-          <!-- [REPLACE/DELETE] a table header is optional -->
-            <tr><th>Column 1 [REPLACE]</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Cell [REPLACE]</td></tr>
-          </tbody>
-        </table>
-
-        <figure>
-          <name>A Box</name>
-          <artset>  <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artset -->
-          <!-- This <artset> includes two <artwork> elements, each of a different type.  Both are not 
-              always needed.  See https://authors.ietf.org/e/en/adding-diagrams -->
-            <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
-              <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artwork -->
-              <!-- Inserting the SVG like this is only one way of adding an SVG diagram.  Another way is 
-                  to use the src attribute to point to an external file or URI.  The name attribute 
-                  recommends a filename to use if the artwork is extracted to a file. -->
-              <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 71 40">
-                <g>
-                  <title>Layer 1</title>
-                  <rect x="4.5" y="6.5" width="61.0" height="27.0" stroke="black" stroke-width="1.0" 
-                  stroke-linecap="square" stroke-linejoin="miter" fill="none" />
-                  <text x="33.883" text-anchor="middle" y="26.559">
-                    <tspan fill="black" font-size="13.0">A box</tspan>
-                  </text>
-                </g>
-              </svg>
-            </artwork>
-            <artwork type="ascii-art" name="box.txt">
-              <![CDATA[
-  +--------+
-  | A box  |
-  +--------+          
-              ]]>
-            </artwork>
-          </artset>      
-        </figure>
-      </section>
+      <t>Examples of JsonNTV representation of NTV entities:</t>
+      <t><strong>Vsingle :</strong></t><ul empty="true">
+        <li><em>"lyon"</em></li>
+        <li><em>52.5</em></li>
+        <li><em>{ ":" : [4.8357, 45.7640] }</em></li></ul>
+      <t><strong>NVsingle : </strong></t><ul empty="true">
+        <li><em>{ "city" : "paris" }</em></li>
+        <li><em>{ "paris:" : [4.8357, 45.7640] }</em></li></ul>
+      <t><strong>TVsingle: </strong></t><ul empty="true">
+        <li><em>{ ":point" : [4.8357, 45.7640] }</em></li></ul>
+      <t><strong>NTVsingle: </strong></t><ul empty="true">
+        <li><em>{ "paris:point" : [2.3522, 48.8566] }</em></li>
+        <li><em>{ "paris:ntv" : { "coordinate:point" : [4.8357, 45.7640] } }</em></li></ul>
+      <t><strong>Vlist (composed with JsonArray): </strong></t><ul empty="true">
+        <li><em>[4, 45]</em></li>
+        <li><em>["paris"]</em></li>
+        <li><em>[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]</em></li>
+        <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]</em></li>
+        <li><em>[]</em></li></ul>
+      <t><strong>Vlist (composed with JsonObject) :</strong></t><ul empty="true">
+        <li><em>{ "name": "white", "firstname":"walter", "surname":"heisenberg" }</em></li>
+        <li><em>{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}</em></li>
+        <li><em>{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640]}</em></li>
+        <li><em>{ }</em></li></ul>
+      <t><strong>NVlist : </strong></t><ul empty="true">
+        <li><em>{ "simple list" : [4, 45.7] }</em></li>
+        <li><em>{ "cities" : [ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] }</em></li></ul>
+      <t><strong>TVlist : </strong></t><ul empty="true">
+        <li><em>{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }</em></li>
+        <li><em>{ "::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li></ul>
+      <t><strong>NTVlist : </strong></t><ul empty="true">
+        <li><em>{ "cities::point" : [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
+        <li><em>{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li>
+        <li><em>{ "various::point" : [ [2.3522, 48.8566], { ":date": "2022-01-28"}</em></li>
+        <li><em>{"json": 25 }, { "another NTVlist":: [ 1,2,3]} ] }</em></li></ul>
+      <t><strong>NTVlist and NVlist (composed with JsonObject) :</strong></t><ul empty="true">
+        <li><em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em></li>
+        <li><em>{ "cities" : { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}  }</em></li>
+        <li><em>{ "city::" : { "paris" : [2.3522, 48.8566] } }</em></li></ul>
+    </section>
+    <section><name>Parsing a JsonValue</name>
+      <t>A first decoding step identifies the following objects:</t><ul empty='true'>
+        <li>JsonNTVvalue, NTVname (if present), separator (if present), JsonNTVtype (if present).</li></ul>
+      <t>The tables below present the rules for identifying angle NTV entity.</t> 
+      <table anchor="table1" align="left" pn="table-1"><name>Decoding JsonValue</name>
+        <thead>
+          <tr><th align="left" colspan="1" rowspan="1">JsonValue</th>
+              <th align="left" colspan="1" rowspan="1">NTV entity</th></tr>
+        </thead><tbody>
+          <tr><td align="left" colspan="1" rowspan="1">JsonPrimitive</td>
+              <td align="left" colspan="1" rowspan="1">Vsingle</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">JsonUnnamed</td>
+              <td align="left" colspan="1" rowspan="1">Vlist</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">JsonArray</td>
+              <td align="left" colspan="1" rowspan="1">Vlist</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">JsonNamed</td>
+              <td align="left" colspan="1" rowspan="1">see Table 2</td></tr>
+        </tbody>
+      </table>
+      <table anchor="table2" align="left" pn="table-2"><name>Decoding JsonNTVvalue</name>
+        <thead>
+          <tr><th align="left" colspan="1" rowspan="1">Separator</th>
+              <th align="left" colspan="1" rowspan="1">JsonNTVvalue</th>
+              <th align="left" colspan="1" rowspan="1">NTV entity</th></tr>
+        </thead><tbody>
+          <tr><td align="left" colspan="1" rowspan="1">None</td>
+              <td align="left" colspan="1" rowspan="1">JsonPrimitive</td>
+              <td align="left" colspan="1" rowspan="1">NVsingle</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">None</td>
+              <td align="left" colspan="1" rowspan="1">JsonNamed</td>
+              <td align="left" colspan="1" rowspan="1">NVsingle</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">None</td>
+              <td align="left" colspan="1" rowspan="1">JsonUnnamed</td>
+              <td align="left" colspan="1" rowspan="1">NVlist</td></tr>                
+          <tr><td align="left" colspan="1" rowspan="1">None</td>
+              <td align="left" colspan="1" rowspan="1">JsonArray</td>
+              <td align="left" colspan="1" rowspan="1">NVlist</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">":"</td>
+              <td align="left" colspan="1" rowspan="1">JsonValue</td>
+              <td align="left" colspan="1" rowspan="1">TVsingle or NTVSingle</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">"::"</td>
+              <td align="left" colspan="1" rowspan="1">JsonUnnamed</td>
+              <td align="left" colspan="1" rowspan="1">NVlist or TVlist or NTVlist</td></tr>
+          <tr><td align="left" colspan="1" rowspan="1">"::"</td>
+              <td align="left" colspan="1" rowspan="1">JsonArray</td>
+              <td align="left" colspan="1" rowspan="1">NVlist or TVlist or NTVlist</td></tr>                                                
+        </tbody>
+      </table>
+      <t>The NTVvalue of NTVsingle is the JsonNTVvalue.</t>
+      <t>The NTVvalue of NTVlist is build by decoding data included in JsonNTVvalue.</t>
+      <t>For NTV entities not included in a NTVlist, the NTVtype is built with:</t><ul>
+        <li>"json" JsonNTVtype if JsonNTVtype is None and if the NTV entity is a NTVsingle,</li>
+        <li>the NTVtype build with the JsonNTVType.</li></ul>
+      <t>For NTV entities included in a NTVlist, the NTVtype is built with : </t><ul>
+        <li>the JsonNTVtype if it is an absolute NTVtype and if the entity is a NTVsingle,</li>
+        <li>the concatenation of the JsonNTVtype of the NTVlist and the JsonNTVtype (if it is a relative NTVtype),</li>
+        <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
+      <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
+    </section>
+    <section><name>tests</name>
+      <figure>
+        <name>A Box</name>
+        <artset>  <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artset -->
+        <!-- This <artset> includes two <artwork> elements, each of a different type.  Both are not 
+            always needed.  See https://authors.ietf.org/e/en/adding-diagrams -->
+          <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
+            <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artwork -->
+            <!-- Inserting the SVG like this is only one way of adding an SVG diagram.  Another way is 
+                to use the src attribute to point to an external file or URI.  The name attribute 
+                recommends a filename to use if the artwork is extracted to a file. -->
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 71 40">
+              <g>
+                <title>Layer 1</title>
+                <rect x="4.5" y="6.5" width="30.0" height="15.0" stroke="black" stroke-width="0.2" 
+                stroke-linecap="square" stroke-linejoin="miter" fill="none" />
+                <text x="20" text-anchor="middle" y="15">
+                  <tspan fill="black" font-size="3.0">A box</tspan>
+                </text>
+              </g>
+            </svg>
+          </artwork>
+          <artwork type="ascii-art" name="box.txt">
+            <![CDATA[
++--------+
+| A box  |
++--------+          
+            ]]>
+          </artwork>
+        </artset>      
+      </figure>
     </section>   
     
     <section anchor="IANA"><name>IANA Considerations</name>
     <!-- All drafts are required to have an IANA considerations section. See RFC 8126 for a guide.-->
-      <t>This memo includes no request to IANA. [CHECK]</t>
+      <t>This memo includes no request to IANA. -CHECK-</t>
     </section>
     
     <section anchor="Security"><name>Security Considerations</name>
       <!-- All drafts are required to have a security considerations section. See RFC 3552 for a guide. -->
-      <t>This document should not affect the security of the Internet. [CHECK]</t>
+      <t>This document should not affect the security of the Internet. -CHECK-</t>
     </section>
     
     <!-- NOTE: The Acknowledgements and Contributors sections are at the end of this template -->
@@ -469,17 +524,16 @@ JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
     </references>
     
     <section>
-      <name>Appendix 1 [REPLACE/DELETE]</name>
-      <t>This becomes an Appendix [REPLACE]</t>
+      <name>Appendix 1 - REPLACE/DELETE-</name>
+      <t>This becomes an Appendix -REPLACE-</t>
     </section>
 
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
-      <t>This template uses extracts from templates written by Pekka Savola, Elwyn Davies and 
-        Henrik Levkowetz. [REPLACE]</t>
+      <t>TBD</t>
     </section>
     
     <section anchor="Contributors" numbered="false"><name>Contributors</name> 
-      <t>Thanks to all of the contributors. [REPLACE]</t>
+      <t>Thanks to all of the contributors. -REPLACE-</t>
     </section>
     
  </back>
