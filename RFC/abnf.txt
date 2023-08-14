@@ -13,7 +13,7 @@ NTVentity = NTVsingle / NTVlist
 
 NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
 NTVsingleType   = NTVtype 
-NTVsingleValue  = JsonValue / NTVsingle
+NTVsingleValue  = JsonValue
 
 NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
 NTVlistType     = NTVtype / Namespace
@@ -53,9 +53,9 @@ listSep     = "::"     ; NTVlist separator
 
 ; Json representation of NTVvalue
 
-JsonNTVvalue    = JsonSingleValue / JsonListValue
-JsonSingleValue = NTVsingleValue / JsonSingleValue
-JsonListValue   = JsonArrayValue / JsonObjectValue
-JsonArrayValue  = "JsonArray(" *JsonNTVrepr ")"
+JsonNTVvalue    = JsonNTVsingleValue / JsonNTVlistValue
+JsonNTVsingleValue = NTVsingleValue
+JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
+JsonArrayValue  = "JsonArray(" *JsonNTV ")"
 JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
 

@@ -55,7 +55,7 @@
         <ul empty="true">
           <li><em>For example, Paris location can be represented by : </em><ul spacing="compact">
             <li><em>a name : "paris",</em></li>
-            <li><em>a type : geoJSON Point coordinates,</em></li>
+            <li><em>a type : geoJSON Point coordinates <xref target="RFC7946"/>,</em></li>
             <li><em>a value : [2.3522, 48.8566]</em></li>
           </ul></li>
         </ul>
@@ -151,7 +151,7 @@
   
   NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
   NTVsingleType   = NTVtype 
-  NTVsingleValue  = JsonValue / NTVsingle
+  NTVsingleValue  = JsonValue
 
   NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
   NTVlistType     = NTVtype / Namespace
@@ -167,7 +167,7 @@
           </sourcecode>
         </figure>
         <section><name>NTVsingle</name>
-          <t>The NTVvalue (NTVsingleValue) is the JSON representation of the NTV entity (JsonValue) or another NTVsingle entity.</t>
+          <t>The NTVvalue (NTVsingleValue) is the JSON representation of the NTV entity (JsonValue).</t>
           <t>The NTVtype (NTVsingleType) defines the type of entity and the conversion rules between the NTV entity and the NTVvalue. The default value is the "json" type.</t>
           <t>The NTVname is a string</t>
           <t><strong>In other words, any entity that has on the one hand a function of encoding it into a json value and on the other hand a function of creating from a json value can be taken into account.
@@ -322,16 +322,16 @@ JsonType        = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]
           <sourcecode type="abnf" markers="false" pn="section-4">
 ; Json representation of NTVvalue
 
-JsonNTVvalue    = JsonSingleValue / JsonListValue
+JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
-JsonSingleValue = NTVsingleValue / JsonSingleValue
-JsonListValue   = JsonArrayValue / JsonObjectValue
-JsonArrayValue  = "JsonArray(" *JsonNTV ")"
-JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
+JsonNTVsingleValue = NTVsingleValue
+JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
+JsonArrayValue     = "JsonArray(" *JsonNTV ")"
+JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
 
           </sourcecode>
         </figure>
-        <t>For a NTVsingle, JsonNTVvalue is the NTVvalue (if NTVvalue is not a NTVsingle entity) or the JsonSingleValue of NTVsingle included.</t>
+        <t>For a NTVsingle, JsonNTVvalue is the NTVvalue.</t>
         <t>For a NTVlist, JsonNTValue has two representations:<ul>
           <li>a JsonArray where JsonElements are the JsonNTV of included NTV entities,</li>
           <li>a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.</li></ul></t>
@@ -342,15 +342,48 @@ JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
     </section>
     <section><name>examples</name>
         <section><name>examples</name>
+          <t>Examples of JsonNTV representation of NTV entities:</t>
+          <t><strong>Vsingle :</strong></t><ul empty="true">
+            <li><em>"lyon"</em></li>
+            <li><em>52.5</em></li>
+            <li><em>{ ":" : [4.8357, 45.7640] }</em></li></ul>
+          <t><strong>NVsingle : </strong></t><ul empty="true">
+            <li><em>{ "city" : "paris" }</em></li>
+            <li><em>{ "paris:" : [4.8357, 45.7640] }</em></li></ul>
+          <t><strong>TVsingle: </strong></t><ul empty="true">
+            <li><em>{ ":point" : [4.8357, 45.7640] }</em></li></ul>
+          <t><strong>NTVsingle: </strong></t><ul empty="true">
+            <li><em>{ "paris:point" : [2.3522, 48.8566] }</em></li>
+            <li><em>{ "paris:ntv" : { "coordinate:point" : [4.8357, 45.7640] } }</em></li></ul>
+          <t><strong>Vlist (composed with JsonArray): </strong></t><ul empty="true">
+            <li><em>[4, 45]</em></li>
+            <li><em>["paris"]</em></li>
+            <li><em>[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]</em></li>
+            <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]</em></li>
+            <li><em>[]</em></li></ul>
+          <t><strong>Vlist (composed with JsonObject) :</strong></t><ul empty="true">
+            <li><em>{ "name": "white", "firstname":"walter", "surname":"heisenberg" }</em></li>
+            <li><em>{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}</em></li>
+            <li><em>{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640]}</em></li>
+            <li><em>{ }</em></li></ul>
+          <t><strong>NVlist : </strong></t><ul empty="true">
+            <li><em>{ "simple list" : [4, 45.7] }</em></li>
+            <li><em>{ "cities" : [ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] }</em></li></ul>
+          <t><strong>TVlist : </strong></t><ul empty="true">
+            <li><em>{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }</em></li>
+            <li><em>{ "::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li></ul>
+          <t><strong>NTVlist : </strong></t><ul empty="true">
+            <li><em>{ "cities::point" : [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
+            <li><em>{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li>
+            <li><em>{ "various::point" : [ [2.3522, 48.8566], { ":date": "2022-01-28"}</em></li>
+            <li><em>{"json": 25 }, { "another NTVlist":: [ 1,2,3]} ] }</em></li></ul>
+          <t><strong>NTVlist and NVlist (composed with JsonObject) :</strong></t><ul empty="true">
+            <li><em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em></li>
+            <li><em>{ "cities" : { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}  }</em></li>
+            <li><em>{ "city::" : { "paris" : [2.3522, 48.8566] } }</em></li></ul>
+
         </section>
         <section><name>a virer</name>
-        <ol>
-          <li>Ordered list item [REPLACE/DELETE]</li>
-        </ol>
-        
-        <ul>
-          <li>Bulleted list item [REPLACE/DELETE]</li>
-        </ul>
         
         <table>
           <thead>
@@ -361,16 +394,6 @@ JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
             <tr><td>Cell [REPLACE]</td></tr>
           </tbody>
         </table>
-
-        <figure>
-          <name>Source [REPLACE]</name>
-          <sourcecode name="suggested filename [REPLACE/DELETE]" type="language [REPLACE/DELETE]" markers="true">
-            <![CDATA[
-  source code goes here [REPLACE]
-            ]]>
-          </sourcecode>
-          <!-- [CHECK] markers="true" means that the rendered file will have <CODE BEGINS> and <CODE ENDS> added -->
-        </figure>
 
         <figure>
           <name>Diagram [REPLACE]</name>
@@ -405,6 +428,7 @@ JsonObjectValue = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
   <back>
     <references><name>References</name>
       <references><name>Normative References</name>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7946.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
