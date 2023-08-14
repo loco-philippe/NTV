@@ -8,7 +8,7 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="info"
-  docName="draft-thomy-json-ntv"
+  docName="draft-thomy-jsonntv-00"
   ipr="trust200902"
   obsoletes=""
   updates=""
@@ -17,7 +17,7 @@
   version="0">
   <front>
     <title abbrev="JSON-NTV">JSON-NTV semantic format</title>
-    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv"/>
+    <seriesInfo name="Internet-Draft" value="draft-thomy-jsonntv-00"/>
     <author fullname="Philippe THOMY" initials="P" role="editor" surname="THOMY">
       <organization>Loco-labs</organization>
       <address>
@@ -36,8 +36,8 @@
     <keyword>JSON SEMANTIC</keyword>
     <abstract>
       <t>This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
-      JSON Data Interchange Format <xref target="RFC8259" />. These rules and framework, called JSON-NTV (JSON with 
-      Named and Typed Values), relies on the rules defined in the <xref target="JSON-ND" />.</t>
+      JSON Data Interchange Format. These rules and framework, called JSON-NTV (JSON with 
+      Named and Typed Values), relies on the rules defined in the.</t>
     </abstract>
   </front>
   <middle>
@@ -45,7 +45,7 @@
       <section><name>Presentation</name>
         <t>Today, the semantic level of shared data remains low. It is very often limited to the type of data defined 
         in the exchange formats (strings for CSV formats; numbers, strings, arrays and objects for JSON formats).</t>
-        <t>JSON-NTV proposes to increase the semantic level of the JSON entities by adding two additional pieces of information
+        <t>JSON-NTV proposes to increase the semantic level of the JSON entities <xref target="RFC8259"/> by adding two additional pieces of information
          to a JSON entity :<ul>
           <li><strong>name</strong>: interpretation of the value in human language or detailed information or link to external information,</li>
           <li><strong>type</strong>: interpretation of the value in a data standard (e.g. GeoJSON, datetime), in a data catalog or 
@@ -60,7 +60,7 @@
           </ul></li>
         </ul>
         <t>The easiest way to add that information into a JSON-value is to use a JSON-object with a single member using 
-        the syntax JSON-ND for the first term of the member and the JSON-value for the second term of the member.</t>
+        the syntax JSON-ND <xref target="JSON-ND"/> for the first term of the member and the JSON-value for the second term of the member.</t>
         <ul empty="true">
           <li><em>The JSON value of the previous example is:</em><ul spacing="compact" empty="true">
             <li><em>{ "paris:point" : [2.3522, 48.8566] }</em></li>
@@ -113,8 +113,10 @@
           <xref target="RFC8174"/> when, and only when, they appear in
           all capitals, as shown here.</t>
         <t>This document also uses the following terms:</t><dl newline="true">    
-          <dt><strong>JsonType, JsonText, JsonName, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber, JsonString, JsonFalse, JsonNull, JsonTrue:</strong></dt>
-          <dd>These terms are defined as type, text, name, value, object, member, element, array, number, string, false, null, true in the JSON grammar.</dd>
+          <dt><strong>JsonType, JsonText, JsonName, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber,
+           JsonString, JsonFalse, JsonNull, JsonTrue:</strong></dt>
+          <dd>These terms are defined as type, text, name, value, object, member, element, array, number, string, false, 
+          null, true in the JSON grammar.</dd>
           <dt><strong>JsonPrimitive:</strong></dt>
           <dd>A JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull.</dd>
           <dt><strong>NTVsingle, NTVlist:</strong></dt>
@@ -134,10 +136,10 @@
           <li>NTVsingle for the primitive entity,</li>
           <li>NTVlist for an ordered sequence of NTV entities</li></ul></t>
         <t>Entities are defined in <xref target="NTVentities-abnf" format="default" sectionFormat="of" derivedContent="Figure 1"/>, 
-        which uses ABNF from <xref target="RFC3339"/>.</t>
+        which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="NTVentities-abnf" align="left" suppress-title="false" pn="figure-1">
           <name>NTV entities - ABNF</name>
-          <sourcecode type="abnf" markers="false" pn="section-1">
+          <sourcecode type="abnf" markers="false">
   ; notation:
   ;   "Object(" *param ")" represent an Object defined by a list of parameters (param)
   
@@ -168,15 +170,19 @@
         </figure>
         <section><name>NTVsingle</name>
           <t>The NTVvalue (NTVsingleValue) is the JSON representation of the NTV entity (JsonValue).</t>
-          <t>The NTVtype (NTVsingleType) defines the type of entity and the conversion rules between the NTV entity and the NTVvalue. The default value is the "json" type.</t>
+          <t>The NTVtype (NTVsingleType) defines the type of entity and the conversion rules between the NTV entity and the NTVvalue. 
+          The default value is the "json" type.</t>
           <t>The NTVname is a string</t>
-          <t><strong>In other words, any entity that has on the one hand a function of encoding it into a json value and on the other hand a function of creating from a json value can be taken into account.
-          This approach is very general because the majority of computer objects are defined by a list of parameters (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
+          <t><strong>In other words, any entity that has on the one hand a function of encoding it into a json value and 
+          on the other hand a function of creating from a json value can be taken into account.
+          This approach is very general because the majority of computer objects are defined by a list of parameters 
+          (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
           which simply translate into a JSON-Array or a JSON-Object.</strong></t>
         </section>
         <section><name>NTVlist</name>
           <t>The NTVvalue (NTVlistValue) is the list of included NTV entities.</t>
-          <t>The NTVtype (NTVlistType) is a Namespace or a default NTVtype to apply to the NTV entities included. This NTVtype avoids having to include a type (if default NTVtype) 
+          <t>The NTVtype (NTVlistType) is a Namespace or a default NTVtype to apply to the NTV entities included. 
+          This NTVtype avoids having to include a type (if default NTVtype) 
           or reduce the length (if Namespace) in the JSON representation of the included NTV entities. The default value is "None".</t>
           <t>The NTVname is a string.</t><ul empty="true">
             <li><em>Example of equivalent JSON representations:</em><ul spacing="compact" empty="true">
@@ -193,11 +199,12 @@
         </section>
       </section>
       <section><name>NTVtype</name>
-        <t>NTVtype and associated Namespace  are defined in <xref target="NTVtype-abnf" format="default" sectionFormat="of" derivedContent="Figure 2"/>, 
-        which uses ABNF from <xref target="RFC3339"/>.</t>
+        <t>NTVtype and associated Namespace  are defined in 
+        <xref target="NTVtype-abnf" format="default" sectionFormat="of" derivedContent="Figure 2"/>, 
+        which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="NTVtype-abnf" align="left" suppress-title="false" pn="figure-2">
           <name>NTVtype - ABNF</name>
-          <sourcecode type="abnf" markers="false" pn="section-2">
+          <sourcecode type="abnf" markers="false">
 ; Namespace and NtvType
 
 Namespace       = "Namespace(" NamespaceName  NamespaceParent ")" 
@@ -260,11 +267,12 @@ JsonNTVtype     = JsonNamespaceParent NTVtypeName
     </section>
     <section><name>JsonNTV</name>
       <section><name>JsonNTV format</name>
-        <t>The JsonNTV format is the JsonValue representation of an NTV entity as defined in <xref target="JsonNTV-abnf" format="default" sectionFormat="of" derivedContent="Figure 3"/>, 
-        which uses ABNF from <xref target="RFC3339"/>.</t>
+        <t>The JsonNTV format is the JsonValue representation of an NTV entity as defined in 
+        <xref target="JsonNTV-abnf" format="default" sectionFormat="of" derivedContent="Figure 3"/>, 
+        which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-3">
           <name>JsonNTV - ABNF</name>
-          <sourcecode type="abnf" markers="false" pn="section-3">
+          <sourcecode type="abnf" markers="false">
 ; JsonValue representation of NTV entities
 
 JsonNTV         = JsonNTVnamed / JsonNTVsimple
@@ -315,11 +323,12 @@ JsonType        = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]
             <li>relative NTVtype if the NTVtype of the structured NTV entity is a Namespace shared with the NTVtype of the NTV entity.</li></ul></li></ul>
       </section>
       <section><name>JsonNTVvalue</name>
-        <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in <xref target="JsonNTVvalue-abnf" format="default" sectionFormat="of" derivedContent="Figure 4"/>, 
-        which uses ABNF from <xref target="RFC3339"/>.</t>
+        <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in 
+        <xref target="JsonNTVvalue-abnf" format="default" sectionFormat="of" derivedContent="Figure 4"/>, 
+        which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-4">
           <name>JsonNTVvalue - ABNF</name>
-          <sourcecode type="abnf" markers="false" pn="section-4">
+          <sourcecode type="abnf" markers="false">
 ; Json representation of NTVvalue
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
@@ -336,8 +345,8 @@ JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <li>a JsonArray where JsonElements are the JsonNTV of included NTV entities,</li>
           <li>a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.</li></ul></t>
         <t><em>Note:</em><ul empty="true">
-          <li><em>The JsonObject option is available only if all the NTV entities included have a JsonNTVname and all the JsonNTVname are different 
-          (e.g. {":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640]} is not a valid  JSON-value)</em></li></ul></t>
+          <li><em>The JsonObject option is available only if all the NTV entities included have a JsonNTVname and 
+          all the JsonNTVname are different (e.g. {":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640]} is not a valid  JSON-value)</em></li></ul></t>
       </section>
     </section>
     <section><name>examples</name>
@@ -396,18 +405,34 @@ JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         </table>
 
         <figure>
-          <name>Diagram [REPLACE]</name>
-          <artset>
-          <!-- This <artset> includes two <artwork> elements, each of a different type -->
-            <artwork type="svg" src="https://www.rfc-editor.org/materials/format/svg/stream.svg" />
-            <!-- [REPLACE] src points to either a local file or a URI. -->
-            <artwork type="ascii-art" name="stream.txt">
-              <!-- [REPLACE/DELETE] name recommends a filename to use if the diagram is extracted -->  
+          <name>A Box</name>
+          <artset>  <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artset -->
+          <!-- This <artset> includes two <artwork> elements, each of a different type.  Both are not 
+              always needed.  See https://authors.ietf.org/e/en/adding-diagrams -->
+            <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
+              <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artwork -->
+              <!-- Inserting the SVG like this is only one way of adding an SVG diagram.  Another way is 
+                  to use the src attribute to point to an external file or URI.  The name attribute 
+                  recommends a filename to use if the artwork is extracted to a file. -->
+              <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 71 40">
+                <g>
+                  <title>Layer 1</title>
+                  <rect x="4.5" y="6.5" width="61.0" height="27.0" stroke="black" stroke-width="1.0" 
+                  stroke-linecap="square" stroke-linejoin="miter" fill="none" />
+                  <text x="33.883" text-anchor="middle" y="26.559">
+                    <tspan fill="black" font-size="13.0">A box</tspan>
+                  </text>
+                </g>
+              </svg>
+            </artwork>
+            <artwork type="ascii-art" name="box.txt">
               <![CDATA[
-  ascii-art diagram goes here [REPLACE]
+  +--------+
+  | A box  |
+  +--------+          
               ]]>
             </artwork>
-          </artset>
+          </artset>      
         </figure>
       </section>
     </section>   
@@ -430,7 +455,6 @@ JsonObjectValue    = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
       <references><name>Normative References</name>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7946.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
