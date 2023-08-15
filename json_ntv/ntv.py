@@ -64,7 +64,7 @@ from abc import ABC, abstractmethod
 import json
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
-from .ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree
+from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree
 
 
 class Ntv(ABC):
@@ -386,6 +386,20 @@ class Ntv(ABC):
         - **ntv_value**: list of ntv values'''
         return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
 
+    def comment(self, text, val=None, name=None, typ=None):
+        parent = self.parent
+        com_val = [self]
+        if (val, typ, name) == (None, None, None):
+            com_val.append(NtvSingle(text))
+        else:            
+            new_self = copy.copy(self)
+            new_self.ntv_value = new_self.ntv_value if val is None else val 
+            new_self.ntv_type = new_self.ntv_type if typ is None else NtvType(typ) 
+            new_self.ntv_name = new_self.ntv_name if name is None else name
+            com_val.append(NtvSingle(new_self, text))
+        comment = NtvList(com_val, ntv_type=NtvType('$comment'), ntv_name=self.name)
+        parent[parent.ntv_value.index(self)] = comment
+        
     def from_value(self):
         '''return a Ntv entity from ntv_value'''
         if isinstance(self.ntv_value, list):
