@@ -289,6 +289,8 @@ class Ntv(ABC):
         if ind < 0 or ind >= len(self):
             raise NtvError("out of bounds")
         self.ntv_value[ind] = value
+        if isinstance(value, (NtvSingle, NtvList)):
+            value.parent = self
 
     def __delitem__(self, ind):
         '''remove ntv_value item at the `ind` row'''
@@ -386,19 +388,46 @@ class Ntv(ABC):
         - **ntv_value**: list of ntv values'''
         return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
 
-    def comment(self, text, val=None, name=None, typ=None):
+    def add_comment(self, text, val=None, name=None, typ=None):
         parent = self.parent
-        com_val = [self]
         if (val, typ, name) == (None, None, None):
-            com_val.append(NtvSingle(text))
+            comment = NtvSingle(text, ntv_type='$comment')
         else:            
-            new_self = copy.copy(self)
+            if self.type_str == '$history':
+                new_self = copy.copy(self.ntv_value[0])
+            else:
+                new_self = copy.copy(self)
             new_self.ntv_value = new_self.ntv_value if val is None else val 
             new_self.ntv_type = new_self.ntv_type if typ is None else NtvType(typ) 
             new_self.ntv_name = new_self.ntv_name if name is None else name
-            com_val.append(NtvSingle(new_self, text))
-        comment = NtvList(com_val, ntv_type=NtvType('$comment'), ntv_name=self.name)
-        parent[parent.ntv_value.index(self)] = comment
+            comment = NtvSingle(new_self, text)
+        if self.type_str == '$history':
+            self.ntv_value.append(comment)
+            return
+        com_val = [self]
+        com_val.append(comment)
+        com_list = NtvList(com_val, ntv_type=NtvType('$history'), ntv_name=self.name)
+        parent[parent.ntv_value.index(self)] = com_list
+        return
+    
+    def refuse_comment(self):
+        parent = self.parent
+        if self.type_str != '$history':   
+            return
+        old_ntv = self.ntv_value[0]
+        parent[parent.ntv_value.index(self)] = old_ntv
+
+    def accept_comment(self):
+        parent = self.parent
+        if self.type_str != '$history':   
+            return
+        for ntv in reversed(self.ntv_value):
+            if ntv.type_str != '$comment':
+                new_ntv = ntv
+                break
+        new_ntv = new_ntv.ntv_value if new_ntv.type_str == 'ntv' else new_ntv
+        parent[parent.ntv_value.index(self)] = new_ntv
+
         
     def from_value(self):
         '''return a Ntv entity from ntv_value'''
