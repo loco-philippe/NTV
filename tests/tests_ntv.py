@@ -555,6 +555,43 @@ class Test_Ntv_function(unittest.TestCase):
         for int, val in enumerate(ntv):
             self.assertEqual(val.val, int)
 
+class Test_Ntv_comment(unittest.TestCase):
+
+    def test_comment(self):
+        data = {'index':           [1, 2, 3],
+         'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'],
+         'value':           [10, 20, 30],
+         'value32::int32':  [10, 20, 30],
+         'res':             {'res1': 10, 'res2': 20, 'res3': 30},
+         'coord::point':    [[1, 2], [3, 4], [5, 6]],
+         'names::string':   ['john', 'eric', 'judith']}
+        ntv_data = Ntv.obj(data)
+        ntv = Ntv.obj(data)
+        ntv['dates'].add_comment('bof')
+        ntv['dates'].add_comment('bof suite')
+        ntv['dates'].accept_comment()
+        self.assertEqual(ntv, ntv_data)
+        ntv = Ntv.obj(data)
+        ntv['dates'].add_comment('bof')
+        ntv['dates'].add_comment('bof suite')
+        ntv['dates'].reject_comment()
+        self.assertEqual(ntv, ntv_data)
+        ntv = Ntv.obj(data)
+        ntv['dates'][1].add_comment('a corriger', '1995-02-05')
+        ntv['dates'][1].add_comment('bof')
+        ntv['dates'][1].add_comment('a corriger suite', '1998-02-05')
+        ntv['dates'][1].add_comment('bof suite')
+        ntv['dates'][1].reject_comment()
+        self.assertEqual(ntv, ntv_data)
+        ntv = Ntv.obj(data)
+        ntv['dates'][1].add_comment('a corriger', '1995-02-05')
+        ntv['dates'][1].add_comment('bof')
+        ntv['dates'][1].add_comment('a corriger suite', '1998-02-05')
+        ntv['dates'][1].add_comment('bof suite')
+        ntv['dates'][1].accept_comment()
+        ntv_data['dates'][1].set_value('1998-02-05')
+        self.assertEqual(ntv, ntv_data)
+        
 class Test_NtvTree(unittest.TestCase):
 
     def test_NtvTree(self):

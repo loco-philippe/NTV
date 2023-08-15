@@ -394,7 +394,7 @@ class NtvTree:
     def _next_up(self):
         ''' find the next sibling or ancestor node'''
         parent = self._node.parent
-        if not parent:
+        if not parent or self._node == self._ntv:
             raise StopIteration
         ind = parent.val.index(self._node)
         if ind < len(parent) - 1:  # if ind is not the last

@@ -389,6 +389,7 @@ class Ntv(ABC):
         return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
 
     def add_comment(self, text, val=None, name=None, typ=None):
+        '''add a comment (text) and a proposal for a new NTV entity defined by (val, name and typ)'''
         parent = self.parent
         if (val, typ, name) == (None, None, None):
             comment = NtvSingle(text, ntv_type='$comment')
@@ -410,7 +411,8 @@ class Ntv(ABC):
         parent[parent.ntv_value.index(self)] = com_list
         return
     
-    def refuse_comment(self):
+    def reject_comment(self):
+        '''delete all the comments'''
         parent = self.parent
         if self.type_str != '$history':   
             return
@@ -418,6 +420,7 @@ class Ntv(ABC):
         parent[parent.ntv_value.index(self)] = old_ntv
 
     def accept_comment(self):
+        ''' replace self by the last NTV proposal and delete all comments''' 
         parent = self.parent
         if self.type_str != '$history':   
             return
@@ -425,7 +428,7 @@ class Ntv(ABC):
             if ntv.type_str != '$comment':
                 new_ntv = ntv
                 break
-        new_ntv = new_ntv.ntv_value if new_ntv.type_str == 'ntv' else new_ntv
+        new_ntv = Ntv.obj(new_ntv.ntv_value) if new_ntv.type_str == 'ntv' else new_ntv
         parent[parent.ntv_value.index(self)] = new_ntv
 
         
