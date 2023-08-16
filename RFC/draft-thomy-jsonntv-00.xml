@@ -136,7 +136,7 @@
     &nbsp;
     <section><name>NTV structure</name>
       <section><name>NTV layers</name>
-        <t>Two structures are defined:<xref target="NTVlayers-svg" format="default" sectionFormat="of" derivedContent="Figure 1"/>.</t><ul>
+        <t>Two structures are defined as shown in <xref target="NTVlayers-svg" format="default" sectionFormat="of" derivedContent="Figure 1"/>:</t><ul>
           <li>NTV is a triplet (NTVname, NTVtype, NTVvalue) that contains all the data needed to reconstruct the software object. 
           NTV is used to build the software object.</li>
           <li>JsonNTV is the JsonValue of the NTV entity. JsonNTV is used to build an interchangeable JsonText</li></ul>
@@ -185,6 +185,15 @@
             ]]>
           </artwork>
         </artset></figure>
+        <t><em>Example:</em></t><ul>
+          <li><em>Object layer</em><ul empty="true">
+            <li>new_year_2022 = datetime.date(2022, 01, 01) <em>  is a Python variable "new_year_2022" corresponding to a datetime object</em></li></ul></li>
+          <li><em>NTV layer</em><ul empty="true">
+            <li>("new_year_2022", "date", "2022-01-01") <em>  is a triplet</em></li></ul></li>
+          <li><em>JsonNTV layer</em><ul empty="true">
+            <li>{ "new_year_2022:date" : "2022-01-01" }<em>  is a JsonValue</em></li></ul></li>
+          <li><em>JsonText layer</em><ul empty="true">
+            <li>'{"new_year_2022:date":"2022-01-01"}'<em>  is a string</em></li></ul></li></ul>          
       </section>
       <section><name>NTV entities</name>
         <t>Two categories of entities (one primitive and one structured) are defined:<ul>
@@ -517,11 +526,33 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
     &nbsp;
     <section anchor="IANA"><name>IANA Considerations</name>
     <!-- All drafts are required to have an IANA considerations section. See RFC 8126 for a guide.-->
-      <t>This memo includes no request to IANA. -CHECK-</t>
+      <t>The MIME media type for JSON text sequences is "application/json-ntv" :<ul>
+        <li>Type name: application</li>
+        <li>Subtype name: json-seq</li>
+        <li>Required parameters: N/A</li>
+        <li>Optional parameters: N/A</li>
+        <li>Encoding considerations: binary (The standard encoding format is UTF-8 as per standard practice in application/json mimetype)</li>
+        <li>Security considerations: Described herein</li>
+        <li>Published specification: This document.</li>
+        <li>Interoperability considerations: The media type is intended to interoperate across as many systems and applications as possible.</li>
+        <li>Applications that use this media type: Any application needing to interoperate with another system may use this message syntax.
+        As JsonNTV is syntactically identical to JSON syntax, any application currently using JSON syntax may alternatively use JsonNTV.</li>
+        <li>Fragment identifier considerations: N/A</li>
+        <li>Additional information:<ul>
+            <li>Deprecated alias names for this type: N/A</li>
+            <li>Magic number(s): N/A</li>
+            <li>File extension(s): N/A</li>
+            <li>Macintosh file type code(s): N/A</li></ul></li>
+        <li>Person and email address to contact: philippe@loco-labs.io</li>
+        <li>Intended usage: COMMON</li>
+        <li>Author: Philippe Thomy (philippe@loco-labs.io)</li>
+        <li>Change controller: IETF</li></ul></t>
     </section>
     <section anchor="Security"><name>Security Considerations</name>
       <!-- All drafts are required to have a security considerations section. See RFC 3552 for a guide. -->
-      <t>This document should not affect the security of the Internet. -CHECK-</t>
+      <t>The format used for NTV data exchanges is the JSON format. 
+      So, all the security considerations of <xref target="RFC8259"/> apply.</t>
+      <t>The NTV structure provides no cryptographic integrity protection of any kind.</t>
     </section>
   </middle>
 
