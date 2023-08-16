@@ -40,6 +40,7 @@
       Named and Typed Values), relies on the rules defined in the.</t>
     </abstract>
   </front>
+  &nbsp;
   <middle>
     <section><name>Introduction</name>
       <section><name>Presentation</name>
@@ -132,37 +133,55 @@
         </dl>
       </section>
     </section>
+    &nbsp;
     <section><name>NTV structure</name>
       <section><name>NTV layers</name>
         <t>Two structures are defined:<xref target="NTVlayers-svg" format="default" sectionFormat="of" derivedContent="Figure 1"/>.</t><ul>
           <li>NTV is a triplet (NTVname, NTVtype, NTVvalue) that contains all the data needed to reconstruct the software object. 
           NTV is used to build the software object.</li>
           <li>JsonNTV is the JsonValue of the NTV entity. JsonNTV is used to build an interchangeable JsonText</li></ul>
-        <figure anchor="NTVlayers-svg" align="left" suppress-title="false" pn="figure-1"><name>NTV layers</name><artset>  
-          
+        <figure anchor="NTVlayers-svg" align="left" suppress-title="false" pn="figure-1"><name>NTV layers</name><artset>      
           <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
-            <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artwork -->
-            <!-- Inserting the SVG like this is only one way of adding an SVG diagram.  Another way is 
-                to use the src attribute to point to an external file or URI.  The name attribute 
-                recommends a filename to use if the artwork is extracted to a file. -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300">
-              <g id="Layer_1">
-                <title>Layer 1</title>
-                <path id="svg_1" d="m103.33332,154.99998l139,0l0,89l-139,0l0,-89z" />
-                <text xml:space="preserve" text-anchor="start" font-size="24" stroke-width="0" id="svg_2" y="215.99998" x="149.33332" fill="#ffffff">JSON</text>
-                <line id="svg_3" y2="164.99999" x2="412.33331" y1="164.99999" x1="242.33332" fill="none"/>
-                <path id="svg_4" d="m409.33332,152.99998l139,0l0,89.00001l-139,0l0,-89.00001z" />
-                <text xml:space="preserve" text-anchor="start" font-size="24" stroke-width="0" id="svg_5" y="152.99999" x="285.33331" fill="#000000">to_json</text>
-                <path transform="rotate(92.1232 401.382 164.323)" id="svg_6" d="m394.38164,172.32313l7,-16.00001l7,16.00001l-14,0z" stroke-width="0" fill="#000000"/>
-                <text xml:space="preserve" text-anchor="start" font-size="24" stroke-width="0" id="svg_8" y="215.99998" x="451.33332" fill="#000000">JSON</text>
-              </g>
+            <svg viewBox="0 0 500 100" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+            <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+            <g class="layer">
+              <title>Layer 1</title>
+              <rect fill="#ffffff" height="35.36" id="svg_1" stroke="#000000" transform="matrix(1 0 0 1 0 0)" width="63.29" x="32.53" y="30"/>
+              <text fill="#000000" font-size="10" id="svg_2" stroke="#000000" stroke-width="0" text-anchor="middle" x="66.88" xml:space="preserve" y="50.07">JsonText</text>
+              <rect fill="#ffffff" height="35.36" id="svg_4" stroke="#000000" transform="matrix(1 0 0 1 0 0)" width="63.79" x="157.13" y="29.98"/>
+              <text fill="#000000" font-size="10" id="svg_3" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(0.98567 0 0 1 0.245089 0)" x="191.49" xml:space="preserve" y="50.05">JsonNTV</text>
+              <rect fill="#ffffff" height="35.36" id="svg_8" stroke="#000000" width="63.29" x="401.77" y="30.12"/>
+              <text fill="#000000" font-size="10" id="svg_7" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="434.13" xml:space="preserve" y="49.69">native entity</text>
+              <path d="m96.43,34.64l59.83,0" fill="#ffffff" id="svg_9" stroke="#000000"/>
+              <path d="m146,32.14l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_11" stroke="#000000"/>
+              <rect fill="#ffffff" height="35.36" id="svg_6" stroke="#000000" transform="matrix(1 0 0 1 0 0)" width="63.79" x="277.27" y="29.9"/>
+              <text fill="#000000" font-size="10" id="svg_5" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="311.63" xml:space="preserve" y="49.97">NTV triplet</text>
+              <path d="m341.92,35.9l59.5,0" fill="#ffffff" id="svg_12" stroke="#000000"/>
+              <path d="m391.16,33.4l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_10" stroke="#000000"/>
+              <path d="m221.58,35.57l53.83,0" fill="#ffffff" id="svg_14" stroke="#000000"/>
+              <path d="m265.16,33.07l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_13" stroke="#000000"/>
+              <path d="m96.73,57.76l59.83,0" fill="#ffffff" id="svg_17" stroke="#000000"/>
+              <path d="m342.22,59.02l59.5,0" fill="#ffffff" id="svg_16" stroke="#000000"/>
+              <path d="m221.88,58.69l53.83,0" fill="#ffffff" id="svg_15" stroke="#000000"/>
+              <path d="m342.26,56.38l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_18" stroke="#000000" transform="rotate(178.552 347.222 59.055)"/>
+              <path d="m221.96,55.84l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_19" stroke="#000000" transform="matrix(1 0 0 1 0 0) rotate(178.552 226.924 58.5164)"/>
+              <path d="m106.62,60.07l0.08,-5.36l-10.29,2.77c3.4,0.86 6.81,1.73 10.21,2.59z" fill="#000000" id="svg_20" stroke="#000000"/>
+              <text fill="#000000" font-size="8" id="svg_24" stroke="#000000" stroke-width="0" text-anchor="middle" x="121.5" xml:space="preserve" y="31.72">JSON load</text>
+              <text fill="#000000" font-size="8" id="svg_25" stroke="#000000" stroke-width="0" text-anchor="middle" x="127.78" xml:space="preserve" y="66.39">JSON dump</text>
+              <text fill="#000000" font-size="8" id="svg_27" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="245.3" xml:space="preserve" y="32.39">NTV load</text>
+              <text fill="#000000" font-size="8" id="svg_26" stroke="#000000" stroke-width="0" text-anchor="middle" x="251.58" xml:space="preserve" y="67.05">NTV dump</text>
+              <text fill="#000000" font-size="8" id="svg_29" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="368.64" xml:space="preserve" y="33.06">to_obj</text>
+              <text fill="#000000" font-size="8" id="svg_28" stroke="#000000" stroke-width="0" text-anchor="middle" x="374.91" xml:space="preserve" y="67.72">from_obj</text>
+            </g>
             </svg>
           </artwork>
           <artwork type="ascii-art" name="box.txt">
             <![CDATA[
-  +--------+
-  | A box  |
-  +--------+          
++--------+ JSON load +-------+ NTV load +-------+  to_obj  +------+                                                    
+|        |---------->|       |--------->|  NTV  |--------->|native|                                                    
+|JsonText|           |JsonNTV|          |triplet|          |entity|                                                    
+|        |<----------|       |<---------|       |<---------|      |                                                    
++--------+ JSON dump +-------+ NTV dump +-------+ from_obj +------+                                                              
             ]]>
           </artwork>
         </artset></figure>
@@ -303,6 +322,7 @@ JsonNTVtype = JsonNamespaceParent NTVtypeName
         all the shared data structures within the same tree of types.</t>
       </section>      
     </section>
+    &nbsp;
     <section><name>JsonNTV</name>
       <section><name>JsonNTV format</name>
         <t>The JsonNTV format is the JsonValue representation of an NTV entity as defined in 
@@ -391,6 +411,7 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           is not a valid  JSON-value)</em></li></ul></t>
       </section>
     </section>
+    &nbsp;
     <section><name>examples</name>
       <t>Examples of JsonNTV representation of NTV entities:</t>
       <t><strong>Vsingle :</strong></t><ul empty="true">
@@ -417,21 +438,22 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <li><em>{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640]}</em></li>
         <li><em>{ }</em></li></ul>
       <t><strong>NVlist : </strong></t><ul empty="true">
-        <li><em>{ "simple list" : [4, 45.7] }</em></li>
-        <li><em>{ "cities" : [ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] }</em></li></ul>
+        <li><em>{ "simple list": [4, 45.7]}</em></li>
+        <li><em>{ "cities": [{":point": [2.3522, 48.8566]}, {":point": [4.8357, 45.7640]}]}</em></li></ul>
       <t><strong>TVlist : </strong></t><ul empty="true">
-        <li><em>{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }</em></li>
-        <li><em>{ "::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li></ul>
+        <li><em>{ "::point": [[2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }</em></li>
+        <li><em>{ "::dat": [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li></ul>
       <t><strong>NTVlist : </strong></t><ul empty="true">
-        <li><em>{ "cities::point" : [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
-        <li><em>{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em></li>
-        <li><em>{ "various::point" : [ [2.3522, 48.8566], { ":date": "2022-01-28"}</em></li>
-        <li><em>{"json": 25 }, { "another NTVlist":: [ 1,2,3]} ] }</em></li></ul>
+        <li><em>{ "cities::point": [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
+        <li><em>{ "generic date::dat": [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78]}</em></li>
+        <li><em>{ "various::point": [ [2.3522, 48.8566], { ":date": "2022-01-28"}</em></li>
+        <li><em>{"json": 25 }, { "another NTVlist":: [ 1,2,3]}]}</em></li></ul>
       <t><strong>NTVlist and NVlist (composed with JsonObject) :</strong></t><ul empty="true">
         <li><em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em></li>
-        <li><em>{ "cities" : { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}  }</em></li>
-        <li><em>{ "city::" : { "paris" : [2.3522, 48.8566] } }</em></li></ul>
+        <li><em>{ "cities": {"paris:point": [2.3522, 48.8566] , "lyon": "france"}}</em></li>
+        <li><em>{ "city::": {"paris": [2.3522, 48.8566] } }</em></li></ul>
     </section>
+    &nbsp;
     <section><name>Parsing a JsonValue</name>
       <t>A first decoding step identifies the following objects:</t><ul empty='true'>
         <li>JsonNTVvalue, NTVname (if present), separator (if present), JsonNTVtype (if present).</li></ul>
@@ -490,55 +512,20 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <li>the concatenation of the JsonNTVtype of the NTVlist and the JsonNTVtype (if it is a relative NTVtype),</li>
         <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
       <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
+      <t>The <xref target="JSON-NTV"/> repository gives some examples of NTV usage.</t>
     </section>
-    <section><name>NTV properties</name>
-    </section>
-    <section><name>tests</name>
-      <figure>
-        <name>A Box</name>
-        <artset>  <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artset -->
-        <!-- This <artset> includes two <artwork> elements, each of a different type.  Both are not 
-            always needed.  See https://authors.ietf.org/e/en/adding-diagrams -->
-          <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
-            <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artwork -->
-            <!-- Inserting the SVG like this is only one way of adding an SVG diagram.  Another way is 
-                to use the src attribute to point to an external file or URI.  The name attribute 
-                recommends a filename to use if the artwork is extracted to a file. -->
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 71 40">
-              <g>
-                <title>Layer 1</title>
-                <rect x="4.5" y="6.5" width="30.0" height="15.0" stroke="black" stroke-width="0.2" 
-                stroke-linecap="square" stroke-linejoin="miter" fill="none" />
-                <text x="20" text-anchor="middle" y="15">
-                  <tspan fill="black" font-size="3.0">A box</tspan>
-                </text>
-              </g>
-            </svg>
-          </artwork>
-          <artwork type="ascii-art" name="box.txt">
-            <![CDATA[
-+--------+
-| A box  |
-+--------+          
-            ]]>
-          </artwork>
-        </artset>      
-      </figure>
-    </section>   
-    
+    &nbsp;
     <section anchor="IANA"><name>IANA Considerations</name>
     <!-- All drafts are required to have an IANA considerations section. See RFC 8126 for a guide.-->
       <t>This memo includes no request to IANA. -CHECK-</t>
     </section>
-    
     <section anchor="Security"><name>Security Considerations</name>
       <!-- All drafts are required to have a security considerations section. See RFC 3552 for a guide. -->
       <t>This document should not affect the security of the Internet. -CHECK-</t>
     </section>
-    
-    <!-- NOTE: The Acknowledgements and Contributors sections are at the end of this template -->
   </middle>
 
+  &nbsp;
   <back>
     <references><name>References</name>
       <references><name>Normative References</name>
@@ -553,22 +540,23 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <title>JSON-ND</title>
           <author initials="G" surname="Kleidon"></author>
           <date year="2020"/>
+        </front></reference>
+        <reference anchor="JSON-NTV" target="https://github.com/loco-philippe/NTV#readme"><front>
+          <title>JSON-NTV</title>
+          <author initials="P" surname="Thomy"></author>
+          <date year="2022"/>
         </front></reference>      
       </references>
     </references>
-    
     <section>
       <name>Appendix 1 - REPLACE/DELETE-</name>
       <t>This becomes an Appendix -REPLACE-</t>
     </section>
-
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
     </section>
-    
     <section anchor="Contributors" numbered="false"><name>Contributors</name> 
       <t>Thanks to all of the contributors. -REPLACE-</t>
     </section>
-    
  </back>
 </rfc>
