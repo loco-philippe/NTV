@@ -133,15 +133,47 @@
       </section>
     </section>
     <section><name>NTV structure</name>
+      <section><name>NTV layers</name>
+        <t>Two structures are defined:<xref target="NTVlayers-svg" format="default" sectionFormat="of" derivedContent="Figure 1"/>.</t><ul>
+          <li>NTV is a triplet (NTVname, NTVtype, NTVvalue) that contains all the data needed to reconstruct the software object. 
+          NTV is used to build the software object.</li>
+          <li>JsonNTV is the JsonValue of the NTV entity. JsonNTV is used to build an interchangeable JsonText</li></ul>
+        <figure anchor="NTVlayers-svg" align="left" suppress-title="false" pn="figure-1"><name>NTV layers</name><artset>  
+          
+          <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
+            <!-- https://authors.ietf.org/en/rfcxml-vocabulary#artwork -->
+            <!-- Inserting the SVG like this is only one way of adding an SVG diagram.  Another way is 
+                to use the src attribute to point to an external file or URI.  The name attribute 
+                recommends a filename to use if the artwork is extracted to a file. -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300">
+              <g id="Layer_1">
+                <title>Layer 1</title>
+                <path id="svg_1" d="m103.33332,154.99998l139,0l0,89l-139,0l0,-89z" />
+                <text xml:space="preserve" text-anchor="start" font-size="24" stroke-width="0" id="svg_2" y="215.99998" x="149.33332" fill="#ffffff">JSON</text>
+                <line id="svg_3" y2="164.99999" x2="412.33331" y1="164.99999" x1="242.33332" fill="none"/>
+                <path id="svg_4" d="m409.33332,152.99998l139,0l0,89.00001l-139,0l0,-89.00001z" />
+                <text xml:space="preserve" text-anchor="start" font-size="24" stroke-width="0" id="svg_5" y="152.99999" x="285.33331" fill="#000000">to_json</text>
+                <path transform="rotate(92.1232 401.382 164.323)" id="svg_6" d="m394.38164,172.32313l7,-16.00001l7,16.00001l-14,0z" stroke-width="0" fill="#000000"/>
+                <text xml:space="preserve" text-anchor="start" font-size="24" stroke-width="0" id="svg_8" y="215.99998" x="451.33332" fill="#000000">JSON</text>
+              </g>
+            </svg>
+          </artwork>
+          <artwork type="ascii-art" name="box.txt">
+            <![CDATA[
+  +--------+
+  | A box  |
+  +--------+          
+            ]]>
+          </artwork>
+        </artset></figure>
+      </section>
       <section><name>NTV entities</name>
-        <t>The NTV entity is a triplet (NTVvalue, NTVtype, NTVname).</t>
-        <t>The triplet contains all the data needed to reconstruct the software object.</t>
         <t>Two categories of entities (one primitive and one structured) are defined:<ul>
           <li>NTVsingle for the primitive entity,</li>
           <li>NTVlist for an ordered sequence of NTV entities</li></ul></t>
-        <t>Entities are defined in <xref target="NTVentities-abnf" format="default" sectionFormat="of" derivedContent="Figure 1"/>, 
+        <t>Entities are defined in <xref target="NTVentities-abnf" format="default" sectionFormat="of" derivedContent="Figure 2"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="NTVentities-abnf" align="left" suppress-title="false" pn="figure-1">
+        <figure anchor="NTVentities-abnf" align="left" suppress-title="false" pn="figure-2">
           <name>NTV entities - ABNF</name>
           <sourcecode type="abnf" markers="false">
   ; notation:
@@ -206,9 +238,9 @@
       </section>
       <section><name>NTVtype</name>
         <t>NTVtype and associated Namespace  are defined in 
-        <xref target="NTVtype-abnf" format="default" sectionFormat="of" derivedContent="Figure 2"/>, 
+        <xref target="NTVtype-abnf" format="default" sectionFormat="of" derivedContent="Figure 3"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="NTVtype-abnf" align="left" suppress-title="false" pn="figure-2">
+        <figure anchor="NTVtype-abnf" align="left" suppress-title="false" pn="figure-3">
           <name>NTVtype - ABNF</name>
           <sourcecode type="abnf" markers="false">
 ; Namespace and NtvType
@@ -274,9 +306,9 @@ JsonNTVtype = JsonNamespaceParent NTVtypeName
     <section><name>JsonNTV</name>
       <section><name>JsonNTV format</name>
         <t>The JsonNTV format is the JsonValue representation of an NTV entity as defined in 
-        <xref target="JsonNTV-abnf" format="default" sectionFormat="of" derivedContent="Figure 3"/>, 
+        <xref target="JsonNTV-abnf" format="default" sectionFormat="of" derivedContent="Figure 4"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-3">
+        <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-4">
           <name>JsonNTV - ABNF</name>
           <sourcecode type="abnf" markers="false">
 ; JsonValue representation of NTV entities
@@ -332,9 +364,9 @@ listSep     = "::"     ; NTVlist separator
       </section>
       <section><name>JsonNTVvalue</name>
         <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in 
-        <xref target="JsonNTVvalue-abnf" format="default" sectionFormat="of" derivedContent="Figure 4"/>, 
+        <xref target="JsonNTVvalue-abnf" format="default" sectionFormat="of" derivedContent="Figure 5"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-4">
+        <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-5">
           <name>JsonNTVvalue - ABNF</name>
           <sourcecode type="abnf" markers="false">
 ; Json representation of NTVvalue
@@ -458,6 +490,8 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <li>the concatenation of the JsonNTVtype of the NTVlist and the JsonNTVtype (if it is a relative NTVtype),</li>
         <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
       <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
+    </section>
+    <section><name>NTV properties</name>
     </section>
     <section><name>tests</name>
       <figure>
