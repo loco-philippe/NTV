@@ -479,9 +479,8 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td align="left" colspan="1" rowspan="1">JsonArray</td>
               <td align="left" colspan="1" rowspan="1">Vlist</td></tr>
           <tr><td align="left" colspan="1" rowspan="1">JsonNamed</td>
-              <td align="left" colspan="1" rowspan="1">see Table 2</td></tr>
-        </tbody>
-      </table>
+              <td align="left" colspan="1" rowspan="1">see <xref target="table2"/></td></tr>
+        </tbody></table>
       <table anchor="table2" align="left" pn="table-2"><name>Decoding JsonNTVvalue</name>
         <thead>
           <tr><th align="left" colspan="1" rowspan="1">Separator</th>
@@ -509,8 +508,7 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td align="left" colspan="1" rowspan="1">"::"</td>
               <td align="left" colspan="1" rowspan="1">JsonArray</td>
               <td align="left" colspan="1" rowspan="1">NVlist or TVlist or NTVlist</td></tr>                                                
-        </tbody>
-      </table>
+        </tbody></table>
       <t>The NTVvalue of NTVsingle is the JsonNTVvalue.</t>
       <t>The NTVvalue of NTVlist is build by decoding data included in JsonNTVvalue.</t>
       <t>For NTV entities not included in a NTVlist, the NTVtype is built with:</t><ul>
@@ -522,6 +520,19 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
       <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
       <t>The <xref target="JSON-NTV"/> repository gives some examples of NTV usage.</t>
+    </section>
+    &nbsp;
+    <section><name>NTV extended structure</name>
+      <t>The NTVvalue of NTV entities are JsonValue. In the NTV extended structure, NTVvalue can be every kind of data.</t>
+      <t>With this structure, the NTV representation is a "json like" data where:</t><ul>
+        <li>JsonNTVvalue is always NTVvalue,</li>
+        <li>JsonNTVtype is optional (if NTVtype can be deduced from the NTVvalue),</li>
+        <li>JsonNTVname is optional (if NTVname can be deduced from the NTVvalue).</li></ul>
+
+      <t><em>Examples of NTV extended representation:</em></t><ul empty="true">
+        <li><ul empty="true"><li><t><em>{ "date object" : [ datetime.date(2022, 1, 18), datetime.date(2023, 1, 12) ] }</em></t></li></ul></li>
+        <li><em>this "json like" structure can be converted in JsonNTV format:</em></li>
+        <li><ul empty="true"><li><t><em>{ "date object::date" : [ "2022-01-18", "2023-01-12" ] }</em></t></li></ul></li></ul>
     </section>
     &nbsp;
     <section anchor="IANA"><name>IANA Considerations</name>
@@ -555,7 +566,6 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
       <t>The NTV structure provides no cryptographic integrity protection of any kind.</t>
     </section>
   </middle>
-
   &nbsp;
   <back>
     <references><name>References</name>
@@ -579,9 +589,27 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         </front></reference>      
       </references>
     </references>
-    <section>
-      <name>Appendix 1 - REPLACE/DELETE-</name>
-      <t>This becomes an Appendix -REPLACE-</t>
+    &nbsp;
+    <section><name>Appendix 1 - Global NTVtype</name>
+      <t>The structure of NTVtype by Namespace makes it possible to have types corresponding to recognized standards at the global level.</t>
+      <t>A Global NTVtype is a NTVtype defined in the Global Namespace.</t>
+      <t>The Global NTVtype are listed below (to be completed).</t>
+      <section><name>Json NTVtype</name>
+        <t>Json types have a generic Type : json</t>
+        <table anchor="table3" align="left" pn="table-3"><name>"json" NTVtype</name>
+          <thead>
+            <tr><th>NTVtype (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr>
+          </thead><tbody>
+            <tr><td>json</td><td>JsonValue <xref target="RFC8259"/></td><td>{"value": [1, 2] }</td></tr>
+            <tr><td align="left" colspan="1" rowspan="1">json</td>
+                <td align="left" colspan="1" rowspan="1">JsonValue <xref target="RFC8259"/></td>
+                <td align="left" colspan="1" rowspan="1">{"value": [1, 2] }</td></tr>
+        </tbody></table>
+        
+
+
+
+      </section>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
