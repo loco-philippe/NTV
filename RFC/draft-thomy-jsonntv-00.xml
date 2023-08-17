@@ -575,6 +575,7 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
       </references>
       <references><name>Informative References</name>
         <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
@@ -618,12 +619,34 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td>float16, float32, float64</td><td>JsonNumber <xref target="RFC8259"/></td><td>floating point real</td></tr>
         </tbody></table>
       </section>
+      <section><name>Datation NTVtype</name>
+        <t>Datation NTVtype have a generic NTVtype : "dat"</t>
+        <table anchor="table5" align="left" pn="table-5"><name>Json NTVtype</name><thead>
+          <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+          <tr><td>year</td><td>fullyear <xref target="RFC3339"/></td><td>1998</td></tr>
+          <tr><td>month</td><td>month <xref target="RFC3339"/></td><td>10</td></tr>
+          <tr><td>day</td><td>mday <xref target="RFC3339"/></td><td>21</td></tr>
+          <tr><td>wday</td><td>wday <xref target="RFC3339"/></td><td>7</td></tr>
+          <tr><td>yday</td><td>yday <xref target="RFC3339"/></td><td>360</td></tr>
+          <tr><td>week</td><td>week <xref target="RFC3339"/></td><td>38</td></tr>
+          <tr><td>hour</td><td>hour <xref target="RFC3339"/></td><td>20</td></tr>
+          <tr><td>minute</td><td>minute <xref target="RFC3339"/></td><td>18</td></tr>
+          <tr><td>second</td><td>second <xref target="RFC3339"/></td><td>54</td></tr>
+          <tr><td>dat</td><td>generic NTVtype <xref target="RFC3339"/></td><td> </td></tr>
+          <tr><td>timeposix (dat)</td><td>xxxxx</td><td>123456.78</td></tr>
+          <tr><td>date (dat)</td><td>date <xref target="RFC3339"/></td><td>"2022-01-28""</td></tr>
+          <tr><td>time (dat)</td><td>timespec-base [time-fraction]<xref target="RFC3339"/></td><td>"T18:23:54",  "18:23", "T18"</td></tr>
+          <tr><td>timetz (dat)</td><td>timespec-base [time-fraction] time-zone<xref target="RFC3339"/></td><td>"T18:23:54+0400"</td></tr>
+          <tr><td>datetime (dat)</td><td>iso-date-time (without time-zone)<xref target="RFC3339"/></td><td>"2022-01-28T18-23-54"</td></tr>
+          <tr><td>datetimetz (dat)</td><td>iso-date-time (with time-zone)<xref target="RFC3339"/></td><td>"2022-01-28T18-23-54+0400"</td></tr>
+        </tbody></table>
+      </section>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
     </section>
     <section anchor="Contributors" numbered="false"><name>Contributors</name> 
-      <t>Thanks to all of the contributors. -REPLACE-</t>
+      <t>Thanks to all of the contributors.</t>
     </section>
  </back>
 </rfc>
