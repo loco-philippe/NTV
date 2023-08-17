@@ -588,6 +588,16 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <author initials="P" surname="Thomy"></author>
           <date year="2022"/>
         </front></reference>      
+        <reference anchor="OLC" target="https://github.com/google/open-location-code"><front>
+          <title>Open Location Code</title>
+          <author><organization>"Google"</organization></author>
+          <date year="2016"/>
+        </front></reference>            
+        <reference anchor="W3C TAB" target="https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/"><front>
+          <title>Recommendation : Model for Tabular Data and Metadata on the Web</title>
+          <author><organization>"W3C"</organization></author>
+          <date year="17 December 2015"/>
+        </front></reference>            
       </references>
     </references>
     &nbsp;
@@ -595,11 +605,11 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
       <t>The structure of NTVtype by Namespace makes it possible to have types corresponding to recognized standards at the global level.</t>
       <t>A Global NTVtype is a NTVtype defined in the Global Namespace.</t>
       <t>The Global NTVtype are listed below (to be completed).</t>
-      <section><name>Json NTVtype</name>
+      <section><name>Json</name>
         <t>Json NTVtype have a generic NTVtype : "json"</t>
         <table anchor="table3" align="left" pn="table-3"><name>Json NTVtype</name><thead>
           <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
-          <tr><td>json</td><td>JsonValue <xref target="RFC8259"/></td><td>{"value": [1, 2] }</td></tr>
+          <tr><td>json</td><td>generic NTVtype</td><td></td></tr>
           <tr><td>number (json)</td><td>JsonNumber <xref target="RFC8259"/></td><td>10</td></tr>
           <tr><td>boolean (json)</td><td>JsonBoolean <xref target="RFC8259"/></td><td>"true"</td></tr>
           <tr><td>null (json)</td><td>JsonNull <xref target="RFC8259"/></td><td>"null"</td></tr>
@@ -608,10 +618,9 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td>object (json)</td><td>JsonObject <xref target="RFC8259"/></td><td>{"value1": 1, "value2": 2}</td></tr>
         </tbody></table>
       </section>
-      <section><name>Numbers NTVtype</name>
-        <t>Numbers NTVtype don't have a generic NTVtype.</t>
+      <section><name>Numbers</name>
         <table anchor="table4" align="left" pn="table-4"><name>Numbers NTVtype</name><thead>
-          <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>comment</th></tr></thead><tbody>
+          <tr><th>NTVtypeName</th><th>NTVvalue</th><th>comment</th></tr></thead><tbody>
           <tr><td>int</td><td>JsonNumber <xref target="RFC8259"/></td><td>integer</td></tr>
           <tr><td>int8, int16, int32, int64</td><td>JsonNumber <xref target="RFC8259"/></td><td>signed integer</td></tr>
           <tr><td>uint8, uint16, uint32, uint64</td><td>JsonNumber <xref target="RFC8259"/></td><td>unsigned integer</td></tr>
@@ -619,26 +628,58 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td>float16, float32, float64</td><td>JsonNumber <xref target="RFC8259"/></td><td>floating point real</td></tr>
         </tbody></table>
       </section>
-      <section><name>Datation NTVtype</name>
+      <section><name>Datation</name>
         <t>Datation NTVtype have a generic NTVtype : "dat"</t>
-        <table anchor="table5" align="left" pn="table-5"><name>Json NTVtype</name><thead>
+        <table anchor="table5" align="left" pn="table-5"><name>Datation NTVtype</name><thead>
           <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>year</td><td>fullyear <xref target="RFC3339"/></td><td>1998</td></tr>
           <tr><td>month</td><td>month <xref target="RFC3339"/></td><td>10</td></tr>
-          <tr><td>day</td><td>mday <xref target="RFC3339"/></td><td>21</td></tr>
-          <tr><td>wday</td><td>wday <xref target="RFC3339"/></td><td>7</td></tr>
-          <tr><td>yday</td><td>yday <xref target="RFC3339"/></td><td>360</td></tr>
+          <tr><td>day</td><td>mday <xref target="RFC3339"/> day of month</td><td>21</td></tr>
+          <tr><td>wday</td><td>wday <xref target="RFC3339"/> day of week</td><td>7</td></tr>
+          <tr><td>yday</td><td>yday <xref target="RFC3339"/> day of year</td><td>360</td></tr>
           <tr><td>week</td><td>week <xref target="RFC3339"/></td><td>38</td></tr>
           <tr><td>hour</td><td>hour <xref target="RFC3339"/></td><td>20</td></tr>
           <tr><td>minute</td><td>minute <xref target="RFC3339"/></td><td>18</td></tr>
           <tr><td>second</td><td>second <xref target="RFC3339"/></td><td>54</td></tr>
-          <tr><td>dat</td><td>generic NTVtype <xref target="RFC3339"/></td><td> </td></tr>
-          <tr><td>timeposix (dat)</td><td>xxxxx</td><td>123456.78</td></tr>
+          <tr><td>dat</td><td>generic NTVtype</td><td> </td></tr>
           <tr><td>date (dat)</td><td>date <xref target="RFC3339"/></td><td>"2022-01-28""</td></tr>
           <tr><td>time (dat)</td><td>timespec-base [time-fraction]<xref target="RFC3339"/></td><td>"T18:23:54",  "18:23", "T18"</td></tr>
           <tr><td>timetz (dat)</td><td>timespec-base [time-fraction] time-zone<xref target="RFC3339"/></td><td>"T18:23:54+0400"</td></tr>
           <tr><td>datetime (dat)</td><td>iso-date-time (without time-zone)<xref target="RFC3339"/></td><td>"2022-01-28T18-23-54"</td></tr>
           <tr><td>datetimetz (dat)</td><td>iso-date-time (with time-zone)<xref target="RFC3339"/></td><td>"2022-01-28T18-23-54+0400"</td></tr>
+        </tbody></table>
+      </section>
+      <section><name>Period and Duration</name>
+        <table anchor="table6" align="left" pn="table-6"><name>Period and Duration NTVtype</name><thead>
+          <tr><th>NTVtypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+          <tr><td>duration</td><td>duration <xref target="RFC3339"/></td><td>"P3Y6M4DT12H30M5S"</td></tr>
+          <tr><td>timearray</td><td>JsonArray</td><td><t>[dat1, dat2]</t><t><em>dat1, dat2 have "dat" NTVtypeName</em></t></td></tr>
+          <tr><td>period</td><td>period <xref target="RFC3339"/></td><td><t>"2022-01-01 / 2022-01-30"</t><t>"2022-01-01 / P3Y6M4DT12H30M5S"</t></td></tr>
+        </tbody></table>
+      </section>
+      <section><name>Location</name>
+        <t>Location NTVtype have a generic NTVtype : "loc".</t>
+        <t>The CRS (Coordinate Reference Systems) is geographic, using the World Geodetic System 1984 (WGS 84) datum, 
+        with longitude and latitude units of decimal degrees (EPSG:4326).</t>
+        <table anchor="table7" align="left" pn="table-7"><name>Location NTVtype</name><thead>
+          <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+          <tr><td>loc</td><td>generic NTVtype</td><td></td></tr>
+          <tr><td>point (loc)</td><td>Point coordinates <xref target="RFC7946"/></td><td>[ 5.12, 45.256 ] <em>(lon, lat)</em></td></tr>
+          <tr><td>line (loc)</td><td>LineString coordinates <xref target="RFC7946"/></td><td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" NTVtypeName</em></t></td></tr>
+          <tr><td>polygon (loc)</td><td>Polygon coordinates <xref target="RFC7946"/></td><td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" NTVtypeName</em></t></td></tr>
+          <tr><td>multipolygon (loc)</td><td>MultiPolygon coordinates <xref target="RFC7946"/></td><td><t>[pl1, pl2, pl3]</t><t><em>plx has "polygon" NTVtypeName</em></t></td></tr>
+          <tr><td>bbox (loc)</td><td>Bbox coordinates <xref target="RFC7946"/></td><td>[ -10.0, -10.0, 10.0, 10.0 ]</td></tr>
+          <tr><td>geojson</td><td>geoJSON object <xref target="RFC7946"/></td><td>{"type": "point", "coordinates": [40.0, 0.0]}</td></tr>
+          <tr><td>codeolc</td><td>Open Location Code <xref target="OLC"/></td><td>"8FW4V75V+8F6"</td></tr>
+        </tbody></table>
+      </section>
+      <section><name>Structured data</name>
+        <table anchor="table8" align="left" pn="table-8"><name>Structured NTVtype</name><thead>
+          <tr><th>NTVtypeName</th><th>NTVvalue</th></tr></thead><tbody>
+          <tr><td>row</td><td>row <xref target="W3C TAB"/></td></tr>
+          <tr><td>field</td><td>column <xref target="W3C TAB"/></td></tr>
+          <tr><td>dataset</td><td>table <xref target="W3C TAB"/></td></tr>
+          <tr><td>ntv</td><td>JsonNTV</td></tr>
         </tbody></table>
       </section>
     </section>
