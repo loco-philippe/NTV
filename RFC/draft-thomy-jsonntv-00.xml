@@ -172,16 +172,17 @@
         which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="NTVentities-abnf" align="left" suppress-title="false" pn="figure-2">
           <name>NTV entities - ABNF</name><sourcecode type="abnf" markers="false">
-  ; notation:
-  ;   "Object(" *param ")" represent an Object defined 
-  ;   by a list of parameters (param)
-  
-  ;   JsonArray(*param) represent a JsonArray as defined 
-  ;   in the Json grammar, *param is a list of JsonElement
-  ;   JsonObject(*param) represent a JsonObject as defined 
-  ;   in the Json grammar, *param is a list of JsonMember
-  ;   JsonValue represent a JsonValue as defined 
-  ;   in the Json grammar
+
+; notation:
+;   "Object(" *param ")" represent an Object defined 
+;   by a list of parameters (param)
+
+;   JsonArray(*param) represent a JsonArray as defined 
+;   in the Json grammar, *param is a list of JsonElement
+;   JsonObject(*param) represent a JsonObject as defined 
+;   in the Json grammar, *param is a list of JsonMember
+;   JsonValue represent a JsonValue as defined 
+;   in the Json grammar
 
   NTVentity = NTVsingle / NTVlist
   
@@ -232,6 +233,7 @@
         which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="NTVtype-abnf" align="left" suppress-title="false" pn="figure-3">
           <name>NTVtype - ABNF</name><sourcecode type="abnf" markers="false">
+
 ; Namespace and NtvType
 
 Namespace       = "Namespace(" NamespaceName NamespaceParent ")" 
@@ -296,6 +298,7 @@ JsonNTVtype = JsonNamespaceParent NTVtypeName
         which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-4">
           <name>JsonNTV - ABNF</name><sourcecode type="abnf" markers="false">
+
 ; JsonValue representation of NTV entities
 
 JsonNTV        = JsonNTVnamed / JsonNTVsimple
@@ -308,6 +311,7 @@ JsonType       = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]
 
 singleSep   = ":"      ; NTVsingle separator 
 listSep     = "::"     ; NTVlist separator
+
         </sourcecode></figure>
         <t>The JsonNTV format is built with the NTVname, NTVvalue and the JsonNTVtype.</t>
         <t>Two JsonNTV formats are defined:<ul>
@@ -349,6 +353,7 @@ listSep     = "::"     ; NTVlist separator
         which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-5">
           <name>JsonNTVvalue - ABNF</name><sourcecode type="abnf" markers="false">
+
 ; Json representation of NTVvalue
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
@@ -526,7 +531,7 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td>boolean (json)</td><td>JsonBoolean <xref target="RFC8259"/></td><td>"true"</td></tr>
           <tr><td>null (json)</td><td>JsonNull <xref target="RFC8259"/></td><td>"null"</td></tr>
           <tr><td>string (json)</td><td>JsonString <xref target="RFC8259"/></td><td>"value"</td></tr>
-          <tr><td>array (json)</td><td>JsonArray <xref target="RFC8259"/></td><td>[1, 2]</td></tr>
+          <tr><td>array (json)</td><td>JsonArray <xref target="RFC8259"/></td><td>[1.1, 2.2]</td></tr>
           <tr><td>object (json)</td><td>JsonObject <xref target="RFC8259"/></td><td>{"value1": 1, "value2": 2}</td></tr></tbody></table>
       </section>
       <section><name>Numbers</name>
@@ -630,6 +635,76 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <tr><td>"$darwincore."</td><td><t>"darwincore" catalog</t><t>eg. { ":$darwincore.acceptedNameUsage": "Tamias minimus" }</t></td>
           </tr></tbody></table>  
       </section>
+    </section>
+    <section><name>Appendix 2 - Complete ABNF notation</name>
+        <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-6">
+          <name>Complete ABNF notation</name><sourcecode type="abnf" markers="false">
+
+; notation:
+;   "Object(" *param ")" represent an Object defined 
+;   by a list of parameters (param)
+
+;   JsonArray(*param) represent a JsonArray as defined 
+;   in the Json grammar, *param is a list of JsonElement
+;   JsonObject(*param) represent a JsonObject as defined 
+;   in the Json grammar, *param is a list of JsonMember
+;   JsonValue represent a JsonValue as defined 
+;   in the Json grammar
+
+NTVentity = NTVsingle / NTVlist
+
+NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
+NTVsingleType  = NTVtype 
+NTVsingleValue = JsonValue
+
+NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
+NTVlistType    = NTVtype / Namespace
+NTVlistValue   = *NTVentity
+
+NTVname        = string
+JsonValue      = string
+
+string   = DQUOTE *CHAR DQUOTE
+DQUOTE   = %x22          ; " double quote
+CHAR     = %x01-7F
+
+; Namespace and NtvType
+
+Namespace       = "Namespace(" NamespaceName NamespaceParent ")" 
+NamespaceParent = Namespace  ; Namespace is nested
+NamespaceName   = [ ["$"] string "." ] 
+JsonNamespace   = JsonNamespaceParent NamespaceName
+JsonNamespaceParent = JsonNamespace
+
+NTVtype     = "NTVtype(" NTVtypeName NamespaceParent [NTVtypeGen] ")"
+NTVtypeGen  = NTVtype
+NTVtypeName = ["$"] string
+JsonNTVtype = JsonNamespaceParent NTVtypeName  
+
+; JsonValue representation of NTV entities
+
+JsonNTV        = JsonNTVnamed / JsonNTVsimple
+
+JsonNTVnamed   = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")" 
+JsonNTVsimple  = JsonNTVvalue
+
+JsonNTVname    = NTVname / (NTVname JsonType) / JsonType
+JsonType       = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
+
+singleSep   = ":"      ; NTVsingle separator 
+listSep     = "::"     ; NTVlist separator
+
+; Json representation of NTVvalue
+
+JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
+
+JsonNTVsingleValue = NTVsingleValue
+JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
+
+JsonArrayValue     = "JsonArray(" *JsonNTV ")"
+JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
+
+        </sourcecode></figure>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
