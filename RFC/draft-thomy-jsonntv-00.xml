@@ -463,27 +463,9 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
     </section>
     &nbsp;
     <section anchor="IANA"><name>IANA Considerations</name>
-      <t>The MIME media type for JSON text sequences is "application/json-ntv" :<ul>
-        <li>Type name: application</li>
-        <li>Subtype name: json-seq</li>
-        <li>Required parameters: N/A</li>
-        <li>Optional parameters: N/A</li>
-        <li>Encoding considerations: binary (The standard encoding format is UTF-8 as per standard practice in application/json mimetype)</li>
-        <li>Security considerations: Described herein</li>
-        <li>Published specification: This document.</li>
-        <li>Interoperability considerations: The media type is intended to interoperate across as many systems and applications as possible.</li>
-        <li>Applications that use this media type: Any application needing to interoperate with another system may use this message syntax.
-        As JsonNTV is syntactically identical to JSON syntax, any application currently using JSON syntax may alternatively use JsonNTV.</li>
-        <li>Fragment identifier considerations: N/A</li>
-        <li>Additional information:<ul>
-            <li>Deprecated alias names for this type: N/A</li>
-            <li>Magic number(s): N/A</li>
-            <li>File extension(s): N/A</li>
-            <li>Macintosh file type code(s): N/A</li></ul></li>
-        <li>Person and email address to contact: philippe@loco-labs.io</li>
-        <li>Intended usage: COMMON</li>
-        <li>Author: Philippe Thomy (philippe@loco-labs.io)</li>
-        <li>Change controller: IETF</li></ul></t>
+      <t>Any JsonValue is a JsonNTVValue and conversely, any JsonNTVvalue is a JsonValue.</t>
+      <t>Thus, any JSON data may or may not be treated as JsonNTV data, so there is no need to create a specific MIME media type for JsonNTV.</t>
+      <t>All properties of the MIME media type "application/json" are applicable.</t>
     </section>
     <section anchor="Security"><name>Security Considerations</name>
       <t>The format used for NTV data exchanges is the JSON format. 
@@ -638,31 +620,57 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
     </section>
     <section><name>Appendix 2 - Complete ABNF notation</name>
         <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-6">
-          <name>Complete ABNF notation</name><sourcecode type="abnf" markers="false">
+          <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
 
 ; notation:
-;   "Object(" *param ")" represent an Object defined 
-;   by a list of parameters (param)
+;   To express that a function is applied to a list of parameters:
+;       Result = Function(param1, param2, ...)
+;   the following ABNF notation is used:
 
-;   JsonArray(*param) represent a JsonArray as defined 
-;   in the Json grammar, *param is a list of JsonElement
-;   JsonObject(*param) represent a JsonObject as defined 
-;   in the Json grammar, *param is a list of JsonMember
-;   JsonValue represent a JsonValue as defined 
-;   in the Json grammar
+Result = "Function(" ListParam ")"
+ListParam = [param *("," param)]
+
+; This notation is used with:
+;
+;   - JsonArray(ListParam):
+;       constructor of a JsonArray as defined in the Json grammar,
+;       ListParam is a list of JsonElement
+;   - JsonObject(ListParam):
+;       constructor of a JsonObject as defined in the Json grammar,
+;       ListParam is a list of JsonMember
+;   - JsonMember(key, value):
+;       constructor of a JsonMember as defined in the Json grammar,
+;       key is a string, value is a JsonValue
+;   - JsonLoad(JsonText)
+;       function which convert JsonText in JsonValue
+;   - Array(ListParam):
+;       constructor of an ordonned list of objects
+;       defined by ListParam,
+;   - NTVList(value, name, type):
+;       constructor of an NTVlist created with a value,
+;       a name and a type
+;   - NTVsingle(value, name, type):
+;       constructor of an NTVsingle created with a value,
+;       a name and a type
+;   - Namespace(name, NamespaceParent):
+;       constructor of an Namespace created with a name
+;       and a Namespace parent
+;   - NTVtype(name, NamespaceParent, NTVtypeGen):
+;       constructor of an NTVtype created with a name,
+;       a Namespace parent and optionaly a generic NTVtype
 
 NTVentity = NTVsingle / NTVlist
 
-NTVsingle = "NTVsingle(" NTVsingleValue  NTVname  NTVsingleType ")"
-NTVsingleType  = NTVtype 
+NTVsingle = "NTVsingle(" NTVsingleValue "," NTVname "," NTVType ")"
 NTVsingleValue = JsonValue
 
-NTVlist   = "NTVlist(" NTVlistValue  NTVname  NTVlistType ")"
+NTVlist   = "NTVlist(" NTVlistValue "," NTVname "," NTVlistType ")"
 NTVlistType    = NTVtype / Namespace
-NTVlistValue   = *NTVentity
+NTVlistValue   = "Array(" [NTVentity *("," NTVentity)] ")"
 
 NTVname        = string
-JsonValue      = string
+JsonValue      = "JSONload(" JsonText ")"
+JsonText       = string
 
 string   = DQUOTE *CHAR DQUOTE
 DQUOTE   = %x22          ; " double quote
@@ -670,13 +678,12 @@ CHAR     = %x01-7F
 
 ; Namespace and NtvType
 
-Namespace       = "Namespace(" NamespaceName NamespaceParent ")" 
-NamespaceParent = Namespace  ; Namespace is nested
+Namespace   = "Namespace(" NamespaceName "," Namespace ")" 
 NamespaceName   = [ ["$"] string "." ] 
 JsonNamespace   = JsonNamespaceParent NamespaceName
 JsonNamespaceParent = JsonNamespace
 
-NTVtype     = "NTVtype(" NTVtypeName NamespaceParent [NTVtypeGen] ")"
+NTVtype = "NTVtype(" NTVtypeName "," Namespace ["," NTVtypeGen] ")"
 NTVtypeGen  = NTVtype
 NTVtypeName = ["$"] string
 JsonNTVtype = JsonNamespaceParent NTVtypeName  
@@ -685,8 +692,9 @@ JsonNTVtype = JsonNamespaceParent NTVtypeName
 
 JsonNTV        = JsonNTVnamed / JsonNTVsimple
 
-JsonNTVnamed   = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")" 
+JsonNTVnamed   = "JsonObject(" JsonNTVMemb ")" 
 JsonNTVsimple  = JsonNTVvalue
+JsonNTVMemb  = "JsonMember(" JsonNTVname "," JsonNTVvalue ")"
 
 JsonNTVname    = NTVname / (NTVname JsonType) / JsonType
 JsonType       = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
@@ -701,8 +709,9 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
 
-JsonArrayValue     = "JsonArray(" *JsonNTV ")"
-JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
+JsonArrayValue   = "JsonArray(" [JsonNTV *("," JsonNTV) ")"
+JsonObjectValue  = "JsonObject(" [JsonNTVMemb *("," JsonNTVMemb)] ")"
+
 
         </sourcecode></figure>
     </section>
