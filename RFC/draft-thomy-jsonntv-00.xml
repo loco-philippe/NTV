@@ -66,20 +66,22 @@
             <li>JSON is simple and readable as simple text</li>
             <li>JSON supports rich structure including nesting and basic types</li>
             <li>JSON is web-native and very widely used and supported</li>
-            <li>JSON format has binary representation (i.e. CBOR format)</li></ul></li>
+            <li>JSON format has binary representation (eg. CBOR format)</li></ul></li>
           <li><strong>high semantic level of data</strong><ul>
             <li>wide variety of data typing</li>
             <li>tree-like and customisable data typing </li></ul></li>
           <li><strong>compatibility with existing formats</strong><ul>
-            <li>JSON data is a JSON-NTV data</li>
-            <li>most of NTV types are existing types</li>
-            <li>the defined types integrate the data catalogs (i.e.  schemaorg, darwincore)</li></ul></li>
+            <li>All JSON data is a JsonNTV data</li>
+            <li>All NTVtypes are standard types</li></ul></li>
           <li><strong>compatibility with any type of platform</strong><ul>
             <li>types and structures are independent of software and hardware platforms</li>
             <li>the NTV concept is applicable to all types of software and data</li></ul></li>
           <li><strong>reversibility</strong><ul>
-            <li>the NTV entity coming from a Json is identical to the NTV entity from which the Json comes</li>
-            <li>the Json representation of an NTV entity is the same as the Json value used to construct the NTV entity</li></ul></li></ul></t>
+            <li>the NTV entity coming from a JsonValue is identical to the NTV entity from which the JsonValue comes</li>
+            <li>the JSON representation of an NTV entity is the same as the JsonValue used to construct the NTV entity</li></ul></li>
+          <li><strong>tree structure</strong><ul>
+            <li>all NTV entities are trees</li>
+            <li>tree properties are applicable to NTV entities</li></ul></li></ul></t>
       </section>     
       <section><name>Requirements Language</name>
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
@@ -93,9 +95,9 @@
           <dt><strong>JsonPrimitive:</strong></dt>
           <dd>A JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull.</dd>
           <dt><strong>JsonUnnamed:</strong></dt>
-          <dd>A JSON-object without a single member.</dd>
+          <dd>A JsonObject without a single member.</dd>
           <dt><strong>JsonNamed:</strong></dt>
-          <dd>A JSON-object with a single member.</dd>
+          <dd>A JsonObject with a single member.</dd>
           <dt><strong>NTVsingle, NTVlist:</strong></dt>
           <dd>NTVlist and NTVsingle entities can be abbreviated as:<ul>
                 <li>NVsingle : entity with default NTVtype "json",</li>
@@ -494,9 +496,6 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5322.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8089.xml"/>
       </references>
       <references><name>Informative References</name>
         <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
@@ -509,7 +508,7 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
           <title>Recommendation : Model for Tabular Data and Metadata on the Web</title>
           <author><organization>"W3C"</organization></author><date year="17 December 2015"/></front></reference>            
         <reference anchor="ISO 3166-1 alpha-2" target="https://www.iso.org/standard/72482.html"><front>
-          <title>Codes for the representation of names of countries and their subdivisions — Part 1: Country code</title>
+          <title>Codes for the representation of names of countries and their subdivisions - Part 1: Country code</title>
           <author><organization>"ISO"</organization></author><date year="2020"/></front></reference>            
       </references>
     </references>
@@ -598,12 +597,12 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
       <section><name>Normalized String</name>
         <table anchor="table9" align="left" pn="table-9"><name>Structured NTVtype</name><thead>
           <tr><th>NTVtypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
-          <tr><td>uri</td><td>URI <xref target="RFC3986"/></td><td><t>"https://www.ietf.org/rfc/rfc3986.txt"</t>
+          <tr><td>uri</td><td>URI (RFC3986)</td><td><t>"https://www.ietf.org/rfc/rfc3986.txt"</t>
             <t>"urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"</t>
             <t>"geo:13.4125,103.86673" (RFC5870)"</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t>
             <t>"news:comp.infosystems.www.servers.unix"</t></td></tr>
-          <tr><td>email</td><td>adress <xref target="RFC5322"/></td><td>"John Doe &lt;jdoe@machine.example&gt;"</td></tr>
-          <tr><td>file</td><td>file-hier-part <xref target="RFC8089"/></td>
+          <tr><td>email</td><td>adress (RFC5322)</td><td>"John Doe &lt;jdoe@machine.example&gt;"</td></tr>
+          <tr><td>file</td><td>file-hier-part (RFC8089)</td>
             <td><t>"///path/to/file"</t><t>"//host.example.com/path/to/file"</t></td></tr></tbody></table>
         <t>Keywords are not defined as Normalized String (eg. "id", "mandatory", "units"), they can be used as custom NTVtype 
         (eg. "$id", "$mandatory", "$units")</t>
