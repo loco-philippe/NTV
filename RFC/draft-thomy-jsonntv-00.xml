@@ -622,95 +622,83 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
         <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-6">
           <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
 
-; notation:
-;   To express that a function is applied to a list of parameters:
-;       Result = Function(param1, param2, ...)
-;   the following ABNF notation is used:
+; NTV entities
 
-Result = "Function(" ListParam ")"
-ListParam = [param *("," param)]
+;   - NTVList(NTVlistValue, NTVname, NTVlistType):
+;       constructor of an NTVlist defined by a value,
+;       a name and a type.
+;   - NTVsingle(NTVsinglevalue, NTVname, NTVsingleType):
+;       constructor of an NTVsingle defined by a value,
+;       a name and a type.
+    NTVsingle = "NTVsingle(" NTVsingleValue "," NTVname "," NTVSingleType ")"
 
-; This notation is used with:
-;
-;   - JsonArray(ListParam):
-;       constructor of a JsonArray as defined in the Json grammar,
-;       ListParam is a list of JsonElement
-;   - JsonObject(ListParam):
-;       constructor of a JsonObject as defined in the Json grammar,
-;       ListParam is a list of JsonMember
-;   - JsonMember(key, value):
-;       constructor of a JsonMember as defined in the Json grammar,
-;       key is a string, value is a JsonValue
-;   - JsonLoad(JsonText)
-;       function which convert JsonText in JsonValue
-;   - Array(ListParam):
-;       constructor of an ordonned list of objects
-;       defined by ListParam,
-;   - NTVList(value, name, type):
-;       constructor of an NTVlist created with a value,
-;       a name and a type
-;   - NTVsingle(value, name, type):
-;       constructor of an NTVsingle created with a value,
-;       a name and a type
-;   - Namespace(name, NamespaceParent):
-;       constructor of an Namespace created with a name
-;       and a Namespace parent
-;   - NTVtype(name, NamespaceParent, NTVtypeGen):
-;       constructor of an NTVtype created with a name,
-;       a Namespace parent and optionaly a generic NTVtype
-
-NTVentity = NTVsingle / NTVlist
-
-NTVsingle = "NTVsingle(" NTVsingleValue "," NTVname "," NTVType ")"
-NTVsingleValue = JsonValue
-
-NTVlist   = "NTVlist(" NTVlistValue "," NTVname "," NTVlistType ")"
-NTVlistType    = NTVtype / Namespace
-NTVlistValue   = "Array(" [NTVentity *("," NTVentity)] ")"
+    NTVlist   = "NTVlist(" NTVlistValue "," NTVlistValue "," NTVlistType ")"
+    NTVlistType    = NTVtype / Namespace
+    NTVlistValue   = "Array(" [NTVentity *("," NTVentity)] ")"
 
 NTVname        = string
-JsonValue      = "JSONload(" JsonText ")"
-JsonText       = string
+NTVsingleValue = JsonValue
 
-string   = DQUOTE *CHAR DQUOTE
-DQUOTE   = %x22          ; " double quote
-CHAR     = %x01-7F
+; Json grammar
+
+beginArray    = ws "[" ws
+beginObject   = ws "{" ws
+endArray      = ws "]" ws
+endObject     = ws "}" ws
+nSep          = ws ":" ws
+vSep          = ws "," ws
+ws = *( %x20 / %x09 / %x0A / %x0D )
+
+JsonValue = JsonValue
+string = string
 
 ; Namespace and NtvType
 
-Namespace   = "Namespace(" NamespaceName "," Namespace ")" 
+;   - Namespace(name, NamespaceParent):
+;       constructor of an Namespace defined by a name
+;       and a parent Namespace.
+;   - NTVtype(name, NamespaceParent, NTVtypeGen):
+;       constructor of an NTVtype defined by a name,
+;       a parent Namespace and optionally a generic NTVtype
+
+          Namespace   = "Namespace(" NamespaceName "," Namespace ")" 
+          NTVtype = "NTVtype(" NTVtypeName "," Namespace ["," NTVtypeGen] ")"
+          NTVtypeGen  = NTVtype
 NamespaceName   = [ ["$"] string "." ] 
+NTVtypeName = ["$"] string
+
+; JSON representation of Namespace and NtvType
+
 JsonNamespace   = JsonNamespaceParent NamespaceName
 JsonNamespaceParent = JsonNamespace
 
-NTVtype = "NTVtype(" NTVtypeName "," Namespace ["," NTVtypeGen] ")"
-NTVtypeGen  = NTVtype
-NTVtypeName = ["$"] string
 JsonNTVtype = JsonNamespaceParent NTVtypeName  
 
-; JsonValue representation of NTV entities
+; JSON representation of NTV entities
 
 JsonNTV        = JsonNTVnamed / JsonNTVsimple
 
-JsonNTVnamed   = "JsonObject(" JsonNTVMemb ")" 
+JsonNTVnamed   = beginObject JsonNTVMember endObject 
 JsonNTVsimple  = JsonNTVvalue
-JsonNTVMemb  = "JsonMember(" JsonNTVname "," JsonNTVvalue ")"
 
+JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
 JsonNTVname    = NTVname / (NTVname JsonType) / JsonType
 JsonType       = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
 
 singleSep   = ":"      ; NTVsingle separator 
 listSep     = "::"     ; NTVlist separator
 
-; Json representation of NTVvalue
+; JSON representation of NTVvalue
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
 
-JsonArrayValue   = "JsonArray(" [JsonNTV *("," JsonNTV) ")"
-JsonObjectValue  = "JsonObject(" [JsonNTVMemb *("," JsonNTVMemb)] ")"
+JsonArrayValue    = beginArray ListJsonNTVvalue endArray
+ListJsonNTVvalue  = [JsonNTV  *( vSep JsonNTV )]
+JsonObjectValue   = beginObject ListJsonNTVmember endObject
+ListJsonNTVmember = [JsonNTVMember *( vSep JsonNTVMember)]
 
 
         </sourcecode></figure>
