@@ -110,8 +110,7 @@
     <section><name>NTV structure</name>
       <section><name>NTV layers</name>
         <t>Two structures are defined as shown in <xref target="NTVlayers-svg" derivedContent="Figure 1"/>:</t><ul>
-          <li>NTV is a triplet (NTVname, NTVtype, NTVvalue) that contains all the data needed to reconstruct the software object. 
-          NTV is used to build the software object.</li>
+          <li>NTV is a data triplet (NTVname, NTVtype, NTVvalue) that contains all the information needed to build the native entity. </li>
           <li>JsonNTV is the JsonValue of the NTV entity. JsonNTV is used to build an interchangeable JsonText</li></ul>
         <figure anchor="NTVlayers-svg" align="left" suppress-title="false" pn="figure-1"><name>NTV layers</name><artset>      
           <artwork type="svg" name="https://www.rfc-editor.org/materials/format/svg/stream.svg">  
@@ -155,42 +154,110 @@
             ]]>
           </artwork></artset></figure>
         <t><em>Example:</em></t><ul>
-          <li><em>Object layer</em><ul empty="true">
-            <li>new_year_2022 = datetime.date(2022, 01, 01) <em>  is a Python variable "new_year_2022" corresponding to a datetime object</em></li></ul></li>
+          <li><em>Native layer</em><ul empty="true">
+            <li>new_year_2022 = datetime.date(2022, 01, 01) <em>is a Python variable "new_year_2022" corresponding to a datetime object</em></li></ul></li>
           <li><em>NTV layer</em><ul empty="true">
-            <li>("new_year_2022", "date", "2022-01-01") <em>  is a triplet</em></li></ul></li>
+            <li>("new_year_2022", "date", "2022-01-01") <em>is a triplet</em></li></ul></li>
           <li><em>JsonNTV layer</em><ul empty="true">
-            <li>{ "new_year_2022:date" : "2022-01-01" }<em>  is a JsonValue</em></li></ul></li>
+            <li>{ "new_year_2022:date" : "2022-01-01" } <em>is a JsonValue</em></li></ul></li>
           <li><em>JsonText layer</em><ul empty="true">
-            <li>'{"new_year_2022:date":"2022-01-01"}'<em>  is a string</em></li></ul></li></ul>          
+            <li>'{"new_year_2022:date":"2022-01-01"}' <em>is a string</em></li></ul></li></ul>          
       </section>
       <section><name>NTV entities</name>
         <t>Two categories of entities (one primitive and one structured) are defined:<ul>
-          <li>NTVsingle for the primitive entity,</li>
-          <li>NTVlist for an ordered sequence of NTV entities</li></ul></t>
-        <t>Entities are defined in <xref target="NTVentities-abnf" derivedContent="Figure 2"/>, 
+          <li><strong>NTVsingle</strong> for the primitive entity,</li>
+          <li><strong>NTVlist</strong> for an ordered sequence of NTV entities</li></ul></t>
+        <t>An NTV entity is therefore a tree where the leaves nodes are the NTVsingle entities and where the inner nodes are the NTVlist entities</t>
+        <section><name>NTVsingle</name>
+          <t>The data triplet of NTVsingle entities is composed by:</t><ul>
+            <li><strong>NTVsingleValue</strong>: This NTVvalue is the JSON representation (JsonValue) of the main content of the NTV entity,</li>
+            <li><strong>NTVsingleType</strong>: This NTVtype defines the type of entity and the conversion rules between the native entity 
+            and the NTV entity. The default value is the "json" NTVtype.</li>
+            <li><strong>NTVname</strong>: The NTVname is an additional textual information (JsonString)</li></ul>
+          <t><strong>In other words, any entity that has on the one hand a function of encoding it into a JsonValue and 
+          on the other hand a function of creating from a JsonValue can be taken into account.
+          This approach is very general because the majority of computer objects are defined by a list of parameters 
+          (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
+          which simply translate into a JsonArray or a JsonObject.</strong></t>
+        </section>
+        <section><name>NTVlist</name>
+          <t>The data triplet of NTVlist entities is composed by:</t><ul>
+            <li><strong>NTVlistValue</strong>: This NTVvalue is an ordered sequence of included NTV entities.</li>
+            <li><strong>NTVlistType</strong>: This NTVtype is a Namespace or a default NTVtype to apply to the NTV entities included. 
+            This NTVlistType avoids having to include a NTVtype (if default NTVtype) or reduce the length (if Namespace) in the JSON representation 
+            (JsonNTV) of the included NTV entities. The default value is "None".</li>
+            <li><strong>NTVname</strong>: The NTVname is an additional textual information (JsonString)</li></ul>
+          <t><em>Example of equivalent JSON representations:</em></t><ul empty="true">
+            <li><em>where NTVlistType is None for the global NTVlist</em><ul empty="true">
+              <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] </em></li></ul></li>
+            <li><em>where NTVlistType is "point" for the global NTVlist</em><ul empty="true">
+              <li><em>{ "::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }</em></li></ul></li></ul>
+          <t><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1.1, 2.2] ] } }, 
+          the parsers deduce that the first NTVvalue has a  "dat" NTVtype and the second a "point" NTVtype.</em></t>
+        </section>
+      </section>
+      <section><name>NTVtype and Namespace</name>
+        <t> NTVtype is defined in a nested structure called Namespace:</t><ul>
+          <li>A NTVtype is defined in a parent Namespace,</li>
+          <li>A Namespace is defined in a parent Namespace,</li></ul>
+        <t>This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate 
+        all the shared data structures within the same tree of types.</t>
+        <section><name>Namespace</name>
+          <t>A Namespace is included in a Namespace parent (NamespaceParent) and may contain Namespace child.</t>
+          <t>A Namespace is represented by a string followed by a point (NamespaceName). 
+          The global Namespace (root node in the Namespace tree) is represented by an empty string and its NamespaceParent is None.</t>
+        </section>
+        <section><name>NTVtype</name>
+          <t>A NTVtype is defined by a name (NTVtypeName) and a Namespace parent (NamespaceParent). 
+          The NTVtype is unique in the Namespace parent.</t>
+          <t>NTVtype and the rules to encode or decode NTVvalues MUST be understood by data producers and data consumers. 
+          So NTVtype and rules associated have to be defined in a specification shared by a large community.
+          On the other hand, it must be possible for everyone to share data according to their own data structure.</t>
+          <t>There are therefore two categories of data: <ul>
+            <li>custom NTVtype (and Namespace) which can be created by anyone without control,</li>
+            <li>shared NTVtype (and Namespace) that are defined and used in a single, shared repository.</li></ul></t>
+          <t>The corresponding rules are as follows:<ul>
+            <li>NTVtype (or Namespace) whose name begins with '$' is of type 'custom'</li>
+            <li>NTVtype (or Namespace) included in a Namespace of type 'custom' is also of type 'custom'</li>
+            <li>Each 'shared' Namespace or NTVtype is uniquely managed.</li></ul></t>
+          <t><em>Example:</em> <ul empty="true">
+            <li><em>If "fr." is a Namespace attached to the global Namespace and containing the Namespace 'BAN.' and the NTVtype 'dep', then:</em> <ul>
+              <li><em>"fr.dep" is a shared NTVtype,</em></li>
+              <li><em>"fr.$test" is a custom NTVtype,</em></li>
+              <li><em>"fr.$example.one" is a custom NTVtype</em></li>
+              <li><em>"fr.BAN.$test" is a custom NTVtype</em></li></ul></li></ul></t>
+          <t>Three categories of NTVtype are defined (None, Simple, Generic).<ul>
+            <li>The "None" NTVtype is used with NTVlist to indicate the absence of a default Type.</li>
+            <li>If NTVtype is Simple, the rules associated with the NTVtype are used  for the conversion between an entity and a NTVvalue.</li>
+            <li>The Generic NTVtype (NTVtypeGen) is equivalent to a set of Simple NTVtype. 
+            This indicates that parsers can use an associated simple NTV type to decode the JsonNTVvalue.</li></ul></t>
+          <t><em>Example:</em> <ul empty="true">
+            <li><em>"dat" is the generic NTVtype for "datetime" and "timeposix"</em> </li>
+            <li><em> If a JSONvalue is { "::dat" : ["2022-01-28T18-23-54", 123456.78] }, the parser deduce that the NTVvalue of included entities 
+            has a NTVtype with a "dat" NTVtypeGen. The parser of included NTV entities deduces that the first object has an equivalent "datetime" 
+            NTVtype and the second an equivalent "timeposix" NTVtype.</em></li></ul></t>       
+        </section>
+      </section>      
+    </section>
+    &nbsp;
+    <section><name>JsonNTV</name>
+      <section><name>JsonNTV format</name>
+        <t>The JsonNTV format is the JsonValue representation of an NTV entity as defined in 
+        <xref target="JsonNTV-abnf" derivedContent="Figure 2"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="NTVentities-abnf" align="left" suppress-title="false" pn="figure-2">
-          <name>NTV entities - ABNF</name><sourcecode type="abnf" markers="false">
+        <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-2">
+          <name>JsonNTV - ABNF</name><sourcecode type="abnf" markers="false">
+            <![CDATA[
+; JSON representation of NTV entities (JsonNTV)
 
-; NTV entities
+JsonNTV        = JsonNTVnamed / JsonNTVsimple
 
-;   - NTVList(NTVlistValue, NTVname, NTVlistType):
-;       constructor of an NTVlist defined by a value,
-;       a name and a type.
-;   - NTVsingle(NTVsinglevalue, NTVname, NTVsingleType):
-;       constructor of an NTVsingle defined by a value,
-;       a name and a type.
-    NTVsingle = "NTVsingle(" NTVsingleValue "," NTVname "," NTVSingleType ")"
+JsonNTVnamed   = beginObject JsonNTVMember endObject 
+JsonNTVsimple  = JsonNTVvalue
 
-    NTVlist   = "NTVlist(" NTVlistValue "," NTVlistValue "," NTVlistType ")"
-    NTVlistType    = NTVtype / Namespace
-    NTVlistValue   = "Array(" [NTVentity *("," NTVentity)] ")"
+JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
 
-NTVname        = JsonString
-NTVsingleValue = JsonValue
-
-; Json grammar
+; Extract of JSON grammar used in this document 
 
 beginArray    = ws "[" ws
 beginObject   = ws "{" ws
@@ -200,120 +267,9 @@ nSep          = ws ":" ws
 vSep          = ws "," ws
 ws = *( %x20 / %x09 / %x0A / %x0D )
 
-JsonValue  = JsonValue          ; as defined in RFC8259
-JsonString = JsonString         ; as defined in RFC8259
-
-        </sourcecode></figure>
-        <section><name>NTVsingle</name>
-          <t>The NTVvalue (NTVsingleValue) is the JSON representation of the NTV entity value.</t>
-          <t>The NTVtype (NTVsingleType) defines the type of entity and the conversion rules between the NTV entity and the NTVvalue. 
-          The default value is the "json" NTVtype.</t>
-          <t>The NTVname is a JsonString</t>
-          <t><strong>In other words, any entity that has on the one hand a function of encoding it into a JsonValue and 
-          on the other hand a function of creating from a JsonValue can be taken into account.
-          This approach is very general because the majority of computer objects are defined by a list of parameters 
-          (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
-          which simply translate into a JsonArray or a JsonObject.</strong></t>
-        </section>
-        <section><name>NTVlist</name>
-          <t>The NTVvalue (NTVlistValue) is the list of included NTV entities.</t>
-          <t>The NTVtype (NTVlistType) is a Namespace or a default NTVtype to apply to the NTV entities included. 
-          This NTVtype avoids having to include a type (if default NTVtype) 
-          or reduce the length (if Namespace) in the JSON representation of the included NTV entities. The default value is "None".</t>
-          <t>The NTVname is a string.</t><ul empty="true">
-            <li><em>Example of equivalent JSON representations:</em><ul spacing="compact" empty="true">
-              <li><em>where NTVtype is None for the NTVlist</em><ul spacing="compact" empty="true">
-                <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] </em></li></ul></li>
-              <li><em>where NTVtype is "point" for the NTVlist</em><ul spacing="compact" empty="true">
-                <li><em>{ "::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }</em></li></ul></li></ul></li>
-            <li><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1.1, 2.2] ] } }, 
-            the parsers deduce that the first NTVvalue has a  "dat" NTVtype and the second a "point" NTVtype.</em></li></ul>
-        </section>
-      </section>
-      <section><name>NTVtype</name>
-        <t>NTVtype and associated Namespace are defined in <xref target="NTVtype-abnf" derivedContent="Figure 3"/>, 
-        which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="NTVtype-abnf" align="left" suppress-title="false" pn="figure-3">
-          <name>NTVtype - ABNF</name><sourcecode type="abnf" markers="false">
-
-; Namespace and NtvType
-
-Namespace       = "Namespace(" NamespaceName NamespaceParent ")" 
-NamespaceParent = Namespace  ; Namespace is nested
-NamespaceName   = [ ["$"] string "." ] 
-JsonNamespace   = JsonNamespaceParent NamespaceName
-JsonNamespaceParent = JsonNamespace
-
-NTVtype     = "NTVtype(" NTVtypeName NamespaceParent [NTVtypeGen] ")"
-NTVtypeGen  = NTVtype
-NTVtypeName = ["$"] string
-JsonNTVtype = JsonNamespaceParent NTVtypeName  
-
-        </sourcecode></figure>
-        <t>A NTVtype is defined by a name (NTVtypeName) and a Namespace parent (NamespaceParent). 
-        The NTVtype is unique in the Namespace parent.</t>
-        <t>NTVtype and the rules to encode or decode NTVvalues MUST be understood by data producers and data consumers.</t>
-        <t>So NTVtype and rules associated have to be defined in a specification shared by a large community.</t>
-        <t>On the other hand, it must be possible for everyone to share data according to their own data structure.</t>
-        <t>There are therefore two categories of data: <ul>
-          <li>custom NTVtype (and Namespace) which can be created by anyone without control,</li>
-          <li>shared NTVtype (and Namespace) that are defined and used in a single, shared repository.</li></ul></t>
-        <t>The corresponding rules are as follows:<ul>
-          <li>NTVtype (or Namespace) whose name begins with '$' is of type 'custom'</li>
-          <li>NTVtype (or Namespace) included in a Namespace of type 'custom' is also of type 'custom'</li>
-          <li>Each 'shared' Namespace or NTVtype is uniquely managed.</li></ul></t>
-        <t><em>Example:</em> <ul empty="true">
-          <li><em>If "fr." is a Namespace attached to the global Namespace and containing the Namespace 'BAN.' and the NTVtype 'dep', then:</em> <ul>
-            <li><em>"fr.dep" is a shared NTVtype,</em></li>
-            <li><em>"fr.$test" is a custom NTVtype,</em></li>
-            <li><em>"fr.$example.one" is a custom NTVtype</em></li>
-            <li><em>"fr.BAN.$test" is a custom NTVtype</em></li></ul></li></ul></t>
-        <t>A Namespace is included in a Namespace parent (NamespaceParent) and may contain Namespace child.</t>
-        <t>A Namespace is represented by a string followed by a point (NamespaceName). 
-        The global Namespace (root node in the Namespace tree) is represented by an empty string and its NamespaceParent is None. 
-        The Namespace representations are added to the value of an NTVtype to have an absolute representation of an NTVtype (JsonNTVtype).</t>
-        <t><em>Example for an absolute representation of an NTVtype defined in two nested Namespace in the global Namespace:</em> <ul empty="true">
-          <li><em>"ns1.ns2.type" </em> </li>
-          <li><em> where:</em> <ul empty="true">
-            <li><em>ns1. is a Namespace defined in the global Namespace,</em> </li>
-            <li><em>ns2. is a Namespace defined in the ns1. Namespace,</em> </li>
-            <li><em>type is a NTVtype defined in the ns2. Namespace</em> </li></ul></li></ul></t>
-        <t>Three categories of NTVtype are defined (None, Simple, Generic).<ul>
-          <li>The "None" NTVtype is used with NTVlist to indicate the absence of a default Type.</li>
-          <li>If NTVtype is Simple, the rules associated with the NTVtype are used  for the conversion between an entity and a NTVvalue.</li>
-          <li>The Generic NTVtype (NTVtypeGen) is equivalent to a set of Simple NTVtype. 
-          This indicates that parsers can use an associated simple NTV type to decode the JsonNTVvalue.</li></ul></t>
-        <t><em>Example:</em> <ul empty="true">
-          <li><em>"dat" is the generic NTVtype for "datetime" and "timeposix"</em> </li>
-          <li><em> If a JSONvalue is { "::dat" : ["2022-01-28T18-23-54", 123456.78] }, the parser deduce that the NTVvalue of included entities 
-          has a NTVtype with a "dat" NTVtypeGen. The parser of included NTV entities deduces that the first object has an equivalent "datetime" 
-          NTVtype and the second an equivalent "timeposix" NTVtype.</em></li></ul></t>       
-        <t>This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate 
-        all the shared data structures within the same tree of types.</t>
-      </section>      
-    </section>
-    &nbsp;
-    <section><name>JsonNTV</name>
-      <section><name>JsonNTV format</name>
-        <t>The JsonNTV format is the JsonValue representation of an NTV entity as defined in 
-        <xref target="JsonNTV-abnf" derivedContent="Figure 4"/>, 
-        which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-4">
-          <name>JsonNTV - ABNF</name><sourcecode type="abnf" markers="false">
-
-; JsonValue representation of NTV entities
-
-JsonNTV        = JsonNTVnamed / JsonNTVsimple
-
-JsonNTVnamed   = "JsonObject(" JsonNTVname ":" JsonNTVvalue ")" 
-JsonNTVsimple  = JsonNTVvalue
-
-JsonNTVname    = NTVname / (NTVname JsonType) / JsonType
-JsonType       = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
-
-singleSep   = ":"      ; NTVsingle separator 
-listSep     = "::"     ; NTVlist separator
-
+JsonValue  = JsonValue    ; indicates that rule is defined in RFC8259
+JsonString = JsonString   ; indicates that rule is defined in RFC8259
+            ]]>
         </sourcecode></figure>
         <t>The JsonNTV format is built with the NTVname, NTVvalue and the JsonNTVtype.</t>
         <t>Two JsonNTV formats are defined:<ul>
@@ -331,12 +287,26 @@ listSep     = "::"     ; NTVlist separator
           <li><em>a NTVlist with a single included entity has a JsonNTVname with a pair of colons e.g. { "::" : { "age" : 21 } }</em></li></ul></t>
       </section>
       <section><name>JsonNTVname</name>
-        <t><strong>JsonNTVname</strong></t><ul empty="true">
-          <li>JsonNTVname is the concatenation of NTVname and JsonType.</li>
-          <li>If the JsonNTVname contains one colon, the entity is a NTV-single.</li>
-          <li>If the JsonNTVname contains two adjacent colons, the entity is an NTV-list.</li></ul>
-        <t><strong>JsonType</strong></t><ul empty="true">
-          <li>The JsonType is composed with the separator singleSep or listSep and the JsonNTVtype.</li>
+        <t>JsonNTVname is the concatenation of NTVname and JsonType.</t>
+        <t>If the JsonNTVname contains one colon, the entity is a NTV-single.</t>
+        <t>If the JsonNTVname contains two adjacent colons, the entity is an NTV-list.</t>
+        <t>JsonNTVname is defined in <xref target="JsonNTVname-abnf" derivedContent="Figure 3"/>, 
+        which uses ABNF from <xref target="RFC5234"/>.</t>
+        <figure anchor="JsonNTVname-abnf" align="left" suppress-title="false" pn="figure-3">
+          <name>JsonNTVname - ABNF</name><sourcecode type="abnf" markers="false">
+            <![CDATA[
+; JSON representation of NTVname and NTVtype (JsonNTVname)
+
+JsonNTVname    = NTVname / (NTVname JsonSepType) / JsonSepType
+JsonSepType    = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
+
+NTVname = JsonString
+
+singleSep   = ":"      ; NTVsingle separator 
+listSep     = "::"     ; NTVlist separator
+          ]]>
+        </sourcecode></figure>
+        <t>The JsonType is composed with the separator singleSep or listSep and the JsonNTVtype.</t><ul empty="true">
           <li>For NTVsingle entities:<ul>
             <li>The JsonType is identical to the singleSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
             <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is empty.</li>
@@ -349,23 +319,51 @@ listSep     = "::"     ; NTVlist separator
             <li>The empty string if the NTVtype of the structured NTV entity is identical to the NTVtype of the NTV entity,</li>
             <li>relative NTVtype if the NTVtype of the structured NTV entity is a Namespace shared with the NTVtype of the NTV entity.</li></ul></li></ul>
       </section>
+      <section><name>JsonNTVtype</name>
+        <t>The JSON representation of a NTVtype (JsonNTVtype) is composed by all the nested NamespaceName and the NTVtypeName.</t>
+        <t>The JsonNTVtype is defined in  <xref target="JsonNTVtype-abnf" derivedContent="Figure 4"/>, 
+        which uses ABNF from <xref target="RFC5234"/>.</t>
+        <figure anchor="JsonNTVtype-abnf" align="left" suppress-title="false" pn="figure-4">
+          <name>JsonNTVtype - ABNF</name><sourcecode type="abnf" markers="false">
+            <![CDATA[
+; JSON representation of NtvType (JsonNTVtype)
+
+JsonNTVtype     = JsonNamespaceParent NTVtypeName  
+
+JsonNamespace   = JsonNamespaceParent NamespaceName
+JsonNamespaceParent = JsonNamespace
+
+NamespaceName   = [ ["$"] JsonString "." ] 
+NTVtypeName     = ["$"] JsonString
+          ]]>
+        </sourcecode></figure>
+        <t><em>Example for an absolute representation of an NTVtype defined in two nested Namespace in the global Namespace:</em> <ul empty="true">
+          <li><em>"ns1.ns2.type" </em> </li>
+          <li><em> where:</em> <ul empty="true">
+            <li><em>ns1. is a Namespace defined in the global Namespace,</em> </li>
+            <li><em>ns2. is a Namespace defined in the ns1. Namespace,</em> </li>
+            <li><em>type is a NTVtype defined in the ns2. Namespace</em> </li></ul></li></ul></t>
+      </section>
       <section><name>JsonNTVvalue</name>
-        <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in 
-        <xref target="JsonNTVvalue-abnf" derivedContent="Figure 5"/>, 
+        <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in <xref target="JsonNTVvalue-abnf" derivedContent="Figure 5"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-5">
           <name>JsonNTVvalue - ABNF</name><sourcecode type="abnf" markers="false">
-
-; Json representation of NTVvalue
+            <![CDATA[
+; JSON representation of NTVvalue
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
-JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
+JsonNTVlistValue   = JsonNTVArrayValue / JsonNTVObjectValue
 
-JsonArrayValue     = "JsonArray(" *JsonNTV ")"
-JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
+JsonNTVArrayValue  = beginArray ListJsonNTVvalue endArray
+ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
+JsonNTVObjectValue = beginObject ListJsonNTVmember endObject
+ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
 
+NTVsingleValue     = JsonValue
+            ]]>
         </sourcecode></figure>
         <t>For a NTVsingle, JsonNTVvalue is the NTVvalue.</t>
         <t>For a NTVlist, JsonNTValue has two representations:<ul>
@@ -623,31 +621,8 @@ JsonObjectValue   = "JsonObject(" *(JsonNTVname ":" JsonNTVvalue) ")"
     <section><name>Appendix 2 - Complete ABNF notation</name>
         <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-6">
           <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
-
-
-; Namespace and NtvType
-
-;   - Namespace(name, NamespaceParent):
-;       constructor of an Namespace defined by a name
-;       and a parent Namespace.
-;   - NTVtype(name, NamespaceParent, NTVtypeGen):
-;       constructor of an NTVtype defined by a name,
-;       a parent Namespace and optionally a generic NTVtype
-
-          Namespace   = "Namespace(" NamespaceName "," Namespace ")" 
-          NTVtype = "NTVtype(" NTVtypeName "," Namespace ["," NTVtypeGen] ")"
-          NTVtypeGen  = NTVtype
-NamespaceName   = [ ["$"] JsonString "." ] 
-NTVtypeName     = ["$"] JsonString
-
-; JSON representation of Namespace and NtvType
-
-JsonNamespace   = JsonNamespaceParent NamespaceName
-JsonNamespaceParent = JsonNamespace
-
-JsonNTVtype = JsonNamespaceParent NTVtypeName  
-
-; JSON representation of NTV entities
+            <![CDATA[
+; JSON representation of NTV entities (JsonNTV)
 
 JsonNTV        = JsonNTVnamed / JsonNTVsimple
 
@@ -655,26 +630,55 @@ JsonNTVnamed   = beginObject JsonNTVMember endObject
 JsonNTVsimple  = JsonNTVvalue
 
 JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
+
+; Extract of JSON grammar used in this document 
+
+beginArray    = ws "[" ws
+beginObject   = ws "{" ws
+endArray      = ws "]" ws
+endObject     = ws "}" ws
+nSep          = ws ":" ws
+vSep          = ws "," ws
+ws = *( %x20 / %x09 / %x0A / %x0D )
+
+JsonValue  = JsonValue    ; indicates that rule is defined in RFC8259
+JsonString = JsonString   ; indicates that rule is defined in RFC8259
+
+; JSON representation of NTVname and NTVtype (JsonNTVname)
+
 JsonNTVname    = NTVname / (NTVname JsonSepType) / JsonSepType
 JsonSepType    = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
 
+NTVname = JsonString
+
 singleSep   = ":"      ; NTVsingle separator 
 listSep     = "::"     ; NTVlist separator
+
+; JSON representation of NtvType (JsonNTVtype)
+
+JsonNTVtype     = JsonNamespaceParent NTVtypeName  
+
+JsonNamespace   = JsonNamespaceParent NamespaceName
+JsonNamespaceParent = JsonNamespace
+
+NamespaceName   = [ ["$"] JsonString "." ] 
+NTVtypeName     = ["$"] JsonString
 
 ; JSON representation of NTVvalue
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
-JsonNTVlistValue   = JsonArrayValue / JsonObjectValue
+JsonNTVlistValue   = JsonNTVArrayValue / JsonNTVObjectValue
 
-JsonArrayValue    = beginArray ListJsonNTVvalue endArray
-ListJsonNTVvalue  = [JsonNTV  *( vSep JsonNTV )]
-JsonObjectValue   = beginObject ListJsonNTVmember endObject
-ListJsonNTVmember = [JsonNTVMember *( vSep JsonNTVMember)]
+JsonNTVArrayValue  = beginArray ListJsonNTVvalue endArray
+ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
+JsonNTVObjectValue = beginObject ListJsonNTVmember endObject
+ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
 
-
-        </sourcecode></figure>
+NTVsingleValue     = JsonValue
+        ]]>
+      </sourcecode></figure>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
