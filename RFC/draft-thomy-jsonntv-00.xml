@@ -11,20 +11,32 @@
   submissionType="IETF"
   xml:lang="en"
   version="0">
+
   <front>
-    <title abbrev="JSON-NTV">JSON semantic format (JSON-NTV)</title>
+    <title>JSON semantic format (JSON-NTV)</title>
     <seriesInfo name="Internet-Draft" value="draft-thomy-jsonntv-00"/>
     <author fullname="Philippe THOMY" initials="P" role="editor" surname="THOMY">
       <organization>Loco-labs</organization>
       <address>
-        <postal><street>476 chemin du gaf de Famian</street><city>BOLLENE</city><code>84 500</code><country>FR</country></postal>        
+        <postal>
+          <street>476 chemin du gaf de Famian</street>
+          <city>BOLLENE</city>
+          <code>84 500</code>
+          <country>FR</country>
+        </postal>        
         <email>philippe@loco-labs.io</email>  
-        <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri></address></author> 
-    <date year="2023"/><area>General</area><workgroup>Internet Engineering Task Force</workgroup><keyword>JSON SEMANTIC</keyword>
+        <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
+      </address>
+    </author> 
+    <date year="2023"/>
+    <area>General</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+    <keyword>JSON SEMANTIC</keyword>
     <abstract>
       <t>This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
       JSON Data Interchange Format. These rules are based on an NTV (Named and Typed Values) data structure applicable
-      to any simple or complex data. The JSON-NTV format is its JSON translation.</t></abstract>
+      to any simple or complex data. The JSON-NTV format is its JSON translation.</t>
+      </abstract>
   </front>
   &nbsp;
   <middle>
