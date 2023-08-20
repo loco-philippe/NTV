@@ -57,8 +57,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvSingle', '{"Ntv1:array": [1, 2]}'],
                    ['NtvSingle', '"{ner"'],
                    ['NtvList', '{}'],
-                   ['NtvList', '{"::": {" a": 2}}'],
-                   ['NtvList', '{"test::": {"a": 2}}']]
+                   ['NtvList', '[{" a": 2}]'],
+                   ['NtvList', '{"test": [{"a": 2}]}']]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -100,8 +100,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvList', {}],
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
-                   ['NtvList', {"::": {" a": 2}}],
-                   ['NtvList', {"test::": {"a": 2}}]]
+                   ['NtvList', [{" a": 2}]],
+                   ['NtvList', {"test": [{"a": 2}]}]]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -235,8 +235,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvSingle', '{"Ntv1:array": [1, 2]}'],
                    ['NtvSingle', '"{ner"'],
                    ['NtvList', '{}'],
-                   ['NtvList', '{"::": {" a": 2}}'],
-                   ['NtvList', '{"test::": {"a": 2}}']]
+                   ['NtvList', '[{" a": 2}]'],
+                   ['NtvList', '{"test": [{"a": 2}]}']]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -279,8 +279,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', {}],
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
-                   ['NtvList', {"::": {" a": 2}}],
-                   ['NtvList', {"test::": {"a": 2}}]]
+                   ['NtvList', [{" a": 2}] ],
+                   ['NtvList', {"test": [{"a": 2}]}]]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])

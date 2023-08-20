@@ -58,7 +58,7 @@
               <li><em>{"cities::point": {"paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640]}}      named format for primitive entities</em></li></ul></li></ul>
         <t>A JSON-NTV generator produces a JSON value from a NTV entity and vice versa a JSON-NTV parser transforms a 
         JSON value into a NTV entity. </t>
-        <t>The conversion between NTV entity and native entity is not the subject of this note.</t>
+        <t>The conversion between NTV entity and native entity is outside the scope of this note.</t>
       </section>
       <section><name>Key design features</name>
         <t>The format is focused on simplicity, lightness and web usage.</t>
@@ -110,7 +110,7 @@
     &nbsp;
     <section><name>NTV structure</name>
       <section><name>NTV layers</name>
-        <t>NTV and JsonNTVObjectValue structures are defined as shown in <xref target="NTVlayers-svg" derivedContent="Figure 1"/>:</t><ul>
+        <t>NTV and JsonNTV structures are defined as shown in <xref target="NTVlayers-svg" derivedContent="Figure 1"/>:</t><ul>
           <li>NTV is a data triplet (NTVname, NTVtype, NTVvalue) that contains all the information needed to build the native entity. </li>
           <li>JsonNTV is the JsonValue of the NTV entity. JsonNTV is used to build an interchangeable JsonText</li></ul>
         <figure anchor="NTVlayers-svg" align="left" suppress-title="false" pn="figure-1"><name>NTV layers</name><artset>      
@@ -180,6 +180,7 @@
           This approach is very general because the majority of computer objects are defined by a list of parameters 
           (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
           which simply translate into a JsonArray or a JsonObject.</strong></t>
+          <t>The consistency between NTVsingleValue and NTVsingleType is outside the scope of this note.</t> 
         </section>
         <section><name>NTVlist</name>
           <t>The data triplet of NTVlist entities is composed by:</t><ul>
@@ -283,8 +284,7 @@ JsonString = JsonString   ; indicates that rule is defined in RFC8259
           <li>a JsonArray is the representation of a Vlist entity,</li>
           <li>a JsonObject without a single member is the representation of a Vlist entity composed with unnamed entities.</li></ul></t>
         <t><em>Note :</em><ul>
-          <li><em>JsonNTV : 21, { ":" : 21 } and { ":json" : 21 } represent the same Vsingle entity,</em></li>
-          <li><em>a NTVlist with a single included entity has a JsonNTVname with a pair of colons e.g. { "::" : { "age" : 21 } }</em></li></ul></t>
+          <li><em>JsonNTV : 21, { ":" : 21 } and { ":json" : 21 } represent the same Vsingle entity,</em></li></ul></t>
       </section>
       <section><name>JsonNTVname</name>
         <t>JsonNTVname is the concatenation of NTVname and JsonType.</t>
@@ -306,16 +306,16 @@ singleSep   = ":"      ; NTVsingle separator
 listSep     = "::"     ; NTVlist separator
           ]]>
         </sourcecode></figure>
-        <t>The JsonType is composed with the separator singleSep or listSep and the JsonNTVtype.</t><ul empty="true">
+        <t>The JsonSepType is composed with the separator singleSep or listSep and the JsonNTVtype.</t><ul empty="true">
           <li>For NTVsingle entities:<ul>
-            <li>The JsonType is identical to the singleSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
-            <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is empty.</li>
-            <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonType is ":".</li></ul></li>
+            <li>The JsonSepType is identical to the singleSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonSepType is empty.</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonSepType is ":".</li></ul></li>
           <li>For NTVlist entities:<ul>
-            <li>The JsonType is identical to the listSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
-            <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonType is "::".</li>
-            <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonType is empty.</li></ul></li>
-          <li>For NTV entities included in another entity, the JsonType MAY be set to :<ul>
+            <li>The JsonSepType is identical to the listSep joined with JsonNTVtype if JsonNTVtype is not "json".</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is not a JsonArray and not a JsonObject with not a single member, the JsonSepType is "::".</li>
+            <li>If JsonNTVtype is "json" and JsonNTVvalue is a JsonArray or a JsonObject with not a single member, the JsonSepType is empty.</li></ul></li>
+          <li>For NTV entities included in another entity, the JsonSepType MAY be set to :<ul>
             <li>The empty string if the NTVtype of the structured NTV entity is identical to the NTVtype of the NTV entity,</li>
             <li>relative NTVtype if the NTVtype of the structured NTV entity is a Namespace shared with the NTVtype of the NTV entity.</li></ul></li></ul>
       </section>
@@ -410,18 +410,16 @@ NTVsingleValue     = JsonValue
       <t><strong>NTVlist : </strong></t><ul empty="true">
         <li><em>{ "cities::point": [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
         <li><em>{ "generic date::dat": [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78]}</em></li>
-        <li><em>{ "various::point": [ [2.3522, 48.8566], { ":date": "2022-01-28"}</em></li>
-        <li><em>{"json": 25 }, { "another NTVlist":: [ 1,2,3]}]}</em></li></ul>
+        <li><em>{ "various::point": [ [2.3, 48.8], { ":date": "2022-01-28"}, {"json": 25 }, { "another NTVlist": [1,2,3]} ]}</em></li></ul>
       <t><strong>NTVlist and NVlist (composed with JsonObject) :</strong></t><ul empty="true">
         <li><em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em></li>
-        <li><em>{ "cities": {"paris:point": [2.3522, 48.8566] , "lyon": "france"}}</em></li>
-        <li><em>{ "city::": {"paris": [2.3522, 48.8566] } }</em></li></ul>
+        <li><em>{ "cities": {"paris:point": [2.3522, 48.8566] , "lyon": "france"}}</em></li></ul>
     </section>
     &nbsp;
     <section><name>Parsing a JsonValue</name>
       <t>A first decoding step identifies the following objects:</t><ul empty='true'>
         <li>JsonNTVvalue, NTVname (if present), separator (if present), JsonNTVtype (if present).</li></ul>
-      <t>The tables below present the rules for identifying angle NTV entity.</t> 
+      <t>The tables below present the rules for identifying an NTV entity.</t> 
       <table anchor="table1" align="left" pn="table-1"><name>Decoding JsonValue</name><thead>
         <tr><th>JsonValue</th><th>NTV entity</th></tr></thead><tbody>
         <tr><td>JsonPrimitive</td><td>Vsingle</td></tr>
