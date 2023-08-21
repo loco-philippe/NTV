@@ -301,6 +301,26 @@ class Ntv(ABC):
         return hash(self) < hash(other)
 
     @property
+    def pointer(self):
+        '''return a list of pointer from root'''
+        if not self.parent:
+            return []        
+        return self.parent.pointer + [self.parent.ntv_value.index(self) 
+            if self.ntv_name == "" and not self.json_array 
+            else self.ntv_name]
+
+    @property
+    def json_pointer(self):
+        '''return a string of pointer'''
+        json_p = ''
+        pointer = self.pointer
+        if pointer == []:
+            return ""
+        for name in self.pointer:
+            json_p += '/' + str(name)
+        return json_p
+
+    @property
     def address(self):
         '''return a list of parent row from root'''
         if not self.parent:
