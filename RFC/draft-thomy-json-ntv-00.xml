@@ -9,7 +9,7 @@
   updates=""
   submissionType="IETF"
   xml:lang="en"
-  version="0">
+  version="2">
 
   <front>
     <title>JSON semantic format (JSON-NTV)</title>
