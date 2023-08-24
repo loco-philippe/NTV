@@ -316,10 +316,21 @@ class Ntv(ABC):
         pointer = self.pointer
         if pointer == []:
             return ""
-        for name in self.pointer:
-            json_p += '/' + str(name)
+        for name in pointer:
+            json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
         return json_p
 
+    @staticmethod 
+    def set_pointer(json_pointer):
+        '''convert a json_pointer string into a pointer list''' 
+        split_pointer = json_pointer.split('/')
+        if split_pointer[0] != '':
+            raise NtvError("json_pointer is not correct")
+        if len(split_pointer) == 1:
+            return []
+        return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/') 
+                for nam in split_pointer[1:] ]       
+         
     @property
     def address(self):
         '''return a list of parent row from root'''
