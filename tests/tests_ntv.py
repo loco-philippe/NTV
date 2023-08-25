@@ -382,8 +382,20 @@ class Test_Ntv_indexing(unittest.TestCase):
         ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
                        'b': 'ert',
                        'dic': {'v1': 'val1', 'v2': 'val2'}})
-        pointer = '/a/1/1'
-        self.assertEqual(pointer, ntv[pointer].json_pointer())
+        pointers = ['/a/1/1', '']
+        for pointer in pointers:
+            self.assertEqual(pointer, ntv[pointer].json_pointer())
+
+    def test_pointer(self):
+        a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
+        self.assertTrue(a.parent is None)
+        self.assertEqual(a.pointer(), [])
+        self.assertEqual(a.json_pointer, '')
+        self.assertEqual(a['t3'].pointer(index=true), [2])
+        self.assertEqual(a['t3'].json_pointer(True), '0.2')
+        self.assertEqual(a['t3'][0].parent.parent, a)
+        self.assertEqual(a['t3'][0].address, [0, 2, 0])
+        self.assertEqual(a['t3'][0].address_name, '0.2.0')
                         
 class Test_Ntv_tabular(unittest.TestCase):
 
@@ -526,17 +538,6 @@ class Test_Ntv_function(unittest.TestCase):
                 self.assertEqual(agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
     
-    def test_address(self):
-        a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
-        self.assertTrue(a.parent is None)
-        self.assertEqual(a.address, [0])
-        self.assertEqual(a.address_name, '0')
-        self.assertEqual(a['t3'].address, [0, 2])
-        self.assertEqual(a['t3'].address_name, '0.2')
-        self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(a['t3'][0].address, [0, 2, 0])
-        self.assertEqual(a['t3'][0].address_name, '0.2.0')
-
     def test_default_type(self):
         list_test = [[('', ':', 'fr.BAN.lon'), {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
                      [('', ':', 'fr.BAN.lon'), {
@@ -622,7 +623,7 @@ class Test_NtvTree(unittest.TestCase):
         tree = NtvTree(ntv)
         self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
-            [node.address_name for node in tree.leaf_nodes][6], '0.1')
+            [node.json_pointer() for node in tree.leaf_nodes][6], '/b')
         self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])
         self.assertEqual(tree.height, 3)
         self.assertEqual(tree.size, 11)

@@ -277,7 +277,7 @@ class Ntv(ABC):
             - string : name of the ntv,
             - list : recursive selector
             - tuple : list of name or index '''
-        if selec is None or selec == [] or selec == () or selec == '/':
+        if selec is None or selec == [] or selec == () or selec == '':
             return self
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
             selec = selec[0]
@@ -313,7 +313,7 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-    @property
+    """@property
     def address(self):
         '''return a list of parent row from root'''
         if not self.parent:
@@ -326,7 +326,7 @@ class Ntv(ABC):
         name = ''
         for ind in self.address:
             name += str(ind) + '.'
-        return name[:-1]
+        return name[:-1]"""
 
     def pointer(self, index=False):
         '''return a list of pointer from root'''
@@ -340,7 +340,7 @@ class Ntv(ABC):
         '''return a string of pointer'''
         json_p = ''
         pointer = self.pointer(index)
-        if pointer == []:
+        if pointer == ['']:
             return ""
         for name in pointer:
             json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
@@ -350,10 +350,10 @@ class Ntv(ABC):
     def set_pointer(json_pointer):
         '''convert a json_pointer string into a pointer list''' 
         split_pointer = json_pointer.split('/')
+        if len(split_pointer) == 0:
+            return []
         if split_pointer[0] != '':
             raise NtvError("json_pointer is not correct")
-        if len(split_pointer) == 1:
-            return []
         return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/') 
                 for nam in split_pointer[1:] ]       
          
