@@ -271,18 +271,31 @@ class Ntv(ABC):
             return iter([self.val])
         return iter(self.val)
 
-    def __getitem__(self, selector):
-        ''' return ntv_value item '''
-        if isinstance(self, NtvSingle) and selector == 0:
+    def __getitem__(self, selec):
+        ''' return ntv_value item with selec:
+            - String beginning with "/" : json-pointer,
+            - string : name of the ntv,
+            - list : recursive selector
+            - tuple : list of name or index '''
+        if selec is None or selec == [] or selec == () or selec == '/':
+            return self
+        if isinstance(selec, (list, tuple)) and len(selec) == 1:
+            selec = selec[0]
+        if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
+            selec = Ntv.set_pointer(selec)
+        if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
-        if isinstance(self, NtvSingle) and selector != 0:
+        if isinstance(self, NtvSingle):
             raise NtvError('item not present')
-        if isinstance(selector, tuple):
-            return [self.ntv_value[i] for i in selector]
-        if isinstance(selector, str) and isinstance(self, NtvList):
-            ind = [ntv.ntv_name for ntv in self.ntv_value].index(selector)
+        if isinstance(selec, tuple):
+            #return [self.ntv_value[i] for i in selec]
+            return [self[i] for i in selec]
+        if isinstance(selec, str) and isinstance(self, NtvList):
+            ind = [ntv.ntv_name for ntv in self.ntv_value].index(selec)
             return self.ntv_value[ind]
-        return self.ntv_value[selector]
+        if isinstance(selec, list) and isinstance(self, NtvList):
+            return self[selec[0]][selec[1:]]
+        return self.ntv_value[selec]
 
     def __setitem__(self, ind, value):
         ''' replace ntv_value item at the `ind` row with `value`'''

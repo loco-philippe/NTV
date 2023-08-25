@@ -362,6 +362,22 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(format='obj'),
                          {'paris:point': None})
 
+class Test_Ntv_indexing(unittest.TestCase):
+    
+    def test_pointer(self):
+        ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
+                       'b': 'ert',
+                       'dic': {'v1': 'val1', 'v2': 'val2'}})
+        self.assertTrue(ntv['/a'] == ntv[0] == ntv['a'])
+        self.assertTrue(ntv['/a/1/1'] == ntv[0][1][1] == ntv['a'][1][1])
+        self.assertTrue(ntv['/dic/v1'] == ntv[2][0] == ntv['dic']['v1'])
+        js = { "foo": ["bar", "baz"], " ": 0, "a/b": 1, "c%d": 2,
+               "e^f": 3, "g|h": 4, "i\\j": 5, "k\"l": 6, "m~n": 7 }
+        ntv = Ntv.obj(js)
+        self.assertTrue(ntv['/foo/0'] == ntv[0][0])
+        self.assertTrue(ntv['/a~0b'] == ntv[2])
+        self.assertTrue(ntv['/m~n'] == ntv[8])
+        
 class Test_Ntv_tabular(unittest.TestCase):
 
     def test_tab(self):
