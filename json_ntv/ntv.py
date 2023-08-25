@@ -314,19 +314,32 @@ class Ntv(ABC):
         return hash(self) < hash(other)
 
     @property
-    def pointer(self):
+    def address(self):
+        '''return a list of parent row from root'''
+        if not self.parent:
+            return [0]
+        return self.parent.address + [self.parent.ntv_value.index(self)]
+
+    @property
+    def address_name(self):
+        '''return a string of address'''
+        name = ''
+        for ind in self.address:
+            name += str(ind) + '.'
+        return name[:-1]
+
+    def pointer(self, index=False):
         '''return a list of pointer from root'''
         if not self.parent:
             return []        
-        return self.parent.pointer + [self.parent.ntv_value.index(self) 
-            if self.ntv_name == "" and not self.json_array 
+        return self.parent.pointer(index) + [self.parent.ntv_value.index(self) 
+            if index or (self.ntv_name == "" and self.parent.json_array)
             else self.ntv_name]
 
-    @property
-    def json_pointer(self):
+    def json_pointer(self, index=False):
         '''return a string of pointer'''
         json_p = ''
-        pointer = self.pointer
+        pointer = self.pointer(index)
         if pointer == []:
             return ""
         for name in pointer:
@@ -344,21 +357,6 @@ class Ntv(ABC):
         return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/') 
                 for nam in split_pointer[1:] ]       
          
-    @property
-    def address(self):
-        '''return a list of parent row from root'''
-        if not self.parent:
-            return [0]
-        return self.parent.address + [self.parent.ntv_value.index(self)]
-
-    @property
-    def address_name(self):
-        '''return a string of address'''
-        name = ''
-        for ind in self.address:
-            name += str(ind) + '.'
-        return name[:-1]
-
     @property
     def code_ntv(self):
         '''return a string with the NTV code composed with 1 to 3 letters:
