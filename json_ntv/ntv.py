@@ -80,8 +80,6 @@ class Ntv(ABC):
     - **is_json**:    True if ntv_value is a json_value
 
     *dynamic values (@property)*
-    - `address`
-    - `address_name`
     - `json_array`
     - `type_str`
     - `code_ntv`
@@ -313,21 +311,6 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-    """@property
-    def address(self):
-        '''return a list of parent row from root'''
-        if not self.parent:
-            return [0]
-        return self.parent.address + [self.parent.ntv_value.index(self)]
-
-    @property
-    def address_name(self):
-        '''return a string of address'''
-        name = ''
-        for ind in self.address:
-            name += str(ind) + '.'
-        return name[:-1]"""
-
     def pointer(self, index=False):
         '''return a list of pointer from root'''
         if not self.parent:
@@ -336,12 +319,13 @@ class Ntv(ABC):
             if index or (self.ntv_name == "" and self.parent.json_array)
             else self.ntv_name]
 
-    def json_pointer(self, index=False):
+    def json_pointer(self, index=False, default=''):
         '''return a string of pointer'''
         json_p = ''
         pointer = self.pointer(index)
-        if pointer == ['']:
-            return ""
+        #if pointer == ['']:
+        if pointer == []:
+            return default
         for name in pointer:
             json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
         return json_p
@@ -430,7 +414,7 @@ class Ntv(ABC):
         - **ntv_value**: list of ntv values'''
         return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
 
-    def add_comment(self, text, val=None, name=None, typ=None):
+    """def add_comment(self, text, val=None, name=None, typ=None):
         '''add a comment (text) and a proposal for a new NTV entity defined by (val, name and typ)'''
         parent = self.parent
         if (val, typ, name) == (None, None, None):
@@ -471,7 +455,7 @@ class Ntv(ABC):
                 new_ntv = ntv
                 break
         new_ntv = Ntv.obj(new_ntv.ntv_value) if new_ntv.type_str == 'ntv' else new_ntv
-        parent[parent.ntv_value.index(self)] = new_ntv
+        parent[parent.ntv_value.index(self)] = new_ntv"""
 
         
     def from_value(self):

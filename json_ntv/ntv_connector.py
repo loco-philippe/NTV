@@ -668,11 +668,11 @@ class MermaidConnec(NtvConnector):
                 name += '<i>' + ntv.val + '</i>\n'
             else:
                 name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [ntv.address_name, ['rectangle', name[:-1]]]
+            return [ntv.json_pointer(default='/'), ['rectangle', name[:-1]]]
         if not name:
             name = '<b>::</b>\n'
         name = name.replace('"', "'")
-        return [ntv.address_name, ['roundedge', name[:-1]]]
+        return [ntv.json_pointer(default='/'), ['roundedge', name[:-1]]]
 
     @staticmethod
     def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node):
@@ -684,8 +684,8 @@ class MermaidConnec(NtvConnector):
             for ntv_val in ntv:
                 MermaidConnec._mermaid_link(ntv_val, ntv.type_str,
                                             node_link, row, dic_node)
-                node_link['links'].append(
-                    [ntv.address_name, 'normalarrow', ntv_val.address_name])
+                node_link['links'].append([ntv.json_pointer(default='/'), 'normalarrow',
+                                           ntv_val.json_pointer(default='/')])
 
     @staticmethod
     def _flowchart(ntv):

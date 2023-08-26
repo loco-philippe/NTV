@@ -12,7 +12,6 @@ This package contains the following classes:
 
     - `NTV.json_ntv.namespace.Namespace`
     - `NTV.json_ntv.namespace.NtvType`
-            
          
 - `NTV.json_ntv.ntv` :
 
@@ -20,7 +19,12 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv.NtvList`
     - `NTV.json_ntv.ntv.Ntv` (abstract class)
     
+- `NTV.json_ntv.ntv_comment` :
+    
+    - `NTV.json_ntv.ntv_comment.NtvComment`
+
 - `NTV.json_ntv.ntv_util` :
+    
     - `NTV.json_ntv.ntv_util.NtvTree`
     - `NTV.json_ntv.ntv_util.NtvJsonEncoder`
     - `NTV.json_ntv.ntv_util.NtvError`
@@ -99,6 +103,7 @@ This structuring of type makes it possible to reference any type of data that ha
 
 """
 from json_ntv.namespace import Namespace, NtvType, str_type, relative_type, agreg_type
+from json_ntv.ntv_comment import NtvComment
 from json_ntv.ntv import Ntv, NtvSingle, NtvList
 from json_ntv.ntv_util import NtvTree, NtvJsonEncoder, NtvConnector, NtvError
 from json_ntv.ntv_connector import DataFrameConnec, SeriesConnec, from_csv, to_csv

@@ -12,7 +12,7 @@ import datetime
 import csv
 from itertools import product
 
-from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv
+from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
 from json_ntv import agreg_type, NtvTree, NtvConnector
 from shapely import geometry
 
@@ -591,28 +591,28 @@ class Test_Ntv_comment(unittest.TestCase):
          'names::string':   ['john', 'eric', 'judith']}
         ntv_data = Ntv.obj(data)
         ntv = Ntv.obj(data)
-        ntv['dates'].add_comment('bof')
-        ntv['dates'].add_comment('bof suite')
-        ntv['dates'].accept_comment()
+        NtvComment(ntv['dates']).add_comment('bof')
+        NtvComment(ntv['dates']).add_comment('bof suite')
+        NtvComment(ntv['dates']).accept_comment()
         self.assertEqual(ntv, ntv_data)
         ntv = Ntv.obj(data)
-        ntv['dates'].add_comment('bof')
-        ntv['dates'].add_comment('bof suite')
-        ntv['dates'].reject_comment()
+        NtvComment(ntv['dates']).add_comment('bof')
+        NtvComment(ntv['dates']).add_comment('bof suite')
+        NtvComment(ntv['dates']).reject_comment()
         self.assertEqual(ntv, ntv_data)
         ntv = Ntv.obj(data)
-        ntv['dates'][1].add_comment('a corriger', '1995-02-05')
-        ntv['dates'][1].add_comment('bof')
-        ntv['dates'][1].add_comment('a corriger suite', '1998-02-05')
-        ntv['dates'][1].add_comment('bof suite')
-        ntv['dates'][1].reject_comment()
+        NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof')
+        NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof suite')
+        NtvComment(ntv['dates'][1]).reject_comment()
         self.assertEqual(ntv, ntv_data)
         ntv = Ntv.obj(data)
-        ntv['dates'][1].add_comment('a corriger', '1995-02-05')
-        ntv['dates'][1].add_comment('bof')
-        ntv['dates'][1].add_comment('a corriger suite', '1998-02-05')
-        ntv['dates'][1].add_comment('bof suite')
-        ntv['dates'][1].accept_comment()
+        NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof')
+        NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof suite')
+        NtvComment(ntv['dates'][1]).accept_comment()
         ntv_data['dates'][1].set_value('1998-02-05')
         self.assertEqual(ntv, ntv_data)
         
