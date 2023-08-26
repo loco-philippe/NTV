@@ -364,7 +364,7 @@ class Test_Ntv_creation(unittest.TestCase):
 
 class Test_Ntv_indexing(unittest.TestCase):
     
-    def test_pointer(self):
+    def test_pointer_RFC(self):
         ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
                        'b': 'ert',
                        'dic': {'v1': 'val1', 'v2': 'val2'}})
@@ -390,12 +390,12 @@ class Test_Ntv_indexing(unittest.TestCase):
         a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
         self.assertTrue(a.parent is None)
         self.assertEqual(a.pointer(), [])
-        self.assertEqual(a.json_pointer, '')
-        self.assertEqual(a['t3'].pointer(index=true), [2])
-        self.assertEqual(a['t3'].json_pointer(True), '0.2')
+        self.assertEqual(a.json_pointer(), '')
+        self.assertEqual(a['t3'].pointer(index=True), [2])
+        self.assertEqual(a['t3'].json_pointer(True), '/2')
         self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(a['t3'][0].address, [0, 2, 0])
-        self.assertEqual(a['t3'][0].address_name, '0.2.0')
+        self.assertEqual(a['t3'][0].pointer(index=True), [2, 0])
+        self.assertEqual(a['t3'][0].json_pointer(index=True), '/2/0')
                         
 class Test_Ntv_tabular(unittest.TestCase):
 
