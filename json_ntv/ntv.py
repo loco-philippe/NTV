@@ -225,7 +225,6 @@ class Ntv(ABC):
         value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
-        #ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value, fast=fast)
         ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value)
         sep = def_sep if not sep else sep
         if isinstance(ntv_value, list) and sep in (None, '::'):
