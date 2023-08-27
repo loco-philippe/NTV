@@ -660,6 +660,8 @@ class Test_Pandas_Connector(unittest.TestCase):
     def test_series(self):
         import pandas as pd
         Point = geometry.point.Point
+        from json_ntv import read_json as read_json        
+        from json_ntv import to_json as to_json
         
         # json interface ok
         srs = [# without ntv_type, without dtype
@@ -701,6 +703,8 @@ class Test_Pandas_Connector(unittest.TestCase):
             #print(Ntv.obj(sr))
             self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(format='obj')) or sr.equals(Ntv.obj(sr).to_obj(format='obj', alias=True)))
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
+            self.assertTrue(sr.equals(read_json(to_json(sr))) or sr.equals(read_json(to_json(sr), alias=True)))
+            self.assertEqual(read_json(to_json(sr)).name, sr.name)            
 
     def test_json_sfield_full(self):
 

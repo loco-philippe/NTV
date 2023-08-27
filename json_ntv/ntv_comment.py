@@ -4,18 +4,18 @@ Created on Sun Oct  2 22:24:59 2022
 
 @author: philippe@loco-labs.io
 
-The `python.observation.dataset_interface` module contains the `DatasetInterface` class
-(`python.observation.dataset.Dataset` methods).
+The `NTV.json_ntv.ntv_comment` module contains the `NtvComment` class.
 """
 import copy
 from json_ntv.ntv import NtvSingle, NtvType, NtvList, Ntv
 
 class NtvComment:
-    '''this class includes NTV comments and change management methods :
+    '''this class includes comments and change management methods for NTV entities :
 
     - `NtvComment.add_comment`
     - `NtvComment.accept_comment`
     - `NtvComment.reject_comment`
+    - `NtvComment.show_comment`
     '''
     def __init__(self, ntv):
         ''' the parameter of the constructor is the Ntv entity'''
@@ -53,7 +53,7 @@ class NtvComment:
         parent[parent.ntv_value.index(self._ntv)] = old_ntv
 
     def accept_comment(self):
-        ''' replace self by the last NTV proposal and delete all comments''' 
+        ''' replace the NTV entity by the last NTV proposal and delete all comments''' 
         parent = self._ntv.parent
         if self._ntv.type_str != '$history':   
             return
@@ -65,5 +65,5 @@ class NtvComment:
         parent[parent.ntv_value.index(self._ntv)] = new_ntv
 
     def show_comment(self):
-        ''' return a dict with comments for each node'''
+        ''' return a dict with comments for each commented node'''
         return NtvList([node for node in self._ntv.tree if node.type_str == '$history']).to_obj()

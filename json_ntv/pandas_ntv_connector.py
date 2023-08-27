@@ -22,11 +22,22 @@ import numpy as np
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 
-def to_json(**kwargs):
-    option = {'extkeys': None, 'decode_str': False, 'leng': None} | kwargs
+def to_json(pd_array, **kwargs):
+    option = {'text': False, 'header': True} | kwargs
+    if isinstance(pd_array, pd.Series):
+        jsn = SeriesConnec.to_json_ntv(pd_array)[0]
+        head = ':field'
+    else:
+        jsn = DataFrameConnec.to_json_ntv(pd_array)[0]
+        head = ':tab'
+    if option['header']:      
+        jsn = { head: jsn}
+    if option['text']:
+        return json.dumps(jsn)
+    return jsn
     
 def read_json(js, **kwargs):
-    option = {'extkeys': None, 'decode_str': False, 'leng': None,
+    option = {'extkeys': None, 'decode_str': False, 'leng': None, 'alias': False,
               'annotated':False, 'series':False} | kwargs
     jso = json.loads(js) if isinstance(js, str) else js
     ntv = Ntv.from_obj(jso)
@@ -159,10 +170,13 @@ class SeriesConnec(NtvConnector):
     types = pd.DataFrame(
         {'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime',
                        'int32', 'int64', 'float64', 'array', 'boolean'],
+                      # 'int32', 'int64', 'float64', 'array'],
          'name_type': [None, None, None, None, None,
                        None, 'int64', 'float64', 'array', 'boolean'],
+                      # None, 'int64', 'float64', 'array'],
          'dtype': ['timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
                    'Int32', 'Int64', 'Float64', 'object', 'boolean']})
+                  # 'Int32', 'Int64', 'Float64', 'object']})
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
               'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'}
     deftype = {val: key for key, val in astype.items()}
