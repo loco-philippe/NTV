@@ -27,7 +27,7 @@ class NtvComment:
         if (val, typ, name) == (None, None, None):
             comment = NtvSingle(text, ntv_type='$comment')
         else:            
-            if self.type_str == '$history':
+            if self._ntv.type_str == '$history':
                 new_self = copy.copy(self._ntv.ntv_value[0])
             else:
                 new_self = copy.copy(self._ntv)
@@ -64,4 +64,6 @@ class NtvComment:
         new_ntv = Ntv.obj(new_ntv.ntv_value) if new_ntv.type_str == 'ntv' else new_ntv
         parent[parent.ntv_value.index(self._ntv)] = new_ntv
 
-    
+    def show_comment(self):
+        ''' return a dict with comments for each node'''
+        return NtvList([node for node in self._ntv.tree if node.type_str == '$history']).to_obj()
