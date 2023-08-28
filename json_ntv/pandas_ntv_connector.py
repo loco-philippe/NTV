@@ -174,12 +174,12 @@ class SeriesConnec(NtvConnector):
     clas_typ = 'field'
 
     types = pd.DataFrame(
-        {'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime',
-                       'int32', 'int64', 'float64', 'array', 'boolean'],
-         'name_type': [None, None, None, None, None,
-                       None, 'int64', 'float64', 'array', 'boolean'],
-         'dtype': ['timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
-                   'Int32', 'Int64', 'Float64', 'object', 'boolean']}) #internal
+        {'ntv_type':  ['month', '', 'json', 'durationiso', 'uint64', 'float32', 'string', 'datetime',
+                       'int32', 'int64', 'float64', 'array', 'boolean', 'object'],
+         'name_type': ['month', None, None, None, None, None, None, None,
+                       None, 'int64', 'float64', 'array', 'boolean', 'object'],
+         'dtype': [None, None, None, 'timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
+                   'Int32', 'Int64', 'Float64', 'array', 'boolean', 'object']}) #internal
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
               'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'} #alias
     deftype = {val: key for key, val in astype.items()}
@@ -208,7 +208,8 @@ class SeriesConnec(NtvConnector):
             return None
         ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
-        ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = DataFrameConnec.decode_ntv_tab(ntv, fast=True)
+        ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = \
+            DataFrameConnec.decode_ntv_tab(ntv, fast=True)
         if parent and not option['extkeys']:
             return None
         if coef:
@@ -295,16 +296,14 @@ class SeriesConnec(NtvConnector):
         types = SeriesConnec.types
         astype = SeriesConnec.astype
 
-        str_type = ntv_codec.type_str
-        ntv_type = str_type if str_type and str_type != 'json' else ''
+        ntv_type = ntv_codec.type_str
         len_unique = option['leng'] if len(
             ntv_codec) == 1 and option['leng'] else 1
-        pd_convert = ntv_type in types['ntv_type'].values or ntv_type == ''
+        pd_convert = ntv_type in types['ntv_type'].values
 
         dtype = 'object'
         if pd_convert:
-            dtype = types.set_index(
-                'ntv_type').loc[ntv_type]['dtype'] if ntv_type != '' else None
+            dtype = types.set_index('ntv_type').loc[ntv_type]['dtype']
         ntv_obj, pd_name, name_type = SeriesConnec._val_nam_typ(
             ntv_codec, ntv_type, ntv_name, pd_convert, option['annotated'])
 
@@ -322,12 +321,12 @@ class SeriesConnec(NtvConnector):
                             index=option['index'], dtype='category')
         else:
             data = ntv_obj * len_unique
-
             if pd_convert:
                 srs = pd.read_json(json.dumps(data), dtype=dtype,
                                    typ='series').rename(pd_name)
             else:
                 srs = pd.Series(data, name=pd_name, dtype=dtype)
+        
         if option['alias']:
             return srs.astype(astype.get(srs.dtype.name, srs.dtype.name))
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
@@ -359,8 +358,8 @@ class SeriesConnec(NtvConnector):
             if name_type == 'array':
                 ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True)
             else:
-                ntv_obj = ntv_codec.obj_value(simpleval=annotated,
-                                              json_array=False, def_type=ntv_codec.type_str)
+                ntv_obj = ntv_codec.obj_value(simpleval=annotated, json_array=False,
+                                              def_type=ntv_codec.type_str, fast=True)
                 ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
         else:
             name_type = ntv_type
