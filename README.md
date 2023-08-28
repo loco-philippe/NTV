@@ -14,6 +14,14 @@ With this evolution any data, whatever its semantic level, can be identified, sh
 The implementation of a type with a nested structure facilitates its appropriation.
 Finally, compatibility with existing JSON structures allows progressive deployment.
 
+# NTV uses
+
+Several variations and use cases of the NTV format are defined:
+- Compact, reversible and semantic pandas - JSON interface
+- comment and change management of JSON data
+- Mermaid visualization of JSON tree
+- JSON data editor
+  
 # NTV structure
 
 The constructed entities (called NTV for *named typed value*) are therefore a triplet with one mandatory element (the value in JSON format) and two optional elements (name, type).
