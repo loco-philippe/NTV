@@ -49,6 +49,12 @@ def read_json(js, **kwargs):
         return SeriesConnec.to_obj_ntv(ntv, **option)
     return DataFrameConnec.to_obj_ntv(ntv.ntv_value, **option)
 
+def as_def_type(pd_array):
+    '''convert a Series or DataFrame with default dtype'''
+    if isinstance(pd_array, pd.Series):
+        return pd_array.astype(SeriesConnec.deftype.get(pd_array.dtype.name, pd_array.dtype.name))
+    return pd.DataFrame({col: as_def_type(pd_array[col]) for col in pd_array.columns})
+        
 class DataFrameConnec(NtvConnector):
     '''NTV connector for pandas DataFrame'''
 
@@ -170,15 +176,12 @@ class SeriesConnec(NtvConnector):
     types = pd.DataFrame(
         {'ntv_type':  ['durationiso', 'uint64', 'float32', 'string', 'datetime',
                        'int32', 'int64', 'float64', 'array', 'boolean'],
-                      # 'int32', 'int64', 'float64', 'array'],
          'name_type': [None, None, None, None, None,
                        None, 'int64', 'float64', 'array', 'boolean'],
-                      # None, 'int64', 'float64', 'array'],
          'dtype': ['timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
-                   'Int32', 'Int64', 'Float64', 'object', 'boolean']})
-                  # 'Int32', 'Int64', 'Float64', 'object']})
+                   'Int32', 'Int64', 'Float64', 'object', 'boolean']}) #internal
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
-              'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'}
+              'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'} #alias
     deftype = {val: key for key, val in astype.items()}
 
     @staticmethod
