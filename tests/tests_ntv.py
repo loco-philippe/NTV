@@ -662,6 +662,7 @@ class Test_Pandas_Connector(unittest.TestCase):
         Point = geometry.point.Point
         from json_ntv import read_json as read_json        
         from json_ntv import to_json as to_json
+        from json_ntv import as_def_type as as_def_type        
         
         # json interface ok
         srs = [# without ntv_type, without dtype
@@ -692,6 +693,7 @@ class Test_Pandas_Connector(unittest.TestCase):
                pd.Series([1,2,3], name='::int64'),
                pd.Series([1,2,3], dtype='Float64', name='::float64'), # force dtype dans la conversion json
                pd.Series([[1,2], [3,4], [5,6]], name='::array'),  
+               pd.Series([{'a': 2, 'e':4}, {'a': 3, 'e':5}, {'a': 4, 'e':6}], name='::object'),  
                pd.Series([None, None, None], name='::null'), 
                
                # with ntv_type unknown in pandas
@@ -701,9 +703,9 @@ class Test_Pandas_Connector(unittest.TestCase):
         ]
         for sr in srs:
             #print(Ntv.obj(sr))
-            self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(format='obj')) or sr.equals(Ntv.obj(sr).to_obj(format='obj', alias=True)))
+            self.assertTrue(as_def_type(sr).equals(Ntv.obj(sr).to_obj(format='obj')))
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
-            self.assertTrue(sr.equals(read_json(to_json(sr))) or sr.equals(read_json(to_json(sr), alias=True)))
+            self.assertTrue(as_def_type(sr).equals(read_json(to_json(sr))))
             self.assertEqual(read_json(to_json(sr)).name, sr.name)            
 
     def test_json_sfield_full(self):

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>
 <!DOCTYPE rfc [<!ENTITY nbsp    "&#160;"><!ENTITY zwsp   "&#8203;"><!ENTITY nbhy   "&#8209;"><!ENTITY wj     "&#8288;">]>
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -9,7 +10,7 @@
   updates=""
   submissionType="IETF"
   xml:lang="en"
-  version="3">
+  version="0">
 
   <front>
     <title>JSON semantic format (JSON-NTV)</title>
@@ -27,11 +28,14 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author> 
-    <date year="2023" month="08" day="20"/>
+    <date year="2023" month="08"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
-    <keyword>JSON SEMANTIC</keyword>
-    <abstract>
+    <keyword>JSON</keyword>
+    <keyword>semantic</keyword>
+    <keyword>data interchange format</keyword>
+    <keyword>ABNF</keyword>
+    <abstract pn="section-abstract">
       <t>This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
       JSON Data Interchange Format. These rules are based on an NTV (Named and Typed Values) data structure applicable
       to any simple or complex data. The JSON-NTV format is its JSON translation.</t>
@@ -509,7 +513,7 @@ NTVsingleValue     = JsonValue
       </references>
     </references>
     &nbsp;
-    <section><name>Appendix 1 - Global NTVtype and Namespace</name>
+    <section><name>Global NTVtype and Namespace</name>
       <t>The structure of NTVtype by Namespace makes it possible to have NTVtype or Namespace corresponding to recognized standards at the global level.</t>
       <t>A standard NTVtype / Namespace is a NTVtype / Namespace defined in the Global Namespace.</t>
       <t>The standard NTVtype and Namespace are listed below.</t>
@@ -571,15 +575,19 @@ NTVsingleValue     = JsonValue
           <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>loc</td><td>generic NTVtype</td><td></td></tr>
           <tr><td>point (loc)</td><td>Point coordinates <xref target="RFC7946"/></td><td>[ 5.12, 45.256 ] <em>(lon, lat)</em></td></tr>
+          <tr><td>multipoint</td><td>MultiPoint coordinates <xref target="RFC7946"/></td>
+            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" NTVtypeName</em></t></td></tr>
           <tr><td>line (loc)</td><td>LineString coordinates <xref target="RFC7946"/></td>
             <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" NTVtypeName</em></t></td></tr>
+          <tr><td>multiline</td><td>MultiLineString coordinates <xref target="RFC7946"/></td>
+            <td><t>[li1, li2, li3]</t><t><em>lix has "line" NTVtypeName</em></t></td></tr>
           <tr><td>polygon (loc)</td><td>Polygon coordinates <xref target="RFC7946"/></td>
-            <td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" NTVtypeName</em></t></td></tr>
+            <td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" NTVtypeName (ring)</em></t></td></tr>
           <tr><td>multipolygon (loc)</td><td>MultiPolygon coordinates <xref target="RFC7946"/></td>
             <td><t>[pl1, pl2, pl3]</t><t><em>plx has "polygon" NTVtypeName</em></t></td></tr>
           <tr><td>bbox (loc)</td><td>Bbox coordinates <xref target="RFC7946"/></td><td>[ -10.0, -10.0, 10.0, 10.0 ]</td></tr>
-          <tr><td>geojson</td><td>geoJSON object <xref target="RFC7946"/></td><td>{"type": "point", "coordinates": [40.0, 0.0]}</td></tr>
-          <tr><td>codeolc</td><td>Open Location Code <xref target="OLC"/></td><td>"8FW4V75V+8F6"</td></tr></tbody></table>
+          <tr><td>geojson (loc)</td><td>geoJSON object <xref target="RFC7946"/></td><td>{"type": "point", "coordinates": [40.0, 0.0]}</td></tr>
+          <tr><td>codeolc (loc)</td><td>Open Location Code <xref target="OLC"/></td><td>"8FW4V75V+8F6"</td></tr></tbody></table>
       </section>
       <section><name>Structured data</name>
         <table anchor="table8" align="left" pn="table-8"><name>Structured NTVtype</name><thead>
@@ -627,7 +635,7 @@ NTVsingleValue     = JsonValue
           </tr></tbody></table>  
       </section>
     </section>
-    <section><name>Appendix 2 - Complete ABNF notation</name>
+    <section><name>Complete ABNF notation</name>
         <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-6">
           <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
             <![CDATA[
