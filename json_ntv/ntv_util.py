@@ -361,7 +361,7 @@ class NtvTree:
     @property
     def height(self):
         ''' return the height of the tree'''
-        return max(len(node.address) for node in self.__class__(self._ntv)) - 1
+        return max(len(node.pointer()) for node in self.__class__(self._ntv))
 
     @property
     def adjacency_list(self):

@@ -80,8 +80,6 @@ class Ntv(ABC):
     - **is_json**:    True if ntv_value is a json_value
 
     *dynamic values (@property)*
-    - `address`
-    - `address_name`
     - `json_array`
     - `type_str`
     - `code_ntv`
@@ -225,7 +223,6 @@ class Ntv(ABC):
         value = Ntv._from_value(value, decode_str)
         if value.__class__.__name__ in ['NtvSingle', 'NtvList']:
             return value
-        #ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value, fast=fast)
         ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value)
         sep = def_sep if not sep else sep
         if isinstance(ntv_value, list) and sep in (None, '::'):
@@ -271,18 +268,31 @@ class Ntv(ABC):
             return iter([self.val])
         return iter(self.val)
 
-    def __getitem__(self, selector):
-        ''' return ntv_value item '''
-        if isinstance(self, NtvSingle) and selector == 0:
+    def __getitem__(self, selec):
+        ''' return ntv_value item with selec:
+            - String beginning with "/" : json-pointer,
+            - string : name of the ntv,
+            - list : recursive selector
+            - tuple : list of name or index '''
+        if selec is None or selec == [] or selec == () or selec == '':
+            return self
+        if isinstance(selec, (list, tuple)) and len(selec) == 1:
+            selec = selec[0]
+        if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
+            selec = Ntv.set_pointer(selec)
+        if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
-        if isinstance(self, NtvSingle) and selector != 0:
+        if isinstance(self, NtvSingle):
             raise NtvError('item not present')
-        if isinstance(selector, tuple):
-            return [self.ntv_value[i] for i in selector]
-        if isinstance(selector, str) and isinstance(self, NtvList):
-            ind = [ntv.ntv_name for ntv in self.ntv_value].index(selector)
+        if isinstance(selec, tuple):
+            #return [self.ntv_value[i] for i in selec]
+            return [self[i] for i in selec]
+        if isinstance(selec, str) and isinstance(self, NtvList):
+            ind = [ntv.ntv_name for ntv in self.ntv_value].index(selec)
             return self.ntv_value[ind]
-        return self.ntv_value[selector]
+        if isinstance(selec, list) and isinstance(self, NtvList):
+            return self[selec[0]][selec[1:]]
+        return self.ntv_value[selec]
 
     def __setitem__(self, ind, value):
         ''' replace ntv_value item at the `ind` row with `value`'''
@@ -300,21 +310,36 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-    @property
-    def address(self):
-        '''return a list of parent row from root'''
+    def pointer(self, index=False):
+        '''return a list of pointer from root'''
         if not self.parent:
-            return [0]
-        return self.parent.address + [self.parent.ntv_value.index(self)]
+            return []        
+        return self.parent.pointer(index) + [self.parent.ntv_value.index(self) 
+            if index or (self.ntv_name == "" and self.parent.json_array)
+            else self.ntv_name]
 
-    @property
-    def address_name(self):
-        '''return a string of address'''
-        name = ''
-        for ind in self.address:
-            name += str(ind) + '.'
-        return name[:-1]
+    def json_pointer(self, index=False, default=''):
+        '''return a string of pointer'''
+        json_p = ''
+        pointer = self.pointer(index)
+        #if pointer == ['']:
+        if pointer == []:
+            return default
+        for name in pointer:
+            json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
+        return json_p
 
+    @staticmethod 
+    def set_pointer(json_pointer):
+        '''convert a json_pointer string into a pointer list''' 
+        split_pointer = json_pointer.split('/')
+        if len(split_pointer) == 0:
+            return []
+        if split_pointer[0] != '':
+            raise NtvError("json_pointer is not correct")
+        return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/') 
+                for nam in split_pointer[1:] ]       
+         
     @property
     def code_ntv(self):
         '''return a string with the NTV code composed with 1 to 3 letters:
@@ -388,7 +413,7 @@ class Ntv(ABC):
         - **ntv_value**: list of ntv values'''
         return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
 
-    def add_comment(self, text, val=None, name=None, typ=None):
+    """def add_comment(self, text, val=None, name=None, typ=None):
         '''add a comment (text) and a proposal for a new NTV entity defined by (val, name and typ)'''
         parent = self.parent
         if (val, typ, name) == (None, None, None):
@@ -429,7 +454,7 @@ class Ntv(ABC):
                 new_ntv = ntv
                 break
         new_ntv = Ntv.obj(new_ntv.ntv_value) if new_ntv.type_str == 'ntv' else new_ntv
-        parent[parent.ntv_value.index(self)] = new_ntv
+        parent[parent.ntv_value.index(self)] = new_ntv"""
 
         
     def from_value(self):
@@ -941,7 +966,7 @@ class NtvList(Ntv):
     def json_array(self):
         ''' return the json_array dynamic attribute'''
         set_name = {ntv.ntv_name for ntv in self}
-        return '' in set_name or len(set_name) != len(self)
+        return '' in set_name or len(set_name) != len(self) or len(set_name)==1
 
     def __eq__(self, other):
         ''' equal if name and value are equal'''

@@ -12,7 +12,7 @@ import datetime
 import csv
 from itertools import product
 
-from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv
+from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
 from json_ntv import agreg_type, NtvTree, NtvConnector
 from shapely import geometry
 
@@ -57,8 +57,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvSingle', '{"Ntv1:array": [1, 2]}'],
                    ['NtvSingle', '"{ner"'],
                    ['NtvList', '{}'],
-                   ['NtvList', '{"::": {" a": 2}}'],
-                   ['NtvList', '{"test::": {"a": 2}}']]
+                   ['NtvList', '[{" a": 2}]'],
+                   ['NtvList', '{"test": [{"a": 2}]}']]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -100,8 +100,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvList', {}],
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
-                   ['NtvList', {"::": {" a": 2}}],
-                   ['NtvList', {"test::": {"a": 2}}]]
+                   ['NtvList', [{" a": 2}]],
+                   ['NtvList', {"test": [{"a": 2}]}]]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -235,8 +235,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvSingle', '{"Ntv1:array": [1, 2]}'],
                    ['NtvSingle', '"{ner"'],
                    ['NtvList', '{}'],
-                   ['NtvList', '{"::": {" a": 2}}'],
-                   ['NtvList', '{"test::": {"a": 2}}']]
+                   ['NtvList', '[{" a": 2}]'],
+                   ['NtvList', '{"test": [{"a": 2}]}']]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -279,8 +279,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', {}],
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
-                   ['NtvList', {"::": {" a": 2}}],
-                   ['NtvList', {"test::": {"a": 2}}]]
+                   ['NtvList', [{" a": 2}] ],
+                   ['NtvList', {"test": [{"a": 2}]}]]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -362,6 +362,41 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(format='obj'),
                          {'paris:point': None})
 
+class Test_Ntv_indexing(unittest.TestCase):
+    
+    def test_pointer_RFC(self):
+        ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
+                       'b': 'ert',
+                       'dic': {'v1': 'val1', 'v2': 'val2'}})
+        self.assertTrue(ntv['/a'] == ntv['/0'] == ntv[0] == ntv['a'])
+        self.assertTrue(ntv['/a/1/1'] == ntv['/0/1/1'] == ntv[0][1][1] == ntv['a'][1][1])
+        self.assertTrue(ntv['/dic/v1'] == ntv['/2/0'] == ntv[2][0] == ntv['dic']['v1'])
+        js = { "foo": ["bar", "baz"], " ": 0, "a/b": 1, "c%d": 2,
+               "e^f": 3, "g|h": 4, "i\\j": 5, "k\"l": 6, "m~n": 7 }
+        ntv = Ntv.obj(js)
+        self.assertTrue(ntv['/foo/0'] == ntv[0][0])
+        self.assertTrue(ntv['/a~0b'] == ntv[2])
+        self.assertTrue(ntv['/m~n'] == ntv[8])
+
+    def test_json_pointer(self):
+        ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
+                       'b': 'ert',
+                       'dic': {'v1': 'val1', 'v2': 'val2'}})
+        pointers = ['/a/1/1', '']
+        for pointer in pointers:
+            self.assertEqual(pointer, ntv[pointer].json_pointer())
+
+    def test_pointer(self):
+        a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
+        self.assertTrue(a.parent is None)
+        self.assertEqual(a.pointer(), [])
+        self.assertEqual(a.json_pointer(), '')
+        self.assertEqual(a['t3'].pointer(index=True), [2])
+        self.assertEqual(a['t3'].json_pointer(True), '/2')
+        self.assertEqual(a['t3'][0].parent.parent, a)
+        self.assertEqual(a['t3'][0].pointer(index=True), [2, 0])
+        self.assertEqual(a['t3'][0].json_pointer(index=True), '/2/0')
+                        
 class Test_Ntv_tabular(unittest.TestCase):
 
     def test_tab(self):
@@ -503,17 +538,6 @@ class Test_Ntv_function(unittest.TestCase):
                 self.assertEqual(agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]).long_name, typ[1])
     
-    def test_address(self):
-        a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
-        self.assertTrue(a.parent is None)
-        self.assertEqual(a.address, [0])
-        self.assertEqual(a.address_name, '0')
-        self.assertEqual(a['t3'].address, [0, 2])
-        self.assertEqual(a['t3'].address_name, '0.2')
-        self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(a['t3'][0].address, [0, 2, 0])
-        self.assertEqual(a['t3'][0].address_name, '0.2.0')
-
     def test_default_type(self):
         list_test = [[('', ':', 'fr.BAN.lon'), {'ntv1::fr.BAN.': [{':BAN.lon': 4}, 5, 6]}],
                      [('', ':', 'fr.BAN.lon'), {
@@ -567,28 +591,28 @@ class Test_Ntv_comment(unittest.TestCase):
          'names::string':   ['john', 'eric', 'judith']}
         ntv_data = Ntv.obj(data)
         ntv = Ntv.obj(data)
-        ntv['dates'].add_comment('bof')
-        ntv['dates'].add_comment('bof suite')
-        ntv['dates'].accept_comment()
+        NtvComment(ntv['dates']).add_comment('bof')
+        NtvComment(ntv['dates']).add_comment('bof suite')
+        NtvComment(ntv['dates']).accept_comment()
         self.assertEqual(ntv, ntv_data)
         ntv = Ntv.obj(data)
-        ntv['dates'].add_comment('bof')
-        ntv['dates'].add_comment('bof suite')
-        ntv['dates'].reject_comment()
+        NtvComment(ntv['dates']).add_comment('bof')
+        NtvComment(ntv['dates']).add_comment('bof suite')
+        NtvComment(ntv['dates']).reject_comment()
         self.assertEqual(ntv, ntv_data)
         ntv = Ntv.obj(data)
-        ntv['dates'][1].add_comment('a corriger', '1995-02-05')
-        ntv['dates'][1].add_comment('bof')
-        ntv['dates'][1].add_comment('a corriger suite', '1998-02-05')
-        ntv['dates'][1].add_comment('bof suite')
-        ntv['dates'][1].reject_comment()
+        NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof')
+        NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof suite')
+        NtvComment(ntv['dates'][1]).reject_comment()
         self.assertEqual(ntv, ntv_data)
         ntv = Ntv.obj(data)
-        ntv['dates'][1].add_comment('a corriger', '1995-02-05')
-        ntv['dates'][1].add_comment('bof')
-        ntv['dates'][1].add_comment('a corriger suite', '1998-02-05')
-        ntv['dates'][1].add_comment('bof suite')
-        ntv['dates'][1].accept_comment()
+        NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof')
+        NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
+        NtvComment(ntv['dates'][1]).add_comment('bof suite')
+        NtvComment(ntv['dates'][1]).accept_comment()
         ntv_data['dates'][1].set_value('1998-02-05')
         self.assertEqual(ntv, ntv_data)
         
@@ -599,7 +623,7 @@ class Test_NtvTree(unittest.TestCase):
         tree = NtvTree(ntv)
         self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
-            [node.address_name for node in tree.leaf_nodes][6], '0.1')
+            [node.json_pointer() for node in tree.leaf_nodes][6], '/b')
         self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])
         self.assertEqual(tree.height, 3)
         self.assertEqual(tree.size, 11)
@@ -636,6 +660,9 @@ class Test_Pandas_Connector(unittest.TestCase):
     def test_series(self):
         import pandas as pd
         Point = geometry.point.Point
+        from json_ntv import read_json as read_json        
+        from json_ntv import to_json as to_json
+        from json_ntv import as_def_type as as_def_type        
         
         # json interface ok
         srs = [# without ntv_type, without dtype
@@ -666,6 +693,7 @@ class Test_Pandas_Connector(unittest.TestCase):
                pd.Series([1,2,3], name='::int64'),
                pd.Series([1,2,3], dtype='Float64', name='::float64'), # force dtype dans la conversion json
                pd.Series([[1,2], [3,4], [5,6]], name='::array'),  
+               pd.Series([{'a': 2, 'e':4}, {'a': 3, 'e':5}, {'a': 4, 'e':6}], name='::object'),  
                pd.Series([None, None, None], name='::null'), 
                
                # with ntv_type unknown in pandas
@@ -675,8 +703,10 @@ class Test_Pandas_Connector(unittest.TestCase):
         ]
         for sr in srs:
             #print(Ntv.obj(sr))
-            self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(format='obj')) or sr.equals(Ntv.obj(sr).to_obj(format='obj', alias=True)))
+            self.assertTrue(as_def_type(sr).equals(Ntv.obj(sr).to_obj(format='obj')))
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
+            self.assertTrue(as_def_type(sr).equals(read_json(to_json(sr))))
+            self.assertEqual(read_json(to_json(sr)).name, sr.name)            
 
     def test_json_sfield_full(self):
 
