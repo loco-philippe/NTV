@@ -17,6 +17,7 @@ Finally, compatibility with existing JSON structures allows progressive deployme
 # NTV uses
 
 Several variations and use cases of the NTV format are defined:
+- tabular data exchange format (e.g. open-data)
 - Compact, reversible and semantic pandas - JSON interface
 - comment and change management of JSON data
 - Mermaid visualization of JSON tree
