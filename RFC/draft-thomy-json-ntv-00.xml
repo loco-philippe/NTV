@@ -188,7 +188,7 @@
           <t>The data triplet of NTVsingle entities is composed by:</t><ul>
             <li><strong>NTVsingleValue</strong>: This NTVvalue is the JSON representation (JsonValue) of the main content of the NTV entity,</li>
             <li><strong>NTVsingleType</strong>: This NTVtype defines the type of entity and the conversion rules between the native entity 
-            and the NTV entity. The default value is the "json" NTVtype.</li>
+            and the NTV entity. The default NTVtype (defaultNTVtype) is the "json" NTVtype.</li>
             <li><strong>NTVname</strong>: The NTVname is an additional textual information (JsonString)</li></ul>
           <t><strong>In other words, any entity that has on the one hand a function of encoding it into a JsonValue and 
           on the other hand a function of creating from a JsonValue can be taken into account.
@@ -200,9 +200,9 @@
         <section><name>NTVlist</name>
           <t>The data triplet of NTVlist entities is composed by:</t><ul>
             <li><strong>NTVlistValue</strong>: This NTVvalue is an ordered sequence of included NTV entities.</li>
-            <li><strong>NTVlistType</strong>: This NTVtype is a Namespace or a default NTVtype to apply to the NTV entities included. 
-            This NTVlistType avoids including a NTVtype (if default NTVtype) or reduces the length (if Namespace) in the JSON representation 
-            (JsonNTV) of the included NTV entities. The default value is "None".</li>
+            <li><strong>NTVlistType</strong>: This NTVtype is a Namespace or a NTVtype to apply to the NTV entities included. 
+            This NTVlistType avoids including a NTVtype (if NTVtype) or reduces the length (if Namespace) in the JSON representation 
+            (JsonNTV) of the included NTV entities. The default NTVtype (defaultNTVtype) is "None".</li>
             <li><strong>NTVname</strong>: The NTVname is an additional textual information (JsonString)</li></ul>
           <t><em>Example of equivalent JSON representations:</em></t><ul empty="true">
             <li><em>where NTVlistType is None for the global NTVlist</em><ul empty="true">
@@ -221,8 +221,11 @@
         all the shared data structures within the same tree of types.</t>
         <section><name>Namespace</name>
           <t>A Namespace is included in a Namespace parent (NamespaceParent) and may contain Namespace childs.</t>
-          <t>A Namespace is represented by a string followed by a point (NamespaceName). 
-          The global Namespace (root node in the Namespace tree) is represented by an empty string and its NamespaceParent is None.</t>
+          <t>A Namespace is represented by a string followed by a point (NamespaceName).</t>
+          <t>Root node in the Namespace tree is the GlobalNamespace.</t>
+          <ul empty="true"><li><ol type="REQ%d:" group="reqs"> 
+            <li>NamespaceName and NamespaceLongName of GlobalNamespace are empty.</li>
+            <li>NamespaceParent of GlobalNamespace is None.</li></ol></li></ul>
         </section>
         <section><name>NTVtype</name>
           <t>A NTVtype is defined by a name (NTVtypeName) and a Namespace parent (NamespaceParent). 
@@ -232,11 +235,11 @@
           On the other hand, it must be possible for everyone to share data according to their own data structure.</t>
           <t>There are therefore two categories of NTVtype: <ul>
             <li>custom NTVtype (and Namespace) which can be created by anyone without control,</li>
-            <li>shared NTVtype (and Namespace) that are defined in a single, shared repository.</li></ul></t>
-          <t>The corresponding rules are as follows:<ul>
-            <li>NTVtype (or Namespace) whose name begins with '$' is of type 'custom'</li>
-            <li>NTVtype (or Namespace) included in a Namespace of type 'custom' is also of type 'custom'</li>
-            <li>Each 'shared' Namespace or NTVtype is uniquely managed.</li></ul></t>
+            <li>shared NTVtype (and Namespace) that are defined in a single, shared repository. 
+            Each 'shared' Namespace or NTVtype is uniquely managed.</li></ul></t>
+          <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
+            <li>NTVtype (or Namespace) whose NTVtypeName (or NamespaceName) begins with '$' is of type 'custom'</li>
+            <li>NTVtype (or Namespace) included in a Namespace of type 'custom' is also of type 'custom'</li></ol></li></ul>
           <t><em>Example:</em> <ul empty="true">
             <li><em>If "fr." is a Namespace attached to the global Namespace and containing the Namespace 'BAN.' and the NTVtype 'dep', then:</em> <ul>
               <li><em>"fr.dep" is a shared NTVtype,</em></li>
@@ -266,7 +269,7 @@
             <![CDATA[
 ; JSON representation of NTV entities (JsonNTV)
 
-JsonNTV        = JsonNTVnamed / JsonNTVsimple
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ5
 
 JsonNTVnamed   = beginObject JsonNTVMember endObject 
 JsonNTVsimple  = JsonNTVvalue
@@ -293,6 +296,8 @@ JsonString = JsonString   ; indicates that rule is defined in RFC8259
             <li><em>{ JsonNTVname : JsonNTVvalue }</em></li></ul></li>
           <li>simple format (if NTVname and JsonType are empty string): <ul empty="true">
             <li><em>JsonNTVvalue</em></li></ul></li></ul></t>
+        <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
+          <li>If JsonNTVname is empty, simple format is used</li></ol></li></ul>
         <t>This format allows full compatibility with existing JSON structures:<ul>
           <li>a JsonNumber, JsonString, JsonNull or JsonBoolean is the representation of a Vsingle entity,</li>
           <li>a JsonObject with a single member is the representation of an NVsingle or TVsingle entity,</li>
