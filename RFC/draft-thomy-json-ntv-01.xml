@@ -4,17 +4,17 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="info"
-  docName="draft-thomy-json-ntv-00"
+  docName="draft-thomy-json-ntv-01"
   ipr="trust200902"
   obsoletes=""
   updates=""
   submissionType="IETF"
   xml:lang="en"
-  version="0">
+  version="">
 
   <front>
     <title>JSON semantic format (JSON-NTV)</title>
-    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv-00"/>
+    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv-01"/>
     <author fullname="Philippe THOMY" initials="P." surname="THOMY">
       <organization>Loco-labs</organization>
       <address>
@@ -28,7 +28,7 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author> 
-    <date year="2023" month="08"/>
+    <date year="2023" month="09"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
     <keyword>JSON</keyword>
@@ -249,9 +249,9 @@
           <t>A NTVtype is defined by a string (NTVtypeName).</t>
           <t>The representation of a Namespace (NamespaceLongName) is composed by all the nested NamespaceName.</t>
           <t>The representation of a NTVtype (NTVtypeLongName) is composed by the NamespaceLongName and the NTVtypeName.</t>
-          <t>The NTVtypeLongName is defined in  <xref target="NTVtypeLongName-abnf" derivedContent="Figure 4"/>, 
+          <t>The NTVtypeLongName is defined in  <xref target="NTVtypeLongName-abnf" derivedContent="Figure 2"/>, 
           which uses ABNF from <xref target="RFC5234"/>.</t>
-          <figure anchor="NTVtypeLongName-abnf" align="left" suppress-title="false" pn="figure-4">
+          <figure anchor="NTVtypeLongName-abnf" align="left" suppress-title="false">
             <name>JsonNTVtype - ABNF</name><sourcecode type="abnf" markers="false">
               <![CDATA[
 ; representation of NtvType and Namespace (LongName)
@@ -287,9 +287,9 @@ NTVtypeName     = ["$"] JsonString              ; REQ3
     <section><name>JsonNTV</name>
       <section><name>JsonNTV format</name>
         <t>The JsonNTV format is the JSON representation of an NTV entity (JsonValue) as defined in 
-        <xref target="JsonNTV-abnf" derivedContent="Figure 2"/>, 
+        <xref target="JsonNTV-abnf" derivedContent="Figure 3"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="JsonNTV-abnf" align="left" suppress-title="false" pn="figure-2">
+        <figure anchor="JsonNTV-abnf" align="left" suppress-title="false">
           <name>JsonNTV - ABNF</name><sourcecode type="abnf" markers="false">
             <![CDATA[
 ; JSON representation of NTV entities (JsonNTV)
@@ -334,9 +334,9 @@ JsonString = JsonString   ; indicates that rule is defined in RFC8259
       <section><name>JsonNTVname</name>
         <t>JsonNTVname is the concatenation of NTVname and JsonSepType.</t>
         <t>JsonSepType is composed with the separator singleSep or listSep and the JsonNTVtype.</t>
-        <t>JsonNTVname and JsonSepType are defined in <xref target="JsonNTVname-abnf" derivedContent="Figure 3"/>, 
+        <t>JsonNTVname and JsonSepType are defined in <xref target="JsonNTVname-abnf" derivedContent="Figure 4"/>, 
         which uses ABNF from <xref target="RFC5234"/>.</t>
-        <figure anchor="JsonNTVname-abnf" align="left" suppress-title="false" pn="figure-3">
+        <figure anchor="JsonNTVname-abnf" align="left" suppress-title="false">
           <name>JsonNTVname - ABNF</name><sourcecode type="abnf" markers="false">
             <![CDATA[
 ; JSON representation of NTVname and NTVtype (JsonNTVname)
@@ -367,17 +367,19 @@ listSep     = "::"     ; NTVlist separator
             <![CDATA[
 ; JSON representation of NtvType (JsonNTVtype)
 
-JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
+JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]    ; REQ7
 
-relativeNTVtypeLongName = *NTVtypeParentName NTVtypeName  
+relativeNTVtypeLongName = *NTVtypeParentName NTVtypeName       ; REQ7
             ]]>
         </sourcecode></figure>
-        <t><em>Example for an absolute representation of an NTVtype defined in two nested Namespace in the global Namespace:</em> <ul empty="true">
-          <li><em>"ns1.ns2.type" </em> </li>
-          <li><em> where:</em> <ul empty="true">
-            <li><em>ns1. is a Namespace defined in the global Namespace,</em> </li>
-            <li><em>ns2. is a Namespace defined in the ns1. Namespace,</em> </li>
-            <li><em>type is a NTVtype defined in the ns2. Namespace</em> </li></ul></li></ul></t>
+        <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
+            <li><t>if NTVtype is identical to NTVtypeParent, JsonNTVtype is empty,</t>
+            <t>else if NTVtypeParent is a Namespace and if NTVtype is including in NTVtypeParent, 
+            JsonNTVtype is the NTVtypeLongName relative to the NTVtypeParent.</t>
+            <t>else JsonNTVtype is the NTVtypeLongName</t></li></ol></li></ul>
+        <t><em>Example:</em> <ul empty="true">
+          <li><em>If "fr." is the name of a Namespace attached to the global Namespace and containing the NTVtype 'dep', then:</em> <ul>
+            <li><em>{ "::fr." : { "department1:dep": "name1", "department2:dep": "name2" } } is a valid JsonNTV representation.</em></li></ul></li></ul></t>
       </section>
       <section><name>JsonNTVvalue</name>
         <t>The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in <xref target="JsonNTVvalue-abnf" derivedContent="Figure 6"/>, 
@@ -390,11 +392,11 @@ relativeNTVtypeLongName = *NTVtypeParentName NTVtypeName
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
-JsonNTVlistValue   = JsonNTVArrayValue / JsonNTVObjectValue
+JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue     ; REQ8
 
-JsonNTVArrayValue  = beginArray ListJsonNTVvalue endArray
+JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
-JsonNTVObjectValue = beginObject ListJsonNTVmember endObject
+JsonNTVobjectValue = beginObject ListJsonNTVmember endObject
 ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
 
 NTVsingleValue     = JsonValue
@@ -404,10 +406,11 @@ NTVsingleValue     = JsonValue
         <t>For a NTVlist, JsonNTValue has two representations:<ul>
           <li>a JsonArray where JsonElements are the JsonNTV of included NTV entities,</li>
           <li>a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.</li></ul></t>
-        <t><em>Note:</em><ul empty="true">
-          <li><em>The JsonObject option is available only if all the NTV entities included have a JsonNTVname and 
-          all the JsonNTVname are different (e.g. {":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640]} 
-          is not a valid  JSON-value)</em></li></ul></t>
+        <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
+          <li><t>if NTVlistValue has more than one NTV entities and if all NTVname are different and not empty, JsonNTVobject is used,</t>
+          <t>else JsonNTVarray is used</t></li></ol></li></ul>
+        <t><em>Example:</em><ul empty="true">
+          <li><em>{ ":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640] }   is not a valid JsonNTV</em></li></ul></t>
       </section>
     </section>
     &nbsp;
@@ -445,7 +448,7 @@ NTVsingleValue     = JsonValue
       <t><strong>NTVlist : </strong></t><ul empty="true">
         <li><em>{ "cities::point": [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em></li>
         <li><em>{ "generic date::dat": [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78]}</em></li>
-        <li><em>{ "various::point": [ [2.3, 48.8], { ":date": "2022-01-28"}, {"json": 25 }, { "another NTVlist": [1,2,3]} ]}</em></li></ul>
+        <li><em>{ "various::point": [ [2.3, 48.8], { ":date": "2022-01-28"}, {":json": 25 }, { "another NTVlist::json": [1,2,3]} ]}</em></li></ul>
       <t><strong>NTVlist and NVlist (composed with JsonObject) :</strong></t><ul empty="true">
         <li><em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em></li>
         <li><em>{ "cities": {"paris:point": [2.3522, 48.8566] , "lyon": "france"}}</em></li></ul>
