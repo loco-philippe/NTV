@@ -10,7 +10,7 @@
   updates=""
   submissionType="IETF"
   xml:lang="en"
-  version="">
+  version="2">
 
   <front>
     <title>JSON semantic format (JSON-NTV)</title>
@@ -311,8 +311,8 @@ nSep          = ws ":" ws
 vSep          = ws "," ws
 ws = *( %x20 / %x09 / %x0A / %x0D )
 
-JsonValue  = JsonValue    ; indicates that rule is defined in RFC8259
-JsonString = JsonString   ; indicates that rule is defined in RFC8259
+JsonValue  = JsonValue   ; indicates that rule is defined in RFC8259
+JsonString = JsonString  ; indicates that rule is defined in RFC8259
             ]]>
         </sourcecode></figure>
         <t>The JsonNTV format is built with the NTVname, NTVvalue and the JsonNTVtype.</t>
@@ -341,8 +341,9 @@ JsonString = JsonString   ; indicates that rule is defined in RFC8259
             <![CDATA[
 ; JSON representation of NTVname and NTVtype (JsonNTVname)
 
-JsonNTVname    = NTVname JsonSepType
-JsonSepType    = [singleSep [JsonNTVtype]] / [listSep JsonNTVtype]  ; REQ5, REQ6
+JsonNTVname = NTVname JsonSepType
+JsonSepType = [singleSep [JsonNTVtype]]/[listSep JsonNTVtype]
+    ; REQ5 REQ6
 
 NTVname = JsonString
 
@@ -367,9 +368,11 @@ listSep     = "::"     ; NTVlist separator
             <![CDATA[
 ; JSON representation of NtvType (JsonNTVtype)
 
-JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]    ; REQ7
+JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
+    ; REQ7
 
-relativeNTVtypeLongName = *NTVtypeParentName NTVtypeName       ; REQ7
+relativeNTVtypeLongName = *NamespaceName NTVtypeName
+    ; REQ7
             ]]>
         </sourcecode></figure>
         <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
@@ -387,12 +390,13 @@ relativeNTVtypeLongName = *NTVtypeParentName NTVtypeName       ; REQ7
         <figure anchor="JsonNTVvalue-abnf" align="left" suppress-title="false" pn="figure-6">
           <name>JsonNTVvalue - ABNF</name><sourcecode type="abnf" markers="false">
             <![CDATA[
-; JSON representation of NTVvalue
+; JSON representation of NTVvalue (JsonNTVvalue)
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
-JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue     ; REQ8
+JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
+    ; REQ8
 
 JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
@@ -455,17 +459,20 @@ NTVsingleValue     = JsonValue
     </section>
     &nbsp;
     <section><name>Parsing a JsonValue</name>
-      <t>several steps are considered:</t><ul>
+      <t>JsonValue is parsed according to JSON structure (from root to leaves).</t>
+      <t>Several steps are considered:</t><ul>
         <li>JSON decoding</li>
-        <li>decoding of the entity</li>
-        <li>decoding of the NTVvalue</li>
-        <li>decoding of NTVtype</li></ul>
+        <li>NTV entity decoding</li>
+        <li>NTVvalue decoding</li>
+        <li>NTVtype decoding</li></ul>
       <section><name>JSON decoding</name>
-        <t>This first decoding step identifies the following objects:</t><ul empty='true'>
-          <li>JsonNTVvalue, NTVname (if present), separator singleSep or listSep (if present), JsonNTVtype (if present).</li></ul>
+        <t>This part is not detailed and consists of:</t><ul>
+            <li>exploit the JSON structure to identify JsonNTVname and JsonNTVvalue,</li>
+            <li>extract the following data from the JsonNTVname string: JsonNTVtype, NTVname and singleSep or listSep</li></ul>
       </section> 
-      <section><name>a virer</name>     
-        <t>The tables below present the rules for identifying an NTV entity.</t> 
+      <section><name>NTV entity decoding</name>
+        <t>The NTV entity is inferred from the JSON structure of JsonValue or JsonNTVvalue:</t><ul empty="true"><li><ol type="PARS%d:" group="parsing reqs">
+            <li>The tables <xref target="table1"/> and <xref target="table2"/> define the entity identification rules (NTVsingle or NTVlist)</li></ol></li></ul>
         <table anchor="table1" align="left" pn="table-1"><name>Decoding JsonValue</name><thead>
           <tr><th>JsonValue</th><th>NTV entity</th></tr></thead><tbody>
           <tr><td>JsonPrimitive</td><td>Vsingle</td></tr>
@@ -481,16 +488,18 @@ NTVsingleValue     = JsonValue
           <tr><td>":"</td><td>JsonValue</td><td>TVsingle or NTVSingle</td></tr>
           <tr><td>"::"</td><td>JsonUnnamed</td><td>NVlist or TVlist or NTVlist</td></tr>
           <tr><td>"::"</td><td>JsonArray</td><td>NVlist or TVlist or NTVlist</td></tr></tbody></table>
-        <t>The NTVvalue of NTVsingle is the JsonNTVvalue.</t>
-        <t>The NTVvalue of NTVlist is build by decoding data included in JsonNTVvalue.</t>
-        <t>For NTV entities not included in a NTVlist, the NTVtype is built with:</t><ul>
-          <li>"json" JsonNTVtype if JsonNTVtype is None and if the NTV entity is a NTVsingle,</li>
-          <li>the NTVtype build with the JsonNTVType.</li></ul>
-        <t>For NTV entities included in a NTVlist, the NTVtype is built with : </t><ul>
-          <li>the JsonNTVtype if it is an absolute NTVtype and if the entity is a NTVsingle,</li>
-          <li>the concatenation of the JsonNTVtype of the NTVlist and the JsonNTVtype (if it is a relative NTVtype),</li>
-          <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
-        <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
+      </section> 
+      <section><name>NTVvalue decoding</name>
+        <t>The NTVvalue is inferred from the JsonNTVvalue:</t><ul empty="true"><li><ol type="PARS%d:" group="parsing reqs">
+            <li>The NTVvalue of NTVsingle is the JsonNTVvalue.</li>
+            <li>The NTVvalue of NTVlist is the list of NTV entities parsed for each JsonElement or JsonMember including in the JsonNTVvalue.</li></ol></li></ul>
+      </section>
+      <section><name>NTVtype decoding</name>             
+        <t>NTVtype is inferred from the JsonNTVtype:</t><ul empty="true"><li><ol type="PARS%d:" group="parsing reqs">
+            <li><t>If JsonNTVtype is a valid NTVtypeLongName NTVtype is the decoded JsonNTVtype,</t>
+            <t>else NTVtype is "json" NTVtype if concatened ParentNTVtypeLongName with JsonNTVtype is empty,</t>
+            <t>else NTVtype is the decoded of concatenation of ParentNTVtypeLongName with JsonNTVtype if it is a valid  NTVtypeLongName,</t>
+            <t>else NTVtype is the defaultNTVtype</t></li></ol></li></ul>
         <t>The <xref target="JSON-NTV"/> repository gives some examples of NTV usage.</t>
       </section>
     </section>
@@ -671,9 +680,19 @@ NTVsingleValue     = JsonValue
         <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-7">
           <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
             <![CDATA[
+; representation of NtvType and Namespace (LongName)
+
+NTVtypeLongName     = NamespaceParentLongName NTVtypeName  
+
+NamespaceLongName   = NamespaceParentLongName NamespaceName
+NamespaceParentLongName = NamespaceLongName
+
+NamespaceName   = [ ["$"] JsonString "." ]      ; REQ2 REQ3
+NTVtypeName     = ["$"] JsonString              ; REQ3
+
 ; JSON representation of NTV entities (JsonNTV)
 
-JsonNTV        = JsonNTVnamed / JsonNTVsimple
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
 
 JsonNTVnamed   = beginObject JsonNTVMember endObject 
 JsonNTVsimple  = JsonNTVvalue
@@ -690,13 +709,14 @@ nSep          = ws ":" ws
 vSep          = ws "," ws
 ws = *( %x20 / %x09 / %x0A / %x0D )
 
-JsonValue  = JsonValue    ; indicates that rule is defined in RFC8259
-JsonString = JsonString   ; indicates that rule is defined in RFC8259
+JsonValue  = JsonValue   ; indicates that rule is defined in RFC8259
+JsonString = JsonString  ; indicates that rule is defined in RFC8259
 
 ; JSON representation of NTVname and NTVtype (JsonNTVname)
 
-JsonNTVname    = NTVname / (NTVname JsonSepType) / JsonSepType
-JsonSepType    = [singleSep [JsonNTVtype]] / [listSep [JsonNTVtype]]  
+JsonNTVname    = NTVname JsonSepType
+JsonSepType    = [singleSep [JsonNTVtype]] / [listSep JsonNTVtype]
+    ; REQ5 REQ6
 
 NTVname = JsonString
 
@@ -705,35 +725,34 @@ listSep     = "::"     ; NTVlist separator
 
 ; JSON representation of NtvType (JsonNTVtype)
 
-JsonNTVtype     = JsonNamespaceParent NTVtypeName  
+JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
+    ; REQ7
 
-JsonNamespace   = JsonNamespaceParent NamespaceName
-JsonNamespaceParent = JsonNamespace
+relativeNTVtypeLongName = *NamespaceName NTVtypeName
+    ; REQ7
 
-NamespaceName   = [ ["$"] JsonString "." ] 
-NTVtypeName     = ["$"] JsonString
-
-; JSON representation of NTVvalue
+; JSON representation of NTVvalue (JsonNTVvalue)
 
 JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
-JsonNTVlistValue   = JsonNTVArrayValue / JsonNTVObjectValue
+JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
+    ; REQ8
 
-JsonNTVArrayValue  = beginArray ListJsonNTVvalue endArray
+JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
-JsonNTVObjectValue = beginObject ListJsonNTVmember endObject
+JsonNTVobjectValue = beginObject ListJsonNTVmember endObject
 ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
 
 NTVsingleValue     = JsonValue
-        ]]>
+            ]]>
       </sourcecode></figure>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
     </section>
     <section anchor="Contributors" numbered="false"><name>Contributors</name> 
-      <t>Thanks to all of the contributors.</t>
+      <t>TBD</t>
     </section>
  </back>
 </rfc>
