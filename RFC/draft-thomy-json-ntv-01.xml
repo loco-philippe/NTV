@@ -455,35 +455,44 @@ NTVsingleValue     = JsonValue
     </section>
     &nbsp;
     <section><name>Parsing a JsonValue</name>
-      <t>A first decoding step identifies the following objects:</t><ul empty='true'>
-        <li>JsonNTVvalue, NTVname (if present), separator (if present), JsonNTVtype (if present).</li></ul>
-      <t>The tables below present the rules for identifying an NTV entity.</t> 
-      <table anchor="table1" align="left" pn="table-1"><name>Decoding JsonValue</name><thead>
-        <tr><th>JsonValue</th><th>NTV entity</th></tr></thead><tbody>
-        <tr><td>JsonPrimitive</td><td>Vsingle</td></tr>
-        <tr><td>JsonUnnamed</td><td>Vlist</td></tr>
-        <tr><td>JsonArray</td><td>Vlist</td></tr>
-        <tr><td>JsonNamed</td><td>see <xref target="table2"/></td></tr></tbody></table>
-      <table anchor="table2" align="left" pn="table-2"><name>Decoding JsonNTVvalue</name><thead>
-        <tr><th>Separator</th><th>JsonNTVvalue</th><th>NTV entity</th></tr></thead><tbody>
-        <tr><td>None</td><td>JsonPrimitive</td><td>NVsingle</td></tr>
-        <tr><td>None</td><td>JsonNamed</td><td>NVsingle</td></tr>
-        <tr><td>None</td><td>JsonUnnamed</td><td>NVlist</td></tr>                
-        <tr><td>None</td><td>JsonArray</td><td>NVlist</td></tr>
-        <tr><td>":"</td><td>JsonValue</td><td>TVsingle or NTVSingle</td></tr>
-        <tr><td>"::"</td><td>JsonUnnamed</td><td>NVlist or TVlist or NTVlist</td></tr>
-        <tr><td>"::"</td><td>JsonArray</td><td>NVlist or TVlist or NTVlist</td></tr></tbody></table>
-      <t>The NTVvalue of NTVsingle is the JsonNTVvalue.</t>
-      <t>The NTVvalue of NTVlist is build by decoding data included in JsonNTVvalue.</t>
-      <t>For NTV entities not included in a NTVlist, the NTVtype is built with:</t><ul>
-        <li>"json" JsonNTVtype if JsonNTVtype is None and if the NTV entity is a NTVsingle,</li>
-        <li>the NTVtype build with the JsonNTVType.</li></ul>
-      <t>For NTV entities included in a NTVlist, the NTVtype is built with : </t><ul>
-        <li>the JsonNTVtype if it is an absolute NTVtype and if the entity is a NTVsingle,</li>
-        <li>the concatenation of the JsonNTVtype of the NTVlist and the JsonNTVtype (if it is a relative NTVtype),</li>
-        <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
-      <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
-      <t>The <xref target="JSON-NTV"/> repository gives some examples of NTV usage.</t>
+      <t>several steps are considered:</t><ul>
+        <li>JSON decoding</li>
+        <li>decoding of the entity</li>
+        <li>decoding of the NTVvalue</li>
+        <li>decoding of NTVtype</li></ul>
+      <section><name>JSON decoding</name>
+        <t>This first decoding step identifies the following objects:</t><ul empty='true'>
+          <li>JsonNTVvalue, NTVname (if present), separator singleSep or listSep (if present), JsonNTVtype (if present).</li></ul>
+      </section> 
+      <section><name>a virer</name>     
+        <t>The tables below present the rules for identifying an NTV entity.</t> 
+        <table anchor="table1" align="left" pn="table-1"><name>Decoding JsonValue</name><thead>
+          <tr><th>JsonValue</th><th>NTV entity</th></tr></thead><tbody>
+          <tr><td>JsonPrimitive</td><td>Vsingle</td></tr>
+          <tr><td>JsonUnnamed</td><td>Vlist</td></tr>
+          <tr><td>JsonArray</td><td>Vlist</td></tr>
+          <tr><td>JsonNamed</td><td>see <xref target="table2"/></td></tr></tbody></table>
+        <table anchor="table2" align="left" pn="table-2"><name>Decoding JsonNTVvalue</name><thead>
+          <tr><th>Separator</th><th>JsonNTVvalue</th><th>NTV entity</th></tr></thead><tbody>
+          <tr><td>None</td><td>JsonPrimitive</td><td>NVsingle</td></tr>
+          <tr><td>None</td><td>JsonNamed</td><td>NVsingle</td></tr>
+          <tr><td>None</td><td>JsonUnnamed</td><td>NVlist</td></tr>                
+          <tr><td>None</td><td>JsonArray</td><td>NVlist</td></tr>
+          <tr><td>":"</td><td>JsonValue</td><td>TVsingle or NTVSingle</td></tr>
+          <tr><td>"::"</td><td>JsonUnnamed</td><td>NVlist or TVlist or NTVlist</td></tr>
+          <tr><td>"::"</td><td>JsonArray</td><td>NVlist or TVlist or NTVlist</td></tr></tbody></table>
+        <t>The NTVvalue of NTVsingle is the JsonNTVvalue.</t>
+        <t>The NTVvalue of NTVlist is build by decoding data included in JsonNTVvalue.</t>
+        <t>For NTV entities not included in a NTVlist, the NTVtype is built with:</t><ul>
+          <li>"json" JsonNTVtype if JsonNTVtype is None and if the NTV entity is a NTVsingle,</li>
+          <li>the NTVtype build with the JsonNTVType.</li></ul>
+        <t>For NTV entities included in a NTVlist, the NTVtype is built with : </t><ul>
+          <li>the JsonNTVtype if it is an absolute NTVtype and if the entity is a NTVsingle,</li>
+          <li>the concatenation of the JsonNTVtype of the NTVlist and the JsonNTVtype (if it is a relative NTVtype),</li>
+          <li>the JsonNTVtype of the NTVlist if the JsonNTVtype is None.</li></ul>
+        <t>If the resulting NTVtype is inconsistent, the NTVtype is set to None.</t>
+        <t>The <xref target="JSON-NTV"/> repository gives some examples of NTV usage.</t>
+      </section>
     </section>
     &nbsp;
     <section><name>NTV extended structure</name>
