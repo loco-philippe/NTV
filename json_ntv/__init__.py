@@ -9,16 +9,16 @@ Created on Fri Dec 24 15:21:14 2021
 This package contains the following classes:
 
 - `NTV.json_ntv.namespace` :
-
     - `NTV.json_ntv.namespace.Namespace`
     - `NTV.json_ntv.namespace.NtvType`
-         
-- `NTV.json_ntv.ntv` :
 
+        
+- `NTV.json_ntv.ntv` :
     - `NTV.json_ntv.ntv.NtvSingle`
     - `NTV.json_ntv.ntv.NtvList`
     - `NTV.json_ntv.ntv.Ntv` (abstract class)
-    
+
+
 - `NTV.json_ntv.ntv_comment` :
     
     - `NTV.json_ntv.ntv_comment.NtvComment`
@@ -30,6 +30,12 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv_util.NtvError`
     - `NTV.json_ntv.ntv_util.NtvConnector` (abstract class)    
           
+- `NTV.json_ntv.pandas_ntv_connector` :
+    
+    - `NTV.json_ntv.pandas_ntv_connector.DataFrameConnec`
+    - `NTV.json_ntv.pandas_ntv_connector.SeriesConnec`
+    
+    
 - `NTV.json_ntv.ntv_connector` :
     
     - `NTV.json_ntv.ntv_connector.DataFrameConnec`

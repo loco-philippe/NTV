@@ -4,7 +4,7 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="info"
-  docName="draft-thomy-json-ntv-01"
+  docName="draft-thomy-json-ntv-02"
   ipr="trust200902"
   obsoletes=""
   updates=""
@@ -14,7 +14,7 @@
 
   <front>
     <title>JSON semantic format (JSON-NTV)</title>
-    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv-01"/>
+    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv-02"/>
     <author fullname="Philippe THOMY" initials="P." surname="THOMY">
       <organization>Loco-labs</organization>
       <address>
@@ -644,8 +644,8 @@ NTVsingleValue     = JsonValue
           <tr><th>NTVtypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>uri</td><td>URI (RFC3986)</td><td><t>"https://www.ietf.org/rfc/rfc3986.txt"</t>
             <t>"urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"</t>
-            <t>"geo:13.4125,103.86673" (RFC5870)"</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t>
-            <t>"news:comp.infosystems.www.servers.unix"</t></td></tr>
+            <t>"geo:13.4125,103.86673" (RFC5870)</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t>
+            <t>"tel:+1-201-555-0123" (RFC3966)</t></td></tr>
           <tr><td>email</td><td>adress (RFC5322)</td><td>"John Doe &lt;jdoe@machine.example&gt;"</td></tr>
           <tr><td>file</td><td>file-hier-part (RFC8089)</td>
             <td><t>"///path/to/file"</t><t>"//host.example.com/path/to/file"</t></td></tr></tbody></table>
