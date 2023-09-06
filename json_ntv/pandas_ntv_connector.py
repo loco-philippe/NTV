@@ -174,11 +174,11 @@ class SeriesConnec(NtvConnector):
     clas_typ = 'field'
 
     types = pd.DataFrame(
-        {'ntv_type':  ['month', '', 'json', 'durationiso', 'uint64', 'float32', 'string', 'datetime',
+        {'ntv_type':  ['date', 'month', '', 'json', 'durationiso', 'uint64', 'float32', 'string', 'datetime',
                        'int32', 'int64', 'float64', 'array', 'boolean', 'object'],
-         'name_type': ['month', None, None, None, None, None, None, None,
+         'name_type': ['date', 'month', None, None, None, None, None, None, None,
                        None, 'int64', 'float64', 'array', 'boolean', 'object'],
-         'dtype': [None, None, None, 'timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
+         'dtype': ['object', None, None, None, 'timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
                    'Int32', 'Int64', 'Float64', 'array', 'boolean', 'object']}) #internal
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
               'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'} #alias
@@ -324,6 +324,8 @@ class SeriesConnec(NtvConnector):
             if pd_convert:
                 srs = pd.read_json(json.dumps(data), dtype=dtype,
                                    typ='series').rename(pd_name)
+                if ntv_type == 'date':
+                    srs = pd.to_datetime(srs).dt.date
             else:
                 srs = pd.Series(data, name=pd_name, dtype=dtype)
         
@@ -389,7 +391,10 @@ class SeriesConnec(NtvConnector):
                 orient='records', date_format='iso', default_handler=str))
         else:
             ntv_type = name_type
-            if dtype == 'object':
+            if ntv_type == 'date':
+                ntv_value = json.loads(srs.astype(str).to_json(
+                    orient='records', date_format='iso', default_handler=str))                
+            elif dtype == 'object':
                 ntv_value = srs.to_list()
             else:
                 ntv_value = json.loads(srs.to_json(
