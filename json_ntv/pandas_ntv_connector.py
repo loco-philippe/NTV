@@ -331,6 +331,8 @@ class SeriesConnec(NtvConnector):
                                    typ='series').rename(pd_name)
                 if ntv_type == 'date':
                     srs = pd.to_datetime(srs).dt.date
+                elif ntv_type == 'time':
+                    srs = pd.to_datetime(srs).dt.time
             else:
                 srs = pd.Series(data, name=pd_name, dtype=dtype)
         
