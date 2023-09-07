@@ -17,9 +17,12 @@ It contains :
 """
 import datetime
 import json
+import configparser
+from pathlib import Path
 import pandas as pd
 import numpy as np
 
+import json_ntv
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 
 def to_json(pd_array, **kwargs):
@@ -169,11 +172,12 @@ class DataFrameConnec(NtvConnector):
 
 class SeriesConnec(NtvConnector):
     '''NTV connector for pandas Series'''
-
     clas_obj = 'Series'
     clas_typ = 'field'
-
-    types = pd.DataFrame(
+    config = configparser.ConfigParser()
+    config.read(Path(json_ntv.__file__).parent.joinpath('ntv_pandas.ini'))
+    types = pd.DataFrame(json.loads(config['data']['type']), columns=json.loads(config['data']['column']))
+    """types = pd.DataFrame(
         {'ntv_type':  ['date', 'month', '', 'json', 'durationiso', 'uint64', 'float32', 'string', 'datetime',
                        'int32', 'int64', 'float64', 'array', 'boolean', 'object'],
          'name_type': ['date', 'month', None, None, None, None, None, None, None,
@@ -181,7 +185,8 @@ class SeriesConnec(NtvConnector):
          'dtype': ['object', None, None, None, 'timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
                    'Int32', 'Int64', 'Float64', 'object', 'boolean', 'object']}) #internal
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
-              'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'} #alias
+              'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'} #alias"""
+    astype = json.loads(config['data']['astype'])
     deftype = {val: key for key, val in astype.items()}
 
     @staticmethod

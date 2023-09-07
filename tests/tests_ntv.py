@@ -699,7 +699,8 @@ class Test_Pandas_Connector(unittest.TestCase):
                # with ntv_type unknown in pandas
                pd.Series([datetime.date(2022, 1, 1), datetime.date(2022, 1, 2)], name='::date'),
                pd.Series([Point(1, 0), Point(1, 1), Point(1, 2)], name='::point'),
-               pd.Series([1,2,3], dtype='object', name='::day')
+               pd.Series([1,2,3], dtype='int64', name='::day'),
+               pd.Series([2001,2002,2003], dtype='int64', name='::year')
         ]
         for sr in srs:
             #print(Ntv.obj(sr))
