@@ -1,0 +1,16 @@
+,ntv_type,name_type,dtype
+0,date,date,object
+1,month,month,
+2,,,
+3,json,,
+4,durationiso,,timedelta64[ns]
+5,uint64,,UInt64
+6,float32,,Float32
+7,string,,string
+8,datetime,,datetime64[ns]
+9,int32,,Int32
+10,int64,int64,Int64
+11,float64,float64,Float64
+12,array,array,array
+13,boolean,boolean,boolean
+14,object,object,object

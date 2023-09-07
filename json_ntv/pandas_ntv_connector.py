@@ -179,7 +179,7 @@ class SeriesConnec(NtvConnector):
          'name_type': ['date', 'month', None, None, None, None, None, None, None,
                        None, 'int64', 'float64', 'array', 'boolean', 'object'],
          'dtype': ['object', None, None, None, 'timedelta64[ns]', 'UInt64', 'Float32', 'string', 'datetime64[ns]',
-                   'Int32', 'Int64', 'Float64', 'array', 'boolean', 'object']}) #internal
+                   'Int32', 'Int64', 'Float64', 'object', 'boolean', 'object']}) #internal
     astype = {'uint64': 'UInt64', 'float32': 'Float32', 'int32': 'Int32',
               'int64': 'Int64', 'float64': 'Float64', 'bool': 'boolean'} #alias
     deftype = {val: key for key, val in astype.items()}
