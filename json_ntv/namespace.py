@@ -187,9 +187,11 @@ For example :
 
 """
 import configparser
+from pathlib import Path
 import json
 import requests
 
+import json_ntv
 
 def agreg_type(str_typ, def_type, single):
     '''aggregate str_typ and def_type to return an NtvType or a Namespace if not single
@@ -304,8 +306,15 @@ class NtvType():
         return [nam.long_name for nam in cls._types_.values()]
 
     @classmethod
-    def add(cls, long_name):
-        '''activate and return a valid NtvType defined by the long name'''
+    def add(cls, long_name, module=False):
+        '''activate and return a valid NtvType defined by the long name
+        
+        *parameters :*
+
+        - **long_name** : String - absolut name of the NtvType
+        - **module** : boolean (default False) - if True search data in the 
+        local .ini file, else in the distant repository
+        '''
         if long_name == '':
             return None
         if long_name in NtvType.types():
@@ -316,7 +325,7 @@ class NtvType():
         if len(split_name) == 1:
             return cls(split_name[0])
         if len(split_name) == 2:
-            nspace = Namespace.add(split_name[0]+'.')
+            nspace = Namespace.add(split_name[0]+'.', module=module)
             return cls(split_name[1], nspace)
         raise NtvTypeError(long_name + ' is not a valid NTVtype')
 
@@ -355,7 +364,6 @@ class NtvType():
         if self.__class__.__name__ != other.__class__.__name__:
             return False
         return self.name == other.name and self.nspace == other.nspace
-
     def __hash__(self):
         '''return hash(name) + hash(nspace)'''
         return hash(self.name) + hash(self.nspace)
@@ -419,28 +427,38 @@ class Namespace():
         return [nam.long_name for nam in cls._namespaces_.values()]
 
     @classmethod
-    def add(cls, long_name):
-        '''activate and return a valid Namespace defined by the long name'''
+    def add(cls, long_name, module=False):
+        '''activate and return a valid Namespace defined by the long_name.
+                
+        *parameters :*
+
+        - **long_name** : String - absolut name of the Namespace
+        - **module** : boolean (default False) - if True search data in the 
+        local .ini file, else in the distant repository
+        '''
         if long_name in Namespace.namespaces():
             return cls._namespaces_[long_name]
         split_name = long_name.rsplit('.', 2)
         if len(split_name) == 1 or split_name[-1] != '':
             raise NtvTypeError(long_name + ' is not a valid classname')
         if len(split_name) == 2:
-            return cls(split_name[0]+'.')
+            return cls(split_name[0]+'.', module=module)
         if len(split_name) == 3:
             parent = Namespace.add(split_name[0]+'.')
-            return cls(split_name[1]+'.', parent)
+            return cls(split_name[1]+'.', parent, module=module)
         raise NtvTypeError(long_name + ' is not a valid classname')
 
-    def __init__(self, name='', parent=None):
+    def __init__(self, name='', parent=None, module=False):
         '''
         Namespace constructor.
 
         *Parameters*
 
         - **name** : String - name of the namespace
-        - **parent** : Namespace - parent namespace'''
+        - **parent** : Namespace - parent namespace
+        - **module** : boolean (default False) - if True search data in the 
+        local .ini file, else in the distant repository
+        '''
         if name and parent is None:
             parent = Namespace._namespaces_['']
         if name and name[0] != '$' and not parent.custom and \
@@ -452,8 +470,8 @@ class Namespace():
             self.custom = parent.custom or name[0] == '$'
         else:
             self.custom = False
-        self.file = Namespace._file(self.parent , self.name, self.custom)
-        self.content = Namespace._content(self.file, self.name, self.custom)
+        self.file = Namespace._file(self.parent , self.name, self.custom, module)
+        self.content = Namespace._content(self.file, self.name, self.custom, module)
         self._namespaces_[self.long_name] = self
 
     def __eq__(self, other):
@@ -479,25 +497,58 @@ class Namespace():
         return self.__class__.__name__ + '(' + self.long_name + ')'
 
     @staticmethod
-    def _file(parent, name, custom):
-        '''return the file name of the Namespace configuration'''
+    def _file(parent, name, custom, module):
+        '''return the file name of the Namespace configuration
+                
+        *parameters :*
+
+        - **parent** : Namespace - Parent of the Namespace
+        - **name** : String - name of the Namespace
+        - **custom** : boolean - if True, return None (custom Namespace)
+        - **module** : boolean (default False) - if True search data in the 
+        local .ini file, else in the distant repository
+        '''
         if custom:
             return None
         if parent:
             config = configparser.ConfigParser()
-            config.read_string(requests.get(
-                parent.file, allow_redirects=True).content.decode())
+            if module:
+                p_file = Path(parent.file).stem + Path(parent.file).suffix
+                config.read(Path(json_ntv.__file__
+                    ).parent.parent.joinpath('config', p_file))
+            else:
+                config.read_string(requests.get(
+                    parent.file, allow_redirects=True).content.decode())
             return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[name]
         return Namespace._pathconfig_ + Namespace._global_
 
     @staticmethod
-    def _content(file, name, custom):
-        '''return the content of the Namespace configuration'''
+    def _content(file, name, custom, module):
+        '''return the content of the Namespace configuration
+        
+        *parameters :*
+
+        - **file** : string - file name of the parent Namespace
+        - **name** : string - name of the Namespace
+        - **custom** : boolean - if True, return empty dict (custom Namespace)
+        - **module** : boolean (default False) - if True search data in the 
+        local .ini file, else in the distant repository
+        
+        *return :*
+        
+        - dict : {'type': <list of ntv_type names>,  
+                  'namespace': <list of namespace names>}
+        '''
         if custom:
             return {'type': {}, 'namespace': {}}
         config = configparser.ConfigParser()
-        config.read_string(requests.get(
-            file, allow_redirects=True).content.decode())
+        if module:
+            p_file = Path(file).stem + Path(file).suffix
+            config.read(Path(json_ntv.__file__
+                ).parent.parent.joinpath('config', p_file))
+        else:
+            config.read_string(requests.get(
+                file, allow_redirects=True).content.decode())
         config_name = config['data']['name']
         if config_name != name:
             raise NtvTypeError(file + ' is not correct')
@@ -537,7 +588,7 @@ class NtvTypeError(Exception):
     # pass
 
 
-nroot = Namespace()
+nroot = Namespace(module=True)
 for root_typ in nroot.content['type'].keys():
-    typ = NtvType.add(root_typ)
+    typ = NtvType.add(root_typ, module=True)
 typ_json = NtvType('json')

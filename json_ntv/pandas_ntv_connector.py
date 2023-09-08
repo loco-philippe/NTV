@@ -327,18 +327,30 @@ class SeriesConnec(NtvConnector):
         else:
             data = ntv_obj * len_unique
             if pd_convert:
-                srs = pd.read_json(json.dumps(data), dtype=dtype,
+                srs = SeriesConnec.read_json(data, dtype, pd_name, ntv_type)
+                """srs = pd.read_json(json.dumps(data), dtype=dtype,
                                    typ='series').rename(pd_name)
                 if ntv_type == 'date':
                     srs = pd.to_datetime(srs).dt.date
                 elif ntv_type == 'time':
-                    srs = pd.to_datetime(srs).dt.time
+                    srs = pd.to_datetime(srs).dt.time"""
             else:
                 srs = pd.Series(data, name=pd_name, dtype=dtype)
         
         if option['alias']:
             return srs.astype(astype.get(srs.dtype.name, srs.dtype.name))
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
+
+    @staticmethod 
+    def read_json(data, dtype, pd_name, ntv_type):
+        '''return a Series from a json value'''
+        srs = pd.read_json(json.dumps(data), dtype=dtype,
+                           typ='series').rename(pd_name)
+        if ntv_type == 'date':
+            srs = pd.to_datetime(srs).dt.date
+        elif ntv_type == 'time':
+            srs = pd.to_datetime(srs).dt.time
+        return srs
 
     @staticmethod
     def _val_nam_typ(ntv_codec, ntv_type, ntv_name, pd_convert, annotated):

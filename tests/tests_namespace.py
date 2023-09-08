@@ -9,7 +9,7 @@ The `NTV.test_namespace` module contains the unit tests (class unittest) for the
 """
 import unittest
 from namespace import Namespace, NtvTypeError, NtvType
-from observation import  Ilist
+#from observation import  Ilist
 
 class Test_Namespace(unittest.TestCase):
     
@@ -25,6 +25,18 @@ class Test_Namespace(unittest.TestCase):
         self.assertEqual(Nroot.is_parent(NBAN), 2)
         self.assertEqual(Nroot.is_child(NBAN), -1)
         
+    def test_child_parent_module(self):
+        Nroot = Namespace(module=True)
+        Nfr = Namespace('fr.', Nroot, module=True)
+        NBAN = Namespace('BAN.', Nfr, module=True)     
+        self.assertEqual(NBAN.long_name, 'fr.BAN.')
+        self.assertEqual(Nroot.long_name, '')
+        self.assertNotEqual(NBAN, Nfr)
+        self.assertEqual(NBAN.is_child(Nfr), 1)
+        self.assertEqual(NBAN.is_child(Nroot), 2)
+        self.assertEqual(Nroot.is_parent(NBAN), 2)
+        self.assertEqual(Nroot.is_child(NBAN), -1)
+
     def test_add(self):
         liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
                    'fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.', '$a.c.c.', 'fr.$a.b.']
