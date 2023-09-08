@@ -26,6 +26,15 @@ import json_ntv
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 
 def to_json(pd_array, **kwargs):
+    ''' convert pandas Series or Dataframe to JSON text or JSON Value.
+    
+    *parameters*
+    
+    - **pd_array** : Series or Dataframe to convert
+    - **text** : boolean (default: False) - if True return a JSON text else a JSON value
+    - **header** : boolean (default: True) - if True the JSON data is included as
+    value in a {key:value} object where key is ':field' for Series or ':tab' for DataFrame
+    ''' 
     option = {'text': False, 'header': True} | kwargs
     if isinstance(pd_array, pd.Series):
         jsn = SeriesConnec.to_json_ntv(pd_array)[0]
@@ -40,6 +49,13 @@ def to_json(pd_array, **kwargs):
     return jsn
     
 def read_json(js, **kwargs):
+    ''' convert JSON text or JSON Value to pandas Series or Dataframe.
+    
+    *parameters*
+    
+    - **js** : JSON text or JSON value to convert
+    
+    ''' 
     option = {'extkeys': None, 'decode_str': False, 'leng': None, 'alias': False,
               'annotated':False, 'series':False} | kwargs
     jso = json.loads(js) if isinstance(js, str) else js
@@ -298,24 +314,21 @@ class SeriesConnec(NtvConnector):
         '''
         option = {'index': None, 'leng': None, 'alias': False,
                   'annotated': False} | kwargs
-        types = SeriesConnec.types
+        types = SeriesConnec.types.set_index('ntv_type')
         astype = SeriesConnec.astype
 
         ntv_type = ntv_codec.type_str
         len_unique = option['leng'] if len(
             ntv_codec) == 1 and option['leng'] else 1
-        pd_convert = ntv_type in types['ntv_type'].values
+        pd_convert = ntv_type in types.index
 
-        dtype = 'object'
-        if pd_convert:
-            dtype = types.set_index('ntv_type').loc[ntv_type]['dtype']
+        dtype = types.loc[ntv_type]['dtype'] if pd_convert else 'object'
         ntv_obj, pd_name, name_type = SeriesConnec._val_nam_typ(
             ntv_codec, ntv_type, ntv_name, pd_convert, option['annotated'])
 
         if ntv_keys:
             if pd_convert and name_type != 'array':
-                categ = pd.read_json(json.dumps(ntv_obj),
-                                     dtype=dtype, typ='series')
+                categ = SeriesConnec.read_json(ntv_obj, dtype, ntv_type)
                 cat_type = categ.dtype.name
                 categories = categ.astype(astype.get(cat_type, cat_type))
             else:
@@ -327,13 +340,7 @@ class SeriesConnec(NtvConnector):
         else:
             data = ntv_obj * len_unique
             if pd_convert:
-                srs = SeriesConnec.read_json(data, dtype, pd_name, ntv_type)
-                """srs = pd.read_json(json.dumps(data), dtype=dtype,
-                                   typ='series').rename(pd_name)
-                if ntv_type == 'date':
-                    srs = pd.to_datetime(srs).dt.date
-                elif ntv_type == 'time':
-                    srs = pd.to_datetime(srs).dt.time"""
+                srs = SeriesConnec.read_json(data, dtype, ntv_type, pd_name)
             else:
                 srs = pd.Series(data, name=pd_name, dtype=dtype)
         
@@ -342,10 +349,12 @@ class SeriesConnec(NtvConnector):
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
 
     @staticmethod 
-    def read_json(data, dtype, pd_name, ntv_type):
+    def read_json(data, dtype, ntv_type, pd_name=None):
         '''return a Series from a json value'''
         srs = pd.read_json(json.dumps(data), dtype=dtype,
-                           typ='series').rename(pd_name)
+                           typ='series')
+        if not pd_name is None:
+            srs = srs.rename(pd_name)
         if ntv_type == 'date':
             srs = pd.to_datetime(srs).dt.date
         elif ntv_type == 'time':
@@ -370,10 +379,9 @@ class SeriesConnec(NtvConnector):
         - pd_name : string with the Serie name
         - name_type : string - pandas types to be converted in 'json' Ntv-type
         '''
-        types = SeriesConnec.types
+        types = SeriesConnec.types.set_index('ntv_type')
         if pd_convert:
-            name_type = types.set_index(
-                'ntv_type').loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
             pd_name = ntv_name + '::' + name_type if name_type else ntv_name
             pd_name = pd_name if pd_name else None
             if name_type == 'array':
@@ -382,12 +390,9 @@ class SeriesConnec(NtvConnector):
                 ntv_obj = ntv_codec.obj_value(simpleval=annotated, json_array=False,
                                               def_type=ntv_codec.type_str, fast=True)
                 ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
-        else:
-            name_type = ntv_type
-            pd_name = ntv_name+'::'+name_type
-            ntv_obj = ntv_codec.to_obj(
-                format='obj', simpleval=True, def_type=ntv_type)
-        return (ntv_obj, pd_name, name_type)
+            return (ntv_obj, pd_name, name_type)
+        ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True, def_type=ntv_type)
+        return (ntv_obj, ntv_name + '::' + ntv_type, ntv_type)
 
     @staticmethod
     def _ntv_type_val(name_type, srs):
@@ -398,24 +403,20 @@ class SeriesConnec(NtvConnector):
 
         - **name_type** : string - default NTV type to be used. If None, dtype is converted in NTV type,
         - **srs** : Series to be converted.'''
-        types = SeriesConnec.types
+        types = SeriesConnec.types.set_index('name_type')
         dtype = srs.dtype.name
         if not name_type:
-            types_none = types.set_index('name_type').loc[None]
+            types_none = types.loc[None]
             if dtype in types_none.dtype.values:
                 ntv_type = types_none.set_index('dtype').loc[dtype].ntv_type
             else:
                 ntv_type = 'json'
-            ntv_value = json.loads(srs.to_json(
-                orient='records', date_format='iso', default_handler=str))
-        else:
-            ntv_type = name_type
-            if ntv_type == 'date':
-                ntv_value = json.loads(srs.astype(str).to_json(
-                    orient='records', date_format='iso', default_handler=str))                
-            elif dtype == 'object':
-                ntv_value = srs.to_list()
-            else:
-                ntv_value = json.loads(srs.to_json(
-                    orient='records', date_format='iso', default_handler=str))
-        return (ntv_type, ntv_value)
+            return (ntv_type, json.loads(srs.to_json(orient='records',
+                        date_format='iso', default_handler=str)))
+        ntv_type = name_type
+        if ntv_type == 'date':
+            srs = srs.astype(str)
+        if dtype == 'object':
+            return (ntv_type, srs.to_list())
+        return (ntv_type, json.loads(srs.to_json(orient='records',
+                        date_format='iso', default_handler=str)))
