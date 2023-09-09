@@ -10,6 +10,7 @@ https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.p
 It contains :
 
 - methods `read_json` and `to_json` to convert JSON data and pandas entities
+
 - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
     - `DataFrameConnec`: 'tab' connector
     - `SeriesConnec`:    'field' connector
@@ -54,7 +55,14 @@ def read_json(js, **kwargs):
     *parameters*
     
     - **js** : JSON text or JSON value to convert
-    
+    - **extkeys**: list (default None) - keys to use if not present in ntv_value
+    - **decode_str**: boolean (default False) - if True, string values are converted
+    in object values
+    - **leng**: integer (default None) - leng of the Series (used with single codec value)
+    - **alias**: boolean (default False) - if True, convert dtype in alias dtype
+    - **annotated**: boolean (default False) - if True, ntv_codec names are ignored
+    - **series**: boolean (default False) - used only without header. If True 
+    JSON data is converted into Series else DataFrame
     ''' 
     option = {'extkeys': None, 'decode_str': False, 'leng': None, 'alias': False,
               'annotated':False, 'series':False} | kwargs
