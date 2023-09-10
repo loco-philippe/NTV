@@ -374,6 +374,11 @@ class NtvTree:
         return list(self.__class__(self._ntv))
 
     @property
+    def dic_nodes(self):
+        ''' return a dict of nodes according to the DFS preordering algorithm'''
+        return {node.ntv_name: node for node in self.__class__(self._ntv)}
+
+    @property
     def leaf_nodes(self):
         ''' return the list of leaf nodes according to the DFS preordering algorithm'''
         #return [node for node in self.__class__(self._ntv) if not isinstance(node, NtvList)]
