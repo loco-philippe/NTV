@@ -276,7 +276,7 @@ class MermaidConnec(NtvConnector):
             nodes = [node for node in NtvTree(
                 ntv) if not isinstance(node.val, list)]
             dic_node = {node: row for row, node in enumerate(nodes)}
-        link(ntv, None, node_link, option['row'], dic_node)
+        link(ntv, None, node_link, option['row'], dic_node, None)
         mermaid_json = {option['title'] + ':$flowchart': {
             'orientation': 'top-down',
             'node::': {node[0]: node[1] for node in node_link['nodes']},
@@ -303,7 +303,7 @@ class MermaidConnec(NtvConnector):
         return diag_txt
 
     @staticmethod
-    def _mermaid_node(ntv, def_typ_str, num, dic_node):
+    def _mermaid_node(ntv, def_typ_str, num, dic_node, ind):
         '''create and return a node'''
         j_name, j_sep, j_type = ntv.json_name(def_typ_str)
         name = ''
@@ -320,24 +320,25 @@ class MermaidConnec(NtvConnector):
                 name += '<i>' + ntv.val + '</i>\n'
             else:
                 name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [ntv.json_pointer(default='/'), ['rectangle', name[:-1]]]
+            return [ntv.json_pointer(index=True, default='/', item_idx=ind), ['rectangle', name[:-1]]]
         if not name:
             name = '<b>::</b>\n'
         name = name.replace('"', "'")
-        return [ntv.json_pointer(default='/'), ['roundedge', name[:-1]]]
+        return [ntv.json_pointer(index=True, default='/', item_idx=ind), ['roundedge', name[:-1]]]
 
     @staticmethod
-    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node):
-        '''add nodes and links from ntv in node_list and link_list '''
+    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node, ind):
+        '''add nodes and links from ntv in node_link '''
         num = str(len(node_link['nodes'])) if row else ''
         node_link['nodes'].append(MermaidConnec._mermaid_node(
-            ntv, def_typ_str, num, dic_node))
+            ntv, def_typ_str, num, dic_node, ind))
         if isinstance(ntv, NtvList):
-            for ntv_val in ntv:
+            for ind, ntv_val in enumerate(ntv):
                 MermaidConnec._mermaid_link(ntv_val, ntv.type_str,
-                                            node_link, row, dic_node)
-                node_link['links'].append([ntv.json_pointer(default='/'), 'normalarrow',
-                                           ntv_val.json_pointer(default='/')])
+                                            node_link, row, dic_node, ind)
+                node_link['links'].append(
+                    [ntv.json_pointer(index=True, default='/'), 'normalarrow',
+                     ntv_val.json_pointer(index=True, default='/', item_idx=ind)])
 
     @staticmethod
     def _flowchart(ntv):

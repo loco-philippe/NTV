@@ -310,18 +310,31 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-    def pointer(self, index=False):
-        '''return a list of pointer from root'''
+    def pointer(self, index=False, item_idx=None):
+        '''return a nested list of pointer from root
+        
+        *Parameters*
+
+        - **index**: Boolean (default False) - use index instead of name
+        - **item_idx**: Integer (default None) - index value for the pointer 
+        (useful with duplicate data)'''
         if not self.parent:
             return []        
-        return self.parent.pointer(index) + [self.parent.ntv_value.index(self) 
-            if index or (self.ntv_name == "" and self.parent.json_array)
-            else self.ntv_name]
+        idx = item_idx if item_idx else self.parent.ntv_value.index(self)
+        num = index or (self.ntv_name == "" and self.parent.json_array)
+        return self.parent.pointer(index) + [idx if num else self.ntv_name]
 
-    def json_pointer(self, index=False, default=''):
-        '''return a string of pointer'''
+    def json_pointer(self, index=False, default='', item_idx=None):
+        '''return a string of pointer
+                
+        *Parameters*
+
+        - **index**: Boolean (default False) - use index instead of name
+        - **default**: Str (default '') - default value if pointer is empty
+        - **item_idx**: Integer (default None) - index value for the pointer 
+        (useful with duplicate data)'''
         json_p = ''
-        pointer = self.pointer(index)
+        pointer = self.pointer(index, item_idx)
         #if pointer == ['']:
         if pointer == []:
             return default
@@ -487,6 +500,11 @@ class Ntv(ABC):
             return json_name + json_sep + json_type
         return [json_name, json_sep, json_type]
 
+    def to_single(self, name=None, typ=None, def_type=None, **kwargs):
+        return NtvSingle(self.obj_value(def_type=def_type, **kwargs),
+                         self.name if self.name else name,
+                         self.type_str if self.type_str else typ)
+                         
     def set_name(self, name='', nodes='simple'):
         '''set new names to the entity
 
@@ -559,7 +577,7 @@ class Ntv(ABC):
             return None
         return Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', **option)
 
-    def to_repr(self, nam=True, typ=True, val=True, maxi=10):
+    def to_repr(self, nam=True, typ=True, val=True, jsn=False, maxi=10):
         '''return a simple json representation of the Ntv entity.
 
         *Parameters*
@@ -567,6 +585,7 @@ class Ntv(ABC):
         - **nam**: Boolean(default True) - if true, the names are included
         - **typ**: Boolean(default True) - if true, the types are included
         - **val**: Boolean(default True) - if true, the values are included
+        - **jsn**: Boolean(default False) - if false, the 'json' type is not included
         - **maxi**: Integer (default 10) - number of values to include for NtvList
         entities. If maxi < 1 all the values are included.
         '''
@@ -575,7 +594,7 @@ class Ntv(ABC):
             ntv = ntv[0]
         if self.ntv_name and nam:
             ntv += '-' + self.ntv_name
-        if self.ntv_type and typ:
+        if self.ntv_type and typ and (jsn or self.ntv_type.long_name != 'json'):
             ntv += '-' + self.ntv_type.long_name
         clas = self.__class__.__name__
         clas_val = self.ntv_value.__class__.__name__
@@ -586,10 +605,11 @@ class Ntv(ABC):
                 ntv += json.dumps(self.ntv_value, cls=NtvJsonEncoder)
             return ntv
         if clas == 'NtvSingle' and clas_val == 'NtvSingle':
-            return {ntv:  self.ntv_value.to_repr(nam, typ, val)}
+            return {ntv:  self.ntv_value.to_repr(nam, typ, val, jsn, maxi)}
         if clas == 'NtvList':
             maxv = len(self.ntv_value) if maxi < 1 else maxi
-            return {ntv:  [ntvi.to_repr(nam, typ, val) for ntvi in self.ntv_value[:maxv]]}
+            return {ntv:  [ntvi.to_repr(nam, typ, val, jsn, maxi) 
+                           for ntvi in self.ntv_value[:maxv]]}
         raise NtvError('the ntv entity is not consistent')
 
     def to_name(self, default=''):

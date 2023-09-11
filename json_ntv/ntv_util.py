@@ -330,6 +330,7 @@ class NtvTree:
         ''' the parameter of the constructor is the Ntv entity'''
         self._ntv = ntv
         self._node = None
+        self._stack = []
 
     def __iter__(self):
         ''' iterator without initialization'''
@@ -341,13 +342,34 @@ class NtvTree:
             self._node = self._ntv
         elif len(self._node) == 0:
             raise StopIteration
-            #elif isinstance(self._node, NtvList):
         elif self._node.__class__.__name__ == 'NtvList':
             self._next_down()
         else:
             self._next_up()
         return self._node
 
+    def _next_down(self):
+        ''' find the next subchild node'''
+
+        self._node = self._node[0]
+        self._stack.append(0)
+
+    def _next_up(self):
+        ''' find the next sibling or ancestor node'''
+        parent = self._node.parent
+        if not parent or self._node == self._ntv:
+            raise StopIteration
+        ind = self._stack[-1]
+        if ind < len(parent) - 1:  # if ind is not the last
+            self._node = parent[ind + 1]
+            self._stack[-1] += 1
+        else:
+            if parent == self._ntv:
+                raise StopIteration
+            self._node = parent
+            self._stack.pop()
+            self._next_up()
+            
     @property
     def breadth(self):
         ''' return the number of leaves'''
@@ -376,7 +398,8 @@ class NtvTree:
     @property
     def dic_nodes(self):
         ''' return a dict of nodes according to the DFS preordering algorithm'''
-        return {node.ntv_name: node for node in self.__class__(self._ntv)}
+        return {node.ntv_name: node for node in self.__class__(self._ntv)
+                if node.ntv_name}
 
     @property
     def leaf_nodes(self):
@@ -391,24 +414,7 @@ class NtvTree:
         return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvList']
 
-    def _next_down(self):
-        ''' find the next subchild node'''
 
-        self._node = self._node[0]
-
-    def _next_up(self):
-        ''' find the next sibling or ancestor node'''
-        parent = self._node.parent
-        if not parent or self._node == self._ntv:
-            raise StopIteration
-        ind = parent.val.index(self._node)
-        if ind < len(parent) - 1:  # if ind is not the last
-            self._node = parent[ind + 1]
-        else:
-            if parent == self._ntv:
-                raise StopIteration
-            self._node = parent
-            self._next_up()
 
 
 class NtvJsonEncoder(json.JSONEncoder):

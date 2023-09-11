@@ -190,6 +190,7 @@ import configparser
 from pathlib import Path
 import json
 import requests
+from time import time
 
 import json_ntv
 
@@ -586,7 +587,6 @@ class Namespace():
 class NtvTypeError(Exception):
     ''' NtvType or Namespace Exception'''
     # pass
-
 
 nroot = Namespace(module=True)
 for root_typ in nroot.content['type'].keys():
