@@ -504,7 +504,23 @@ class Ntv(ABC):
         return NtvSingle(self.obj_value(def_type=def_type, **kwargs),
                          self.name if self.name else name,
                          self.type_str if self.type_str else typ)
-                         
+    
+    def to_list(self, def_type=None, def_sep=None, no_typ=False, decode_str=False,
+                 typ_auto=False, fast=False):
+        ntv = Ntv.from_obj(self.ntv_value, def_type, def_sep, no_typ, decode_str,
+                     typ_auto, fast)
+        if ntv.__class__.__name__ == 'NtvSingle':
+            return NtvList([self])
+        if self.ntv_name:
+            ntv.set_name(self.ntv_name)
+        return ntv
+
+    def to_simple(self):
+        for ntv in NtvTree(self).leaf_nodes:
+            ntv.set_type('json')           
+        for ntv in NtvTree(self).inner_nodes:
+            ntv.set_type()
+            
     def set_name(self, name='', nodes='simple'):
         '''set new names to the entity
 
@@ -545,7 +561,8 @@ class Ntv(ABC):
         - **typ**: string, NtvType, Namespace (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        self.ntv_type = str_type(typ, True)
+        #self.ntv_type = str_type(typ, True)
+        self.ntv_type = str_type(typ, self.__class__.__name__ == 'NtvSingle')
 
     def set_value(self, value=None):
         '''set new ntv_value of a single entity or of a list of entities included
@@ -1001,6 +1018,21 @@ class NtvList(Ntv):
         ''' Copy all the data '''
         return self.__class__(self)
 
+    def append(self, ntv):
+        
+        old_parent = ntv.parent
+        if old_parent:
+            del(old_parent[old_parent.ntv_value.index(ntv)])
+        self.ntv_value.append(ntv)
+        ntv.parent = self
+
+    def insert(self, idx, ntv):
+        old_parent = ntv.parent
+        if old_parent:
+            del(old_parent[old_parent.ntv_value.index(ntv)])
+        self.ntv_value.insert(idx, ntv)
+        ntv.parent = self      
+        
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
         if json_type or (len(self.ntv_value) == 1 and not self.json_array):
