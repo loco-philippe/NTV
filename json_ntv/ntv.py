@@ -310,6 +310,17 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
+    def childs(self, obj=False, nam=False, typ=False):
+        ''' return a list of child data'''
+        if isinstance(self, NtvSingle):
+            return []
+        if not (obj or nam or typ):
+            return self.val
+        if obj:
+            return [ntv.to_obj() for ntv in self.val]
+        return [(ntv.name if nam else '') + (' - ' if nam and typ else '') + 
+                (ntv.type_str if typ else '') for ntv in self.val]
+        
     def pointer(self, index=False, item_idx=None):
         '''return a nested list of pointer from root
         
