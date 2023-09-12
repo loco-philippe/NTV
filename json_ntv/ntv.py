@@ -80,7 +80,7 @@ class Ntv(ABC):
     - **is_json**:    True if ntv_value is a json_value
 
     *dynamic values (@property)*
-    - `json_array`
+    - `json_array` (abstract method)
     - `type_str`
     - `code_ntv`
     - `max_len`
@@ -101,30 +101,38 @@ class Ntv(ABC):
     - `to_json_ntv`
     - `to_obj_ntv`
 
-    *export (instance methods)*
+    *export - conversion (instance methods)*
     - `to_fast`
     - `to_name`
     - `to_obj`
     - `to_repr`
     - `to_mermaid`
     - `to_tuple`
+    - `to_ntvsingle`
+    - `to_ntvlist`
+    - `to_simple`
 
-    *instance methods*
+    *tree methods (instance methods)*
+    - `childs`
+    - `pointer`
+    - `json_pointer`
+    - `set_pointer`
+    - `replace`
+    - `append` (NtvList only)
+    - `insert` (NtvList only)
+
+    *other instance methods*
     - `from_value`
     - `json_name`
     - `set_name`
     - `set_type`
     - `set_value`
+    - `obj_value` (abstract method)
 
     *utility methods*
+    - `decode_json` *(staticmethod)*
     - `from_obj_name` *(staticmethod)*
     - `obj_ntv` *(staticmethod)*
-
-    *abstract method*
-    - `_obj_sep`
-    - `obj_value`
-    - `json_array` *(property)*
-
     '''
 
     def __init__(self, ntv_value, ntv_name, ntv_type):
@@ -294,24 +302,19 @@ class Ntv(ABC):
             return self[selec[0]][selec[1:]]
         return self.ntv_value[selec]
 
-    def __setitem__(self, ind, value):
-        ''' replace ntv_value item at the `ind` row with `value`'''
-        if ind < 0 or ind >= len(self):
-            raise NtvError("out of bounds")
-        self.ntv_value[ind] = value
-        if isinstance(value, (NtvSingle, NtvList)):
-            value.parent = self
-
-    def __delitem__(self, ind):
-        '''remove ntv_value item at the `ind` row'''
-        self.ntv_value.pop(ind)
-
     def __lt__(self, other):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
     def childs(self, obj=False, nam=False, typ=False):
-        ''' return a list of child data'''
+        ''' return a list of child Ntv entities or child data
+        
+        *parameters*
+        
+        - **obj**: boolean (default False) - return json-value
+        - **nam**: boolean (default False) - return name (with or without type) 
+        - **typ**: boolean (default False) - return type (with or without name) 
+        '''
         if isinstance(self, NtvSingle):
             return []
         if not (obj or nam or typ):
@@ -437,50 +440,6 @@ class Ntv(ABC):
         - **ntv_value**: list of ntv values'''
         return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
 
-    """def add_comment(self, text, val=None, name=None, typ=None):
-        '''add a comment (text) and a proposal for a new NTV entity defined by (val, name and typ)'''
-        parent = self.parent
-        if (val, typ, name) == (None, None, None):
-            comment = NtvSingle(text, ntv_type='$comment')
-        else:            
-            if self.type_str == '$history':
-                new_self = copy.copy(self.ntv_value[0])
-            else:
-                new_self = copy.copy(self)
-            new_self.ntv_value = new_self.ntv_value if val is None else val 
-            new_self.ntv_type = new_self.ntv_type if typ is None else NtvType(typ) 
-            new_self.ntv_name = new_self.ntv_name if name is None else name
-            comment = NtvSingle(new_self, text)
-        if self.type_str == '$history':
-            self.ntv_value.append(comment)
-            return
-        com_val = [self]
-        com_val.append(comment)
-        com_list = NtvList(com_val, ntv_type=NtvType('$history'), ntv_name=self.name)
-        parent[parent.ntv_value.index(self)] = com_list
-        return
-    
-    def reject_comment(self):
-        '''delete all the comments'''
-        parent = self.parent
-        if self.type_str != '$history':   
-            return
-        old_ntv = self.ntv_value[0]
-        parent[parent.ntv_value.index(self)] = old_ntv
-
-    def accept_comment(self):
-        ''' replace self by the last NTV proposal and delete all comments''' 
-        parent = self.parent
-        if self.type_str != '$history':   
-            return
-        for ntv in reversed(self.ntv_value):
-            if ntv.type_str != '$comment':
-                new_ntv = ntv
-                break
-        new_ntv = Ntv.obj(new_ntv.ntv_value) if new_ntv.type_str == 'ntv' else new_ntv
-        parent[parent.ntv_value.index(self)] = new_ntv"""
-
-        
     def from_value(self):
         '''return a Ntv entity from ntv_value'''
         if isinstance(self.ntv_value, list):
@@ -511,13 +470,36 @@ class Ntv(ABC):
             return json_name + json_sep + json_type
         return [json_name, json_sep, json_type]
 
-    def to_single(self, name=None, typ=None, def_type=None, **kwargs):
+    def to_ntvsingle(self, name=None, typ=None, def_type=None, **kwargs):
+        '''convert NtvList entity to NtvSingle entity
+
+        *Parameters*
+
+        - **ntv_name** : String (default None) - name of the NTV entity
+        - **ntv_type**: String (default None) - type of the entity
+        - **value**: value of the entity
+        - **fast**: boolean (default False) - Ntv is created with a list of json values
+        without control
+        '''
         return NtvSingle(self.obj_value(def_type=def_type, **kwargs),
                          self.name if self.name else name,
                          self.type_str if self.type_str else typ)
     
-    def to_list(self, def_type=None, def_sep=None, no_typ=False, decode_str=False,
+    def to_ntvlist(self, def_type=None, def_sep=None, no_typ=False, decode_str=False,
                  typ_auto=False, fast=False):
+        '''convert NtvSingle entity to NtvList entity
+
+        *Parameters*
+
+        - **value**: Ntv value to convert in an Ntv entity
+        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
+        - **def_type** : NtvType or Namespace (default None) - default type of the value
+        - **def_sep**: ':', '::' or None (default None) - default separator of the value
+        - **decode_str**: boolean (default False) - if True, string are loaded as json data
+        - **type_auto**: boolean (default False) - if True, default type for NtvList
+        is the ntv_type of the first Ntv in the ntv_value
+        - **fast** : boolean (default False) - if True, Ntv entity is created without conversion
+        '''
         ntv = Ntv.from_obj(self.ntv_value, def_type, def_sep, no_typ, decode_str,
                      typ_auto, fast)
         if ntv.__class__.__name__ == 'NtvSingle':
@@ -527,6 +509,7 @@ class Ntv(ABC):
         return ntv
 
     def to_simple(self):
+        '''convert self in a non semantic NTV (with ntv_type is 'json' or None')'''
         for ntv in NtvTree(self).leaf_nodes:
             ntv.set_type('json')           
         for ntv in NtvTree(self).inner_nodes:
@@ -575,17 +558,23 @@ class Ntv(ABC):
         #self.ntv_type = str_type(typ, True)
         self.ntv_type = str_type(typ, self.__class__.__name__ == 'NtvSingle')
 
-    def set_value(self, value=None):
+    def set_value(self, value=None, fast=False):
         '''set new ntv_value of a single entity or of a list of entities included
 
         *Parameters*
 
-        - **value**: list or single value'''
+        - **value**: list or single value
+        - **fast** : boolean (default False) - if True, value is not converted'''
+        if isinstance(self, NtvSingle):
+            self.ntv_value = NtvSingle(value, ntv_type=self.ntv_type, 
+                                       fast=fast).val
+            return
         if not isinstance(value, list):
             value = [value] * NtvTree(self).breadth
-        ntv_val = NtvList(value)
+        ntv_val = NtvList(value, fast=fast)
         for val, ntv in zip(ntv_val, NtvTree(self).leaf_nodes):
             ntv.ntv_value = val.val
+        return
 
     def to_mermaid(self, title='', disp=False, row=False, leaves=False):
         '''return a mermaid flowchart.
@@ -737,7 +726,8 @@ class Ntv(ABC):
         return {name: value} if name else value
 
     def to_json_ntv(self):
-        ''' create a copy where ntv-value is converted in json-value'''
+        ''' create a copy where ntv-value of the self-tree nodes is converted 
+        in json-value'''
         ntv = copy.copy(self)
         for leaf in ntv.tree.leaf_nodes:
             if isinstance(leaf.ntv_value, (NtvSingle, NtvList)):
@@ -751,7 +741,8 @@ class Ntv(ABC):
         return ntv
 
     def to_obj_ntv(self, **kwargs):
-        ''' create a copy where ntv-value is converted in object-value
+        ''' create a copy where ntv-value of the self-tree nodes is converted 
+        in object-value
 
         *Parameters*
 
@@ -789,6 +780,17 @@ class Ntv(ABC):
             maxv = len(self.ntv_value) if maxi < 1 else maxi
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxv]])
         raise NtvError('the ntv entity is not consistent')
+
+    def replace(self, ntv):
+        '''replace self by ntv in the tree'''
+        parent = self.parent
+        if parent:
+            idx = parent.ntv_value.index(self)
+            parent.insert(idx, ntv)
+            del(parent[idx+1])
+            self.parent=None
+        else:
+            self = ntv
 
     @property
     def tree(self):
@@ -1029,8 +1031,20 @@ class NtvList(Ntv):
         ''' Copy all the data '''
         return self.__class__(self)
 
+    def __setitem__(self, ind, value):
+        ''' replace ntv_value item at the `ind` row with `value`'''
+        if ind < 0 or ind >= len(self):
+            raise NtvError("out of bounds")
+        self.ntv_value[ind] = value
+        if isinstance(value, (NtvSingle, NtvList)):
+            value.parent = self
+
+    def __delitem__(self, ind):
+        '''remove ntv_value item at the `ind` row'''
+        self.ntv_value.pop(ind)
+
     def append(self, ntv):
-        
+        ''' add ntv at the end of the list of Ntv entities included'''
         old_parent = ntv.parent
         if old_parent:
             del(old_parent[old_parent.ntv_value.index(ntv)])
@@ -1038,6 +1052,7 @@ class NtvList(Ntv):
         ntv.parent = self
 
     def insert(self, idx, ntv):
+        ''' add ntv at the index idx of the list of Ntv entities included'''
         old_parent = ntv.parent
         if old_parent:
             del(old_parent[old_parent.ntv_value.index(ntv)])

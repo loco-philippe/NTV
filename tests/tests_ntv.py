@@ -619,7 +619,7 @@ class Test_Ntv_comment(unittest.TestCase):
 class Test_NtvTree(unittest.TestCase):
 
     def test_NtvTree(self):
-        ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 'b': 'ert'})
+        ntv = Ntv.obj({'a': [1, [2, 3, 4], [{'c': 5}, 6]], 'b': 'ert'})
         tree = NtvTree(ntv)
         self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
