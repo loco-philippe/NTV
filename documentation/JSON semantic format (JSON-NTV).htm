@@ -1,0 +1,3315 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html -->
+<html lang="en" class="Internet-Draft"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>JSON semantic format (JSON-NTV)</title>
+<meta content="Philippe THOMY" name="author">
+<meta content="
+       This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
+      JSON Data Interchange Format. These rules are based on an NTV (Named and Typed Values) data structure applicable
+      to any simple or complex data. The JSON-NTV format is its JSON translation. 
+    " name="description">
+<meta content="xml2rfc 3.18.0" name="generator">
+<meta content="JSON" name="keyword">
+<meta content="semantic" name="keyword">
+<meta content="data interchange format" name="keyword">
+<meta content="ABNF" name="keyword">
+<meta content="draft-thomy-json-ntv-01" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.18.0
+    Python 3.9.16
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.0
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.3
+    platformdirs 3.10.0
+    pycountry 22.3.5
+    PyYAML 6.0.1
+    requests 2.31.0
+    setuptools 58.1.0
+    six 1.16.0
+    wcwidth 0.2.6
+    weasyprint 59.0
+-->
+<link href="https://www.ietf.org/a/www/www6s/staging/draft-thomy-json-ntv-01.xml" rel="alternate" type="application/rfc+xml">
+<link href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans'); /* Sans-serif */
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif'); /* Serif (print) */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono'); /* Monospace */
+
+:root {
+  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+  --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+  --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+}
+
+@viewport {
+  zoom: 1.0;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-wrap: break-word;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+svg[font-family~="serif" i], svg [font-family~="serif" i] {
+  font-family: var(--font-serif);
+}
+svg[font-family~="sans-serif" i], svg [font-family~="sans-serif" i] {
+  font-family: var(--font-sans);
+}
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  display: table;
+  border: none;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.ulBare, li.ulBare {
+  margin-left: 0em !important;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef,
+.iref + a[href].internal {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre {
+  background-color: #f9f9f9;
+  font-family: var(--font-mono);
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+/* Fix PDF info block run off issue */
+@media print {
+  #identifiers dd {
+    float: none;
+  }
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: var(--font-sans);
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  .breakable pre {
+    break-inside: auto;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.sourcecode pre,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin-bottom: 0.25em;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0.5em;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .artwork > pre,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Avoid narrow tables forcing too narrow table captions, which may render badly */
+table {
+  min-width: 20em;
+}
+/* ol type a */
+ol.type-a { list-style-type: lower-alpha; }
+ol.type-A { list-style-type: upper-alpha; }
+ol.type-i { list-style-type: lower-roman; }
+ol.type-I { list-style-type: lower-roman; }
+/* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+table {
+  border: 1px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+}
+tr {
+  break-inside: avoid;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f8f8f8;
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+/* Add support for keepWithNext */
+.keepWithNext {
+  break-after: avoid-page;
+  break-after: avoid-page;
+}
+/* Add support for keepWithPrevious */
+.keepWithPrevious {
+  break-before: avoid-page;
+}
+/* Change the approach to avoiding breaks inside artwork etc. */
+figure, pre, table, .artwork, .sourcecode  {
+  break-before: auto;
+  break-after: auto;
+}
+/* Avoid breaks between <dt> and <dd> */
+dl {
+  break-before: auto;
+  break-inside: auto;
+}
+dt {
+  break-before: auto;
+  break-after: avoid-page;
+}
+dd {
+  break-before: avoid-page;
+  break-after: auto;
+  orphans: 3;
+  widows: 3
+}
+span.break, dd.break {
+  margin-bottom: 0;
+  min-height: 0;
+  break-before: auto;
+  break-inside: auto;
+  break-after: auto;
+}
+/* Undo break-before ToC */
+@media print {
+  #toc {
+    break-before: auto;
+  }
+}
+/* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+ul.compact p, .ulCompact p,
+ol.compact p, .olCompact p {
+ margin: 0;
+}
+/* But the list as a whole needs the extra space at the end */
+section ul.compact,
+section .ulCompact,
+section ol.compact,
+section .olCompact {
+  margin-bottom: 1em;                    /* same as p not within ul.compact etc. */
+}
+/* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+tt, code {
+  background-color: transparent;
+}
+p tt, p code, li tt, li code {
+  background-color: #f8f8f8;
+}
+/* Tweak the pre margin -- 0px doesn't come out well */
+pre {
+   margin-top: 0.5px;
+}
+/* Tweak the compact list text */
+ul.compact, .ulCompact,
+ol.compact, .olCompact,
+dl.compact, .dlCompact {
+  line-height: normal;
+}
+/* Don't add top margin for nested lists */
+li > ul, li > ol, li > dl,
+dd > ul, dd > ol, dd > dl,
+dl > dd > dl {
+  margin-top: initial;
+}
+/* Elements that should not be rendered on the same line as a <dt> */
+/* This should match the element list in writer.text.TextWriter.render_dl() */
+dd > div.artwork:first-child,
+dd > aside:first-child,
+dd > figure:first-child,
+dd > ol:first-child,
+dd > div.sourcecode:first-child,
+dd > table:first-child,
+dd > ul:first-child {
+  clear: left;
+}
+/* fix for weird browser behaviour when <dd/> is empty */
+dt+dd:empty::before{
+  content: "\00a0";
+}
+/* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+li > p {
+  margin-bottom: 0.5em
+}
+/* Don't let p margin spill out from inside list items */
+li > p:last-of-type:only-child {
+  margin-bottom: 0;
+}
+</style>
+<link href="./JSON semantic format (JSON-NTV)_files/rfc-local.css" rel="stylesheet" type="text/css">
+<script type="application/javascript">async function addMetadata(){try{const e=document.styleSheets[0].cssRules;for(let t=0;t<e.length;t++)if(/#identifiers/.exec(e[t].selectorText)){const a=e[t].cssText.replace("#identifiers","#external-updates");document.styleSheets[0].insertRule(a,document.styleSheets[0].cssRules.length)}}catch(e){console.log(e)}const e=document.getElementById("external-metadata");if(e)try{var t,a="",o=function(e){const t=document.getElementsByTagName("meta");for(let a=0;a<t.length;a++)if(t[a].getAttribute("name")===e)return t[a].getAttribute("content");return""}("rfc.number");if(o){t="https://www.rfc-editor.org/rfc/rfc"+o+".json";try{const e=await fetch(t);a=await e.json()}catch(e){t=document.URL.indexOf("html")>=0?document.URL.replace(/html$/,"json"):document.URL+".json";const o=await fetch(t);a=await o.json()}}if(!a)return;e.style.display="block";const s="",d="https://datatracker.ietf.org/doc",n="https://datatracker.ietf.org/ipr/search",c="https://www.rfc-editor.org/info",l=a.doc_id.toLowerCase(),i=a.doc_id.slice(0,3).toLowerCase(),f=a.doc_id.slice(3).replace(/^0+/,""),u={status:"Status",obsoletes:"Obsoletes",obsoleted_by:"Obsoleted By",updates:"Updates",updated_by:"Updated By",see_also:"See Also",errata_url:"Errata"};let h="<dl style='overflow:hidden' id='external-updates'>";["status","obsoletes","obsoleted_by","updates","updated_by","see_also","errata_url"].forEach(e=>{if("status"==e){a[e]=a[e].toLowerCase();var t=a[e].split(" "),o=t.length,w="",p=1;for(let e=0;e<o;e++)p<o?w=w+r(t[e])+" ":w+=r(t[e]),p++;a[e]=w}else if("obsoletes"==e||"obsoleted_by"==e||"updates"==e||"updated_by"==e){var g,m="",b=1;g=a[e].length;for(let t=0;t<g;t++)a[e][t]&&(a[e][t]=String(a[e][t]).toLowerCase(),m=b<g?m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>, ":m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>",b++);a[e]=m}else if("see_also"==e){var y,L="",C=1;y=a[e].length;for(let t=0;t<y;t++)if(a[e][t]){a[e][t]=String(a[e][t]);var _=a[e][t].slice(0,3),v=a[e][t].slice(3).replace(/^0+/,"");L=C<y?"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>, ":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>, ":"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>",C++}a[e]=L}else if("errata_url"==e){var R="";R=a[e]?R+"<a href='"+a[e]+"'>Errata exist</a> | <a href='"+d+"/"+l+"'>Datatracker</a>| <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>":"<a href='"+d+"/"+l+"'>Datatracker</a> | <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>",a[e]=R}""!=a[e]?"Errata"==u[e]?h+=`<dt>More info:</dt><dd>${a[e]}</dd>`:h+=`<dt>${u[e]}:</dt><dd>${a[e]}</dd>`:"Errata"==u[e]&&(h+=`<dt>More info:</dt><dd>${a[e]}</dd>`)}),h+="</dl>",e.innerHTML=h}catch(e){console.log(e)}else console.log("Could not locate metadata <div> element");function r(e){return e.charAt(0).toUpperCase()+e.slice(1)}}window.removeEventListener("load",addMetadata),window.addEventListener("load",addMetadata);</script>
+</head>
+<body class="xml2rfc">
+<script src="./JSON semantic format (JSON-NTV)_files/metadata.min.js.téléchargement"></script>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">JSON semantic format (JSON-NTV)</td>
+<td class="right">September 2023</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">THOMY</td>
+<td class="center">Expires 7 March 2024</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Internet Engineering Task Force</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-thomy-json-ntv-01</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2023-09" class="published">September 2023</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2024-03-07">7 March 2024</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">P. THOMY</div>
+<div class="org">Loco-labs</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">JSON semantic format (JSON-NTV)</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
+      JSON Data Interchange Format. These rules are based on an NTV (Named and Typed Values) data structure applicable
+      to any simple or complex data. The JSON-NTV format is its JSON translation.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 4 March 2024.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2023 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1" class="auto internal xref">1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1" class="auto internal xref">1.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-presentation" class="internal xref">Presentation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2" class="auto internal xref">1.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-key-design-features" class="internal xref">Key design features</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3" class="auto internal xref">1.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-requirements-language" class="internal xref">Requirements Language</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2" class="auto internal xref">2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-structure" class="internal xref">NTV structure</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1" class="auto internal xref">2.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-layers" class="internal xref">NTV layers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2" class="auto internal xref">2.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-entities" class="internal xref">NTV entities</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                    <p id="section-toc.1-1.2.2.2.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1" class="auto internal xref">2.2.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvsingle" class="internal xref">NTVsingle</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.2">
+                    <p id="section-toc.1-1.2.2.2.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2" class="auto internal xref">2.2.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvlist" class="internal xref">NTVlist</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3" class="auto internal xref">2.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvtype-and-namespace" class="internal xref">NTVtype and Namespace</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.1">
+                    <p id="section-toc.1-1.2.2.3.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.1" class="auto internal xref">2.3.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-namespace" class="internal xref">Namespace</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.2">
+                    <p id="section-toc.1-1.2.2.3.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2" class="auto internal xref">2.3.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvtype" class="internal xref">NTVtype</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.3">
+                    <p id="section-toc.1-1.2.2.3.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3" class="auto internal xref">2.3.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-representation" class="internal xref">Representation</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3" class="auto internal xref">3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntv" class="internal xref">JsonNTV</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1" class="auto internal xref">3.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntv-format" class="internal xref">JsonNTV format</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2" class="auto internal xref">3.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvname" class="internal xref">JsonNTVname</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3" class="auto internal xref">3.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvtype" class="internal xref">JsonNTVtype</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4" class="auto internal xref">3.4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvvalue" class="internal xref">JsonNTVvalue</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4" class="auto internal xref">4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-examples" class="internal xref">Examples</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5" class="auto internal xref">5</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-parsing-a-jsonvalue" class="internal xref">Parsing a JsonValue</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.1" class="auto internal xref">5.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-json-decoding" class="internal xref">JSON decoding</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.2" class="auto internal xref">5.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-entity-decoding" class="internal xref">NTV entity decoding</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.3" class="auto internal xref">5.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvvalue-decoding" class="internal xref">NTVvalue decoding</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4" class="auto internal xref">5.4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvtype-decoding" class="internal xref">NTVtype decoding</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6" class="auto internal xref">6</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-extended-structure" class="internal xref">NTV extended structure</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-7" class="auto internal xref">7</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-8" class="auto internal xref">8</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-9" class="auto internal xref">9</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-9.1" class="auto internal xref">9.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-9.2" class="auto internal xref">9.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A" class="auto internal xref">Appendix A</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-global-ntvtype-and-namespac" class="internal xref">Global NTVtype and Namespace</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.1" class="auto internal xref">A.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-json" class="internal xref">Json</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.2" class="auto internal xref">A.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-numbers" class="internal xref">Numbers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.3" class="auto internal xref">A.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-datation" class="internal xref">Datation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.4">
+                <p id="section-toc.1-1.10.2.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.4" class="auto internal xref">A.4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-period-and-duration" class="internal xref">Period and Duration</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.5">
+                <p id="section-toc.1-1.10.2.5.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5" class="auto internal xref">A.5</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-location" class="internal xref">Location</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.6">
+                <p id="section-toc.1-1.10.2.6.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.6" class="auto internal xref">A.6</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-structured-data" class="internal xref">Structured data</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.7">
+                <p id="section-toc.1-1.10.2.7.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7" class="auto internal xref">A.7</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-normalized-string" class="internal xref">Normalized String</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.8">
+                <p id="section-toc.1-1.10.2.8.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8" class="auto internal xref">A.8</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-namespace-2" class="internal xref">Namespace</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.9">
+                <p id="section-toc.1-1.10.2.9.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9" class="auto internal xref">A.9</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-custom-ntvtype-and-namespac" class="internal xref">Custom NTVtype and Namespace</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-B" class="auto internal xref">Appendix B</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-complete-abnf-notation" class="internal xref">Complete ABNF notation</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-C" class="auto internal xref"></a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-D" class="auto internal xref"></a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-contributors" class="internal xref">Contributors</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-E" class="auto internal xref"></a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1" class="section-number selfRef">1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<section id="section-1.1">
+        <h3 id="name-presentation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1" class="section-number selfRef">1.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-presentation" class="section-name selfRef">Presentation</a>
+        </h3>
+<p id="section-1.1-1">The semantic level of JSON or CSV shared data remains low. It is often limited to the type of data defined 
+        in those exchange formats (strings for CSV formats; numbers, strings, arrays and objects for JSON formats).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">JSON-NTV proposes to increase the semantic level of the JSON entities <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span> 
+        by adding two additional pieces of information to a JSON entity :<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-3.1">
+            <strong>name</strong>: interpretation of the JSON value in human language or detailed information or link to external information,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-3.2">
+            <strong>type</strong>: interpretation of the JSON value in a data standard (eg. GeoJSON, datetime), in a data catalog or 
+          in a software language.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-3.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-1.1-4">The NTV entity is thus a triplet with a mandatory element (value) and two additional elements (name, type).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.1-5.1">
+            <p id="section-1.1-5.1.1"><em>For example, Paris location can be represented by : </em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-5.1.1" class="pilcrow">¶</a></p>
+<ul class="compact normal">
+<li class="compact normal" id="section-1.1-5.1.2.1">
+                <em>a name : "paris",</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-5.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="compact normal" id="section-1.1-5.1.2.2">
+                <em>a type : geoJSON Point coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>,</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-5.1.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="compact normal" id="section-1.1-5.1.2.3">
+                <em>a value : [2.3522, 48.8566]</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-5.1.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-1.1-6">The easiest way to add that information into a JSON value is to use a JSON object with a single member. 
+        The first term is the additional elements using the syntax JSON-ND <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#JSON-ND" class="cite xref">JSON-ND</a>]</span>. 
+        The second term is the JSON value.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.1-7.1">
+            <p id="section-1.1-7.1.1"><em>The JSON value of the previous example is:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-7.1.1" class="pilcrow">¶</a></p>
+<ul class="compact normal ulEmpty">
+<li class="compact normal ulEmpty" id="section-1.1-7.1.2.1">
+                <em>{ "paris:point" : [2.3522, 48.8566] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-7.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-1.1-8">With this approach, two NTV entities are defined :<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-9.1">
+            <strong>a primitive entity</strong> which is not composed of any other entity,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-9.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-9.2">
+            <strong>a structured entity</strong> which is an ordered sequence of NTV entities.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-9.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-1.1-10">
+        as well as two JSON formats depending on the presence of the additional elements :<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-11.1">
+            <strong>simple format</strong> when name and type are not present<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-11.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.2">
+            <strong>named format</strong> when name or type is present<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-11.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.1-12.1">
+            <p id="section-1.1-12.1.1"><em>Example (entity composed of two other primitive entities): </em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-12.1.1" class="pilcrow">¶</a></p>
+<ul class="compact normal ulEmpty">
+<li class="compact normal ulEmpty" id="section-1.1-12.1.2.1">
+                <em>{ "cities::point": [[2.3522, 48.8566], [4.8357, 45.7640]] }      simple format for primitive entities</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-12.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="compact normal ulEmpty" id="section-1.1-12.1.2.2">
+                <em>{"cities::point": {"paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640]}}      named format for primitive entities</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-12.1.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-1.1-13">A JSON-NTV generator produces a JSON value from a NTV entity and vice versa a JSON-NTV parser transforms a 
+        JSON value into a NTV entity.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-13" class="pilcrow">¶</a></p>
+<p id="section-1.1-14">The conversion between NTV entity and native entity is outside the scope of this note.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.1-14" class="pilcrow">¶</a></p>
+</section>
+<section id="section-1.2">
+        <h3 id="name-key-design-features">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2" class="section-number selfRef">1.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-key-design-features" class="section-name selfRef">Key design features</a>
+        </h3>
+<p id="section-1.2-1">The format is focused on simplicity, lightness and web usage.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">The key features of this format are the following:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.1">
+            <p id="section-1.2-3.1.1"><strong>JSON as the base format</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.1.2.1">JSON is simple and readable as simple text<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.1.2.2">JSON supports rich structure including nesting and basic types<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.1.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.1.2.3">JSON is web-native and very widely used and supported<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.1.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.1.2.4">JSON format has binary representation (eg. CBOR format)<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.1.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.2">
+            <p id="section-1.2-3.2.1"><strong>high semantic level of data</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.2.2.1">wide variety of data typing<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.2.2.2">tree-like and customisable data typing<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.2.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.3">
+            <p id="section-1.2-3.3.1"><strong>compatibility with existing formats</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.3.2.1">All JSON data is a JsonNTV data<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.3.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.3.2.2">All NTVtypes are standard types<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.3.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.4">
+            <p id="section-1.2-3.4.1"><strong>compatibility with any type of platform</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.4.2.1">types and structures are independent of software and hardware platforms<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.4.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.4.2.2">the NTV concept is applicable to all types of "jsonable" data<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.4.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.5">
+            <p id="section-1.2-3.5.1"><strong>reversibility</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.5.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.5.2.1">the NTV entity coming from a JSON value is identical to the NTV entity from which the JSON value comes<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.5.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.5.2.2">the JSON representation of an NTV entity is the same as the JSON value used to construct the NTV entity<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.5.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.6">
+            <p id="section-1.2-3.6.1"><strong>tree structure</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.6.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.6.2.1">all NTV entities are trees<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.6.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.2-3.6.2.2">tree properties are applicable to NTV entities<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.2-3.6.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+<section id="section-1.3">
+        <h3 id="name-requirements-language">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3" class="section-number selfRef">1.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-requirements-language" class="section-name selfRef">Requirements Language</a>
+        </h3>
+<p id="section-1.3-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
+          RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC2119" class="cite xref">RFC2119</a>]</span>
+          <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they appear in all capitals, as shown here.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-1" class="pilcrow">¶</a></p>
+<p id="section-1.3-2">This document also uses the following terms:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlNewline" id="section-1.3-3">
+          <dt id="section-1.3-3.1"><strong>JsonType, JsonText, JsonName, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber,
+           JsonString, JsonFalse, JsonNull, JsonTrue:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.2">These terms are defined as type, text, name, value, object, member, element, array, number, string, false, 
+          null, true in the JSON grammar.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.3"><strong>JsonPrimitive:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.4">A JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.4" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.5"><strong>JsonUnnamed:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.6">A JsonObject without a single member.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.6" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.7"><strong>JsonNamed:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.8">A JsonObject with a single member.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.8" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.9"><strong>NTVsingle, NTVlist:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.10">
+            <p id="section-1.3-3.10.1">NTVlist and NTVsingle entities can be abbreviated as:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.10.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.3-3.10.2.1">NVsingle : entity with default NTVtype "json",<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.10.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.3-3.10.2.2">NVlist : entity without NTVtype,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.10.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.3-3.10.2.3">TVsingle, TVlist : entity without NTVname,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.10.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-1.3-3.10.2.4">Vsingle, Vlist : NVsingle or NVlist without NTVname.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-1.3-3.10.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</section>
+<section id="section-2">
+      <h2 id="name-ntv-structure">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2" class="section-number selfRef">2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-structure" class="section-name selfRef">NTV structure</a>
+      </h2>
+<section id="section-2.1">
+        <h3 id="name-ntv-layers">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1" class="section-number selfRef">2.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-layers" class="section-name selfRef">NTV layers</a>
+        </h3>
+<p id="section-2.1-1">NTV and JsonNTV structures are defined as shown in <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#NTVlayers-svg" class="auto internal xref">Figure 1</a>:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-2.1">NTV is a data triplet (NTVname, NTVtype, NTVvalue) that contains all the information needed to build the native entity.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.1-2.2">JsonNTV is the JsonValue of the NTV entity. JsonNTV is used to build an interchangeable JsonText<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-2.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<span id="name-ntv-layers-2"></span><div id="NTVlayers-svg">
+<figure id="figure-1">
+          <div id="section-2.1-3.1">
+            <div class="alignLeft art-svg artwork" id="section-2.1-3.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" viewBox="0 0 500 100">
+                <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+            <g class="layer">
+                  <title>Layer 1</title>
+                  <rect fill="#ffffff" height="35.36" id="svg_1" stroke="#000000" transform="matrix(1 0 0 1 0 0)" width="63.29" x="32.53" y="30"></rect>
+                  <text fill="#000000" font-size="10" id="svg_2" stroke="#000000" stroke-width="0" text-anchor="middle" x="66.88" xml:space="preserve" y="50.07">JsonText</text>
+                  <rect fill="#ffffff" height="35.36" id="svg_4" stroke="#000000" transform="matrix(1 0 0 1 0 0)" width="63.79" x="157.13" y="29.98"></rect>
+                  <text fill="#000000" font-size="10" id="svg_3" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(0.98567 0 0 1 0.245089 0)" x="191.49" xml:space="preserve" y="50.05">JsonNTV</text>
+                  <rect fill="#ffffff" height="35.36" id="svg_8" stroke="#000000" width="63.29" x="401.77" y="30.12"></rect>
+                  <text fill="#000000" font-size="10" id="svg_7" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="434.13" xml:space="preserve" y="49.69">native entity</text>
+                  <path d="m96.43,34.64l59.83,0" fill="#ffffff" id="svg_9" stroke="#000000"></path>
+                  <path d="m146,32.14l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_11" stroke="#000000"></path>
+                  <rect fill="#ffffff" height="35.36" id="svg_6" stroke="#000000" transform="matrix(1 0 0 1 0 0)" width="63.79" x="277.27" y="29.9"></rect>
+                  <text fill="#000000" font-size="10" id="svg_5" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="311.63" xml:space="preserve" y="49.97">NTV triplet</text>
+                  <path d="m341.92,35.9l59.5,0" fill="#ffffff" id="svg_12" stroke="#000000"></path>
+                  <path d="m391.16,33.4l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_10" stroke="#000000"></path>
+                  <path d="m221.58,35.57l53.83,0" fill="#ffffff" id="svg_14" stroke="#000000"></path>
+                  <path d="m265.16,33.07l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_13" stroke="#000000"></path>
+                  <path d="m96.73,57.76l59.83,0" fill="#ffffff" id="svg_17" stroke="#000000"></path>
+                  <path d="m342.22,59.02l59.5,0" fill="#ffffff" id="svg_16" stroke="#000000"></path>
+                  <path d="m221.88,58.69l53.83,0" fill="#ffffff" id="svg_15" stroke="#000000"></path>
+                  <path d="m342.26,56.38l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_18" stroke="#000000" transform="rotate(178.552 347.222 59.055)"></path>
+                  <path d="m221.96,55.84l-0.22,5.36l10.36,-2.51c-3.38,-0.95 -6.76,-1.9 -10.14,-2.85z" fill="#000000" id="svg_19" stroke="#000000" transform="matrix(1 0 0 1 0 0) rotate(178.552 226.924 58.5164)"></path>
+                  <path d="m106.62,60.07l0.08,-5.36l-10.29,2.77c3.4,0.86 6.81,1.73 10.21,2.59z" fill="#000000" id="svg_20" stroke="#000000"></path>
+                  <text fill="#000000" font-size="8" id="svg_24" stroke="#000000" stroke-width="0" text-anchor="middle" x="121.5" xml:space="preserve" y="31.72">JSON load</text>
+                  <text fill="#000000" font-size="8" id="svg_25" stroke="#000000" stroke-width="0" text-anchor="middle" x="127.78" xml:space="preserve" y="66.39">JSON dump</text>
+                  <text fill="#000000" font-size="8" id="svg_27" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="245.3" xml:space="preserve" y="32.39">NTV load</text>
+                  <text fill="#000000" font-size="8" id="svg_26" stroke="#000000" stroke-width="0" text-anchor="middle" x="251.58" xml:space="preserve" y="67.05">NTV dump</text>
+                  <text fill="#000000" font-size="8" id="svg_29" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="368.64" xml:space="preserve" y="33.06">to_obj</text>
+                  <text fill="#000000" font-size="8" id="svg_28" stroke="#000000" stroke-width="0" text-anchor="middle" x="374.91" xml:space="preserve" y="67.72">from_obj</text>
+                </g>
+              </svg><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-3.1.1" class="pilcrow">¶</a>
+</div>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-1" class="selfRef">Figure 1</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-layers-2" class="selfRef">NTV layers</a>
+          </figcaption></figure>
+</div>
+<p id="section-2.1-4"><em>Example:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-5.1">
+            <p id="section-2.1-5.1.1"><em>Native layer</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.1-5.1.2.1">new_year_2022 = datetime.date(2022, 01, 01) <em>is a Python variable "new_year_2022" corresponding to a datetime object</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-2.1-5.2">
+            <p id="section-2.1-5.2.1"><em>NTV layer</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.1-5.2.2.1">("new_year_2022", "date", "2022-01-01") <em>is a triplet</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.2.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-2.1-5.3">
+            <p id="section-2.1-5.3.1"><em>JsonNTV layer</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.3.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.1-5.3.2.1">{ "new_year_2022:date" : "2022-01-01" } <em>is a JsonValue</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.3.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-2.1-5.4">
+            <p id="section-2.1-5.4.1"><em>JsonText layer</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.4.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.1-5.4.2.1">'{"new_year_2022:date":"2022-01-01"}' <em>is a JsonString</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.1-5.4.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+<section id="section-2.2">
+        <h3 id="name-ntv-entities">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2" class="section-number selfRef">2.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-entities" class="section-name selfRef">NTV entities</a>
+        </h3>
+<p id="section-2.2-1">Two categories of entities (one primitive and one structured) are defined:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-2.1">
+            <strong>NTVsingle</strong> for the primitive entity,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-2.2">
+            <strong>NTVlist</strong> for an ordered sequence of NTV entities<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2-2.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-2.2-3">An NTV entity is therefore a tree where the leaves nodes are the NTVsingle entities and where the inner nodes are the NTVlist entities<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2-3" class="pilcrow">¶</a></p>
+<section id="section-2.2.1">
+          <h4 id="name-ntvsingle">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1" class="section-number selfRef">2.2.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvsingle" class="section-name selfRef">NTVsingle</a>
+          </h4>
+<p id="section-2.2.1-1">The data triplet of NTVsingle entities is composed by:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2.1-2.1">
+              <strong>NTVsingleValue</strong>: This NTVvalue is the JSON representation (JsonValue) of the main content of the NTV entity,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1-2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.2.1-2.2">
+              <strong>NTVsingleType</strong>: This NTVtype defines the type of entity and the conversion rules between the native entity 
+            and the NTV entity. The default NTVtype (defaultNTVtype) is the "json" NTVtype.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1-2.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.2.1-2.3">
+              <strong>NTVname</strong>: The NTVname is an additional textual information (JsonString)<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1-2.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-2.2.1-3"><strong>In other words, any entity that has on the one hand a function of encoding it into a JsonValue and 
+          on the other hand a function of creating from a JsonValue can be taken into account.
+          This approach is very general because the majority of computer objects are defined by a list of parameters 
+          (e.g. *args in python) and/or a list of key/values (e.g. **kwargs in python) 
+          which simply translate into a JsonArray or a JsonObject.</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.2.1-4">The consistency between NTVsingleValue and NTVsingleType is outside the scope of this note.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.1-4" class="pilcrow">¶</a></p>
+</section>
+<section id="section-2.2.2">
+          <h4 id="name-ntvlist">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2" class="section-number selfRef">2.2.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvlist" class="section-name selfRef">NTVlist</a>
+          </h4>
+<p id="section-2.2.2-1">The data triplet of NTVlist entities is composed by:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2.2-2.1">
+              <strong>NTVlistValue</strong>: This NTVvalue is an ordered sequence of included NTV entities.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.2.2-2.2">
+              <strong>NTVlistType</strong>: This NTVtype is a Namespace or a NTVtype to apply to the NTV entities included. 
+            This NTVlistType avoids including a NTVtype (if NTVtype) or reduces the length (if Namespace) in the JSON representation 
+            (JsonNTV) of the included NTV entities. The default NTVtype (defaultNTVtype) is "None".<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-2.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.2.2-2.3">
+              <strong>NTVname</strong>: The NTVname is an additional textual information (JsonString)<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-2.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-2.2.2-3"><em>Example of equivalent JSON representations:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.2.2-4.1">
+              <p id="section-2.2.2-4.1.1"><em>where NTVlistType is None for the global NTVlist</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-4.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.2.2-4.1.2.1">
+                  <em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] </em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-4.1.2.1" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+            <li class="normal ulEmpty" id="section-2.2.2-4.2">
+              <p id="section-2.2.2-4.2.1"><em>where NTVlistType is "point" for the global NTVlist</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-4.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.2.2-4.2.2.1">
+                  <em>{ "::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-4.2.2.1" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+          </ul>
+<p id="section-2.2.2-5"><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1.1, 2.2] ] } }, 
+          the parsers deduce that the first NTVvalue has a  "dat" NTVtype and the second a "point" NTVtype.</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.2.2-5" class="pilcrow">¶</a></p>
+</section>
+</section>
+<section id="section-2.3">
+        <h3 id="name-ntvtype-and-namespace">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3" class="section-number selfRef">2.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvtype-and-namespace" class="section-name selfRef">NTVtype and Namespace</a>
+        </h3>
+<p id="section-2.3-1"> NTVtype is defined in a nested structure called Namespace.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate 
+        all the shared data structures within the same tree of types.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3-2" class="pilcrow">¶</a></p>
+<section id="section-2.3.1">
+          <h4 id="name-namespace">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.1" class="section-number selfRef">2.3.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-namespace" class="section-name selfRef">Namespace</a>
+          </h4>
+<p id="section-2.3.1-1">A Namespace is defined by a name (NamespaceName) and a Namespace parent (NamespaceParent). 
+          The NamespaceName is unique in the NamespaceParent.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.3.1-2">Root node in the Namespace tree is the GlobalNamespace.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.1-2" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.3.1-3.1">
+              <span class="break"></span><dl class="olPercent" id="section-2.3.1-3.1.1"> 
+            <dt>REQ1:</dt>
+<dd id="section-2.3.1-3.1.1.1">NamespaceParent of GlobalNamespace is None.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.1-3.1.1.1" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+</dl>
+</li>
+          </ul>
+</section>
+<section id="section-2.3.2">
+          <h4 id="name-ntvtype">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2" class="section-number selfRef">2.3.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvtype" class="section-name selfRef">NTVtype</a>
+          </h4>
+<p id="section-2.3.2-1">A NTVtype is defined by a name (NTVtypeName) and a Namespace parent (NamespaceParent). 
+          The NTVtype is unique in the NamespaceParent.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.3.2-2">NTVtype and the rules to encode or decode NTVvalues MUST be understood by data producers and data consumers. 
+          So NTVtype and rules associated have to be defined in a specification shared by a large community.
+          On the other hand, it must be possible for everyone to share data according to their own data structure.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.3.2-3">There are therefore two categories of NTVtype:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.3.2-4.1">custom NTVtype (and Namespace) which can be created by anyone without control,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-4.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.3.2-4.2">shared NTVtype (and Namespace) that are defined in a single, shared repository. 
+            Each 'shared' Namespace or NTVtype is uniquely managed.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-4.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-2.3.2-5">For shared NTVtype, three sub-categories are defined (None, Simple, Generic).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.3.2-6.1">The "None" NTVtype is used with NTVlist as defaultNTVtype.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-6.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.3.2-6.2">Simple NTVtype is associated to conversion rules between a native entity and a NTV entity.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-6.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-2.3.2-6.3">Generic NTVtype is equivalent to a set of Simple NTVtype. 
+            This indicates that parsers use associated simple NTVtype to decode the JsonNTVvalue.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-6.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-2.3.2-7"><em>Example:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.3.2-8.1">
+              <em>"dat" is the generic NTVtypeName for "datetime" and "timeposix"</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-8.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal ulEmpty" id="section-2.3.2-8.2">
+              <em> If a JSONvalue is { "::dat" : ["2022-01-28T18-23-54", 123456.78] }, the parser deduces that the first entity has a "datetime" 
+            NTVtypeName and the second a "timeposix" NTVtypeName.</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.2-8.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+<section id="section-2.3.3">
+          <h4 id="name-representation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3" class="section-number selfRef">2.3.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-representation" class="section-name selfRef">Representation</a>
+          </h4>
+<p id="section-2.3.3-1">A Namespace is defined by a string followed by a point (NamespaceName).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3.3-2">A NTVtype is defined by a string (NTVtypeName).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.3.3-3">The representation of a Namespace (NamespaceLongName) is composed by all the nested NamespaceName.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.3.3-4">The representation of a NTVtype (NTVtypeLongName) is composed by the NamespaceLongName and the NTVtypeName.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-2.3.3-5">The NTVtypeLongName is defined in  <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#NTVtypeLongName-abnf" class="auto internal xref">Figure 2</a>, 
+          which uses ABNF from <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC5234" class="cite xref">RFC5234</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-5" class="pilcrow">¶</a></p>
+<span id="name-jsonntvtype-abnf"></span><div id="NTVtypeLongName-abnf">
+<figure id="figure-2">
+            <div class="lang-abnf sourcecode" id="section-2.3.3-6.1">
+<pre>
+; representation of NtvType and Namespace (LongName)
+
+NTVtypeLongName     = NamespaceParentLongName NTVtypeName
+
+NamespaceLongName   = NamespaceParentLongName NamespaceName
+NamespaceParentLongName = NamespaceLongName
+
+NamespaceName   = [ ["$"] JsonString "." ]      ; REQ2 REQ3
+NTVtypeName     = ["$"] JsonString              ; REQ3
+
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-2" class="selfRef">Figure 2</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvtype-abnf" class="selfRef">JsonNTVtype - ABNF</a>
+            </figcaption></figure>
+</div>
+<p id="section-2.3.3-7">The corresponding rules are as follows:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.3.3-8.1">
+              <span class="break"></span><dl class="olPercent" id="section-2.3.3-8.1.1">
+            <dt>REQ2:</dt>
+<dd id="section-2.3.3-8.1.1.1">NamespaceName and NamespaceLongName of GlobalNamespace are empty.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-8.1.1.1" class="pilcrow">¶</a>
+</dd>
+                <dd class="break"></dd>
+<dt>REQ3:</dt>
+<dd id="section-2.3.3-8.1.1.2">NTVtype (or Namespace) has 'custom' category if NTVtypeName (or NamespaceName) begins with '$' or NTVtypeParent has 'custom' category<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-8.1.1.2" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+</dl>
+</li>
+          </ul>
+<p id="section-2.3.3-9"><em>Example for a representation of an NTVtype defined in two nested Namespace in the global Namespace:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-9" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.3.3-10.1">
+              <em>"ns1.ns2.type" </em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-10.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal ulEmpty" id="section-2.3.3-10.2">
+              <p id="section-2.3.3-10.2.1"><em> where:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-10.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.3.3-10.2.2.1">
+                  <em>"ns1." is a NamespaceName of a Namespace defined in the global Namespace,</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-10.2.2.1" class="pilcrow">¶</a>
+</li>
+                <li class="normal ulEmpty" id="section-2.3.3-10.2.2.2">
+                  <em>"ns2." is a NamespaceName of a Namespace defined in the "ns1" Namespace,</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-10.2.2.2" class="pilcrow">¶</a>
+</li>
+                <li class="normal ulEmpty" id="section-2.3.3-10.2.2.3">
+                  <em>"type" is a NTVtypeName of a NTVtype defined in the "ns2" Namespace</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-10.2.2.3" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+          </ul>
+<p id="section-2.3.3-11"><em>Example of custom categories:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-11" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2.3.3-12.1">
+              <p id="section-2.3.3-12.1.1"><em>If "fr." is the name of a Namespace attached to the global Namespace and containing the Namespace 'BAN' and the NTVtype 'dep', then:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-12.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.3.3-12.1.2.1">
+                  <em>"fr.dep" is a name of a shared NTVtype,</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-12.1.2.1" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-2.3.3-12.1.2.2">
+                  <em>"fr.$test" is a name of a custom NTVtype,</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-12.1.2.2" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-2.3.3-12.1.2.3">
+                  <em>"fr.$example.one" is a name of a custom NTVtype</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-12.1.2.3" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-2.3.3-12.1.2.4">
+                  <em>"fr.BAN.$test" is a name of a custom NTVtype</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-2.3.3-12.1.2.4" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+          </ul>
+</section>
+</section>
+</section>
+<section id="section-3">
+      <h2 id="name-jsonntv">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3" class="section-number selfRef">3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntv" class="section-name selfRef">JsonNTV</a>
+      </h2>
+<section id="section-3.1">
+        <h3 id="name-jsonntv-format">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1" class="section-number selfRef">3.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntv-format" class="section-name selfRef">JsonNTV format</a>
+        </h3>
+<p id="section-3.1-1">The JsonNTV format is the JSON representation of an NTV entity (JsonValue) as defined in 
+        <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#JsonNTV-abnf" class="auto internal xref">Figure 3</a>, 
+        which uses ABNF from <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC5234" class="cite xref">RFC5234</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-1" class="pilcrow">¶</a></p>
+<span id="name-jsonntv-abnf"></span><div id="JsonNTV-abnf">
+<figure id="figure-3">
+          <div class="lang-abnf sourcecode" id="section-3.1-2.1">
+<pre>
+; JSON representation of NTV entities (JsonNTV)
+
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
+
+JsonNTVnamed   = beginObject JsonNTVMember endObject
+JsonNTVsimple  = JsonNTVvalue
+
+JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
+
+; Extract of JSON grammar used in this document
+
+beginArray    = ws "[" ws
+beginObject   = ws "{" ws
+endArray      = ws "]" ws
+endObject     = ws "}" ws
+nSep          = ws ":" ws
+vSep          = ws "," ws
+ws = *( %x20 / %x09 / %x0A / %x0D )
+
+JsonValue  = JsonValue   ; indicates that rule is defined in RFC8259
+JsonString = JsonString  ; indicates that rule is defined in RFC8259
+
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-3" class="selfRef">Figure 3</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntv-abnf" class="selfRef">JsonNTV - ABNF</a>
+          </figcaption></figure>
+</div>
+<p id="section-3.1-3">The JsonNTV format is built with the NTVname, NTVvalue and the JsonNTVtype.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.1-4">Two JsonNTV formats are defined:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-5.1">
+            <p id="section-3.1-5.1.1">named format (if NTVname or JsonType is not an empty string):<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-5.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.1-5.1.2.1">
+                <em>{ JsonNTVname : JsonNTVvalue }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-5.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-3.1-5.2">
+            <p id="section-3.1-5.2.1">simple format (if NTVname and JsonType are empty string):<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-5.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.1-5.2.2.1">
+                <em>JsonNTVvalue</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-5.2.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.1-6">The corresponding rules are as follows:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.1-7.1">
+            <span class="break"></span><dl class="olPercent" id="section-3.1-7.1.1">
+          <dt>REQ4:</dt>
+<dd id="section-3.1-7.1.1.1">If JsonNTVname is empty, simple format is used<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-7.1.1.1" class="pilcrow">¶</a>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+<p id="section-3.1-8">This format allows full compatibility with existing JSON structures:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-9.1">a JsonNumber, JsonString, JsonNull or JsonBoolean is the representation of a Vsingle entity,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-9.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-9.2">a JsonObject with a single member is the representation of an NVsingle or TVsingle entity,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-9.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-9.3">a JsonArray is the representation of a Vlist entity,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-9.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-9.4">a JsonObject without a single member is the representation of a Vlist entity composed with unnamed entities.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-9.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.1-10"><em>Note :</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-11.1">
+            <em>JsonNTV : 21, { ":" : 21 } and { ":json" : 21 } represent the same Vsingle entity,</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.1-11.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="section-3.2">
+        <h3 id="name-jsonntvname">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2" class="section-number selfRef">3.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvname" class="section-name selfRef">JsonNTVname</a>
+        </h3>
+<p id="section-3.2-1">JsonNTVname is the concatenation of NTVname and JsonSepType.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">JsonSepType is composed with the separator singleSep or listSep and the JsonNTVtype.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">JsonNTVname and JsonSepType are defined in <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#JsonNTVname-abnf" class="auto internal xref">Figure 4</a>, 
+        which uses ABNF from <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC5234" class="cite xref">RFC5234</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-3" class="pilcrow">¶</a></p>
+<span id="name-jsonntvname-abnf"></span><div id="JsonNTVname-abnf">
+<figure id="figure-4">
+          <div class="lang-abnf sourcecode" id="section-3.2-4.1">
+<pre>
+; JSON representation of NTVname and NTVtype (JsonNTVname)
+
+JsonNTVname = NTVname JsonSepType
+JsonSepType = [singleSep [JsonNTVtype]]/[listSep JsonNTVtype]
+    ; REQ5 REQ6
+
+NTVname = JsonString
+
+singleSep   = ":"      ; NTVsingle separator
+listSep     = "::"     ; NTVlist separator
+
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-4" class="selfRef">Figure 4</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvname-abnf" class="selfRef">JsonNTVname - ABNF</a>
+          </figcaption></figure>
+</div>
+<p id="section-3.2-5">For NTVsingle entities:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-6.1">
+            <span class="break"></span><dl class="olPercent" id="section-3.2-6.1.1">
+          <dt>REQ5:</dt>
+<dd id="section-3.2-6.1.1.1">
+                <p id="section-3.2-6.1.1.1.1">If JsonNTVtype is not "json", JsonSepType is identical to singleSep joined with JsonNTVtype,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-6.1.1.1.1" class="pilcrow">¶</a></p>
+<p id="section-3.2-6.1.1.1.2">else if JsonNTVvalue is not a JsonArray and not a JsonUnnamed, JsonSepType is empty,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-6.1.1.1.2" class="pilcrow">¶</a></p>
+<p id="section-3.2-6.1.1.1.3">else JsonSepType is identical to singleSep.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-6.1.1.1.3" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+<p id="section-3.2-7">For NTVlist entities:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-8.1">
+            <span class="break"></span><dl class="olPercent" id="section-3.2-8.1.1">
+          <dt>REQ6:</dt>
+<dd id="section-3.2-8.1.1.1">
+                <p id="section-3.2-8.1.1.1.1">If JsonNTVtype is not empty, JsonSepType is identical to listSep joined with JsonNTVtype<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-8.1.1.1.1" class="pilcrow">¶</a></p>
+<p id="section-3.2-8.1.1.1.2">else JsonSepType is empty.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.2-8.1.1.1.2" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+</section>
+<section id="section-3.3">
+        <h3 id="name-jsonntvtype">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3" class="section-number selfRef">3.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvtype" class="section-name selfRef">JsonNTVtype</a>
+        </h3>
+<p id="section-3.3-1">The JSON representation of a NTVtype (JsonNTVtype) is a compact representation of the NTVtype in the context of the NTVtypeParent.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">The JsonNTVtype is defined in  <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#JsonNTVtype-abnf" class="auto internal xref">Figure 5</a>, 
+        which uses ABNF from <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC5234" class="cite xref">RFC5234</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-2" class="pilcrow">¶</a></p>
+<span id="name-jsonntvtype-abnf-2"></span><div id="JsonNTVtype-abnf">
+<figure id="figure-5">
+          <div class="lang-abnf sourcecode" id="section-3.3-3.1">
+<pre>
+; JSON representation of NtvType (JsonNTVtype)
+
+JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
+    ; REQ7
+
+relativeNTVtypeLongName = *NamespaceName NTVtypeName
+    ; REQ7
+
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-5" class="selfRef">Figure 5</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvtype-abnf-2" class="selfRef">JsonNTVtype - ABNF</a>
+          </figcaption></figure>
+</div>
+<p id="section-3.3-4">The corresponding rules are as follows:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-5.1">
+            <span class="break"></span><dl class="olPercent" id="section-3.3-5.1.1">
+            <dt>REQ7:</dt>
+<dd id="section-3.3-5.1.1.1">
+                <p id="section-3.3-5.1.1.1.1">if NTVtype is identical to NTVtypeParent, JsonNTVtype is empty,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-5.1.1.1.1" class="pilcrow">¶</a></p>
+<p id="section-3.3-5.1.1.1.2">else if NTVtypeParent is a Namespace and if NTVtype is including in NTVtypeParent, 
+            JsonNTVtype is the NTVtypeLongName relative to the NTVtypeParent.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-5.1.1.1.2" class="pilcrow">¶</a></p>
+<p id="section-3.3-5.1.1.1.3">else JsonNTVtype is the NTVtypeLongName<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-5.1.1.1.3" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+<p id="section-3.3-6"><em>Example:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-7.1">
+            <p id="section-3.3-7.1.1"><em>If "fr." is the name of a Namespace attached to the global Namespace and containing the NTVtype 'dep', then:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-7.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-7.1.2.1">
+                <em>{ "::fr." : { "department1:dep": "name1", "department2:dep": "name2" } } is a valid JsonNTV representation.</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.3-7.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+<section id="section-3.4">
+        <h3 id="name-jsonntvvalue">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4" class="section-number selfRef">3.4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvvalue" class="section-name selfRef">JsonNTVvalue</a>
+        </h3>
+<p id="section-3.4-1">The JsonNTVvalue is the JsonValue representation of NTVvalue as defined in <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#JsonNTVvalue-abnf" class="auto internal xref">Figure 6</a>, 
+        which uses ABNF from <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC5234" class="cite xref">RFC5234</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-1" class="pilcrow">¶</a></p>
+<span id="name-jsonntvvalue-abnf"></span><div id="JsonNTVvalue-abnf">
+<figure id="figure-6">
+          <div class="lang-abnf sourcecode" id="section-3.4-2.1">
+<pre>
+; JSON representation of NTVvalue (JsonNTVvalue)
+
+JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
+
+JsonNTVsingleValue = NTVsingleValue
+JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
+    ; REQ8
+
+JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
+ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
+JsonNTVobjectValue = beginObject ListJsonNTVmember endObject
+ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
+
+NTVsingleValue     = JsonValue
+
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-6" class="selfRef">Figure 6</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-jsonntvvalue-abnf" class="selfRef">JsonNTVvalue - ABNF</a>
+          </figcaption></figure>
+</div>
+<p id="section-3.4-3">For a NTVsingle, JsonNTVvalue is the NTVvalue.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-3" class="pilcrow">¶</a></p>
+<p id="section-3.4-4">For a NTVlist, JsonNTValue has two representations:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.4-5.1">a JsonArray where JsonElements are the JsonNTV of included NTV entities,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.4-5.2">a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-5.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.4-6">The corresponding rules are as follows:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.4-7.1">
+            <span class="break"></span><dl class="olPercent" id="section-3.4-7.1.1">
+          <dt>REQ8:</dt>
+<dd id="section-3.4-7.1.1.1">
+                <p id="section-3.4-7.1.1.1.1">if NTVlistValue has more than one NTV entities and if all NTVname are different and not empty, JsonNTVobject is used,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-7.1.1.1.1" class="pilcrow">¶</a></p>
+<p id="section-3.4-7.1.1.1.2">else JsonNTVarray is used<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-7.1.1.1.2" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+<p id="section-3.4-8"><em>Example:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-8" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.4-9.1">
+            <em>{ ":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640] }   is not a valid JsonNTV</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-3.4-9.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</section>
+<section id="section-4">
+      <h2 id="name-examples">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4" class="section-number selfRef">4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-examples" class="section-name selfRef">Examples</a>
+      </h2>
+<p id="section-4-1">Examples of JsonNTV representation of NTV entities:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2"><strong>Vsingle :</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-2" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-3.1">
+          <em>"lyon"</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-3.2">
+          <em>52.5</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-3.3">
+          <em>{ ":" : [4.8357, 45.7640] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-3.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-4"><strong>NVsingle : </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-5.1">
+          <em>{ "city" : "paris" }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-5.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-5.2">
+          <em>{ "paris:" : [4.8357, 45.7640] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-5.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-6"><strong>TVsingle: </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-7.1">
+          <em>{ ":point" : [4.8357, 45.7640] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-7.1" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-8"><strong>NTVsingle: </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-8" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-9.1">
+          <em>{ "paris:point" : [2.3522, 48.8566] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-9.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-9.2">
+          <em>{ "paris:ntv" : { "coordinate:point" : [4.8357, 45.7640] } }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-9.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-10"><strong>Vlist (composed with JsonArray): </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-10" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-11.1">
+          <em>[4, 45]</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-11.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-11.2">
+          <em>["paris"]</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-11.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-11.3">
+          <em>[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-11.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-11.4">
+          <em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-11.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-11.5">
+          <em>[]</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-11.5" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-12"><strong>Vlist (composed with JsonObject) :</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-12" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-13.1">
+          <em>{ "name": "white", "firstname":"walter", "surname":"heisenberg" }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-13.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-13.2">
+          <em>{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france"}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-13.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-13.3">
+          <em>{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640]}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-13.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-13.4">
+          <em>{ }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-13.4" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-14"><strong>NVlist : </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-14" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-15.1">
+          <em>{ "simple list": [4, 45.7]}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-15.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-15.2">
+          <em>{ "cities": [{":point": [2.3522, 48.8566]}, {":point": [4.8357, 45.7640]}]}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-15.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-16"><strong>TVlist : </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-16" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-17.1">
+          <em>{ "::point": [[2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-17.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-17.2">
+          <em>{ "::dat": [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-17.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-18"><strong>NTVlist : </strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-18" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-19.1">
+          <em>{ "cities::point": [[2.3522, 48.8566], {"lyon": [4.8357, 45.7640]}] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-19.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-19.2">
+          <em>{ "generic date::dat": [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78]}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-19.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-19.3">
+          <em>{ "various::point": [ [2.3, 48.8], { ":date": "2022-01-28"}, {":json": 25 }, { "another NTVlist::json": [1,2,3]} ]}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-19.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-20"><strong>NTVlist and NVlist (composed with JsonObject) :</strong><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-20" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4-21.1">
+          <em>{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-21.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-4-21.2">
+          <em>{ "cities": {"paris:point": [2.3522, 48.8566] , "lyon": "france"}}</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-4-21.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+<section id="section-5">
+      <h2 id="name-parsing-a-jsonvalue">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5" class="section-number selfRef">5. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-parsing-a-jsonvalue" class="section-name selfRef">Parsing a JsonValue</a>
+      </h2>
+<p id="section-5-1">JsonValue is parsed according to JSON structure (from root to leaves).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">Several steps are considered:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-3.1">JSON decoding<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-3.2">NTV entity decoding<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-3.3">NTVvalue decoding<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5-3.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-3.4">NTVtype decoding<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5-3.4" class="pilcrow">¶</a>
+</li>
+      </ul>
+<section id="section-5.1">
+        <h3 id="name-json-decoding">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.1" class="section-number selfRef">5.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-json-decoding" class="section-name selfRef">JSON decoding</a>
+        </h3>
+<p id="section-5.1-1">This part is not detailed and consists of:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-2.1">exploit the JSON structure to identify JsonNTVname and JsonNTVvalue,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.1-2.2">extract the following data from the JsonNTVname string: JsonNTVtype, NTVname and singleSep or listSep<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.1-2.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="section-5.2">
+        <h3 id="name-ntv-entity-decoding">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.2" class="section-number selfRef">5.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-entity-decoding" class="section-name selfRef">NTV entity decoding</a>
+        </h3>
+<p id="section-5.2-1">The NTV entity is inferred from the JSON structure of JsonValue or JsonNTVvalue:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.2-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.2-2.1">
+            <span class="break"></span><dl class="olPercent" id="section-5.2-2.1.1">
+            <dt>PARS1:</dt>
+<dd id="section-5.2-2.1.1.1">The tables <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table1" class="auto internal xref">Table 1</a> and <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table2" class="auto internal xref">Table 2</a> define the entity identification rules (NTVsingle or NTVlist)<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.2-2.1.1.1" class="pilcrow">¶</a>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+<span id="name-decoding-jsonvalue"></span><div id="table1">
+<table class="left" id="table-1">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-1" class="selfRef">Table 1</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-decoding-jsonvalue" class="selfRef">Decoding JsonValue</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">JsonValue</th>
+              <th class="text-left" rowspan="1" colspan="1">NTV entity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">JsonPrimitive</td>
+              <td class="text-left" rowspan="1" colspan="1">Vsingle</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">JsonUnnamed</td>
+              <td class="text-left" rowspan="1" colspan="1">Vlist</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">JsonArray</td>
+              <td class="text-left" rowspan="1" colspan="1">Vlist</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">JsonNamed</td>
+              <td class="text-left" rowspan="1" colspan="1">see <a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table2" class="auto internal xref">Table 2</a>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<span id="name-decoding-jsonntvvalue"></span><div id="table2">
+<table class="left" id="table-2">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-2" class="selfRef">Table 2</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-decoding-jsonntvvalue" class="selfRef">Decoding JsonNTVvalue</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Separator</th>
+              <th class="text-left" rowspan="1" colspan="1">JsonNTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">NTV entity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">None</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonPrimitive</td>
+              <td class="text-left" rowspan="1" colspan="1">NVsingle</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">None</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNamed</td>
+              <td class="text-left" rowspan="1" colspan="1">NVsingle</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">None</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonUnnamed</td>
+              <td class="text-left" rowspan="1" colspan="1">NVlist</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">None</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonArray</td>
+              <td class="text-left" rowspan="1" colspan="1">NVlist</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">":"</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonValue</td>
+              <td class="text-left" rowspan="1" colspan="1">TVsingle or NTVSingle</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"::"</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonUnnamed</td>
+              <td class="text-left" rowspan="1" colspan="1">NVlist or TVlist or NTVlist</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"::"</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonArray</td>
+              <td class="text-left" rowspan="1" colspan="1">NVlist or TVlist or NTVlist</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="section-5.3">
+        <h3 id="name-ntvvalue-decoding">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.3" class="section-number selfRef">5.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvvalue-decoding" class="section-name selfRef">NTVvalue decoding</a>
+        </h3>
+<p id="section-5.3-1">The NTVvalue is inferred from the JsonNTVvalue:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.3-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.3-2.1">
+            <span class="break"></span><dl class="olPercent" id="section-5.3-2.1.1">
+            <dt>PARS2:</dt>
+<dd id="section-5.3-2.1.1.1">The NTVvalue of NTVsingle is the JsonNTVvalue.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.3-2.1.1.1" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt>PARS3:</dt>
+<dd id="section-5.3-2.1.1.2">The NTVvalue of NTVlist is the list of NTV entities parsed for each JsonElement or JsonMember including in the JsonNTVvalue.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.3-2.1.1.2" class="pilcrow">¶</a>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+</section>
+<section id="section-5.4">
+        <h3 id="name-ntvtype-decoding">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4" class="section-number selfRef">5.4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntvtype-decoding" class="section-name selfRef">NTVtype decoding</a>
+        </h3>
+<p id="section-5.4-1">NTVtype is inferred from the JsonNTVtype:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.4-2.1">
+            <span class="break"></span><dl class="olPercent" id="section-5.4-2.1.1">
+            <dt>PARS4:</dt>
+<dd id="section-5.4-2.1.1.1">
+                <p id="section-5.4-2.1.1.1.1">If JsonNTVtype is a valid NTVtypeLongName NTVtype is the decoded JsonNTVtype,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4-2.1.1.1.1" class="pilcrow">¶</a></p>
+<p id="section-5.4-2.1.1.1.2">else NTVtype is "json" NTVtype if concatened ParentNTVtypeLongName with JsonNTVtype is empty,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4-2.1.1.1.2" class="pilcrow">¶</a></p>
+<p id="section-5.4-2.1.1.1.3">else NTVtype is the decoded of concatenation of ParentNTVtypeLongName with JsonNTVtype if it is a valid  NTVtypeLongName,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4-2.1.1.1.3" class="pilcrow">¶</a></p>
+<p id="section-5.4-2.1.1.1.4">else NTVtype is the defaultNTVtype<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4-2.1.1.1.4" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</li>
+        </ul>
+<p id="section-5.4-3">The <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#JSON-NTV" class="cite xref">JSON-NTV</a>]</span> repository gives some examples of NTV usage.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-5.4-3" class="pilcrow">¶</a></p>
+</section>
+</section>
+<section id="section-6">
+      <h2 id="name-ntv-extended-structure">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6" class="section-number selfRef">6. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-ntv-extended-structure" class="section-name selfRef">NTV extended structure</a>
+      </h2>
+<p id="section-6-1">The NTVvalue of NTV entities are JsonValue. In the NTV extended structure, NTVvalue can be every kind of data.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">With this structure, the NTV representation is a "json like" data where:<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-3.1">JsonNTVvalue is always NTVvalue,<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-3.2">JsonNTVtype is optional (if NTVtype can be deduced from the NTVvalue),<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-3.3">JsonNTVname is optional (if NTVname can be deduced from the NTVvalue).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-3.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-6-4"><em>Examples of NTV extended representation:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-6-5.1">
+          <ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-6-5.1.1.1">
+              <p id="section-6-5.1.1.1.1"><em>{ "date object" : [ datetime.date(2022, 1, 18), datetime.date(2023, 1, 12) ] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-5.1.1.1.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li class="normal ulEmpty" id="section-6-5.2">
+          <em>this "json like" structure can be converted in JsonNTV format:</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-5.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-6-5.3">
+          <ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-6-5.3.1.1">
+              <p id="section-6-5.3.1.1.1"><em>{ "date object::date" : [ "2022-01-18", "2023-01-12" ] }</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-6-5.3.1.1.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+      </ul>
+</section>
+<div id="IANA">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-7" class="section-number selfRef">7. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">Any JsonValue is a JsonNTVValue and conversely, any JsonNTVvalue is a JsonValue.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">Thus, any JSON data may or may not be treated as JsonNTV data, so there is no need to create a specific MIME media type for JsonNTV.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-7-2" class="pilcrow">¶</a></p>
+<p id="section-7-3">All properties of the MIME media type "application/json" are applicable.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-7-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Security">
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-8" class="section-number selfRef">8. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">The format used for NTV data exchanges is the JSON format. 
+      So, all the security considerations of <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span> apply.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">The NTV structure provides no cryptographic integrity protection of any kind.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-8-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-references">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-9" class="section-number selfRef">9. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-9.1" class="section-number selfRef">9.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC7946">[RFC7946]</dt>
+        <dd>
+<span class="refAuthor">Butler, H.</span>, <span class="refAuthor">Daly, M.</span>, <span class="refAuthor">Doyle, A.</span>, <span class="refAuthor">Gillies, S.</span>, <span class="refAuthor">Hagen, S.</span>, and <span class="refAuthor">T. Schaub</span>, <span class="refTitle">"The GeoJSON Format"</span>, <span class="seriesInfo">RFC 7946</span>, <span class="seriesInfo">DOI 10.17487/RFC7946</span>, <time datetime="2016-08" class="refDate">August 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7946">https://www.rfc-editor.org/info/rfc7946</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5234">[RFC5234]</dt>
+        <dd>
+<span class="refAuthor">Crocker, D., Ed.</span> and <span class="refAuthor">P. Overell</span>, <span class="refTitle">"Augmented BNF for Syntax Specifications: ABNF"</span>, <span class="seriesInfo">STD 68</span>, <span class="seriesInfo">RFC 5234</span>, <span class="seriesInfo">DOI 10.17487/RFC5234</span>, <time datetime="2008-01" class="refDate">January 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc5234">https://www.rfc-editor.org/info/rfc5234</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8259">[RFC8259]</dt>
+        <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3339">[RFC3339]</dt>
+      <dd>
+<span class="refAuthor">Klyne, G.</span> and <span class="refAuthor">C. Newman</span>, <span class="refTitle">"Date and Time on the Internet: Timestamps"</span>, <span class="seriesInfo">RFC 3339</span>, <span class="seriesInfo">DOI 10.17487/RFC3339</span>, <time datetime="2002-07" class="refDate">July 2002</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3339">https://www.rfc-editor.org/info/rfc3339</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#section-9.2" class="section-number selfRef">9.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="JSON-ND">[JSON-ND]</dt>
+        <dd>
+<span class="refAuthor">Kleidon, G.</span>, <span class="refTitle">"JSON-ND"</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://github.com/glenkleidon/JSON-ND">https://github.com/glenkleidon/JSON-ND</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JSON-NTV">[JSON-NTV]</dt>
+        <dd>
+<span class="refAuthor">Thomy, P.</span>, <span class="refTitle">"JSON-NTV"</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://github.com/loco-philippe/NTV#readme">https://github.com/loco-philippe/NTV#readme</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="OLC">[OLC]</dt>
+        <dd>
+<span class="refAuthor">"Google"</span>, <span class="refTitle">"Open Location Code"</span>, <time datetime="2016" class="refDate">2016</time>, <span>&lt;<a href="https://github.com/google/open-location-code">https://github.com/google/open-location-code</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="W3C_TAB">[W3C_TAB]</dt>
+        <dd>
+<span class="refAuthor">"W3C"</span>, <span class="refTitle">"Recommendation : Model for Tabular Data and Metadata on the Web"</span>, <span>17 December 2015</span>, <span>&lt;<a href="https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/">https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ISO_3166-1_alpha-2">[ISO_3166-1_alpha-2]</dt>
+      <dd>
+<span class="refAuthor">"ISO"</span>, <span class="refTitle">"Codes for the representation of names of countries and their subdivisions - Part 1: Country code"</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://www.iso.org/standard/72482.html">https://www.iso.org/standard/72482.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<section id="appendix-A">
+      <h2 id="name-global-ntvtype-and-namespac">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A" class="section-number selfRef">Appendix A. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-global-ntvtype-and-namespac" class="section-name selfRef">Global NTVtype and Namespace</a>
+      </h2>
+<p id="appendix-A-1">The structure of NTVtype by Namespace makes it possible to have NTVtype or Namespace corresponding to recognized standards at the global level.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">A standard NTVtype / Namespace is a NTVtype / Namespace defined in the Global Namespace.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">The standard NTVtype and Namespace are listed below.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A-3" class="pilcrow">¶</a></p>
+<section id="appendix-A.1">
+        <h3 id="name-json">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.1" class="section-number selfRef">A.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-json" class="section-name selfRef">Json</a>
+        </h3>
+<p id="appendix-A.1-1">Json NTVtype have a generic NTVtype : "json"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.1-1" class="pilcrow">¶</a></p>
+<span id="name-json-ntvtype"></span><div id="table3">
+<table class="left" id="table-3">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-3" class="selfRef">Table 3</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-json-ntvtype" class="selfRef">Json NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName (generic)</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">example NTVvalue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">json</td>
+              <td class="text-left" rowspan="1" colspan="1">generic NTVtype</td>
+              <td class="text-left" rowspan="1" colspan="1"></td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">number (json)</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNumber <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">10</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">boolean (json)</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonBoolean <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"true"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">null (json)</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNull <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"null"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">string (json)</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonString <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"value"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">array (json)</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonArray <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">[1.1, 2.2]</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">object (json)</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonObject <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">{"value1": 1, "value2": 2}</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="appendix-A.2">
+        <h3 id="name-numbers">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.2" class="section-number selfRef">A.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-numbers" class="section-name selfRef">Numbers</a>
+        </h3>
+<span id="name-numbers-ntvtype"></span><div id="table4">
+<table class="left" id="table-4">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-4" class="selfRef">Table 4</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-numbers-ntvtype" class="selfRef">Numbers NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">int</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNumber <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">int8, int16, int32, int64</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNumber <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">signed integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">uint8, uint16, uint32, uint64</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNumber <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">unsigned integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">float</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNumber <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">floating point real</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">float16, float32, float64</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNumber <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC8259" class="cite xref">RFC8259</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">floating point real</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="appendix-A.3">
+        <h3 id="name-datation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.3" class="section-number selfRef">A.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-datation" class="section-name selfRef">Datation</a>
+        </h3>
+<p id="appendix-A.3-1">Datation NTVtype have a generic NTVtype : "dat"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.3-1" class="pilcrow">¶</a></p>
+<span id="name-datation-ntvtype"></span><div id="table5">
+<table class="left" id="table-5">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-5" class="selfRef">Table 5</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-datation-ntvtype" class="selfRef">Datation NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName (generic)</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">example NTVvalue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">year</td>
+              <td class="text-left" rowspan="1" colspan="1">fullyear <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">1998</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">month</td>
+              <td class="text-left" rowspan="1" colspan="1">month <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">10</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">day</td>
+              <td class="text-left" rowspan="1" colspan="1">mday <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span> day of month</td>
+              <td class="text-left" rowspan="1" colspan="1">21</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">wday</td>
+              <td class="text-left" rowspan="1" colspan="1">wday <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span> day of week</td>
+              <td class="text-left" rowspan="1" colspan="1">7</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">yday</td>
+              <td class="text-left" rowspan="1" colspan="1">yday <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span> day of year</td>
+              <td class="text-left" rowspan="1" colspan="1">360</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">week</td>
+              <td class="text-left" rowspan="1" colspan="1">week <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">38</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">hour</td>
+              <td class="text-left" rowspan="1" colspan="1">hour <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">20</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">minute</td>
+              <td class="text-left" rowspan="1" colspan="1">minute <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">18</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">second</td>
+              <td class="text-left" rowspan="1" colspan="1">second <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">54</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">dat</td>
+              <td class="text-left" rowspan="1" colspan="1">generic NTVtype</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">date (dat)</td>
+              <td class="text-left" rowspan="1" colspan="1">date <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"2022-01-28""</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">time (dat)</td>
+              <td class="text-left" rowspan="1" colspan="1">timespec-base [time-fraction]<span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"T18:23:54",  "18:23", "T18"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">timetz (dat)</td>
+              <td class="text-left" rowspan="1" colspan="1">timespec-base [time-fraction] time-zone<span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"T18:23:54+0400"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">datetime (dat)</td>
+              <td class="text-left" rowspan="1" colspan="1">iso-date-time (without time-zone)<span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"2022-01-28T18-23-54"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">datetimetz (dat)</td>
+              <td class="text-left" rowspan="1" colspan="1">iso-date-time (with time-zone)<span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"2022-01-28T18-23-54+0400"</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="appendix-A.4">
+        <h3 id="name-period-and-duration">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.4" class="section-number selfRef">A.4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-period-and-duration" class="section-name selfRef">Period and Duration</a>
+        </h3>
+<span id="name-period-and-duration-ntvtype"></span><div id="table6">
+<table class="left" id="table-6">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-6" class="selfRef">Table 6</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-period-and-duration-ntvtype" class="selfRef">Period and Duration NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">example NTVvalue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">duration</td>
+              <td class="text-left" rowspan="1" colspan="1">duration <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"P3Y6M4DT12H30M5S"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">timearray</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonArray</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.4-1.2.2.3.1">[dat1, dat2]<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.4-1.2.2.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-1.2.2.3.2"><em>dat1, dat2 have "dat" NTVtypeName</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.4-1.2.2.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">period</td>
+              <td class="text-left" rowspan="1" colspan="1">period <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC3339" class="cite xref">RFC3339</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.4-1.2.3.3.1">"2022-01-01 / 2022-01-30"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.4-1.2.3.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-1.2.3.3.2">"2022-01-01 / P3Y6M4DT12H30M5S"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.4-1.2.3.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="appendix-A.5">
+        <h3 id="name-location">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5" class="section-number selfRef">A.5. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-location" class="section-name selfRef">Location</a>
+        </h3>
+<p id="appendix-A.5-1">Location NTVtype have a generic NTVtype : "loc".<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.5-2">The CRS (Coordinate Reference Systems) is geographic, using the World Geodetic System 1984 (WGS 84) datum, 
+        with longitude and latitude units of decimal degrees (EPSG:4326).<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-2" class="pilcrow">¶</a></p>
+<span id="name-location-ntvtype"></span><div id="table7">
+<table class="left" id="table-7">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-7" class="selfRef">Table 7</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-location-ntvtype" class="selfRef">Location NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName (generic)</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">example NTVvalue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">loc</td>
+              <td class="text-left" rowspan="1" colspan="1">generic NTVtype</td>
+              <td class="text-left" rowspan="1" colspan="1"></td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">point (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">Point coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">[ 5.12, 45.256 ] <em>(lon, lat)</em>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">multipoint</td>
+              <td class="text-left" rowspan="1" colspan="1">MultiPoint coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.5-3.2.3.3.1">[pt1, pt2, pt3]<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.3.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.5-3.2.3.3.2"><em>ptx has "point" NTVtypeName</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.3.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">line (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">LineString coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.5-3.2.4.3.1">[pt1, pt2, pt3]<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.4.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.5-3.2.4.3.2"><em>ptx has "point" NTVtypeName</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.4.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">multiline</td>
+              <td class="text-left" rowspan="1" colspan="1">MultiLineString coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.5-3.2.5.3.1">[li1, li2, li3]<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.5.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.5-3.2.5.3.2"><em>lix has "line" NTVtypeName</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.5.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">polygon (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">Polygon coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.5-3.2.6.3.1">[rg1, rg2, rg3]<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.6.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.5-3.2.6.3.2"><em>rgx has "line" NTVtypeName (ring)</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.6.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">multipolygon (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">MultiPolygon coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.5-3.2.7.3.1">[pl1, pl2, pl3]<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.7.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.5-3.2.7.3.2"><em>plx has "polygon" NTVtypeName</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.5-3.2.7.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">bbox (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">Bbox coordinates <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">[ -10.0, -10.0, 10.0, 10.0 ]</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">geojson (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">geoJSON object <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#RFC7946" class="cite xref">RFC7946</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">{"type": "point", "coordinates": [40.0, 0.0]}</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">codeolc (loc)</td>
+              <td class="text-left" rowspan="1" colspan="1">Open Location Code <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#OLC" class="cite xref">OLC</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">"8FW4V75V+8F6"</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="appendix-A.6">
+        <h3 id="name-structured-data">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.6" class="section-number selfRef">A.6. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-structured-data" class="section-name selfRef">Structured data</a>
+        </h3>
+<span id="name-structured-ntvtype"></span><div id="table8">
+<table class="left" id="table-8">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-8" class="selfRef">Table 8</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-structured-ntvtype" class="selfRef">Structured NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">row</td>
+              <td class="text-left" rowspan="1" colspan="1">row <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#W3C_TAB" class="cite xref">W3C_TAB</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">field</td>
+              <td class="text-left" rowspan="1" colspan="1">column <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#W3C_TAB" class="cite xref">W3C_TAB</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">tab</td>
+              <td class="text-left" rowspan="1" colspan="1">table <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#W3C_TAB" class="cite xref">W3C_TAB</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ntv</td>
+              <td class="text-left" rowspan="1" colspan="1">JsonNTV</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="appendix-A.6-2">The data structure associated to this NTVtypeName are defined in specific document.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.6-2" class="pilcrow">¶</a></p>
+</section>
+<section id="appendix-A.7">
+        <h3 id="name-normalized-string">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7" class="section-number selfRef">A.7. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-normalized-string" class="section-name selfRef">Normalized String</a>
+        </h3>
+<span id="name-structured-ntvtype-2"></span><div id="table9">
+<table class="left" id="table-9">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-9" class="selfRef">Table 9</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-structured-ntvtype-2" class="selfRef">Structured NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">NTVtypeName</th>
+              <th class="text-left" rowspan="1" colspan="1">NTVvalue</th>
+              <th class="text-left" rowspan="1" colspan="1">example NTVvalue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">uri</td>
+              <td class="text-left" rowspan="1" colspan="1">URI (RFC3986)</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.7-1.2.1.3.1">"https://www.ietf.org/rfc/rfc3986.txt"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.1.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.7-1.2.1.3.2">"urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.1.3.2" class="pilcrow">¶</a></p>
+<p id="appendix-A.7-1.2.1.3.3">"geo:13.4125,103.86673" (RFC5870)"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.1.3.3" class="pilcrow">¶</a></p>
+<p id="appendix-A.7-1.2.1.3.4">"info:eu-repo/dai/nl/12345"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.1.3.4" class="pilcrow">¶</a></p>
+<p id="appendix-A.7-1.2.1.3.5">"mailto:John.Doe@example.com"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.1.3.5" class="pilcrow">¶</a></p>
+<p id="appendix-A.7-1.2.1.3.6">"news:comp.infosystems.www.servers.unix"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.1.3.6" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">email</td>
+              <td class="text-left" rowspan="1" colspan="1">adress (RFC5322)</td>
+              <td class="text-left" rowspan="1" colspan="1">"John Doe &lt;jdoe@machine.example&gt;"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">file</td>
+              <td class="text-left" rowspan="1" colspan="1">file-hier-part (RFC8089)</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.7-1.2.3.3.1">"///path/to/file"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.3.3.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.7-1.2.3.3.2">"//host.example.com/path/to/file"<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-1.2.3.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="appendix-A.7-2">Keywords are not defined as Normalized String (eg. "id", "mandatory", "units"), they can be used as custom NTVtype 
+        (eg. "$id", "$mandatory", "$units")<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.7-2" class="pilcrow">¶</a></p>
+</section>
+<section id="appendix-A.8">
+        <h3 id="name-namespace-2">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8" class="section-number selfRef">A.8. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-namespace-2" class="section-name selfRef">Namespace</a>
+        </h3>
+<p id="appendix-A.8-1">The global Namespace includes Namespaces for countries, dependent territories and special areas as defined in 
+        <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#ISO_3166-1_alpha-2" class="cite xref">ISO_3166-1_alpha-2</a>]</span><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.8-2">The JsonNamespace for those Namespace is composed by the two digits of the country following by a dot.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.8-3"><em>Example :</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.8-4.1">
+            <em>"fr." is the France JsonNamespace</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.8-4.2">
+            <em>"un." is The United Nations JsonNamespace</em><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8-4.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.8-5">Each Namespace defines a list of included NTVtype and Namespace.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.8-5" class="pilcrow">¶</a></p>
+</section>
+<section id="appendix-A.9">
+        <h3 id="name-custom-ntvtype-and-namespac">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9" class="section-number selfRef">A.9. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-custom-ntvtype-and-namespac" class="section-name selfRef">Custom NTVtype and Namespace</a>
+        </h3>
+<p id="appendix-A.9-1">Custom NTVtype and Namespace can be created in any Namespace.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-2"><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table10" class="auto internal xref">Table 10</a> below presents some examples of custom NTVtype.<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-2" class="pilcrow">¶</a></p>
+<span id="name-examples-of-custom-ntvtype"></span><div id="table10">
+<table class="left" id="table-10">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#table-10" class="selfRef">Table 10</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-examples-of-custom-ntvtype" class="selfRef">Examples of custom NTVtype</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">JsonNTVtype</th>
+              <th class="text-left" rowspan="1" colspan="1">comment or JsonNTV example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"$id"</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.9-3.2.1.2.1">defined in the global Namespace<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.1.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.1.2.2">eg. { ":$id": 5426849" }<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.1.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"$iata"</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.9-3.2.2.2.1">IATA airport code<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.2.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.2.2.2">eg. {"Paris Nord:$iata": "CDG"}<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.2.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"$uic.station"</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.9-3.2.3.2.1">UIC station code<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.3.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.3.2.2">eg. {"Nantes station:$uic.station" : "8748100"}<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.3.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"fr.$city"</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.9-3.2.4.2.1">NTVtype "city" in "fr." Namespace<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.4.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.4.2.2">eg. {":fr.$city" : "Paris"}<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.4.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"$schemaorg."</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.9-3.2.5.2.1">"schemaorg" catalog<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.5.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.5.2.2">eg. { ":$schemaorg.propertyID": "NO2" }<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.5.2.2" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.5.2.3">{ ":$schemaorg.unitText": "mg/m3"}<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.5.2.3" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"$darwincore."</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="appendix-A.9-3.2.6.2.1">"darwincore" catalog<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.6.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A.9-3.2.6.2.2">eg. { ":$darwincore.acceptedNameUsage": "Tamias minimus" }<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-A.9-3.2.6.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+</section>
+<section id="appendix-B">
+      <h2 id="name-complete-abnf-notation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-B" class="section-number selfRef">Appendix B. </a><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-complete-abnf-notation" class="section-name selfRef">Complete ABNF notation</a>
+      </h2>
+<span id="name-collected-abnf-grammar"></span><div id="Complete-abnf">
+<figure id="figure-7">
+        <div class="breakable lang-abnf sourcecode" id="appendix-B-1.1">
+<pre>
+; representation of NtvType and Namespace (LongName)
+
+NTVtypeLongName     = NamespaceParentLongName NTVtypeName
+
+NamespaceLongName   = NamespaceParentLongName NamespaceName
+NamespaceParentLongName = NamespaceLongName
+
+NamespaceName   = [ ["$"] JsonString "." ]      ; REQ2 REQ3
+NTVtypeName     = ["$"] JsonString              ; REQ3
+
+; JSON representation of NTV entities (JsonNTV)
+
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
+
+JsonNTVnamed   = beginObject JsonNTVMember endObject
+JsonNTVsimple  = JsonNTVvalue
+
+JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
+
+; Extract of JSON grammar used in this document
+
+beginArray    = ws "[" ws
+beginObject   = ws "{" ws
+endArray      = ws "]" ws
+endObject     = ws "}" ws
+nSep          = ws ":" ws
+vSep          = ws "," ws
+ws = *( %x20 / %x09 / %x0A / %x0D )
+
+JsonValue  = JsonValue   ; indicates that rule is defined in RFC8259
+JsonString = JsonString  ; indicates that rule is defined in RFC8259
+
+; JSON representation of NTVname and NTVtype (JsonNTVname)
+
+JsonNTVname    = NTVname JsonSepType
+JsonSepType    = [singleSep [JsonNTVtype]] / [listSep JsonNTVtype]
+    ; REQ5 REQ6
+
+NTVname = JsonString
+
+singleSep   = ":"      ; NTVsingle separator
+listSep     = "::"     ; NTVlist separator
+
+; JSON representation of NtvType (JsonNTVtype)
+
+JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
+    ; REQ7
+
+relativeNTVtypeLongName = *NamespaceName NTVtypeName
+    ; REQ7
+
+; JSON representation of NTVvalue (JsonNTVvalue)
+
+JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
+
+JsonNTVsingleValue = NTVsingleValue
+JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
+    ; REQ8
+
+JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
+ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
+JsonNTVobjectValue = beginObject ListJsonNTVmember endObject
+ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
+
+NTVsingleValue     = JsonValue
+
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#figure-7" class="selfRef">Figure 7</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-collected-abnf-grammar" class="selfRef">Collected ABNF grammar</a>
+        </figcaption></figure>
+</div>
+</section>
+<div id="Acknowledgements">
+<section id="appendix-C">
+      <h2 id="name-acknowledgements">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="appendix-C-1">TBD<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-C-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Contributors">
+<section id="appendix-D">
+      <h2 id="name-contributors">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-contributors" class="section-name selfRef">Contributors</a>
+      </h2>
+<p id="appendix-D-1">TBD<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#appendix-D-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-E">
+      <h2 id="name-authors-address">
+<a href="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Philippe THOMY</span></div>
+<div dir="auto" class="left"><span class="org">Loco-labs</span></div>
+<div dir="auto" class="left"><span class="street-address">476 chemin du gaf de Famian</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">84 500</span> <span class="locality">BOLLENE</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">France</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:philippe@loco-labs.io" class="email">philippe@loco-labs.io</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://github.com/loco-philippe/NTV/blob/main/README.md" class="url">https://github.com/loco-philippe/NTV/blob/main/README.md</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+
+
+</body></html>
