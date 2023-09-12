@@ -5,14 +5,14 @@ Created on Feb 27 2023
 @author: Philippe@loco-labs.io
 
 The `ntv` module is part of the `NTV.json_ntv` package ([specification document](
-https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
+https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
 
 It contains the classes `NtvSingle`, `NtvList`, `Ntv`(abstract) for NTV entities.
 
 # 1 - JSON-NTV structure
 
 The NTV triplet (name, type, value) is represented using a JSON-NTV format inspired
-by the RFC [JSON-ND](https://github.com/glenkleidon/JSON-ND) project :
+by the [JSON-ND](https://github.com/glenkleidon/JSON-ND) project :
 - **```value```** (if name and type are not documented)
 - **```{ "name" : value }```** (if name is documented but not type)
 - **```{ ":type" : value }```** for primitive entities and **```{ "::type" : value }```**
