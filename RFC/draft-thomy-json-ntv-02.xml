@@ -626,7 +626,11 @@ NTVsingleValue     = JsonValue
             <td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" NTVtypeName (ring)</em></t></td></tr>
           <tr><td>multipolygon (loc)</td><td>MultiPolygon coordinates <xref target="RFC7946"/></td>
             <td><t>[pl1, pl2, pl3]</t><t><em>plx has "polygon" NTVtypeName</em></t></td></tr>
-          <tr><td>bbox (loc)</td><td>Bbox coordinates <xref target="RFC7946"/></td><td>[ -10.0, -10.0, 10.0, 10.0 ]</td></tr>
+          <tr><td>geometry (loc)</td><td>Geometry coordinates <xref target="RFC7946"/></td>
+            <td><t>point, line or polygon</t><t>coordinates</t></td></tr>
+          <tr><td>multigeometry (loc)</td><td>MultiGeometry coordinates <xref target="RFC7946"/></td>
+            <td><t>[geo1, geo2, geo3]</t><t><em>geox is point, line, polygon or geometry</em></t></td></tr>
+          <tr><td>box (loc)</td><td>box coordinates <xref target="RFC7946"/></td><td>[ -10.0, -10.0, 10.0, 10.0 ]</td></tr>
           <tr><td>geojson (loc)</td><td>geoJSON object <xref target="RFC7946"/></td><td>{"type": "point", "coordinates": [40.0, 0.0]}</td></tr>
           <tr><td>codeolc (loc)</td><td>Open Location Code <xref target="OLC"/></td><td>"8FW4V75V+8F6"</td></tr></tbody></table>
       </section>

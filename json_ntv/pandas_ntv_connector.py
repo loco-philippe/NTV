@@ -25,6 +25,7 @@ import numpy as np
 
 import json_ntv
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
+from json_ntv.ntv_connector import ShapelyConnec
 
 def to_json(pd_array, **kwargs):
     ''' convert pandas Series or Dataframe to JSON text or JSON Value.
@@ -100,7 +101,7 @@ class DataFrameConnec(NtvConnector):
         series = SeriesConnec.to_series
 
         ntv = Ntv.fast(ntv_value)
-        lidx = [list(DataFrameConnec.decode_ntv_tab(ntvf, fast=True))
+        lidx = [list(DataFrameConnec.decode_ntv_tab(ntvf))
                 for ntvf in ntv]
         leng = max([idx[6] for idx in lidx])
         option = kwargs | {'leng': leng}
@@ -146,15 +147,8 @@ class DataFrameConnec(NtvConnector):
         return srs[:1] if np.array_equal(srs.values, [srs.values[0]] * len(srs)) else srs
 
     @staticmethod
-    def decode_ntv_tab(field, fast=False):
+    def decode_ntv_tab(field):
         '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
-
-        *Parameters*
-
-        - **field** : bytes, string json or Ntv object to convert
-        - **format** : string (default 'json') - format to convert ntv_value
-        - **fast**: boolean (default False) - if True, codec is created without
-        conversion, else codec is created with json structure
 
         *Returns*
 
@@ -238,7 +232,7 @@ class SeriesConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
         ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = \
-            DataFrameConnec.decode_ntv_tab(ntv, fast=True)
+            DataFrameConnec.decode_ntv_tab(ntv)
         if parent and not option['extkeys']:
             return None
         if coef:
@@ -364,9 +358,11 @@ class SeriesConnec(NtvConnector):
         if not pd_name is None:
             srs = srs.rename(pd_name)
         if ntv_type == 'date':
-            srs = pd.to_datetime(srs).dt.date
-        elif ntv_type == 'time':
-            srs = pd.to_datetime(srs).dt.time
+            return pd.to_datetime(srs).dt.date
+        if ntv_type == 'time':
+            return pd.to_datetime(srs).dt.time
+        if ntv_type == 'point':
+            return srs.apply(ShapelyConnec.to_geometry)
         return srs
 
     @staticmethod
@@ -422,6 +418,8 @@ class SeriesConnec(NtvConnector):
             return (ntv_type, json.loads(srs.to_json(orient='records',
                         date_format='iso', default_handler=str)))
         ntv_type = name_type
+        if ntv_type in ['point', 'line', 'polygon', 'geometry']:
+            return (ntv_type, srs.apply(ShapelyConnec.to_coord).to_list())
         if ntv_type == 'date':
             srs = srs.astype(str)
         if dtype == 'object':

@@ -114,6 +114,24 @@ class ShapelyConnec(NtvConnector):
     def to_coord(geom):
         ''' convert shapely geometry into geojson coordinates.'''
         return Ntv._listed(geom.__geo_interface__['coordinates'])
+
+    @staticmethod 
+    def to_geometry(value):
+        '''convert geojson coordinates into shapely geometry'''
+        return ShapelyConnec.to_obj_ntv(value, type_geo=ShapelyConnec.type_geo(value))
+    
+    @staticmethod 
+    def type_geo(value):
+        '''return geometry type of the value'''
+        if not value or not isinstance(value, list):
+            return 'not a geometry'
+        val = value[0]
+        if not isinstance(val, list):
+            return 'point'
+        val = val[0]
+        if not isinstance(val, list):
+            return 'line'        
+        return 'polygon'
     
 class CborConnec(NtvConnector):
     '''NTV connector for binary data'''
