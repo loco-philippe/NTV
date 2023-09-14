@@ -95,8 +95,9 @@ class ShapelyConnec(NtvConnector):
         polygon, multipolygon)
         - **ntv_value** : array - coordinates'''
         from shapely import geometry
-        return geometry.shape({"type": kwargs['type_geo'],
-                               "coordinates": ntv_value})
+        type_geo = ShapelyConnec.type_geo(ntv_value) if not 'type_geo' in kwargs \
+            or kwargs['type_geo'] == 'geometry' else kwargs['type_geo']
+        return geometry.shape({"type": type_geo, "coordinates": ntv_value})
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
