@@ -361,8 +361,10 @@ class SeriesConnec(NtvConnector):
             return pd.to_datetime(srs).dt.date
         if ntv_type == 'time':
             return pd.to_datetime(srs).dt.time
-        if ntv_type == 'point':
+        if ntv_type in ['point', 'polygon', 'line', 'geometry']:
             return srs.apply(ShapelyConnec.to_geometry)
+        if ntv_type == 'geojson':
+            return srs.apply(ShapelyConnec.from_geojson)
         return srs
 
     @staticmethod
@@ -420,6 +422,8 @@ class SeriesConnec(NtvConnector):
         ntv_type = name_type
         if ntv_type in ['point', 'line', 'polygon', 'geometry']:
             return (ntv_type, srs.apply(ShapelyConnec.to_coord).to_list())
+        if ntv_type == 'geojson':
+            return (ntv_type, srs.apply(ShapelyConnec.to_geojson).to_list())
         if ntv_type == 'date':
             srs = srs.astype(str)
         if dtype == 'object':

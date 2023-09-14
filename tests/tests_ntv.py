@@ -659,7 +659,7 @@ class Test_Pandas_Connector(unittest.TestCase):
     
     def test_series(self):
         import pandas as pd
-        Point = geometry.point.Point
+        from shapely.geometry import Point, Polygon
         from json_ntv import read_json as read_json        
         from json_ntv import to_json as to_json
         from json_ntv import as_def_type as as_def_type        
@@ -714,6 +714,16 @@ class Test_Pandas_Connector(unittest.TestCase):
 
                # with ntv_type unknown in pandas and NTV conversion
                pd.Series([Point(1, 0), Point(1, 1), Point(1, 2)], name='::point'),
+               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2),
+                          Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                          Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
+                                  [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
+                                  name='::geometry'),
+               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2),
+                          Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                          Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
+                                  [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
+                                  name='::geojson'),
         ]
         for sr in srs:
             #print(Ntv.obj(sr))

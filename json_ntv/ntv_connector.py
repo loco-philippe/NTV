@@ -115,6 +115,17 @@ class ShapelyConnec(NtvConnector):
         ''' convert shapely geometry into geojson coordinates.'''
         return Ntv._listed(geom.__geo_interface__['coordinates'])
 
+    @staticmethod
+    def to_geojson(geom):
+        ''' convert shapely geometry into geojson string'''
+        return json.dumps(geom.__geo_interface__)
+
+    @staticmethod
+    def from_geojson(geojson):
+        ''' convert geojson string into shapely geometry.'''
+        from shapely import geometry
+        return geometry.shape(json.loads(geojson))
+    
     @staticmethod 
     def to_geometry(value):
         '''convert geojson coordinates into shapely geometry'''
