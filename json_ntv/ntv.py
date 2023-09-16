@@ -306,7 +306,10 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-
+    #def __del__(self):
+    #    if self.parent and self in self.parent:
+    #        raise NtvError('the entity have to be removed from his parent entity')
+            
     def childs(self, obj=False, nam=False, typ=False):
         ''' return a list of child Ntv entities or child data
         
@@ -784,9 +787,17 @@ class Ntv(ABC):
 
     def remove(self, first=True):
         '''remove self'''
-        xxxxx
-        pass
-
+        parent = self.parent
+        if parent:
+            idx = parent.ntv_value.index(self)
+            del parent[idx]
+        if not first:
+            while self in parent:
+                idx = parent.ntv_value.index(self)
+                del parent[idx]                
+        if not self in parent:
+            del self
+            
     def replace(self, ntv):
         '''replace self by ntv in the tree'''
         parent = self.parent
@@ -1047,7 +1058,10 @@ class NtvList(Ntv):
 
     def __delitem__(self, ind):
         '''remove ntv_value item at the `ind` row'''
+        #ntv = self.ntv_value[ind]
         self.ntv_value.pop(ind)
+        #if not ntv in self:
+        #    del ntv
 
     def append(self, ntv):
         ''' add ntv at the end of the list of Ntv entities included'''
