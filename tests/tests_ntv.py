@@ -13,7 +13,7 @@ import csv
 from itertools import product
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
-from json_ntv import agreg_type, NtvTree, NtvConnector
+from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp
 from shapely import geometry
 
 class Test_Ntv_fast(unittest.TestCase):
@@ -778,7 +778,17 @@ class Test_Pandas_Connector(unittest.TestCase):
             #print(ntv)
             self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
 
-                        
+class Test_NtvPatch(unittest.TestCase):
+    
+    def test_op(self):
+        a=Ntv.obj({'test': [[1, 2, 3], [0,1,2,0,1,{'val':[1,2]}]],'truc':1})
+        entity = {'new': 'entity'}
+        #ntv_entity = Ntv.obj(entity)
+        add = NtvOp({'op':'add', 'path':'/0/1', 'entity': entity})
+        test = NtvOp({'op':'test', 'path':'/0/1', 'entity': entity})
+        remove = NtvOp({'op':'remove', 'path':'/0/1/6'})
+        self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
+            
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)

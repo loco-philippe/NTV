@@ -306,6 +306,11 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
+    def __del__(self):
+        '''remove self'''
+        xxxxx
+        pass
+
     def childs(self, obj=False, nam=False, typ=False):
         ''' return a list of child Ntv entities or child data
         
