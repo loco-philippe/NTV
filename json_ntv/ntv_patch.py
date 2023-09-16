@@ -43,7 +43,9 @@ class NtvOp:
         if self.op in ['move', 'copy', 'add']:
             if self.op == 'move':
                 ntv = ntv_res[self.from_path]
-                idx = Ntv.list_pointer(ntv_res[self.from_path].json_pointer(True))[-1]
+                idx = Ntv.list_pointer(self.from_path)[-1]
+                if isinstance(idx, str): 
+                    idx = Ntv.list_pointer(ntv_res[self.from_path].json_pointer(True))[-1]
                 ntv_res[self.from_path].remove(index=idx)       
                 ntv.parent = None
             elif self.op == 'add':
@@ -59,7 +61,10 @@ class NtvOp:
             not self.index is None and self.ntv == ntv[self.path][self.index]):
             pass
         elif self.op == 'remove':
-            idx = Ntv.list_pointer(ntv_res[self.path].json_pointer(True))[-1]
+            idx = Ntv.list_pointer(self.path)[-1]
+            if isinstance(idx, str): 
+                idx = Ntv.list_pointer(ntv_res[self.path].json_pointer(True))[-1]
+            #idx = Ntv.list_pointer(ntv_res[self.path].json_pointer(True))[-1]
             ntv_res[self.path].remove(index=idx)       
         elif self.op == 'replace' and self.entity:
             ntv_res[self.path].replace(self.ntv)

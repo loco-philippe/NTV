@@ -800,11 +800,11 @@ class Ntv(ABC):
         idx = parent.ntv_value.index(self) if index is None else index
         if not parent[idx] == self:
             raise NtvError('the entity is not present at the index')
-        del parent[idx]
+        del parent.ntv_value[idx]
         if not first and index is None:
             while self in parent:
                 idx = parent.ntv_value.index(self)
-                del parent[idx]                
+                del parent.ntv_value[idx]                
         if not self in parent:
             self.parent = None
         return
