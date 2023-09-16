@@ -795,8 +795,8 @@ class Ntv(ABC):
             while self in parent:
                 idx = parent.ntv_value.index(self)
                 del parent[idx]                
-        if not self in parent:
-            del self
+        #if not self in parent:
+        #    del self
             
     def replace(self, ntv):
         '''replace self by ntv in the tree'''
