@@ -306,10 +306,6 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-    def __del__(self):
-        '''remove self'''
-        xxxxx
-        pass
 
     def childs(self, obj=False, nam=False, typ=False):
         ''' return a list of child Ntv entities or child data
@@ -785,6 +781,11 @@ class Ntv(ABC):
             maxv = len(self.ntv_value) if maxi < 1 else maxi
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxv]])
         raise NtvError('the ntv entity is not consistent')
+
+    def remove(self, first=True):
+        '''remove self'''
+        xxxxx
+        pass
 
     def replace(self, ntv):
         '''replace self by ntv in the tree'''
