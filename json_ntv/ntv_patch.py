@@ -57,7 +57,7 @@ class NtvOp:
             not self.index is None and self.ntv == ntv[self.path][self.index]):
             pass
         elif self.op == 'remove':
-            del ntv_res[self.path]            
+            ntv_res[self.path].remove()       
         elif self.op == 'replace' and self.entity:
             ntv_res[self.path].replace(self.ntv)
         else:

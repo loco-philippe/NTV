@@ -785,18 +785,29 @@ class Ntv(ABC):
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxv]])
         raise NtvError('the ntv entity is not consistent')
 
-    def remove(self, first=True):
-        '''remove self'''
+    def remove(self, first=True, index=None):
+        '''remove self from its parent entity.
+        
+        *parameters*
+        
+        - **first** : boolean (default True) - if True only the first instance
+        else all
+        - **index** : integer (default None) - index of self in its parent
+        '''
         parent = self.parent
-        if parent:
-            idx = parent.ntv_value.index(self)
-            del parent[idx]
+        if not parent:
+            return
+        idx = parent.ntv_value.index(self) if not index else index
+        if not parent[index] == self:
+            raise NtvError('the entity is not present at the index')
+        del parent[idx]
         if not first:
             while self in parent:
                 idx = parent.ntv_value.index(self)
                 del parent[idx]                
-        #if not self in parent:
-        #    del self
+        if not self in parent:
+            self.parent = None
+        return
             
     def replace(self, ntv):
         '''replace self by ntv in the tree'''

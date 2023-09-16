@@ -788,6 +788,11 @@ class Test_NtvPatch(unittest.TestCase):
         test = NtvOp({'op':'test', 'path':'/0/1', 'entity': entity})
         remove = NtvOp({'op':'remove', 'path':'/0/1/6'})
         self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
+        add = NtvOp({'op':'add', 'path':'/0/1', 'entity': entity, 'index': 0})
+        test = NtvOp({'op':'test', 'path':'/0/1', 'entity': entity, 'index':0})
+        remove = NtvOp({'op':'remove', 'path':'/0/1/6'})
+        self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
+        
             
 if __name__ == '__main__':
     
