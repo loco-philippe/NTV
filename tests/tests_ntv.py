@@ -781,18 +781,29 @@ class Test_Pandas_Connector(unittest.TestCase):
 class Test_NtvPatch(unittest.TestCase):
     
     def test_op(self):
-        a=Ntv.obj({'test': [[1, 2, 3], [0,1,2,0,1,{'val':[1,2]}]],'truc':1})
+        a = Ntv.obj({'test': [[1, 2, 3], [0,1,2,0,1,{'val':[1,2]}]],'truc':1})
         entity = {'new': 'entity'}
         #ntv_entity = Ntv.obj(entity)
-        add = NtvOp({'op':'add', 'path':'/0/1', 'entity': entity})
-        test = NtvOp({'op':'test', 'path':'/0/1', 'entity': entity})
-        remove = NtvOp({'op':'remove', 'path':'/0/1/6'})
+        add = NtvOp({'op': 'add', 'path': '/0/1', 'entity': entity})
+        test = NtvOp({'op': 'test', 'path': '/0/1', 'entity': entity})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/6'})
         self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
-        add = NtvOp({'op':'add', 'path':'/0/1', 'entity': entity, 'index': 0})
-        test = NtvOp({'op':'test', 'path':'/0/1', 'entity': entity, 'index':0})
-        remove = NtvOp({'op':'remove', 'path':'/0/1/6'})
+        add = NtvOp({'op': 'add', 'path': '/0/1', 'entity': entity, 'index': 0})
+        test = NtvOp({'op': 'test', 'path': '/0/1', 'entity': entity, 'index': 0})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/0'})
         self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
-        
+        repl = NtvOp({'op': 'replace', 'path': '/0/1/1', 'entity': entity})
+        test = NtvOp({'op': 'test', 'path': '/0/1', 'entity': entity})
+        invr = NtvOp({'op': 'replace', 'path': '/0/1/1', 'entity': 1})
+        self.assertEqual(invr.exe(test.exe(repl.exe(a))), a)
+        move = NtvOp({'op': 'move', 'from': '/0/1/1', 'path': '/0/1', 'index': 2})
+        test = NtvOp({'op': 'test', 'path': '/0/1', 'entity': 1, 'index': 2})
+        invm = NtvOp({'op': 'move', 'from': '/0/1/2', 'path': '/0/1', 'index': 1})
+        self.assertEqual(invm.exe(test.exe(move.exe(a))), a)        
+        cop = NtvOp({'op': 'copy', 'from': '/0/1/1', 'path': '/0/1',  'index': 3})
+        test = NtvOp({'op': 'test', 'path': '/0/1', 'entity': 1, 'index': 3})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/3'})
+        self.assertEqual(remove.exe(test.exe(cop.exe(a))), a)
             
 if __name__ == '__main__':
     

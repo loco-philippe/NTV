@@ -116,7 +116,7 @@ class Ntv(ABC):
     - `childs`
     - `pointer`
     - `json_pointer`
-    - `set_pointer`
+    - `list_pointer`
     - `replace`
     - `append` (NtvList only)
     - `insert` (NtvList only)
@@ -287,7 +287,7 @@ class Ntv(ABC):
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
             selec = selec[0]
         if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
-            selec = Ntv.set_pointer(selec)
+            selec = Ntv.list_pointer(selec)
         if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
         if isinstance(self, NtvSingle):
@@ -361,7 +361,7 @@ class Ntv(ABC):
         return json_p
 
     @staticmethod 
-    def set_pointer(json_pointer):
+    def list_pointer(json_pointer):
         '''convert a json_pointer string into a pointer list''' 
         split_pointer = json_pointer.split('/')
         if len(split_pointer) == 0:
@@ -797,11 +797,11 @@ class Ntv(ABC):
         parent = self.parent
         if not parent:
             return
-        idx = parent.ntv_value.index(self) if not index else index
-        if not parent[index] == self:
+        idx = parent.ntv_value.index(self) if index is None else index
+        if not parent[idx] == self:
             raise NtvError('the entity is not present at the index')
         del parent[idx]
-        if not first:
+        if not first and index is None:
             while self in parent:
                 idx = parent.ntv_value.index(self)
                 del parent[idx]                
@@ -815,8 +815,9 @@ class Ntv(ABC):
         if parent:
             idx = parent.ntv_value.index(self)
             parent.insert(idx, ntv)
-            del(parent[idx+1])
-            self.parent=None
+            del parent[idx+1]
+            if not self in parent:
+                self.parent=None
         else:
             self = ntv
 
@@ -1057,7 +1058,9 @@ class NtvList(Ntv):
 
     def __copy__(self):
         ''' Copy all the data '''
-        return self.__class__(self)
+        cop = self.__class__(self)
+        cop.parent = None
+        return cop
 
     def __setitem__(self, ind, value):
         ''' replace ntv_value item at the `ind` row with `value`'''
@@ -1069,8 +1072,8 @@ class NtvList(Ntv):
 
     def __delitem__(self, ind):
         '''remove ntv_value item at the `ind` row'''
-        #ntv = self.ntv_value[ind]
-        self.ntv_value.pop(ind)
+        idx = self.ntv_value.index(self[ind])
+        self.ntv_value.pop(idx)
         #if not ntv in self:
         #    del ntv
 
