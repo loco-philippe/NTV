@@ -13,26 +13,34 @@ import json
 from json_ntv.ntv import Ntv
 from copy import copy
 
+OPERATIONS = ['add', 'test', 'move', 'remove', 'copy', 'replace']
+
 class NtvOp:
     ''' The NtvOp class defines operations to apply to an NTV entity'''
     
-    def __init__(self, op, path=None, entity=None, comment=None, from_path=None, index=None):
+    def __init__(self, op, path=None, entity=None, comment=None, from_path=None):
+        op = op.json if isinstance(op, NtvOp) else op
         dic = isinstance(op, dict)
         self.op         = op.get('op')         if dic else op
         self.path       = op.get('path')       if dic else path
         self.entity     = op.get('entity')     if dic else entity
         self.comment    = op.get('comment')    if dic else comment
         self.from_path  = op.get('from')       if dic else from_path
-        self.index      = op.get('index')      if dic else index
         self.ntv = Ntv.obj(self.entity) if self.entity else None
-        if not self.path or not self.op in ['add', 'test', 'move', 'remove', 
-                                            'copy', 'replace']:
+        if not self.path or not self.op in OPERATIONS:
             raise NtvOpError('path or op is not correct')
         
     def __repr__(self):
         '''return the json representation'''
         return json.dumps(self.json)
     
+    def __eq__(self, other):
+        ''' equal if op, path, entity, comment and from_path are equal'''
+        return self.__class__.__name__ == other.__class__.__name__ and\
+            self.op == other.op and self.path == other.path and\
+            self.entity == other.entity and self.comment == other.comment and\
+            self.from_path == other.from_path
+
     @property
     def json(self):
         '''return the json-value representation (dict)'''
@@ -86,6 +94,11 @@ class NtvOp:
 class NtvPatch:
     ''' The NtvPatch class defines a sequence of operations to apply to an 
     NTV entity'''
+
+    def __init__(self, list_op=None):
+        list_op = [] if not list_op else list_op 
+        self.list_op = [NtvOp(op) for op in list_op]
+        
 
 class NtvOpError(Exception):
     ''' NtvOp Exception'''

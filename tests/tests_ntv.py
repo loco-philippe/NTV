@@ -803,6 +803,7 @@ class Test_NtvPatch(unittest.TestCase):
         test = NtvOp({'op': 'test', 'path': '/0/1/3', 'entity': 1})
         remove = NtvOp({'op': 'remove', 'path': '/0/1/3'})
         self.assertEqual(remove.exe(test.exe(cop.exe(a))), a)
+        self.assertTrue( NtvOp(remove.json) == NtvOp(remove) == remove)
             
 if __name__ == '__main__':
     
