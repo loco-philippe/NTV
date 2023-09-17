@@ -30,10 +30,12 @@ class NtvOp:
             raise NtvOpError('path or op is not correct')
         
     def __repr__(self):
+        '''return the json representation'''
         return json.dumps(self.json)
     
     @property
     def json(self):
+        '''return the json-value representation (dict)'''
         dic = {'op': self.op, 'path': self.path, 'entity': self.entity, 
                'comment':self.comment, 'from': self.from_path, 'index': self.index}
         return {key: val for key, val in dic.items() if val}
@@ -42,30 +44,34 @@ class NtvOp:
     def index(path):
         '''return the last pointer of the path and the path without the last pointer'''
         pointer = Ntv.pointer_list(path)
+        if pointer == []:
+            return (None, None)
         return (pointer[-1], Ntv.pointer_json(pointer[:-1]))
 
     def exe(self, ntv):
+        '''execute the operation with ntv entity and return the resulting entity'''
         ntv_res = copy(ntv)
+        idx, p_path = NtvOp.index(self.path)
         if self.op in ['move', 'copy', 'add']:
-            if self.op == 'move':
+            if self.op == 'add' and self.entity:
+                ntv = self.ntv
+            elif self.op == 'copy' and self.from_path:
+                ntv = copy(ntv_res[self.from_path])                
+            elif self.op == 'move' and self.from_path:
                 ntv = ntv_res[self.from_path]
-                idx = NtvOp.index(self.from_path)[0]
-                if isinstance(idx, str): 
-                    idx = NtvOp.index(ntv_res[self.from_path].json_pointer(True))[0]
-                ntv_res[self.from_path].remove(index=idx)       
+                from_idx, from_p_path = NtvOp.index(self.from_path)
+                del ntv_res[from_p_path][from_idx]
                 ntv.parent = None
-            elif self.op == 'add':
-                ntv = self.ntv           
             else:
-                ntv = copy(ntv_res[self.from_path])
-            if self.index is None:
-                ntv_res[self.path].append(ntv)
+                raise NtvOpError('op is not correct')
+            if idx == '-':
+                ntv_res[p_path].append(ntv)
             else:
-                ntv_res[self.path].insert(self.index, ntv)                
-        elif self.op == 'test' and self.entity and (
-            self.index is None and self.ntv in ntv[self.path] or
-            not self.index is None and self.ntv == ntv[self.path][self.index]):
-            pass
+                ntv_res[p_path].insert(idx, ntv)                            
+        elif self.op == 'test' and self.entity:
+            if not (idx == '-' and self.ntv in ntv[p_path]) and not (
+                isinstance(idx, int) and self.ntv == ntv[self.path]):
+                raise NtvOpError('test is not correct')                
         elif self.op == 'remove':
             idx = NtvOp.index(self.path)[0]
             if isinstance(idx, str): 
