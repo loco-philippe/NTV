@@ -13,7 +13,7 @@ import csv
 from itertools import product
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
-from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp
+from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch
 from shapely import geometry
 
 class Test_Ntv_fast(unittest.TestCase):
@@ -781,12 +781,12 @@ class Test_Pandas_Connector(unittest.TestCase):
 class Test_NtvPatch(unittest.TestCase):
     
     def test_op(self):
-        a = Ntv.obj({'test': [[1, 2, 3], [0,1,2,0,1,{'val':[1,2]}]],'truc':1})
+        a = Ntv.obj({'test': [[1, 2, 3], {'liste': [0,1,2,0,1,{'val':[1,2]}]}],'truc':1})
         entity = {'new': 'entity'}
-        add = NtvOp({'op': 'add', 'path': '/0/1/-', 'entity': entity})
+        add = NtvOp({'op': 'add', 'path': '/0/liste/-', 'entity': entity})
         test = NtvOp({'op': 'test', 'path': '/0/1/-', 'entity': entity})
-        remove = NtvOp({'op': 'remove', 'path': '/0/1/6'})
-        self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/-'})
+        self.assertEqual(NtvPatch([add, test, remove]).exe(a), a)
         add = NtvOp({'op': 'add', 'path': '/0/1/0', 'entity': entity})
         test = NtvOp({'op': 'test', 'path': '/0/1/0', 'entity': entity})
         remove = NtvOp({'op': 'remove', 'path': '/0/1/0'})
@@ -797,14 +797,23 @@ class Test_NtvPatch(unittest.TestCase):
         self.assertEqual(invr.exe(test.exe(repl.exe(a))), a)
         move = NtvOp({'op': 'move', 'from': '/0/1/1', 'path': '/0/1/2'})
         test = NtvOp({'op': 'test', 'path': '/0/1/2', 'entity': 1})
-        invm = NtvOp({'op': 'move', 'from': '/0/1/2', 'path': '/0/1/1'})
+        invm = NtvOp({'op': 'move', 'from': '/0/liste/2', 'path': '/0/1/1'})
         self.assertEqual(invm.exe(test.exe(move.exe(a))), a)        
         cop = NtvOp({'op': 'copy', 'from': '/0/1/1', 'path': '/0/1/3'})
-        test = NtvOp({'op': 'test', 'path': '/0/1/3', 'entity': 1})
+        test = NtvOp({'op': 'test', 'path': '/0/liste/3', 'entity': 1})
         remove = NtvOp({'op': 'remove', 'path': '/0/1/3'})
         self.assertEqual(remove.exe(test.exe(cop.exe(a))), a)
         self.assertTrue( NtvOp(remove.json) == NtvOp(remove) == remove)
-            
+
+    def test_patch(self):
+        cop = NtvOp({'op': 'copy', 'from': '/0/1/1', 'path': '/0/1/3'})
+        test = NtvOp({'op': 'test', 'path': '/0/liste/3', 'entity': 1})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/3'})        
+        pat = NtvPatch([cop, test, remove])
+        pat.append(test)
+        del pat[3]
+        self.assertEqual(pat, NtvPatch([cop, test, remove]))
+        
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)

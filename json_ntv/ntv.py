@@ -117,6 +117,7 @@ class Ntv(ABC):
     - `pointer`
     - `json_pointer`
     - `replace`
+    - `remove`
     - `append` (NtvList only)
     - `insert` (NtvList only)
 
