@@ -38,14 +38,20 @@ class NtvOp:
                'comment':self.comment, 'from': self.from_path, 'index': self.index}
         return {key: val for key, val in dic.items() if val}
 
+    @staticmethod 
+    def index(path):
+        '''return the last pointer of the path and the path without the last pointer'''
+        pointer = Ntv.pointer_list(path)
+        return (pointer[-1], Ntv.pointer_json(pointer[:-1]))
+
     def exe(self, ntv):
         ntv_res = copy(ntv)
         if self.op in ['move', 'copy', 'add']:
             if self.op == 'move':
                 ntv = ntv_res[self.from_path]
-                idx = Ntv.list_pointer(self.from_path)[-1]
+                idx = NtvOp.index(self.from_path)[0]
                 if isinstance(idx, str): 
-                    idx = Ntv.list_pointer(ntv_res[self.from_path].json_pointer(True))[-1]
+                    idx = NtvOp.index(ntv_res[self.from_path].json_pointer(True))[0]
                 ntv_res[self.from_path].remove(index=idx)       
                 ntv.parent = None
             elif self.op == 'add':
@@ -61,10 +67,9 @@ class NtvOp:
             not self.index is None and self.ntv == ntv[self.path][self.index]):
             pass
         elif self.op == 'remove':
-            idx = Ntv.list_pointer(self.path)[-1]
+            idx = NtvOp.index(self.path)[0]
             if isinstance(idx, str): 
-                idx = Ntv.list_pointer(ntv_res[self.path].json_pointer(True))[-1]
-            #idx = Ntv.list_pointer(ntv_res[self.path].json_pointer(True))[-1]
+                idx = NtvOp.index(ntv_res[self.path].json_pointer(True))[0]
             ntv_res[self.path].remove(index=idx)       
         elif self.op == 'replace' and self.entity:
             ntv_res[self.path].replace(self.ntv)

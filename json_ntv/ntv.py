@@ -116,7 +116,6 @@ class Ntv(ABC):
     - `childs`
     - `pointer`
     - `json_pointer`
-    - `list_pointer`
     - `replace`
     - `append` (NtvList only)
     - `insert` (NtvList only)
@@ -133,6 +132,8 @@ class Ntv(ABC):
     - `decode_json` *(staticmethod)*
     - `from_obj_name` *(staticmethod)*
     - `obj_ntv` *(staticmethod)*
+    - `pointer_list` *(static method)*
+    - `pointer_json` *(static method)*
     '''
 
     def __init__(self, ntv_value, ntv_name, ntv_type):
@@ -287,7 +288,7 @@ class Ntv(ABC):
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
             selec = selec[0]
         if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
-            selec = Ntv.list_pointer(selec)
+            selec = Ntv.pointer_list(selec)
         if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
         if isinstance(self, NtvSingle):
@@ -351,17 +352,32 @@ class Ntv(ABC):
         - **default**: Str (default '') - default value if pointer is empty
         - **item_idx**: Integer (default None) - index value for the pointer 
         (useful with duplicate data)'''
+        #pointer = self.pointer(index, item_idx)
+        return Ntv.pointer_json(self.pointer(index, item_idx), default)
+        #json_p = ''
+        #if pointer == []:
+        #    return default
+        #for name in pointer:
+        #    json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
+        #return json_p
+
+    @staticmethod 
+    def pointer_json(list_pointer, default=''):
+        '''convert a list of pointer string into a json_pointer 
+        
+        *Parameters*
+
+        - **default**: Str (default '') - default value if pointer is empty
+        ''' 
         json_p = ''
-        pointer = self.pointer(index, item_idx)
-        #if pointer == ['']:
-        if pointer == []:
+        if list_pointer == []:
             return default
-        for name in pointer:
+        for name in list_pointer:
             json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
         return json_p
 
     @staticmethod 
-    def list_pointer(json_pointer):
+    def pointer_list(json_pointer):
         '''convert a json_pointer string into a pointer list''' 
         split_pointer = json_pointer.split('/')
         if len(split_pointer) == 0:
@@ -1072,8 +1088,13 @@ class NtvList(Ntv):
 
     def __delitem__(self, ind):
         '''remove ntv_value item at the `ind` row'''
-        idx = self.ntv_value.index(self[ind])
-        self.ntv_value.pop(idx)
+        if isinstance(ind, int):
+            self.ntv_value.pop(ind)
+        else:            
+            self.ntv_value.pop(self.ntv_value.index(self[ind]))
+
+        #idx = self.ntv_value.index(self[ind])
+        #self.ntv_value.pop(idx)
         #if not ntv in self:
         #    del ntv
 
