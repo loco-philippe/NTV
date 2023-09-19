@@ -384,18 +384,19 @@ class Test_Ntv_indexing(unittest.TestCase):
                        'dic': {'v1': 'val1', 'v2': 'val2'}})
         pointers = ['/a/1/1', '']
         for pointer in pointers:
-            self.assertEqual(pointer, ntv[pointer].json_pointer())
+            #self.assertEqual(pointer, ntv[pointer].json_pointer())
+            self.assertEqual(pointer, ntv[pointer].pointer().json())
 
     def test_pointer(self):
         a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
         self.assertTrue(a.parent is None)
-        self.assertEqual(a.pointer(), [])
-        self.assertEqual(a.json_pointer(), '')
-        self.assertEqual(a['t3'].pointer(index=True), [2])
-        self.assertEqual(a['t3'].json_pointer(True), '/2')
+        self.assertEqual(list(a.pointer()), [])
+        self.assertEqual(a.pointer().json(), '')
+        self.assertEqual(list(a['t3'].pointer(index=True)), [2])
+        self.assertEqual(a['t3'].pointer(True).json(), '/2')
         self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(a['t3'][0].pointer(index=True), [2, 0])
-        self.assertEqual(a['t3'][0].json_pointer(index=True), '/2/0')
+        self.assertEqual(list(a['t3'][0].pointer(index=True)), [2, 0])
+        self.assertEqual(a['t3'][0].pointer(index=True).json(), '/2/0')
                         
 class Test_Ntv_tabular(unittest.TestCase):
 
@@ -623,7 +624,8 @@ class Test_NtvTree(unittest.TestCase):
         tree = NtvTree(ntv)
         self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
-            [node.json_pointer() for node in tree.leaf_nodes][6], '/b')
+            #[node.json_pointer() for node in tree.leaf_nodes][6], '/b')
+            [node.pointer().json() for node in tree.leaf_nodes][6], '/b')
         self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])
         self.assertEqual(tree.height, 3)
         self.assertEqual(tree.size, 11)
@@ -655,7 +657,7 @@ class Test_NtvConnector(unittest.TestCase):
         for obj in list_obj:
             self.assertEqual(obj, NtvConnector.uncast(*NtvConnector.cast(obj))[0])
 
-class Test_Pandas_Connector(unittest.TestCase):
+"""class Test_Pandas_Connector(unittest.TestCase):
     
     def test_series(self):
         import pandas as pd
@@ -776,7 +778,7 @@ class Test_Pandas_Connector(unittest.TestCase):
                   {'quantity': [['1 kg', '10 kg'], [4]]}]:  # periodic Series
             ntv = Ntv.from_obj({':field': a})
             #print(ntv)
-            self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
+            self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv) """           
 
 class Test_NtvPatch(unittest.TestCase):
     

@@ -7,6 +7,12 @@ Created on Feb 27 2023
 The `NTV.ntv_connector` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
+A NtvConnector is defined by:
+- clas_obj: str - define the class name of the object to convert
+- clas_typ: str - define the NTVtype of the converted object
+- to_obj_ntv: method - converter from JsonNTV to the object
+- to_json_ntv: method - converter from the object to JsonNTV
+    
 It contains :
 
 - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
@@ -18,6 +24,7 @@ It contains :
     - `MermaidConnec`:   '$mermaid' connector
     - `ShapelyConnec`:   'geometry' connector
     - `CborConnec`:      '$cbor' connector
+
 
 """
 import datetime
@@ -354,11 +361,13 @@ class MermaidConnec(NtvConnector):
                 name += '<i>' + ntv.val + '</i>\n'
             else:
                 name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [ntv.json_pointer(index=True, default='/', item_idx=ind), ['rectangle', name[:-1]]]
+            return [ntv.pointer(index=True, item_idx=ind).json(default='/'), 
+                    ['rectangle', name[:-1]]]
         if not name:
             name = '<b>::</b>\n'
         name = name.replace('"', "'")
-        return [ntv.json_pointer(index=True, default='/', item_idx=ind), ['roundedge', name[:-1]]]
+        return [ntv.pointer(index=True, item_idx=ind).json(default='/'), 
+                ['roundedge', name[:-1]]]
 
     @staticmethod
     def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node, ind):
@@ -371,8 +380,8 @@ class MermaidConnec(NtvConnector):
                 MermaidConnec._mermaid_link(ntv_val, ntv.type_str,
                                             node_link, row, dic_node, ind)
                 node_link['links'].append(
-                    [ntv.json_pointer(index=True, default='/'), 'normalarrow',
-                     ntv_val.json_pointer(index=True, default='/', item_idx=ind)])
+                    [ntv.pointer(index=True).json(default='/'), 'normalarrow',
+                     ntv_val.pointer(index=True, item_idx=ind).json(default='/')])
 
     @staticmethod
     def _flowchart(ntv):

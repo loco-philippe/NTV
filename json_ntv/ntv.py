@@ -65,6 +65,7 @@ import json
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
 from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree
+from json_ntv.ntv_patch import NtvPointer
 
 
 class Ntv(ABC):
@@ -115,7 +116,6 @@ class Ntv(ABC):
     *tree methods (instance methods)*
     - `childs`
     - `pointer`
-    - `json_pointer`
     - `replace`
     - `remove`
     - `append` (NtvList only)
@@ -133,8 +133,6 @@ class Ntv(ABC):
     - `decode_json` *(staticmethod)*
     - `from_obj_name` *(staticmethod)*
     - `obj_ntv` *(staticmethod)*
-    - `pointer_list` *(static method)*
-    - `pointer_json` *(static method)*
     '''
 
     def __init__(self, ntv_value, ntv_name, ntv_type):
@@ -289,13 +287,14 @@ class Ntv(ABC):
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
             selec = selec[0]
         if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
-            selec = Ntv.pointer_list(selec)
+            selec = list(NtvPointer(selec))
+        elif isinstance(selec, NtvPointer):
+            selec = list(selec)
         if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
         if isinstance(self, NtvSingle):
             raise NtvError('item not present')
         if isinstance(selec, tuple):
-            #return [self.ntv_value[i] for i in selec]
             return [self[i] for i in selec]
         if isinstance(selec, str) and isinstance(self, NtvList):
             ind = [ntv.ntv_name for ntv in self.ntv_value].index(selec)
@@ -308,9 +307,6 @@ class Ntv(ABC):
         ''' return a comparison between hash value'''
         return hash(self) < hash(other)
 
-    #def __del__(self):
-    #    if self.parent and self in self.parent:
-    #        raise NtvError('the entity have to be removed from his parent entity')
             
     def childs(self, obj=False, nam=False, typ=False):
         ''' return a list of child Ntv entities or child data
@@ -339,54 +335,12 @@ class Ntv(ABC):
         - **item_idx**: Integer (default None) - index value for the pointer 
         (useful with duplicate data)'''
         if not self.parent:
-            return []        
+            return NtvPointer([])        
         idx = item_idx if item_idx else self.parent.ntv_value.index(self)
         num = index or (self.ntv_name == "" and self.parent.json_array)
-        return self.parent.pointer(index) + [idx if num else self.ntv_name]
-
-    def json_pointer(self, index=False, default='', item_idx=None):
-        '''return a string of pointer
-                
-        *Parameters*
-
-        - **index**: Boolean (default False) - use index instead of name
-        - **default**: Str (default '') - default value if pointer is empty
-        - **item_idx**: Integer (default None) - index value for the pointer 
-        (useful with duplicate data)'''
-        #pointer = self.pointer(index, item_idx)
-        return Ntv.pointer_json(self.pointer(index, item_idx), default)
-        #json_p = ''
-        #if pointer == []:
-        #    return default
-        #for name in pointer:
-        #    json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
-        #return json_p
-
-    @staticmethod 
-    def pointer_json(list_pointer, default=''):
-        '''convert a list of pointer string into a json_pointer 
-        
-        *Parameters*
-
-        - **default**: Str (default '') - default value if pointer is empty
-        ''' 
-        json_p = ''
-        if list_pointer == []:
-            return default
-        for name in list_pointer:
-            json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
-        return json_p
-
-    @staticmethod 
-    def pointer_list(json_pointer):
-        '''convert a json_pointer string into a pointer list''' 
-        split_pointer = json_pointer.split('/')
-        if len(split_pointer) == 0:
-            return []
-        if split_pointer[0] != '':
-            raise NtvError("json_pointer is not correct")
-        return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/') 
-                for nam in split_pointer[1:] ]       
+        pointer = self.parent.pointer(index)
+        pointer.append(idx if num else self.ntv_name)
+        return pointer
          
     @property
     def code_ntv(self):
@@ -421,7 +375,6 @@ class Ntv(ABC):
     def type_str(self):
         '''return a string with the value of the NtvType of the entity'''
         if not self.ntv_type:
-            # return None
             return ''
         return self.ntv_type.long_name
 
@@ -576,7 +529,6 @@ class Ntv(ABC):
         - **typ**: string, NtvType, Namespace (default None)'''
         if typ and not isinstance(typ, (str, NtvType, Namespace)):
             raise NtvError('the type is not a valid type')
-        #self.ntv_type = str_type(typ, True)
         self.ntv_type = str_type(typ, self.__class__.__name__ == 'NtvSingle')
 
     def set_value(self, value=None, fast=False):
@@ -738,11 +690,9 @@ class Ntv(ABC):
         ntv_list = len(value) != 1 if isinstance(
             value, dict) else isinstance(value, list)
         if not single and not ntv_list:
-            raise NtvError(
-                'the value is not compatible with not single NTV data')
+            raise NtvError('value is not compatible with not single NTV data')
         sep = ':' if single else '::'
-        sep = '' if not typ and (
-            not single or single and not ntv_list) else sep
+        sep = '' if not typ and (not single or single and not ntv_list) else sep
         name += sep + typ
         return {name: value} if name else value
 
@@ -1093,11 +1043,6 @@ class NtvList(Ntv):
             self.ntv_value.pop(ind)
         else:            
             self.ntv_value.pop(self.ntv_value.index(self[ind]))
-
-        #idx = self.ntv_value.index(self[ind])
-        #self.ntv_value.pop(idx)
-        #if not ntv in self:
-        #    del ntv
 
     def append(self, ntv):
         ''' add ntv at the end of the list of Ntv entities included'''
