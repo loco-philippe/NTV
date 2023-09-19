@@ -1,0 +1,58 @@
+Version 0.x
+===========
+
+0.1.0 ilist (2023-07-25)
+--------------------
+- Last version compatible with observation v.0.0.5
+- **NTV Connectors:**
+    - separation between Ntv core (without dependencies) and Ntv connectors
+    - replace observation connectors: `NfieldConnec`, `SfieldConnec`, `NdatasetConnec`, `SdatasetConnec`
+    - add pandas connectors: `DataFrameConnec`, `SeriesConnec`
+    - add Shapely, Mermaid and Cbor connectors: `ShapelyConnec`, `MermaidConnec`, `CborConnec` (replace interface with connector)
+    - `cast` and `uncast` methods available for all connectors
+
+- **NTV Structure:**
+    - NTV-value is extended from Json-value to any type of object (`fast` constructor without conversion and add methods: `to_json_ntv` and `to_obj_ntv`)
+
+- **NTV Features:**
+    - list and `NtvSingle` object allowed as ntv-value with NtvSingle
+    - computed default type for `NtvList` is now optional
+
+0.1.0 first version (2023-05-31)
+--------------------
+- Class Ntv:
+    - add tuple, cbor2 and null data in from_obj
+    - add alike , hash, to_name, address, set_value methods
+    - add field and pandas (Series, DataFrame) connector
+    - add mongoDB interface
+    - add mermaid viewer
+    - merge NtvSet and NtvList
+- configuration:
+    - Update NTV_global_namespace
+- Class NtvTree:
+    - creation
+
+0.0.5 alpha (2023-04-06)
+--------------------
+- Performances improvement
+- Generic object connector
+- Custom types and namespaces extension
+
+0.0.4 alpha (2023-04-04)
+--------------------
+- Add connectors :
+    - CSV and Ilist connectors
+    - pandas connectors (types : 'tab', 'field')
+    - custom types and connectors
+- Update global Namespace
+
+0.0.3 alpha (2023-03-29)
+--------------------
+- bug install v0.0.1 corrected
+
+0.0.1 alpha (2023-03-28)
+--------------------
+- First release candidate
+- Namespace and Type management (config, creation, use)
+- NTV objects (creation, import, export, format obj-json-cbor-tuple-repr)
+- NTV connector (pandas, custom)

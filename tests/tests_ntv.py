@@ -13,7 +13,8 @@ import csv
 from itertools import product
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
-from json_ntv import agreg_type, NtvTree, NtvConnector
+from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch
+import ntv_pandas as npd #used to update NtvConnector.dic_connec()
 from shapely import geometry
 
 class Test_Ntv_fast(unittest.TestCase):
@@ -384,18 +385,19 @@ class Test_Ntv_indexing(unittest.TestCase):
                        'dic': {'v1': 'val1', 'v2': 'val2'}})
         pointers = ['/a/1/1', '']
         for pointer in pointers:
-            self.assertEqual(pointer, ntv[pointer].json_pointer())
+            #self.assertEqual(pointer, ntv[pointer].json_pointer())
+            self.assertEqual(pointer, ntv[pointer].pointer().json())
 
     def test_pointer(self):
         a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
         self.assertTrue(a.parent is None)
-        self.assertEqual(a.pointer(), [])
-        self.assertEqual(a.json_pointer(), '')
-        self.assertEqual(a['t3'].pointer(index=True), [2])
-        self.assertEqual(a['t3'].json_pointer(True), '/2')
+        self.assertEqual(list(a.pointer()), [])
+        self.assertEqual(a.pointer().json(), '')
+        self.assertEqual(list(a['t3'].pointer(index=True)), [2])
+        self.assertEqual(a['t3'].pointer(True).json(), '/2')
         self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(a['t3'][0].pointer(index=True), [2, 0])
-        self.assertEqual(a['t3'][0].json_pointer(index=True), '/2/0')
+        self.assertEqual(list(a['t3'][0].pointer(index=True)), [2, 0])
+        self.assertEqual(a['t3'][0].pointer(index=True).json(), '/2/0')
                         
 class Test_Ntv_tabular(unittest.TestCase):
 
@@ -623,7 +625,8 @@ class Test_NtvTree(unittest.TestCase):
         tree = NtvTree(ntv)
         self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
-            [node.json_pointer() for node in tree.leaf_nodes][6], '/b')
+            #[node.json_pointer() for node in tree.leaf_nodes][6], '/b')
+            [node.pointer().json() for node in tree.leaf_nodes][6], '/b')
         self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])
         self.assertEqual(tree.height, 3)
         self.assertEqual(tree.size, 11)
@@ -655,11 +658,11 @@ class Test_NtvConnector(unittest.TestCase):
         for obj in list_obj:
             self.assertEqual(obj, NtvConnector.uncast(*NtvConnector.cast(obj))[0])
 
-class Test_Pandas_Connector(unittest.TestCase):
+"""class Test_Pandas_Connector(unittest.TestCase):
     
     def test_series(self):
         import pandas as pd
-        Point = geometry.point.Point
+        from shapely.geometry import Point, Polygon
         from json_ntv import read_json as read_json        
         from json_ntv import to_json as to_json
         from json_ntv import as_def_type as as_def_type        
@@ -714,6 +717,16 @@ class Test_Pandas_Connector(unittest.TestCase):
 
                # with ntv_type unknown in pandas and NTV conversion
                pd.Series([Point(1, 0), Point(1, 1), Point(1, 2)], name='::point'),
+               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2),
+                          Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                          Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
+                                  [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
+                                  name='::geometry'),
+               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2),
+                          Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                          Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
+                                  [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
+                                  name='::geojson'),
         ]
         for sr in srs:
             #print(Ntv.obj(sr))
@@ -766,9 +779,44 @@ class Test_Pandas_Connector(unittest.TestCase):
                   {'quantity': [['1 kg', '10 kg'], [4]]}]:  # periodic Series
             ntv = Ntv.from_obj({':field': a})
             #print(ntv)
-            self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
+            self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv) """           
 
-                        
+class Test_NtvPatch(unittest.TestCase):
+    
+    def test_op(self):
+        a = Ntv.obj({'test': [[1, 2, 3], {'liste': [0,1,2,0,1,{'val':[1,2]}]}],'truc':1})
+        entity = {'new': 'entity'}
+        add = NtvOp({'op': 'add', 'path': '/0/liste/-', 'entity': entity})
+        test = NtvOp({'op': 'test', 'path': '/0/1/-', 'entity': entity})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/-'})
+        self.assertEqual(NtvPatch([add, test, remove]).exe(a), a)
+        add = NtvOp({'op': 'add', 'path': '/0/1/0', 'entity': entity})
+        test = NtvOp({'op': 'test', 'path': '/0/1/0', 'entity': entity})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/0'})
+        self.assertEqual(remove.exe(test.exe(add.exe(a))), a)
+        repl = NtvOp({'op': 'replace', 'path': '/0/1/1', 'entity': entity})
+        test = NtvOp({'op': 'test', 'path': '/0/1/-', 'entity': entity})
+        invr = NtvOp({'op': 'replace', 'path': '/0/1/1', 'entity': 1})
+        self.assertEqual(invr.exe(test.exe(repl.exe(a))), a)
+        move = NtvOp({'op': 'move', 'from': '/0/1/1', 'path': '/0/1/2'})
+        test = NtvOp({'op': 'test', 'path': '/0/1/2', 'entity': 1})
+        invm = NtvOp({'op': 'move', 'from': '/0/liste/2', 'path': '/0/1/1'})
+        self.assertEqual(invm.exe(test.exe(move.exe(a))), a)        
+        cop = NtvOp({'op': 'copy', 'from': '/0/1/1', 'path': '/0/1/3'})
+        test = NtvOp({'op': 'test', 'path': '/0/liste/3', 'entity': 1})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/3'})
+        self.assertEqual(remove.exe(test.exe(cop.exe(a))), a)
+        self.assertTrue( NtvOp(remove.json) == NtvOp(remove) == remove)
+
+    def test_patch(self):
+        cop = NtvOp({'op': 'copy', 'from': '/0/1/1', 'path': '/0/1/3'})
+        test = NtvOp({'op': 'test', 'path': '/0/liste/3', 'entity': 1})
+        remove = NtvOp({'op': 'remove', 'path': '/0/1/3'})        
+        pat = NtvPatch([cop, test, remove])
+        pat.append(test)
+        del pat[3]
+        self.assertEqual(pat, NtvPatch([cop, test, remove]))
+        
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)

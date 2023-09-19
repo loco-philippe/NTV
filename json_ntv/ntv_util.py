@@ -19,6 +19,12 @@ class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
     for conversion between NTV-JSON data and NTV-OBJ data.
 
+    A NtvConnector child is defined by:
+    - clas_obj: str - define the class name of the object to convert
+    - clas_typ: str - define the NTVtype of the converted object
+    - to_obj_ntv: method - converter from JsonNTV to the object
+    - to_json_ntv: method - converter from the object to JsonNTV
+    
     *class method :*
     - `connector`
     - `dic_connec`
@@ -269,12 +275,27 @@ class NtvConnector(ABC):
         return [derkeys[pkey] for pkey in parentkeys]
 
     @staticmethod 
+    def encode_coef(lis):
+        '''Generate a repetition coefficient for periodic list'''
+        if len(lis) < 2:
+            return 0
+        coef = 1
+        while coef != len(lis):
+            if lis[coef-1] != lis[coef]:
+                break
+            coef += 1
+        if (not len(lis) % (coef * (max(lis) + 1)) and 
+            lis == NtvConnector.keysfromcoef(coef, max(lis) + 1, len(lis))):
+            return coef
+        return 0
+    
+    @staticmethod 
     def keysfromcoef(coef, period, leng=None):
         ''' return a list of keys with periodic structure'''
         if not leng:
             leng = coef * period
-        return None if not coef or not period else [ (ikey % (coef * period)) // coef 
-                                                    for ikey in range(leng)]    
+        return None if not (coef and period) else [(ind % (coef * period)) // coef 
+                                                   for ind in range(leng)]    
     @staticmethod
     def init_ntv_keys(ind, lidx, leng):
         ''' initialization of explicit keys data in lidx object of tabular data'''
@@ -315,6 +336,7 @@ class NtvTree:
 
     - **ntv** : Ntv entity
     - **_node**:  Ntv entity - node pointer
+    - **_stack**:  list - stack used to store context in recursive methods 
 
     *dynamic values (@property)*
     - `breadth`
