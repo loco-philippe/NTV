@@ -14,6 +14,7 @@ from itertools import product
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
 from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch
+import ntv_pandas as npd #used to update NtvConnector.dic_connec()
 from shapely import geometry
 
 class Test_Ntv_fast(unittest.TestCase):

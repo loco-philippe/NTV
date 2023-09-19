@@ -1,0 +1,23 @@
+Version 1.x
+===========
+
+1.0.0 (2023-09-20)
+--------------------
+
+- **NTV Connectors:**
+    - new complete version of pandas connectors available in a specific library (`ntv-pandas` library)
+    - add converter `to_geometry`, `to_coord`, `to_geojson` and `from_geojson` methods in Shapely connector
+
+- **NTV specification:**
+    - Complete set of NTVtype (see NTV_global_namespace.ini)
+    - Internet-Draft for JSON-NTV format (see IETF)
+
+- **NTV Structure:**
+    - add comment and change management in NTV data (new class `NtvComment`) 
+    - add string syntax for identifying a specific NTV entity (RFC6901 - new class `NtvPointer`), 
+    - add JSON data expressing a sequence of operations to apply (RFC6902 - new classes `NtvPatch` and `NtvOp`), 
+    - initialization of `NtvType` without distant access
+    - extension of `NtvTree`: add `dic_nodes` iterator
+    - add conversion methods: `to_simple` (NTV entity -> NV entity), `to_list` (NtvSingle -> NtvList) and `to_single` (NtvList -> NtvSingle) 
+    - add methods to change NTV structure: `append`, `insert`, `replace`, `copy`, `remove`
+    - add NTV data access `childs` method

@@ -13,7 +13,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="json_ntv",
-    version="0.1.0",
+    version="1.0.0",
     description="JSON-NTV a semantic format for interoperability",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -21,13 +21,13 @@ setup(
     author="Philippe Thomy",
     author_email="philippe@loco-labs.io",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        "Topic :: Software Development :: Build Tools",
+        "Topic :: JSON :: Software Development :: Build Tools :: Utilities",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3"],
     keywords="JSON-NTV, semantic JSON, development, environmental data",
     packages=find_packages(include=['json_ntv', 'json_ntv.*']),
     python_requires=">=3.7, <4",
-    install_requires=['shapely', 'cbor2', 'pandas']
+    install_requires=['shapely', 'cbor2']
 )
