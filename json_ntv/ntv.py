@@ -111,7 +111,7 @@ class Ntv(ABC):
     - `to_tuple`
     - `to_ntvsingle`
     - `to_ntvlist`
-    - `to_simple`
+    - `notype`
 
     *tree methods (instance methods)*
     - `childs`
@@ -482,13 +482,33 @@ class Ntv(ABC):
             ntv.set_name(self.ntv_name)
         return ntv
 
-    def to_simple(self):
+    def notype(self):
         '''convert self in a non semantic NTV (with ntv_type is 'json' or None')'''
         for ntv in NtvTree(self).leaf_nodes:
             ntv.set_type('json')           
         for ntv in NtvTree(self).inner_nodes:
             ntv.set_type()
-            
+
+    def reduce(self, maxi=10, level=1):
+        '''reduce the length and the level of the entity'''
+        ntv = copy.copy(self)
+        cont = Ntv.obj('...') if self.json_array else Ntv.obj({'...':''})            
+        if isinstance(self, NtvSingle):
+            return ntv
+        if level == 0:
+            ntv.ntv_value = [NtvSingle('...',ntv_type=ntv.type_str)]
+        if len(self) <= maxi:
+            ntv.ntv_value = [child.reduce(maxi, level-1) for child in ntv]
+            return ntv
+        mid = maxi // 2
+        cont.set_type(ntv.type_str)
+        start = [child.reduce(maxi, level-1) for child in ntv[:mid]]
+        #middle = [NtvSingle('...',ntv_type=ntv.type_str)]
+        middle = [cont]
+        end = [child.reduce(maxi, level-1) for child in ntv[-mid:]]
+        ntv.ntv_value = start + middle + end
+        return ntv
+    
     def set_name(self, name='', nodes='simple'):
         '''set new names to the entity
 
