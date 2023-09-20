@@ -262,7 +262,8 @@ class Ntv(ABC):
 
     def __repr__(self):
         '''return classname and code'''
-        return json.dumps(self.to_repr(False, False, False, 10), cls=NtvJsonEncoder)
+        #return json.dumps(self.to_repr(False, False, False, 10), cls=NtvJsonEncoder)
+        return self.reduce(obj=False, level=3, maxi=6).to_obj(encoded=True)
 
     def __contains__(self, item):
         ''' item of Ntv entities'''
@@ -483,14 +484,27 @@ class Ntv(ABC):
         return ntv
 
     def notype(self):
-        '''convert self in a non semantic NTV (with ntv_type is 'json' or None')'''
-        for ntv in NtvTree(self).leaf_nodes:
+        '''convert NTV entity in a NV entity (with ntv_type is 'json' or None')'''
+        no_type = copy.copy(self)
+        for ntv in NtvTree(no_type).leaf_nodes:
             ntv.set_type('json')           
-        for ntv in NtvTree(self).inner_nodes:
+        for ntv in NtvTree(no_type).inner_nodes:
             ntv.set_type()
+        return no_type
 
-    def reduce(self, maxi=10, level=1):
-        '''reduce the length and the level of the entity'''
+    def reduce(self, obj=True, maxi=6, level=3):
+        '''reduce the length and the level of the entity
+        
+        *Parameters*
+
+        - **obj**: boolean (default True) - If True return jsonNTV else NTV entity
+        - **maxi**: integer (default 6) - Number of returned entities in an NtvList
+        - **level**: integer (default 6) - returned entities in an NtvList at this level is None
+        
+        *return*
+        
+        - **NTV entity** or **jsonNTV**
+        '''
         ntv = copy.copy(self)
         cont = Ntv.obj('...') if self.json_array else Ntv.obj({'...':''})            
         if isinstance(self, NtvSingle):
@@ -498,15 +512,17 @@ class Ntv(ABC):
         if level == 0:
             ntv.ntv_value = [NtvSingle('...',ntv_type=ntv.type_str)]
         if len(self) <= maxi:
-            ntv.ntv_value = [child.reduce(maxi, level-1) for child in ntv]
+            ntv.ntv_value = [child.reduce(False, maxi, level-1) for child in ntv]
             return ntv
         mid = maxi // 2
         cont.set_type(ntv.type_str)
-        start = [child.reduce(maxi, level-1) for child in ntv[:mid]]
+        start = [child.reduce(False, maxi, level-1) for child in ntv[:mid]]
         #middle = [NtvSingle('...',ntv_type=ntv.type_str)]
         middle = [cont]
-        end = [child.reduce(maxi, level-1) for child in ntv[-mid:]]
+        end = [child.reduce(False, maxi, level-1) for child in ntv[-mid:]]
         ntv.ntv_value = start + middle + end
+        if obj:
+            return ntv.to_obj()
         return ntv
     
     def set_name(self, name='', nodes='simple'):
