@@ -28,6 +28,7 @@ setup(
         "Programming Language :: Python :: 3"],
     keywords="JSON-NTV, semantic JSON, development, environmental data",
     packages=find_packages(include=['json_ntv', 'json_ntv.*']),
+    package_data={'json_ntv': ['*.ini']},
     python_requires=">=3.7, <4",
     install_requires=['shapely', 'cbor2']
 )

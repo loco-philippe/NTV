@@ -516,7 +516,7 @@ class Namespace():
             if module:
                 p_file = Path(parent.file).stem + Path(parent.file).suffix
                 config.read(Path(json_ntv.__file__
-                    ).parent.parent.joinpath('config', p_file))
+                    ).parent.joinpath(p_file))
             else:
                 config.read_string(requests.get(
                     parent.file, allow_redirects=True).content.decode())
@@ -546,7 +546,7 @@ class Namespace():
         if module:
             p_file = Path(file).stem + Path(file).suffix
             config.read(Path(json_ntv.__file__
-                ).parent.parent.joinpath('config', p_file))
+                ).parent.joinpath(p_file))
         else:
             config.read_string(requests.get(
                 file, allow_redirects=True).content.decode())

@@ -11,6 +11,7 @@ import unittest
 import datetime
 import csv
 from itertools import product
+import json
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
 from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch
@@ -20,32 +21,38 @@ from shapely import geometry
 class Test_Ntv_fast(unittest.TestCase):
 
     def test_from_obj_repr(self):
-        list_repr = [[1, '"s"'],
-                     [{"truc":  1}, '"sN"'],
-                     [{":point": 1}, '"sT"'],
-                     [{"truc:":  1}, '"sN"'],
-                     [{":": 1}, '"s"'],
-                     [[1, 2], '{"l": ["s", "s"]}'],
-                     [{"truc": [1, 2]}, '{"lN": ["s", "s"]}'],
-                     [{":point": [1, 2]}, '"sT"'],
-                     [{"truc:":  [1, 2]}, '"sN"'],
-                     [{":": [1, 2]}, '"s"'],
-                     [{"::": [1, 2]}, '{"l": ["s", "s"]}'],
-                     [{"::": {"a": 2}}, '{"l": ["sN"]}'],
-                     [{"::": [[1, 2], [3, 4]]},
-                         '{"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}'],
-                     [{"::point": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
-                     [{"::array": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
-                     [{"::array": [{'a': 3, 'e':5}, {'a': 4, 'e':6}]}, '{"lT": ["sT", "sT"]}'],
-                     [{"a": 2}, '"sN"'],
-                     #[{"truc": {"a": 2}}, '{"sN": "sN"}'],
-                     [{":point": {"a": 2}}, '"sT"'],
-                     [{"truc:": {"a": 2}}, '"sN"'],
-                     [{":": {"a": 2}}, '"s"']]
+        list_repr = [[1, "s"],
+                     [{"truc":  1}, "sN"],
+                     [{":point": 1}, "sT"],
+                     [[1, 2], {"l": ["s", "s"]}],
+                     [{"truc": [1, 2]}, {"lN": ["s", "s"]}],
+                     [{":point": [1, 2]}, "sT"],
+                     [{"truc:":  [1, 2]}, "sN"],
+                     [{":": [1, 2]}, "s"],
+                     [{"::point": [[1, 2], [3, 4]]}, {"lT": ["sT", "sT"]}],
+                     [{"::array": [[1, 2], [3, 4]]}, {"lT": ["sT", "sT"]}],
+                     [{"::array": [{'a': 3, 'e':5}, {'a': 4, 'e':6}]}, {"lT": ["sT", "sT"]}],
+                     [{"a": 2}, "sN"],
+                     [{":point": {"a": 2}}, "sT"]
+                     ]
         for test in list_repr:
             #print(test)
-            self.assertEqual(repr(Ntv.fast(test[0])), test[1])
-
+            self.assertEqual(Ntv.fast(test[0]).to_repr(False, False, False, 10), test[1])
+            self.assertEqual(json.loads(repr(Ntv.fast(test[0]))), test[0])
+        list_repr = [[{"truc:":  1}, "sN"],
+                     [{":": 1}, "s"],
+                     [{"::": [1, 2]}, {"l": ["s", "s"]}],
+                     [{"::": {"a": 2}}, {"l": ["sN"]}],
+                     [{"::": [[1, 2], [3, 4]]},
+                         {"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}],
+                     [{"truc": {"a": 2}}, "sN"],
+                     [{"truc:": {"a": 2}}, "sN"],
+                     [{":": {"a": 2}}, "s"]
+                     ]
+        for test in list_repr:
+            #print(test)
+            self.assertEqual(Ntv.fast(test[0]).to_repr(False, False, False, 10), test[1])
+            
     def test_from_obj_json_txt(self):
         dictstr = [['NtvSingle', 'null'],
                    ['NtvSingle', '{"none": null}'],
@@ -185,33 +192,38 @@ class Test_Ntv_fast(unittest.TestCase):
 class Test_Ntv_creation(unittest.TestCase):
 
     def test_from_obj_repr(self):
-        list_repr = [[1, '"s"'],
-                     [{"truc":  1}, '"sN"'],
-                     [{":point": 1}, '"sT"'],
-                     [{"truc:":  1}, '"sN"'],
-                     [{":": 1}, '"s"'],
-                     [[1, 2], '{"l": ["s", "s"]}'],
-                     [{"truc": [1, 2]}, '{"lN": ["s", "s"]}'],
-                     [{":point": [1, 2]}, '"sT"'],
-                     [{"truc:":  [1, 2]}, '"sN"'],
-                     [{":": [1, 2]}, '"s"'],
-                     [{"::": [1, 2]}, '{"l": ["s", "s"]}'],
-                     [{"::": {"a": 2}}, '{"l": ["sN"]}'],
-                     [{"::": [[1, 2], [3, 4]]},
-                         '{"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}'],
-                     [{"::point": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
-                     [{"::array": [[1, 2], [3, 4]]}, '{"lT": ["sT", "sT"]}'],
-                     [{"::array": [{'a': 3, 'e':5}, {'a': 4, 'e':6}]}, '{"lT": ["sT", "sT"]}'],
-                     [{"a": 2}, '"sN"'],
-                     [{"truc": {"a": 2}}, '"sN"'],
-                     #[{"truc": {"a": 2}}, '{"sN": "sN"}'],
-                     [{":point": {"a": 2}}, '"sT"'],
-                     [{"truc:": {"a": 2}}, '"sN"'],
-                     [{":": {"a": 2}}, '"s"']]
+        list_repr = [[1, "s"],
+                     [{"truc":  1}, "sN"],
+                     [{":point": 1}, "sT"],
+                     [[1, 2], {"l": ["s", "s"]}],
+                     [{"truc": [1, 2]}, {"lN": ["s", "s"]}],
+                     [{":point": [1, 2]}, "sT"],
+                     [{"truc:":  [1, 2]}, "sN"],
+                     [{":": [1, 2]}, "s"],
+                     [{"::point": [[1, 2], [3, 4]]}, {"lT": ["sT", "sT"]}],
+                     [{"::array": [[1, 2], [3, 4]]}, {"lT": ["sT", "sT"]}],
+                     [{"::array": [{'a': 3, 'e':5}, {'a': 4, 'e':6}]}, {"lT": ["sT", "sT"]}],
+                     [{"a": 2}, "sN"],
+                     [{":point": {"a": 2}}, "sT"]
+                     ]
         for test in list_repr:
-            # print(test)
-            self.assertEqual(repr(Ntv.from_obj(test[0])), test[1])
-
+            #print(test)
+            self.assertEqual(Ntv.from_obj(test[0]).to_repr(False, False, False, 10), test[1])
+            self.assertEqual(json.loads(repr(Ntv.fast(test[0]))), test[0])
+        list_repr = [[{"truc:":  1}, "sN"],
+                     [{":": 1}, "s"],
+                     [{"::": [1, 2]}, {"l": ["s", "s"]}],
+                     [{"::": {"a": 2}}, {"l": ["sN"]}],
+                     [{"::": [[1, 2], [3, 4]]},
+                         {"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}],
+                     [{"truc": {"a": 2}}, "sN"],
+                     [{"truc:": {"a": 2}}, "sN"],
+                     [{":": {"a": 2}}, "s"]
+                     ]
+        for test in list_repr:
+            #print(test)
+            self.assertEqual(Ntv.from_obj(test[0]).to_repr(False, False, False, 10), test[1])
+            
     def test_from_obj_ko(self):
         liststr = [{"::": 1}]
         for nstr in liststr:
@@ -219,10 +231,10 @@ class Test_Ntv_creation(unittest.TestCase):
                 Ntv.from_obj(nstr)
 
     def test_from_att(self):
-        self.assertEqual(
-            repr(Ntv.obj(([[1, 2], [3, 4]], None, 'point', 'single'))), '"sT"')
-        self.assertEqual(
-            repr(Ntv.obj(([[1, 2], [3, 4]], None, 'point', 'list'))), '{"lT": ["sT", "sT"]}')
+        self.assertEqual(repr(Ntv.obj(([[1, 2], [3, 4]], None, 'point', 'single'))), 
+                         '{":point": [[1, 2], [3, 4]]}')
+        self.assertEqual(repr(Ntv.obj(([[1, 2], [3, 4]], None, 'point', 'list'))),
+                         '{"::point": [[1, 2], [3, 4]]}')
 
     def test_from_obj_json_txt(self):
         dictstr = [['NtvSingle', 'null'],
