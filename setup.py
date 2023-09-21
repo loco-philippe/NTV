@@ -23,7 +23,7 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        "Topic :: JSON :: Software Development :: Build Tools :: Utilities",
+        "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3"],
     keywords="JSON-NTV, semantic JSON, development, environmental data",
