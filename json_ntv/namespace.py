@@ -6,12 +6,9 @@ Created on Jan 20 2023
 
 The `namespace` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
-
-It contains the `Namespace` and the `NtvType` classes and the `str_type` method for NTV entities.
-
-
-
-
+ 
+It contains the `Namespace` and the `NtvType` classes and the `str_type` method for NTV entities.    
+      
 # 0 - Presentation
 
 The NTVtype is defined by a name and a Namespace. The name is unique in the Namespace
@@ -55,24 +52,23 @@ The global namespace can include the following structures:
 | year               | 1998                          |
 | month              | 10                            |
 | day                | 21                            |
+| wday               | 2                             |
+| yday               | 251                           |
 | week               | 38                            |
 | hour               | 20                            |
 | minute             | 18                            |
 | second             | 54                            |
-| timeposix (dat)    | 123456.78                     |
 | date (dat)         | “2022-01-28”                  |
 | time (dat)         | “T18:23:54”,  “18:23”, “T18”  |
 | datetime (dat)     | “2022-01-28T18-23-54Z”, “2022-01-28T18-23-54+0400”        |
-| timearray (dat)    | [date1, date2]                |
-| timeslot (dat)     | [timearray1, timearray2]      |
 
 ## 1.3 - Duration (ISO8601 and Posix)
 
-| type (generic type) | value example                                |
-|---------------------|----------------------------------------------|
-| timeinterval (dur)  | "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"  |
-| durationiso (dur)   | "P0002-10- 15T10:30:20"                      |
-| durposix (dur)      | 123456.78                                    |
+| type (generic type)| value example                 |
+|--------------------|-------------------------------|
+| period             | "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"  |
+| duration           | "P0002-10- 15T10:30:20"       |
+| timearray          | [date1, date2]                |
 
 ## 1.4 - Location (RFC7946 and Open Location Code):
 
@@ -84,7 +80,7 @@ The global namespace can include the following structures:
 | multiline           | [ line1, line2, line3]       |
 | polygon (loc)       | [ ring1, ring2, ring3]       |
 | multipolygon (loc)  | [ poly1, poly2, poly3 ]      |
-| bbox (loc)          | [ -10.0, -10.0, 10.0, 10.0 ] |
+| box (loc)           | [ -10.0, -10.0, 10.0, 10.0 ] |
 | geojson (loc)       | {“type”: “point”, “coordinates”: [40.0, 0.0] } |
 | codeolc (loc)       | “8FW4V75V+8F6”               |
 

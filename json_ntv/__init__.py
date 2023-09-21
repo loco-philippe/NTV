@@ -33,17 +33,9 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv_util.NtvJsonEncoder`
     - `NTV.json_ntv.ntv_util.NtvError`
     - `NTV.json_ntv.ntv_util.NtvConnector` (abstract class)    
-          
-- `NTV.json_ntv.pandas_ntv_connector` :
-    
-    - `NTV.json_ntv.pandas_ntv_connector.DataFrameConnec`
-    - `NTV.json_ntv.pandas_ntv_connector.SeriesConnec`
-    
     
 - `NTV.json_ntv.ntv_connector` :
     
-    - `NTV.json_ntv.ntv_connector.DataFrameConnec`
-    - `NTV.json_ntv.ntv_connector.SeriesConnec`
     - `NTV.json_ntv.ntv_connector.NfieldConnec`
     - `NTV.json_ntv.ntv_connector.SfieldConnec`
     - `NTV.json_ntv.ntv_connector.NdatasetConnec`
@@ -51,7 +43,9 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv_connector.MermaidConnec`
     - `NTV.json_ntv.ntv_connector.CborConnec`
     - `NTV.json_ntv.ntv_connector.ShapelyConnec` 
-       
+
+Note: pandas connector is in another package `ntv-pandas.ntv_pandas.pandas_ntv_connector`      
+     
 # 0 - Abstract
 
 Today, the semantic level of shared data remains low. It is very often limited 
