@@ -30,8 +30,6 @@ It contains :
 import datetime
 import csv
 import json
-import pandas as pd
-import numpy as np
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
 #from observation import Sfield
