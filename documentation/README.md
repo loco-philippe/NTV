@@ -6,5 +6,6 @@ The documentation presents :
 - [the JSON-TAB specification](./JSON-TAB-standard.pdf) (Json for tabular data)
 - Python Connectors documentation
   - [dev](https://loco-philippe.github.io/NTV/json_ntv.html)
+  - [v1.0.1](https://loco-philippe.github.io/NTV/v1.0.1/json_ntv.html)
   - [v1.0.0](https://loco-philippe.github.io/NTV/v1.0.0/json_ntv.html)
 - [Release](./release)
