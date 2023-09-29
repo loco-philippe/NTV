@@ -1,6 +1,10 @@
 Version 1.x
 ===========
 
+1.0.1 (2023-09-30)
+--------------------
+- compatibility `ntv_pandas`: move `from_obj_name` method in `ntv_util` module
+
 1.0.0 (2023-09-20)
 --------------------
 
