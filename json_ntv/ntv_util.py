@@ -14,7 +14,33 @@ from abc import ABC, abstractmethod
 import datetime
 import json
 
+class NtvUtil:
+    ''' The NtvUtil class includes static methods used by several NTV classes '''
 
+    @staticmethod
+    def from_obj_name(string):
+        '''return a tuple with name, type and separator from string'''
+        if not isinstance(string, str):
+            raise NtvError('a json-name have to be str')
+        if string == '':
+            return (None, None, None)
+        sep = None
+        if '::' in string:
+            sep = '::'
+        elif ':' in string:
+            sep = ':'
+        if sep is None:
+            return (string, None, None)
+        split = string.rsplit(sep, 2)
+        if len(split) == 1:
+            return (string, None, sep)
+        if split[0] == '':
+            return (None, split[1], sep)
+        if split[1] == '':
+            return (split[0], None, sep)
+        return (split[0], split[1], sep)
+
+    
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
     for conversion between NTV-JSON data and NTV-OBJ data.

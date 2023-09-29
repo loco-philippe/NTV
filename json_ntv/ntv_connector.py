@@ -30,10 +30,11 @@ It contains :
 import datetime
 import csv
 import json
-import pandas as pd
-import numpy as np
+#import pandas as pd
+#import numpy as np
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
+from json_ntv.ntv_util import NtvUtil
 #from observation import Sfield
 
 
@@ -56,7 +57,7 @@ def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     list_ntv = []
     for ind_field, field in enumerate(names):
         list_ntv.append(
-            NtvList(list_ntv_value[ind_field], *Ntv.from_obj_name(field)[:2]))
+            NtvList(list_ntv_value[ind_field], *NtvUtil.from_obj_name(field)[:2]))
     if single_tab:
         return NtvSingle(NtvList(list_ntv, None, None).to_obj(), None, 'tab')
     return NtvList(list_ntv, None, None)
@@ -98,13 +99,14 @@ class ShapelyConnec(NtvConnector):
 
         *Parameters*
 
-        - **type_geo** : type of geometry (point, multipoint, line, multiline',
-        polygon, multipolygon)
+        - **type_geo** : type of geometry (point, multipoint, 
+        linestring, multilinestring', polygon, multipolygon)
         - **ntv_value** : array - coordinates'''
         from shapely import geometry
         type_geo = ShapelyConnec.type_geo(ntv_value) if not 'type_geo' in kwargs \
             or kwargs['type_geo'] == 'geometry' else kwargs['type_geo']
-        return geometry.shape({"type": type_geo, "coordinates": ntv_value})
+        return geometry.shape({"type": type_geo, 
+                               "coordinates": ntv_value})
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None):
@@ -137,7 +139,8 @@ class ShapelyConnec(NtvConnector):
     @staticmethod 
     def to_geometry(value):
         '''convert geojson coordinates into shapely geometry'''
-        return ShapelyConnec.to_obj_ntv(value, type_geo=ShapelyConnec.type_geo(value))
+        return ShapelyConnec.to_obj_ntv(value, type_geo=
+            NtvConnector.DIC_GEO[ShapelyConnec.type_geo(value)])
     
     @staticmethod 
     def type_geo(value):

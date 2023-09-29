@@ -64,7 +64,7 @@ from abc import ABC, abstractmethod
 import json
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
-from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree
+from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree, NtvUtil
 from json_ntv.ntv_patch import NtvPointer
 
 
@@ -131,7 +131,6 @@ class Ntv(ABC):
 
     *utility methods*
     - `decode_json` *(staticmethod)*
-    - `from_obj_name` *(staticmethod)*
     - `obj_ntv` *(staticmethod)*
     '''
 
@@ -383,29 +382,6 @@ class Ntv(ABC):
     def val(self):
         '''return the ntv_value of the entity'''
         return self.ntv_value
-
-    @staticmethod
-    def from_obj_name(string):
-        '''return a tuple with name, type and separator from string'''
-        if not isinstance(string, str):
-            raise NtvError('a json-name have to be str')
-        if string == '':
-            return (None, None, None)
-        sep = None
-        if '::' in string:
-            sep = '::'
-        elif ':' in string:
-            sep = ':'
-        if sep is None:
-            return (string, None, None)
-        split = string.rsplit(sep, 2)
-        if len(split) == 1:
-            return (string, None, sep)
-        if split[0] == '':
-            return (None, split[1], sep)
-        if split[1] == '':
-            return (split[0], None, sep)
-        return (split[0], split[1], sep)
 
     def alike(self, ntv_value):
         ''' return a Ntv entity with same name and type.
@@ -866,7 +842,7 @@ class Ntv(ABC):
         if isinstance(json_value, dict) and len(json_value) == 1:
             json_name = list(json_value.keys())[0]
             val = json_value[json_name]
-            return (val, *Ntv.from_obj_name(json_name), NtvConnector.is_json(val))
+            return (val, *NtvUtil.from_obj_name(json_name), NtvConnector.is_json(val))
         return (json_value, None, None, None, NtvConnector.is_json(json_value))
 
     @staticmethod

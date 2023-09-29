@@ -4,15 +4,15 @@ Created on Sun Apr 23 23:09:43 2023
 
 @author: a lab in the Air
 """
-from json_ntv import NtvList, NtvSingle, Ntv
+from json_ntv import NtvList, NtvSingle, NtvUtil
 
 class NtvStruct:
     
     def __init__(self, name, fields):
         '''fields : list of jsonname'''
         self.name = name
-        self.fields_n = [Ntv.from_obj_name(field)[0] for field in fields]
-        self.fields_t = [Ntv.from_obj_name(field)[1] for field in fields]
+        self.fields_n = [NtvUtil.from_obj_name(field)[0] for field in fields]
+        self.fields_t = [NtvUtil.from_obj_name(field)[1] for field in fields]
         self.values = None
         
     def setvalue(self, list_val):
