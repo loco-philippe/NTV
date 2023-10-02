@@ -14,7 +14,7 @@ With this evolution any data, whatever its semantic level, can be identified, sh
 The implementation of a type with a nested structure facilitates its appropriation.
 Finally, compatibility with existing JSON structures allows progressive deployment.
 
-# NTV uses
+## NTV uses
 
 Several variations and use cases of the NTV format are defined:
 - Tabular data exchange format (e.g. open-data)
@@ -23,7 +23,7 @@ Several variations and use cases of the NTV format are defined:
 - Mermaid visualization of JSON tree
 - JSON data editor
   
-# NTV structure
+## NTV structure
 
 The constructed entities (called NTV for *named typed value*) are therefore a triplet with one mandatory element (the value in JSON format) and two optional elements (name, type).
 >
@@ -59,7 +59,7 @@ The type incorporates a notion of `namespaces` that can be nested.
     
 This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate all the shared data structures within the same tree of types.
 
-# NTV and JSON
+## NTV and JSON
 
 The flowchart below explain how to convert and exchange native entities through NTV and JSON format.
 
@@ -82,14 +82,6 @@ flowchart LR
 - each JSON data corresponds to a unique NTV entity
 - an NTV entity is a tree where each node is an NTV entity and each leaf an NTV-Single entity
 - an NTV entity is a neutral representation (independent of a software or hardware platform)
-
-# Documentation and installation
-
-- [Specification](https://github.com/loco-philippe/NTV/tree/main/documentation/README.md)
-- [Example](https://github.com/loco-philippe/NTV/tree/main/example/README.md)
-- [Python Connectors documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
-- [installation and package](https://github.com/loco-philippe/NTV/tree/main/json_ntv/README.md)
-
 
 ### ***If you are interested challenge us !*** We will be very happy to show you the relevance of our approach
 
