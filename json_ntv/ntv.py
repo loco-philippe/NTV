@@ -103,6 +103,7 @@ class Ntv(ABC):
     - `to_obj_ntv`
 
     *export - conversion (instance methods)*
+    - `expand`
     - `to_fast`
     - `to_name`
     - `to_obj`
@@ -579,6 +580,22 @@ class Ntv(ABC):
             return None
         return Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', **option)
 
+    def expand(self, full=True):
+        '''return a json representation of the triplet (name, type, value)'''
+        if isinstance(self, NtvList) and full:
+            return {'name': self.name, 'type': self.type_str, 
+                    'value': [ntv.expand(full) for ntv in self.val]}
+        if isinstance(self, NtvSingle) and full:
+            return {'name': self.name, 'type': self.type_str, 'value': self.val}
+        exp = {} if not self.name else {'name': self.name}
+        if not self.type_str in ['json', ''] :
+            exp['type'] = self.type_str
+        if isinstance(self, NtvList):
+            exp['value'] = [ntv.expand(full) for ntv in self.val]
+        else:
+            exp['value'] = self.val
+        return exp
+        
     def to_repr(self, nam=True, typ=True, val=True, jsn=False, maxi=10):
         '''return a simple json representation of the Ntv entity.
 

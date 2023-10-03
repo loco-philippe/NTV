@@ -1,15 +1,17 @@
 ### ***JSON-NTV (named and typed value)  <img src="https://loco-philippe.github.io/ES/json-ntv.PNG" alt="json-NTV" style="float:right;width:233px;height:64px;"> : a semantic format for interoperability***
-*JSON-NTV is a universal representation format. It allows the sharing and conversion of any type of data (NTV format).*     
+*JSON-NTV is a universal representation format. It allows the sharing and conversion of any type of data.*     
     
 *The NTV format is part of the [Environmental Sensing Project](https://github.com/loco-philippe/Environmental-Sensing#readme)*
 
-# Introduction
+For more information, see the [user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html).
+
+# What is NTV
     
 The semantic level of shared JSON (or CSV) data (e.g. Open Data) remains low, which makes automated reuse difficult.
 
 JSON-NTV proposes to enrich it to obtain a real interoperable exchange format.    
   
-## what is NTV structure ?
+## NTV structure
 
 The NTV format consists of representing data by three attributes: a name, a type and a value. This representation is common in programming languages (for example a variable with Python typing is defined by `age: int = 25`), however the JSON format represents data with only a value or a key:value pair.
     
@@ -21,58 +23,45 @@ This approach makes it possible to reversibly represent any simple or complex da
 ```python
 In [1]: from shapely.geometry import Point
         from datetime import date
+        from pprint import pprint
 
-In [2]: Ntv.obj({"paris:point" : [2.3522, 48.8566] }).to_mermaid(disp=True)
-Out[2]:
+In [2]: pprint(Ntv.obj(21).expand())
+Out[2]: {'name': '', 'type': 'json', 'value': 21}
+
+In [3]: pprint(Ntv.obj({"paris:point": [2.3, 48.9] }).expand())
+Out[3]: {'name': 'paris', 'type': 'point', 'value': [2.3, 48.9]}
+
+In [4]: pprint(Ntv.obj({"cities::point": [[2.3, 48.9], [4.8, 45.8] }).expand())
+Out[4]: {'name': 'cities',
+         'type': 'point',
+         'value': [{'name': '', 'type': 'point', 'value': [2.3, 48.9]},
+                   {'name': '', 'type': 'point', 'value': [4.8, 45.8]}]}
+
+In [5]: pprint(Ntv.obj({"paris:point": [2.3, 48.9], "start:date": "2023-08-03", "measurement": 45.8}).expand())
+Out[5]: {'name': '',
+         'type': '',
+         'value': [{'name': 'paris', 'type': 'point', 'value': [2.3, 48.9]},
+                   {'name': 'start', 'type': 'date', 'value': '2023-08-03'},
+                   {'name': 'measurement', 'type': 'json', 'value': 45.8}]}
 ```
-```mermaid
-flowchart TD
-    a["<b>paris</b>
-     point 
-     <i>[2.3522, 48.8566]</i>"]
-```
-```python
-In [3]: Ntv.obj({"paris:point" : [2.3522, 48.8566] }).to_mermaid(disp=True)
-Out[3]:
-```
-```mermaid
-flowchart TD
-    a["<b>paris</b>
-     point 
-     <i>[2.3522, 48.8566]</i>"]
-```
 
+> *Note: This typing syntax can also be used for CSV file headers*
 
-
-> *For example, the location of Paris can be represented by:*
-> - *a name: "Paris",*
-> - *a type: the coordinates of a point according to the GeoJSON format,*
-> - *a value: [ 2.3522, 48.8566]*
-
-The easiest way to add this information into a JSON-value is to use a JSON-object with a single member using the syntax [JSON-ND](https://github.com/glenkleidon/JSON-ND) for the first term of the member and the JSON-value for the second term of the member.
-
-> *For the example above, the JSON representation is:*    
-> *```{ "paris:point" : [2.3522, 48.8566] }```*
+## NTV structure
 
 With this approach, two NTV entities are defined:
 - a primitive entity which is not composed of any other entity (NTV-single),
 - a structured entity which is an ordered sequence of NTV entities (NTV-list).
       
 as well as two JSON formats:
-- simple format when the name and the type are not present (this is the usual case of CSV data),
-- named format when the name or type is present (see example above for an NTV-single entity and below for a structured entity).
+- simple format when the name and the type are not present (e.g. `25`),
+- named format when the name or type is present ((e.g. `{'age': 25}` or `{':int': 25}`)).
 
-> *Example of an entity composed of two other entities:*
-> - *```{ "cities::point": [[2.3522, 48.8566], [4.8357, 45.7640]] }``` for an unnamed NTV-list entity*
-> - *```{ "cities::point": { "paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640] } }``` for a named NTV-list entity*
->
-> *Note: This syntax can also be used for CSV file headers*
-
-The type incorporates a notion of `namespaces` that can be nested.
-> *For example, the type: "ns1.ns2.type" means that:*
-> - *ns1. is a namespace defined in the global namespace,*
-> - *ns2. is a namespace defined in the ns1 namespace.,*
-> - *type is defined in the ns2 namespace.*    
+The type incorporates a notion of `namespace` that can be nested.
+> *For example, the type: `ns1.ns2.type_a` means that:*
+> - *`ns1.` is a namespace defined in the global namespace,*
+> - *`ns2.` is a namespace defined in the `ns1.` namespace.,*
+> - *`type_a` is defined in the `ns2.` namespace.*    
     
 This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate all the shared data structures within the same tree of types.
 
@@ -102,11 +91,18 @@ flowchart LR
     ntv--->|NTV to JSON|val
     nat--->|to NTV|ntv
 ```
+The conversion between native entity and JSON-text is reversible (round trip).
+```python
+In [6]: loc_and_date = {'newyear': date(2023, 1, 2), 'Paris': Point(2.3, 48.9)}
+        json_loc_date = Ntv.obj(loc_and_date).to_obj(encoded=True)
+        print(json_loc_date, type(json_loc_date))
+Out[6]: {"newyear:date": "2023-01-02", "Paris:point": [2.3, 48.9]} <class 'str'>
+
+In [7]: Ntv.obj(json_loc_date).to_obj(format='obj') == loc_and_date
+Out[7]: True
+```
 *Properties :*
 - each NTV object has a unique JSON representation
 - each JSON data corresponds to a unique NTV entity
 - an NTV entity is a tree where each node is an NTV entity and each leaf an NTV-Single entity
 - an NTV entity is a neutral representation (independent of a software or hardware platform)
-
-### ***If you are interested challenge us !*** We will be very happy to show you the relevance of our approach
-

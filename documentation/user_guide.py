@@ -10,7 +10,6 @@ Created on Fri Sep 30 10:09:01 2022
 
 .. include:: ./README.md    
 
-.. include:: ../example/README.md
 .. include:: ../uses/README.md
 
 """
