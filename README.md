@@ -3,7 +3,7 @@
     
 *The NTV format is part of the [Environmental Sensing Project](https://github.com/loco-philippe/Environmental-Sensing#readme)*
 
-For more information, see the [user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html).
+For more information, see the [user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html) or the [github repository](https://github.com/loco-philippe/NTV).
 
 # What is NTV
     

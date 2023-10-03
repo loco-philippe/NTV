@@ -9,54 +9,9 @@ https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
 
 It contains the classes `NtvSingle`, `NtvList`, `Ntv`(abstract) for NTV entities.
 
-# 1 - JSON-NTV structure
-
-The NTV triplet (name, type, value) is represented using a JSON-NTV format inspired
-by the [JSON-ND](https://github.com/glenkleidon/JSON-ND) project :
-- **```value```** (if name and type are not documented)
-- **```{ "name" : value }```** (if name is documented but not type)
-- **```{ ":type" : value }```** for primitive entities and **```{ "::type" : value }```**
- for structured entities (if type is documented but not name)
-- **```{ "name:type" : value }```** for primitive entities and **```{
- "name::type" : value }```** for structured entities (if type and name are documented).
-
-For an NTV-single, the value is the JSON-value of the entity.
-For an NTV-list, value is a JSON-array (JSON-object) where JSON-elements (JSON-members)
-are the JSON-NTV formats of included NTV entities.
-
-This JSON-NTV format allows full compatibility with existing JSON structures:
-- a JSON-number, JSON-string or JSON-boolean is the representation of an NTV-single entity,
-- a JSON-object with a single member is the representation of an NTV-single entity
-- a JSON-array or JSON-object is the representation of an NTV-list entity
-
-# 2 - Examples of JSON-NTV representations
-- NTV-single, simple format :
-   - ```"lyon"```
-   - ```52.5```
-- NTV-single, named format :
-   - ```{ "paris:point" : [2.3522, 48.8566] }```
-   - ```{ ":point" : [4.8357, 45.7640] }```
-   - ```{ "city" : "paris" }```
-- NTV-list, simple format (whithout names):
-   - ```[ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ]```
-   - ```[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ]```
-   - ```[ 4, 45 ]```
-   - ```[ "paris" ]```
-   - ```[ ]```
-- NTV-list, named format (whithout names):
-   - ```{ "cities::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }```
-   - ```{ "::point" : [ [2.3522, 48.8566], {"lyon" : [4.8357, 45.7640]} ] }```
-   - ```{ "simple list" : [ 4, 45.7 ] }```
-   - ```{ "generic date::dat" : [ "2022-01-28T18-23-54Z", "2022-01-28", 1234.78 ] }```
-- NTV-list, simple format (with names):
-   - ```{ "nom”: "white", "prenom": "walter", "surnom": "heisenberg" }```
-   - ```{ "paris:point" : [2.3522, 48.8566] , "lyon" : "france" }```
-   - ```{ "paris" : [2.3522, 48.8566], "" : [4.8357, 45.7640] }```
-   - ```{ }```
-- NTV-list, named format (with names):
-   - ```{ "cities::point": { "paris": [2.352, 48.856], "lyon": [4.835, 45.764]}}```
-   - ```{ "cities" :     { "paris:point" : [2.3522, 48.8566] , "lyon" : "france"} }```
-   - ```{ "city" : { "paris" : [2.3522, 48.8566] } }```
+For more information, see the 
+[user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html) 
+or the [github repository](https://github.com/loco-philippe/NTV).
 
 """
 import copy
