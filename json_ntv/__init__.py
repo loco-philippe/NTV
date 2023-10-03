@@ -22,6 +22,7 @@ This package contains the following classes:
     
     - `NTV.json_ntv.ntv_patch.NtvOp`
     - `NTV.json_ntv.ntv_patch.NtvPatch`
+    - `NTV.json_ntv.ntv_patch.NtvPointer`
 
 - `NTV.json_ntv.ntv_comment` :
     
@@ -52,7 +53,7 @@ or the [github repository](https://github.com/loco-philippe/NTV).
 
 """
 from json_ntv.namespace import Namespace, NtvType, str_type, relative_type, agreg_type
-from json_ntv.ntv_patch import NtvOp, NtvPatch
+from json_ntv.ntv_patch import NtvOp, NtvPatch, NtvPointer
 from json_ntv.ntv_comment import NtvComment
 from json_ntv.ntv import Ntv, NtvSingle, NtvList
 from json_ntv.ntv_util import NtvTree, NtvJsonEncoder, NtvConnector, NtvError

@@ -204,7 +204,7 @@ class NtvPointer(list):
 
         - **default**: Str (default '') - default value if pointer is empty
         ''' 
-        return NtvPointer.pointer_json(self)
+        return NtvPointer.pointer_json(self, default=default)
 
     def append(self, child):
         '''append a child pointer into a pointer '''
