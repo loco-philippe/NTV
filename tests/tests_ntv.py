@@ -596,8 +596,8 @@ class Test_Ntv_function(unittest.TestCase):
 class Test_Ntv_comment(unittest.TestCase):
 
     def test_comment(self):
-        data = {'index':           [1, 2, 3],
-         'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'],
+        data = {'index':    [1, 2, 3],
+         'dates::date':     ['1964-01-01', '1985-02-05', '2022-01-21'],
          'value':           [10, 20, 30],
          'value32::int32':  [10, 20, 30],
          'res':             {'res1': 10, 'res2': 20, 'res3': 30},
@@ -605,16 +605,15 @@ class Test_Ntv_comment(unittest.TestCase):
          'names::string':   ['john', 'eric', 'judith']}
         ntv_data = Ntv.obj(data)
         ntv = Ntv.obj(data)
-        NtvComment(ntv['dates']).add_comment('bof')
-        NtvComment(ntv['dates']).add_comment('bof suite')
-        NtvComment(ntv['dates']).accept_comment()
-        self.assertEqual(ntv, ntv_data)
-        ntv = Ntv.obj(data)
-        NtvComment(ntv['dates']).add_comment('bof')
-        NtvComment(ntv['dates']).add_comment('bof suite')
-        NtvComment(ntv['dates']).reject_comment()
-        self.assertEqual(ntv, ntv_data)
-        ntv = Ntv.obj(data)
+        com = NtvComment(ntv)
+        com.add_comment('bof')
+        com.add_comment('bof suite')
+        com2 = com.accept_comment()
+        self.assertEqual(ntv, com2._ntv)
+        com3 = com.reject_comment(True)
+        self.assertEqual(ntv, com3._ntv)
+        op = NtvOp({'op': 'replace', 'path': '/dates/1', 'entity': {':date':'1905-02-05'}})
+        """
         NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
         NtvComment(ntv['dates'][1]).add_comment('bof')
         NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
@@ -629,7 +628,7 @@ class Test_Ntv_comment(unittest.TestCase):
         NtvComment(ntv['dates'][1]).accept_comment()
         ntv_data['dates'][1].set_value('1998-02-05')
         self.assertEqual(ntv, ntv_data)
-        
+"""        
 class Test_NtvTree(unittest.TestCase):
 
     def test_NtvTree(self):

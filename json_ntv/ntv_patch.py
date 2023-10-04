@@ -42,18 +42,33 @@ class NtvOp:
     
     def __init__(self, op, path=None, entity=None, comment=None, from_path=None):
         op = op.json if isinstance(op, NtvOp) else op
+        if isinstance(op, str):
+            self.op = None
+            self.entity = None
+            self.comment = op
+            self.from_path = None
+            self.path = None
+            return
         dic = isinstance(op, dict)
         self.op        = op.get('op')         if dic else op
         self.entity    = op.get('entity')     if dic else entity
         self.comment   = op.get('comment')    if dic else comment
         self.from_path = NtvPointer(op.get('from')) if dic else NtvPointer(from_path)
         self.path      = NtvPointer(op.get('path')) if dic else NtvPointer(path)
-        if not self.path or not self.op in OPERATIONS:
+        if op and (not self.path or not self.op in OPERATIONS):
             raise NtvOpError('path or op is not correct')
         
     def __repr__(self):
         '''return the op and the path'''
-        return 'op : ' + (self.op + ',').ljust(8, ' ') + ' path : ' + str(self.path)
+        txt = ''
+        if self.op:
+            txt += 'op : ' + (self.op + ',').ljust(8, ' ')
+        if self.path:
+            txt += ' path : ' + str(self.path)
+        if self.comment:
+            txt += self.comment
+        return txt    
+        #return 'op : ' + (self.op + ',').ljust(8, ' ') + ' path : ' + str(self.path)
 
     def __str__(self):
         '''return json format'''
@@ -71,7 +86,7 @@ class NtvOp:
         '''return the json-value representation (dict)'''
         dic = {'op': self.op, 'path': str(self.path), 'entity': self.entity, 
                'comment':self.comment, 'from': str(self.from_path)}
-        return {key: val for key, val in dic.items() if val}
+        return {key: val for key, val in dic.items() if val and val !='None'}
 
     def exe(self, ntv):
         '''execute the operation with ntv entity and return the resulting entity'''
@@ -114,14 +129,26 @@ class NtvPatch:
     ''' The NtvPatch class defines a sequence of operations to apply to an 
     NTV entity'''
 
-    def __init__(self, list_op=None):
-        list_op = [] if not list_op else list_op 
+    def __init__(self, list_op, comment=None):
+        '''list_op is the list of operation in json format or in object format'''
+        if isinstance(list_op, NtvPatch):
+            self.list_op = list_op.list_op
+            self.comment = list_op.comment
+            return
+        if isinstance(list_op, str):
+            self.comment = list_op
+            self.list_op = []
+            return
+        list_op = [list_op] if isinstance(list_op, NtvOp) else list_op
+        list_op = [] if not list_op else list_op
         self.list_op = [NtvOp(ope) for ope in list_op]
+        self.comment = comment
+        return
         
     def __eq__(self, other):
         ''' equal if list_op are equal'''
         return self.__class__.__name__ == other.__class__.__name__ and\
-            self.list_op == other.list_op
+            self.list_op == other.list_op and self.comment == other.comment
 
     def __copy__(self):
         ''' Copy all the data '''
@@ -146,14 +173,14 @@ class NtvPatch:
         return len(self.list_op)
 
     def __str__(self):
-        '''return list of op json format'''
-        return json.dumps([ope.json for ope in self.list_op])
+        '''return comment and list of op in json-text format'''
+        return json.dumps(self.json)
 
     def __repr__(self):
         '''return classname and code'''
-        rep = 'NtvPatch :\n'
+        rep = 'NtvPatch :' + (self.comment if self.comment else '')
         for ind, op in enumerate(self):
-            rep += '    op' + str(ind).ljust(3, ' ') + ' : ' + repr(op)[5:] + '\n'
+            rep += '\n    op' + str(ind).ljust(3, ' ') + ' : ' + repr(op)[5:]
         return rep
 
     def __contains__(self, item):
@@ -165,7 +192,7 @@ class NtvPatch:
         return iter(self.list_op)
 
     def __getitem__(self, selec):
-        ''' return ntv_value item '''
+        ''' return op item in list_op'''
         if selec is None or selec == [] or selec == () or selec == '':
             return self
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
@@ -177,6 +204,12 @@ class NtvPatch:
     def append(self, ope):
         '''append ope in the NtvPatch'''
         self.list_op.append(ope)
+
+    @property
+    def json(self):
+        '''return list of op in json format'''
+        return {'comment': self.comment, 
+                'list-op':[ope.json for ope in self.list_op]}
 
     def exe(self, ntv):
         '''execute the included operations with ntv entity and return 

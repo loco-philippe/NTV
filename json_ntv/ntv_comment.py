@@ -7,8 +7,9 @@ Created on Sun Oct  2 22:24:59 2022
 The `NTV.json_ntv.ntv_comment` module contains the `NtvComment` class.
 """
 import copy
+import json 
 from json_ntv.ntv import NtvSingle, NtvType, NtvList, Ntv
-from json_ntv.ntv_patch import NtvPatch
+from json_ntv.ntv_patch import NtvPatch, NtvOp
 
 class NtvComment:
     '''this class includes comments and change management methods for NTV entities :
@@ -18,43 +19,49 @@ class NtvComment:
     - `NtvComment.reject_comment`
     - `NtvComment.show_comment`
     '''
-    def __init__(self, ntv):
-        ''' the parameter of the constructor is the Ntv entity'''
+    def __init__(self, ntv, comments=None):
+        ''' the parameter of the constructor is the NtvComment entity'''
         self._ntv = ntv
-        self.comment = []
-        
-    def add_comment(self, context, patch=None):
-        '''add [context, patch] in the comment'''
-        patch = patch if isinstance(patch, NtvPatch) else NtvPatch(patch)
-        self.comment.add([context, patch])
-        return len(self.comment)-1
+        if not comments:
+            self._comments = [] 
+        elif isinstance(comments, (NtvPatch, NtvOp)):
+            self._comments = [NtvPatch(comments)]
+        elif isinstance(comments, list):
+            self._comments = [NtvPatch(comment) for comment in comments]
+    
+    def __repr__(self):
+        if not self._comments:
+            return 'no comments'
+        return json.dumps(self.show_comment())
+    
+    def add_comment(self, comment=None):
+        '''add comment in comments'''
+        comment = comment if isinstance(comment, (NtvPatch, NtvOp)) else NtvPatch(comment)
+        self._comments.append(comment)
+        return len(self._comments)-1
 
     def reject_comment(self, all_comment=False):
-        '''delete the last or all comments'''
-        if all_comment:
-            self.comment = []
-        elif len(self.comment) > 0:
-            self.comment = self.comment[:-1]
-
+        '''delete the last or all patch'''
+        if all_comment or len(self._comments) <= 1:
+            return NtvComment(self._ntv, [])
+        return NtvComment(self._ntv, self._comments[:-1])
+            
     def accept_comment(self, all_comments=True):
-        '''accept the or all comments and return the resulted NTV''' 
-        if not self.comment:
-            return self._ntv
-        apply = self.comment if all_comments else [self.comment[0]]
-        ntv = self.ntv
+        '''accept the first or all comments and return the resulted NTV''' 
+        if not self._comments:
+            return NtvComment(self._ntv, self._comments)
+        apply = self._comments if all_comments else [self._comments[0]]
+        ntv = self._ntv
         for comment in apply:
-            ntv = comment[1].exe(ntv)
-        return ntv
+            ntv = comment.exe(ntv)
+        return NtvComment(ntv, [] if all_comments else self._comments[1:])
     
-    def show_comment(self, context=True, comments=False):
-        ''' return a list with comments and context'''
-        if context and not comments:
-            return [comment[0] for comment in self.comments]
-        if not context and comments:
-            return [comment[1] for comment in self.comments]
-        return [{'context': comment[0], 'patch': comment[1]}
-                for comment in self.comments]
-
+    def show_comment(self):
+        ''' return comments'''
+        if self._comments:
+            return [comment.json for comment in self._comments]
+        return None
+    
     def add_comment_old(self, text, val=None, name=None, typ=None):
         '''add a comment (text) and a proposal for a new NTV entity defined by (val, name and typ)'''
         parent = self._ntv.parent
@@ -98,6 +105,6 @@ class NtvComment:
         new_ntv = Ntv.obj(new_ntv.ntv_value) if new_ntv.type_str == 'ntv' else new_ntv
         parent[parent.ntv_value.index(self._ntv)] = new_ntv
 
-    def show_comment(self):
+    def show_comment_old(self):
         ''' return a dict with comments for each commented node'''
         return NtvList([node for node in self._ntv.tree if node.type_str == '$history']).to_obj()
