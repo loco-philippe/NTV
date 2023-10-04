@@ -46,8 +46,8 @@ class NtvOp:
             self.op = None
             self.entity = None
             self.comment = op
-            self.from_path = None
-            self.path = None
+            self.from_path = []
+            self.path = []
             return
         dic = isinstance(op, dict)
         self.op        = op.get('op')         if dic else op
@@ -55,7 +55,7 @@ class NtvOp:
         self.comment   = op.get('comment')    if dic else comment
         self.from_path = NtvPointer(op.get('from')) if dic else NtvPointer(from_path)
         self.path      = NtvPointer(op.get('path')) if dic else NtvPointer(path)
-        if op and (not self.path or not self.op in OPERATIONS):
+        if self.op and (not self.path or not self.op in OPERATIONS):
             raise NtvOpError('path or op is not correct')
         
     def __repr__(self):
@@ -80,6 +80,11 @@ class NtvOp:
             self.op == other.op and self.path == other.path and\
             self.entity == other.entity and self.comment == other.comment and\
             self.from_path == other.from_path
+
+    def __copy__(self):
+        ''' Copy all the data '''
+        cop = self.__class__(self)
+        return cop
 
     @property
     def json(self):
@@ -135,11 +140,20 @@ class NtvPatch:
             self.list_op = list_op.list_op
             self.comment = list_op.comment
             return
+        if isinstance(list_op, NtvOp):
+            self.comment = list_op.comment
+            self.list_op = [copy(list_op)]
+            self.list_op[0].comment = None
+            return
         if isinstance(list_op, str):
             self.comment = list_op
             self.list_op = []
             return
-        list_op = [list_op] if isinstance(list_op, NtvOp) else list_op
+        if isinstance(list_op, dict):
+            self.comment = list_op.get('comment', None)
+            lis = list_op.get('list-op', [])
+            self.list_op = [NtvOp(ope) for ope in lis]
+            return
         list_op = [] if not list_op else list_op
         self.list_op = [NtvOp(ope) for ope in list_op]
         self.comment = comment

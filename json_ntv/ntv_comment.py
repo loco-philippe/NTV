@@ -22,9 +22,10 @@ class NtvComment:
     def __init__(self, ntv, comments=None):
         ''' the parameter of the constructor is the NtvComment entity'''
         self._ntv = ntv
+        self._comments = []
         if not comments:
-            self._comments = [] 
-        elif isinstance(comments, (NtvPatch, NtvOp)):
+            return 
+        if comments.__class__.__name__ in ('NtvPatch', 'NtvOp'):
             self._comments = [NtvPatch(comments)]
         elif isinstance(comments, list):
             self._comments = [NtvPatch(comment) for comment in comments]
@@ -33,11 +34,16 @@ class NtvComment:
         if not self._comments:
             return 'no comments'
         return json.dumps(self.show_comment())
+
+    def __eq__(self, other):
+        ''' equal if _comments and _ntv are equal'''
+        return self.__class__.__name__ == other.__class__.__name__ and\
+            self._ntv == other._ntv and self._comment == other._comment
     
     def add_comment(self, comment=None):
         '''add comment in comments'''
-        comment = comment if isinstance(comment, (NtvPatch, NtvOp)) else NtvPatch(comment)
-        self._comments.append(comment)
+        #comment = comment if isinstance(comment, (NtvPatch, NtvOp)) else NtvPatch(comment)
+        self._comments.append(NtvPatch(comment))
         return len(self._comments)-1
 
     def reject_comment(self, all_comment=False):
