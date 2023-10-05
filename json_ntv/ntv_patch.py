@@ -7,22 +7,33 @@ Created on Sept 10 2023
 The `ntv_patch` module is part of the `NTV.json_ntv` package ([specification document](
 https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
 
-It contains the classes `NtvOp`, `NtvPatch`.
+It contains the classes `NtvOp`, `NtvPatch`, `NtvPointer`
 
-# 1 - NTV Patch
+# 1 - NtvPointer
+
+NtvPointer defines a string syntax for identifying a specific node within a 
+Ntv tree. 
+
+It is the transposition of JSON Pointer defined in RFC6901.
+
+# 2 - NTV Patch and NtvOp
 
 NTV Patch is a transposition of JSON Patch defined in RFC6902.
 
 NTV Patch is a format for expressing a sequence of operations to be applied to a
 target NTV entity.
 
+Each operation is defined by the NtvOp object
+
 This format is also potentially useful in cases where it is necessary to
 make partial updates on an NTV entity.
 
-The representation of an NTV Patch is a JSON-Array that can be added to an NTV
-entity (e.g. comments and change management).
+The representation of an NtvPatch is a JSON-Array of NtvOp that can be added to an NTV
+entity (e.g. NtvComment - comments and change management).
 
-# 2 - Example
+The representation of an NtvOp is a JSON-Object 
+
+# 3 - Example
 
 ```
     [
@@ -31,6 +42,7 @@ entity (e.g. comments and change management).
      {'op': 'remove', 'path': '/0/1/-'}
      ]
 ```
+
 """
 import json
 from copy import copy
