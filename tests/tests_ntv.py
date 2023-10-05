@@ -636,7 +636,7 @@ class Test_NtvConnector(unittest.TestCase):
 class Test_NtvPatch(unittest.TestCase):
     
     def test_init_op(self):
-        js = {'op': 'remove', 'path': '/0/1/-'}
+        js_cop = {'op': 'remove', 'path': '/0/1/-'}
         self.assertEqual(NtvOp(NtvOp(js_cop)), NtvOp(js_cop))
         self.assertTrue(NtvOp('test') == NtvOp({'comment': 'test'}))
 
@@ -713,38 +713,27 @@ class Test_Ntv_comment(unittest.TestCase):
          'res':             {'res1': 10, 'res2': 20, 'res3': 30},
          'coord::point':    [[1, 2], [3, 4], [5, 6]],
          'names::string':   ['john', 'eric', 'judith']}
-        ntv_data = Ntv.obj(data)
         ntv = Ntv.obj(data)
         com = NtvComment(ntv)
-        com.add_comment('bof')
-        com.add_comment('bof suite')
-        com2 = com.accept_comment()
+        com.add('bof')
+        com.add('bof suite')
+        com2 = com.accept()
         self.assertEqual(ntv, com2._ntv)
-        com3 = com.reject_comment(True)
+        com3 = com.reject(True)
         self.assertEqual(ntv, com3._ntv)
         op = NtvOp({'op': 'replace', 'path': '/dates/1', 
-                    'entity': {':date':'1905-02-05'}, 'comment': 'first'})
+                    'entity': {':date':'1995-02-05'}, 'comment': 'a corriger'})
         com = NtvComment(ntv, op)
-        com.add_comment('bof')
-        com.add_comment({'comment': 'a corriger', 'list-op': [
-            {'op': 'replace', 'path': '/dates/1', 'entity': {':date':'1995-02-05'}}]})
-        """
-        NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
-        NtvComment(ntv['dates'][1]).add_comment('bof')
-        NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
-        NtvComment(ntv['dates'][1]).add_comment('bof suite')
-        NtvComment(ntv['dates'][1]).reject_comment()
-        self.assertEqual(ntv, ntv_data)
-        ntv = Ntv.obj(data)
-        NtvComment(ntv['dates'][1]).add_comment('a corriger', '1995-02-05')
-        NtvComment(ntv['dates'][1]).add_comment('bof')
-        NtvComment(ntv['dates'][1]).add_comment('a corriger suite', '1998-02-05')
-        NtvComment(ntv['dates'][1]).add_comment('bof suite')
-        NtvComment(ntv['dates'][1]).accept_comment()
-        ntv_data['dates'][1].set_value('1998-02-05')
-        self.assertEqual(ntv, ntv_data)
-"""        
-
+        com.add('bof')
+        com.add({'comment': 'a corriger suite', 'list-op': [
+            {'op': 'replace', 'path': '/dates/1', 'entity': {':date':'1998-02-05'}}]})
+        com.add('bof suite')
+        com_r = com.reject(all_comment=True)
+        self.assertEqual(ntv, com_r._ntv)
+        com_a = com.accept(all_comment=True)
+        ntv['dates'][1].set_value('1998-02-05')
+        self.assertEqual(ntv, com_a._ntv)
+        #print(com.json(ntv=True))
 
 """    def test_json_sfield_full(self):
 
