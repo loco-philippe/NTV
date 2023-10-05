@@ -370,6 +370,7 @@ class NtvTree:
     - `height`
     - `adjacency_list`
     - `nodes`
+    - `dic_nodes`
     - `leaf_nodes`
     - `inner_nodes`
     '''
