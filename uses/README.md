@@ -1,4 +1,5 @@
 # Examples and Uses
+
 Several variations and use cases of the NTV format are defined:
 
 ## Overview
@@ -14,11 +15,13 @@ This [notebook](https://nbviewer.org/github/loco-philippe/NTV/tree/main/uses/edi
 
 This compact, reversible and semantic pandas - JSON interface is defined in a separate package [ntv-pandas](https://github.com/loco-philippe/ntv-pandas).
 
-.. include:: ../../ntv-pandas/example/README.md
+The Notebook [ntv-pandas](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_ntv_pandas.ipynb) presents the ntv-pandas interface
 
 ## Tabular format
+
 TBD
 
 ## Comment and change
+
 TBD
 
