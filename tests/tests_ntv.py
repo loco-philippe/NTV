@@ -707,7 +707,7 @@ class Test_Ntv_comment(unittest.TestCase):
 
     def test_comment(self):
         data = {'index':    [1, 2, 3],
-         'dates::date':     ['1964-01-01', '1985-02-05', '2022-01-21'],
+         'dates::date':     ['1964-01-01', '1985-02-05', '2022-01-22'],
          'value':           [10, 20, 30],
          'value32::int32':  [10, 20, 30],
          'res':             {'res1': 10, 'res2': 20, 'res3': 30},
