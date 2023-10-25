@@ -40,6 +40,46 @@ class NtvUtil:
             return (split[0], None, sep)
         return (split[0], split[1], sep)
 
+    @staticmethod
+    def decode_ntv_tab(ntv, ntv_to_val):
+        '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
+
+        *Returns tuple: (name, dtype, codec, parent, keys, coef, leng)*
+
+        - name (None or string): name of the Field
+        - dtype (None or string): type of data
+        - codec (list): list of Field codec values
+        - parent (None or int): Field parent or None
+        - keys (None or list): Field keys
+        - coef (None or int): coef if primary Field else None
+        - leng (int): length of the Field
+        '''
+        #ntv = Ntv.obj(field)
+        typ = ntv.type_str if ntv.ntv_type else None
+        nam = ntv.name
+        val = ntv_to_val(ntv)
+        if ntv.__class__.__name__ == 'NtvSingle':
+            return (nam, typ, [val], None, None, None, 1)
+        if len(ntv) < 2 or len(ntv) > 3 or ntv[0].__class__.__name__ == 'NtvSingle':
+            return (nam, typ, val, None, None, None, len(ntv))
+
+        ntvc = ntv[0]
+        leng = max(len(ind) for ind in ntv)
+        typc = ntvc.type_str if ntvc.ntv_type else None
+        valc = ntv_to_val(ntvc)
+        if len(ntv) == 3 and ntv[1].__class__.__name__ == 'NtvSingle' and \
+                isinstance(ntv[1].val, (int, str)) and \
+                ntv[2].__class__.__name__ != 'NtvSingle' and \
+                isinstance(ntv[2][0].val, int):
+            return (nam, typc, valc, ntv[1].val, ntv[2].to_obj(), None, leng)
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, (int, str)):
+            return (nam, typc, valc, ntv[1].val, None, None, leng)
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list):
+            leng = leng * ntv[1][0].val
+            return (nam, typc, valc, None, None, ntv[1][0].val, leng)
+        if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
+            return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
+        return (nam, typ, val, None, None, None, len(ntv))
     
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
