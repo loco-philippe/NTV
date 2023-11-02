@@ -16,6 +16,7 @@ or the [github repository](https://github.com/loco-philippe/NTV).
 """
 import copy
 from abc import ABC, abstractmethod
+from numbers import Number
 import json
 
 from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
@@ -260,9 +261,38 @@ class Ntv(ABC):
         return self.ntv_value[selec]
 
     def __lt__(self, other):
-        ''' return a comparison between hash value'''
-        return hash(self) < hash(other)
-
+        ''' return a comparison between ntv_value'''
+        # order number > string > None
+        val1 = Ntv.obj(self)
+        val2 = Ntv.obj(other)
+        res = None
+        for v1, v2 in zip(val1.tree.leaf_nodes, val2.tree.leaf_nodes):
+            if v1.val is None:
+                res = True
+            elif isinstance(v1.val, (dict, list)):
+                res = Ntv.obj(v1.val) < v2
+                #res = lt(v1.val, v2)
+            elif isinstance(v2.val, (dict, list)):
+                res = v1 < v2.val
+                #res = lt(v1, v2.val)
+            elif isinstance(v1.val, Number):
+                if isinstance(v2.val, Number):
+                    res = None if v1.val == v2.val else v1.val < v2.val
+                else:
+                    res = False
+            elif isinstance(v1.val, str):
+                if isinstance(v2.val, Number):
+                    res = True
+                elif isinstance(v2.val, str):
+                    res = None if v1.val == v2.val else v1.val < v2.val
+                else:
+                    res = False
+            if not res is None:
+                break
+        if res is None:
+            res = None if len(val1) == len(val2) else len(val1) < len(val2)
+        return res == True
+        #return hash(self) < hash(other)
             
     def childs(self, obj=False, nam=False, typ=False):
         ''' return a list of child Ntv entities or child data
