@@ -375,6 +375,28 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(format='obj'),
                          {'paris:point': None})
 
+class Test_Ntv_compare(unittest.TestCase):
+
+    def test_lt(self):
+        self.assertTrue(Ntv.obj(False) > Ntv.obj(None))
+        self.assertTrue(Ntv.obj(None) < Ntv.obj(False))
+        self.assertTrue(Ntv.obj(False) < Ntv.obj(True))
+        self.assertTrue(Ntv.obj(1) < Ntv.obj(2))
+        self.assertFalse(Ntv.obj(2) < Ntv.obj(2))
+        self.assertFalse(Ntv.obj(2) < Ntv.obj('er'))
+        self.assertFalse(Ntv.obj(2) < Ntv.obj(None))
+        self.assertTrue(Ntv.obj(2) < Ntv.obj({'test':3}))
+        self.assertFalse(Ntv.obj(2) < Ntv.obj({'test':1}))
+        self.assertFalse(Ntv.obj({'test':2}) < Ntv.obj({'test':1}))
+        self.assertTrue(Ntv.obj({'test':2, 'r':4}) < Ntv.obj({'test':3}))
+        self.assertTrue(Ntv.obj({'test':2, 'r':4}) < Ntv.obj({'test':2, 'res':5}))
+        self.assertFalse(Ntv.obj({'test':2, 'r':4}) < Ntv.obj({'test':2, 'res':1}))
+        self.assertFalse(Ntv.obj({'test':2, 'r':4}) < Ntv.obj({'test':2}))
+        self.assertTrue(Ntv.obj({'test':2}) < Ntv.obj({'test':2, 'res':1}))
+        self.assertTrue(Ntv.obj({'test':2, 'tr':4}) > Ntv.obj({'test':{'truc':2}}))
+        self.assertTrue(Ntv.obj([1,4]) < Ntv.obj({'test':{'truc':2}}))
+        self.assertTrue(Ntv.obj([1,4]) < Ntv.obj([[2]]))
+        
 class Test_Ntv_indexing(unittest.TestCase):
     
     def test_pointer_RFC(self):
