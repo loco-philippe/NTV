@@ -261,20 +261,26 @@ class Ntv(ABC):
         return self.ntv_value[selec]
 
     def __lt__(self, other):
-        ''' return a comparison between ntv_value'''
-        # order number > string > None
-        val1 = Ntv.obj(self)
-        val2 = Ntv.obj(other)
+        ''' return a comparison between two ntv_value'''
+        # order: number > string > None
+        res = Ntv.lower(self, other)
+        if res is None:
+            res = None if len(self) == len(other) else len(self) < len(other)
+        res = self.to_obj(encoded=True) < other.to_obj(encoded=True) if res is None else res
+        return res
+
+    @staticmethod
+    def lower(val1, val2):
+        ''' compare two ntv_value and return True if val1 < val2, False if val1 > val2 and 
+        None in the other cases'''
         res = None
-        for v1, v2 in zip(val1.tree.leaf_nodes, val2.tree.leaf_nodes):
+        for v1, v2 in zip(Ntv.obj(val1).tree.leaf_nodes, Ntv.obj(val2).tree.leaf_nodes):
             if v1.val is None:
                 res = True
             elif isinstance(v1.val, (dict, list)):
-                res = Ntv.obj(v1.val) < v2
-                #res = lt(v1.val, v2)
+                res = Ntv.lower(v1.val, v2)
             elif isinstance(v2.val, (dict, list)):
-                res = v1 < v2.val
-                #res = lt(v1, v2.val)
+                res = Ntv.lower(v1, v2.val)
             elif isinstance(v1.val, Number):
                 if isinstance(v2.val, Number):
                     res = None if v1.val == v2.val else v1.val < v2.val
@@ -289,11 +295,8 @@ class Ntv(ABC):
                     res = False
             if not res is None:
                 break
-        if res is None:
-            res = None if len(val1) == len(val2) else len(val1) < len(val2)
-        return res == True
-        #return hash(self) < hash(other)
-            
+        return res 
+    
     def childs(self, obj=False, nam=False, typ=False):
         ''' return a list of child Ntv entities or child data
         
