@@ -960,10 +960,9 @@ class NtvSingle(Ntv):
         elif isinstance(ntv_value, NtvSingle):
             ntv_value = ntv_value.to_obj()
             return (ntv_value, ntv_name, 'ntv')
-
         else:
-            ntv_value, name, typ = NtvConnector.cast(
-                ntv_value, ntv_name, ntv_type)
+            ntv_value, name, typ = NtvConnector.cast(ntv_value, ntv_name)  
+            ntv_type = NtvType(typ) if typ else ntv_type
         if not ntv_type:
             if is_json:
                 ntv_type = 'json'

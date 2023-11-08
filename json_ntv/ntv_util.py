@@ -19,7 +19,7 @@ class NtvUtil:
 
     @staticmethod
     def from_obj_name(string):
-        '''return a tuple with name, type and separator from string'''
+        '''return a tuple with name, type_str and separator from string'''
         if not isinstance(string, str):
             raise NtvError('a json-name have to be str')
         if string == '':

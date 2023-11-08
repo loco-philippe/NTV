@@ -14,7 +14,7 @@ from itertools import product
 import json
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
-from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch
+from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch, NtvType
 import ntv_pandas as npd #used to update NtvConnector.dic_connec()
 from shapely import geometry
 
@@ -308,6 +308,7 @@ class Test_Ntv_creation(unittest.TestCase):
             self.assertEqual(ntv, Ntv.obj(ntv.to_obj()))
 
     def test_from_obj_obj(self):
+        self.assertEqual(NtvSingle(datetime.date(2021, 10, 1), None, NtvType('datetime')).type_str, 'date')
         self.assertNotEqual(Ntv.obj({':': NtvSingle(1, 'test')}), Ntv.obj(NtvSingle(1, 'test')))
 
         dictstr2 = [
