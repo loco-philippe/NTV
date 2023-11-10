@@ -241,7 +241,7 @@ class NdatasetConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a NTV Dataset object (no parameters).'''
-        from observation.datasets import Ndataset
+        from observation.dataset import Ndataset
 
         ntv = Ntv.obj(ntv_value)
         return Ndataset.from_ntv(ntv)
@@ -268,7 +268,7 @@ class SdatasetConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a simple Dataset object (no parameters).'''
-        from observation.datasets import Sdataset
+        from observation.dataset import Sdataset
 
         ntv = Ntv.obj(ntv_value)
         return Sdataset.from_ntv(ntv)
