@@ -189,7 +189,7 @@ class NfieldConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a NTV Field object (no parameters).'''
-        from observation.fields import Nfield
+        from tab_dataset import Nfield
         ntv = Ntv.obj(ntv_value)
         return Nfield.from_ntv(ntv)
 
@@ -215,7 +215,7 @@ class SfieldConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a simple Field object (no parameters).'''
-        from observation.fields import Sfield
+        from tab_dataset import Sfield
         ntv = Ntv.obj(ntv_value)
         return Sfield.from_ntv(ntv)
 
@@ -241,7 +241,7 @@ class NdatasetConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a NTV Dataset object (no parameters).'''
-        from observation.dataset import Ndataset
+        from tab_dataset import Ndataset
 
         ntv = Ntv.obj(ntv_value)
         return Ndataset.from_ntv(ntv)
@@ -268,7 +268,7 @@ class SdatasetConnec(NtvConnector):
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         ''' convert json ntv_value into a simple Dataset object (no parameters).'''
-        from observation.dataset import Sdataset
+        from tab_dataset import Sdataset
 
         ntv = Ntv.obj(ntv_value)
         return Sdataset.from_ntv(ntv)
