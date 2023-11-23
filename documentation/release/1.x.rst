@@ -1,8 +1,24 @@
 Version 1.x
 ===========
 
+1.1.0 (2023-11-23)
+--------------------
+
+- **methods**
+    - add `expand` method
+    - add comparison __lt__ method
+
+- **issues**
+    - bugs #3, #6
+    - use NtvPatch and NtvPointer for NtvComment #4, #5
+
+- **compatibility `tab_dataset`**
+    - move `decode_ntv_tab` method in `ntv_util` module
+    - `import observation.xx` converted to `import tab_dataset.xx`
+
 1.0.1 (2023-09-30)
 --------------------
+
 - compatibility `ntv_pandas`: move `from_obj_name` method in `ntv_util` module
 
 1.0.0 (2023-09-20)

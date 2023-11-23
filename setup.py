@@ -13,7 +13,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="json_ntv",
-    version="1.0.1",
+    version="1.1.0",
     description="JSON-NTV a semantic format for interoperability",
     long_description=long_description,
     long_description_content_type="text/markdown",
