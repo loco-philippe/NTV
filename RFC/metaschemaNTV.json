@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ntv.schema.json",
+  "title": "NTV",
+  "description": "schema for NTV entities",
+  "type": "object",
+
+  "properties": {
+    "NTVentity": {
+      "enum" : ["NtvSingle", "NtvList"]
+    },
+    "NTVname": {
+      "description": "name of the NTV entity",
+      "type": "string"
+    },
+    "NTVtype": {
+      "description": "type of the NTV entity",
+      "type": "string"
+
+    }
+  },
+  "if":{
+    "properties":{
+      "NTVentity": {"const": "NtvList"}
+    }
+  },
+  "then":{
+    "properties":{
+      "NTVvalue":{
+        "description": "value of the NTV entity",
+        "$ref": "#/$defs/NTVlist"
+      }
+    }
+  },
+  "else":{
+    "properties":{
+      "NTVvalue":{
+        "description": "value of the NTV entity",
+        "$ref": "#/$defs/json"
+      }
+    }
+  },
+  "required": ["NTVentity", "NTVvalue"],
+  "$defs":{
+    "json": {
+      "type": [ "boolean", "array", "null", "object", "number", "integer", "string" ]
+    },
+    "NTVlist": {
+      "type": [ "boolean", "array", "null", "object", "number", "integer", "string" ]
+    }
+  }
+}
