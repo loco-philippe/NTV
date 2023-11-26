@@ -189,21 +189,24 @@ class Ntv(ABC):
             return value
         ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value)
         sep = def_sep if not sep else sep
-        if isinstance(ntv_value, list) and sep in (None, '::'):
+        #if isinstance(ntv_value, list) and sep in (None, '::'):
+        if isinstance(ntv_value, (list, dict)) and sep in (None, '::'): #!!!
             return Ntv._create_ntvlist(str_typ, def_type, sep, ntv_value,
                                        typ_auto, no_typ, ntv_name, fast)
-        if sep == ':' or (sep is None and isinstance(ntv_value, dict) and
-                          len(ntv_value) == 1):
+        #if sep == ':' or (sep is None and isinstance(ntv_value, dict) and
+        #                  len(ntv_value) == 1):
+        if sep == ':' or (sep is None and isinstance(ntv_value, dict)): #!!!
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
         if sep is None and not isinstance(ntv_value, dict):
             is_single_json = isinstance(value, (int, str, float, bool))
             ntv_type = agreg_type(str_typ, def_type, is_single_json)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
-        if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
-                                            sep is None):
-            return Ntv._create_ntvlist(str_typ, def_type, sep, ntv_value,
-                                       typ_auto, no_typ, ntv_name, fast)
+        #if isinstance(ntv_value, dict) and (sep == '::' or len(ntv_value) != 1 and
+        #                                    sep is None):
+        #if isinstance(ntv_value, dict) and sep in (None, '::'): #!!!
+        #    return Ntv._create_ntvlist(str_typ, def_type, sep, ntv_value,
+        #                               typ_auto, no_typ, ntv_name, fast)
         raise NtvError('separator ":" is not compatible with value')
 
     def __len__(self):
@@ -682,6 +685,8 @@ class Ntv(ABC):
             name = obj_name[0]
         else:
             name = obj_name[0] + obj_name[1] + obj_name[2]
+        #value = [value] if isinstance(self, NtvList) and not name and len(self) == 1 else value  # !!!
+        value = [value] if not name and isinstance(value, dict) and  len(value) == 1 else value  # !!!
         json_obj = {name: value} if name else value
         if option['encoded'] and option['format'] == 'json':
             return json.dumps(json_obj, cls=NtvJsonEncoder)
@@ -704,13 +709,14 @@ class Ntv(ABC):
         value = {} if not value else value
         name = '' if not name else name
         typ = '' if not typ else typ
-        ntv_list = len(value) != 1 if isinstance(
-            value, dict) else isinstance(value, list)
+        #ntv_list = len(value) != 1 if isinstance(value, dict) else isinstance(value, list) #!!!
+        ntv_list = isinstance(value, (list, dict))
         if not single and not ntv_list:
             raise NtvError('value is not compatible with not single NTV data')
         sep = ':' if single else '::'
         sep = '' if not typ and (not single or single and not ntv_list) else sep
         name += sep + typ
+        value = [value] if not name and isinstance(value, dict) and  len(value) == 1 else value  # !!!
         return {name: value} if name else value
 
     def to_json_ntv(self):
@@ -942,7 +948,8 @@ class NtvSingle(Ntv):
         ''' return separator to include in json_name'''
         if json_type or not def_type and \
             (isinstance(self.ntv_value, list) or
-             isinstance(self.ntv_value, dict) and len(self.ntv_value) != 1):
+             #isinstance(self.ntv_value, dict) and len(self.ntv_value) != 1):
+             isinstance(self.ntv_value, dict)): # !!!
             return ':'
         return ''
 
@@ -1028,7 +1035,8 @@ class NtvList(Ntv):
     def json_array(self):
         ''' return the json_array dynamic attribute'''
         set_name = {ntv.ntv_name for ntv in self}
-        return '' in set_name or len(set_name) != len(self) or len(set_name)==1
+        return '' in set_name or len(set_name) != len(self) or len(set_name)==1 #!!!
+        #return '' in set_name or len(set_name) != len(self)
 
     def __eq__(self, other):
         ''' equal if name and value are equal'''
@@ -1078,7 +1086,8 @@ class NtvList(Ntv):
         
     def _obj_sep(self, json_type, def_type=None):
         ''' return separator to include in json_name'''
-        if json_type or (len(self.ntv_value) == 1 and not self.json_array):
+        #if json_type or (len(self.ntv_value) == 1 and not self.json_array):
+        if json_type:  #!!!
             return '::'
         return ''
 
@@ -1090,8 +1099,15 @@ class NtvList(Ntv):
         opt2 = option | {'encoded': False}
         maxv = len(self.ntv_value) if option['maxi'] < 1 else option['maxi']
         def_type = self.ntv_type.long_name if self.ntv_type else def_type
+        values = [ntv.to_obj(def_type=def_type, **opt2)
+                  for ntv in self.ntv_value[:maxv]]
+        if len(values) == 1 and isinstance(values[0], dict):
+            return values[0]
         if self.json_array or option['simpleval'] or option['json_array']:
+            return values
+        return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}        
+        """if self.json_array or option['simpleval'] or option['json_array']:
             return [ntv.to_obj(def_type=def_type, **opt2) for ntv in self.ntv_value[:maxv]]
         values = [ntv.to_obj(def_type=def_type, **opt2)
                   for ntv in self.ntv_value[:maxv]]
-        return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}
+        return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}"""

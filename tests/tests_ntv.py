@@ -45,7 +45,7 @@ class Test_Ntv_fast(unittest.TestCase):
                      [{"::": {"a": 2}}, {"l": ["sN"]}],
                      [{"::": [[1, 2], [3, 4]]},
                          {"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}],
-                     [{"truc": {"a": 2}}, "sN"],
+                     [{"truc": {"a": 2}}, {'lN': ['sN']}], #"sN"],
                      [{"truc:": {"a": 2}}, "sN"],
                      [{":": {"a": 2}}, "s"]
                      ]
@@ -66,7 +66,9 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvSingle', '"{ner"'],
                    ['NtvList', '{}'],
                    ['NtvList', '[{" a": 2}]'],
-                   ['NtvList', '{"test": [{"a": 2}]}']]
+                   #['NtvList', '{"test": [{"a": 2}]}']
+                   ['NtvList', '{"test": {"a": 2}}']
+                   ]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -86,7 +88,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvSingle', 'test'],
                    ['NtvSingle', {'Single': 1}],
                    ['NtvSingle', {'Ntv1:ntv': {'Ntv2': 2}}],
-                   ['NtvSingle', {'Ntv1': {'Ntv2': 2}}],
+                   #['NtvSingle', {'Ntv1': {'Ntv2': 2}}],
+                   ['NtvList', {'Ntv1': {'Ntv2': 2}}],
                    ['NtvSingle', {'Ntv1:fr.reg': {'Ntv2:fr.BAN.lon': 2}}],
                    ['NtvSingle', {'Ntv1': True}],
                    ['NtvSingle', True],
@@ -109,7 +112,9 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
                    ['NtvList', [{" a": 2}]],
-                   ['NtvList', {"test": [{"a": 2}]}]]
+                   #['NtvList', {"test": [{"a": 2}]}]
+                   ['NtvList', {"test": {"a": 2}}]
+                   ]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -216,7 +221,7 @@ class Test_Ntv_creation(unittest.TestCase):
                      [{"::": {"a": 2}}, {"l": ["sN"]}],
                      [{"::": [[1, 2], [3, 4]]},
                          {"l": [{"l": ["s", "s"]}, {"l": ["s", "s"]}]}],
-                     [{"truc": {"a": 2}}, "sN"],
+                     [{"truc": {"a": 2}}, {'lN': ['sN']}], # "sN"],
                      [{"truc:": {"a": 2}}, "sN"],
                      [{":": {"a": 2}}, "s"]
                      ]
@@ -249,7 +254,9 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvSingle', '"{ner"'],
                    ['NtvList', '{}'],
                    ['NtvList', '[{" a": 2}]'],
-                   ['NtvList', '{"test": [{"a": 2}]}']]
+                   #['NtvList', '{"test": [{"a": 2}]}']
+                   ['NtvList', '{"test": {"a": 2}}']
+                   ]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -263,6 +270,14 @@ class Test_Ntv_creation(unittest.TestCase):
             self.assertEqual(ntv, Ntv.obj(Ntv.to_obj(ntv)))
             self.assertEqual(ntv, Ntv.obj(ntv.to_obj()))
 
+    def test_single(self):
+        self.assertEqual(Ntv.obj({'b': {"a": 2}}).to_obj(), {'b': {"a": 2}})
+        self.assertEqual(Ntv.obj([{"a": 2}]).to_obj(), [{"a": 2}])
+        self.assertEqual(Ntv.obj([2]).to_obj(), [2])
+        self.assertEqual(Ntv.obj({'::': {"a": 2}}).to_obj(), [{"a": 2}])
+        self.assertEqual(Ntv.obj({'::': {':json':2}}).to_obj(), [2])
+        self.assertEqual(Ntv.obj({'::': {':':2}}).to_obj(), [2])
+
     def test_from_obj_json(self):
         dictstr = [['NtvSingle', None],
                    ['NtvSingle', {'none': None}],
@@ -270,7 +285,7 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvSingle', 'test'],
                    ['NtvSingle', {'Single': 1}],
                    ['NtvSingle', {'Ntv1:ntv': {'Ntv2': 2}}],
-                   ['NtvSingle', {'Ntv1': {'Ntv2': 2}}],
+                   ['NtvList', {'Ntv1': {'Ntv2': 2}}],
                    ['NtvSingle', {'Ntv1:fr.reg': {'Ntv2:fr.BAN.lon': 2}}],
                    ['NtvSingle', {'Ntv1': True}],
                    ['NtvSingle', True],
@@ -293,7 +308,9 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
                    ['NtvList', [{" a": 2}] ],
-                   ['NtvList', {"test": [{"a": 2}]}]]
+                   #['NtvList', {"test": [{"a": 2}]}]
+                   ['NtvList', {"test": {"a": 2}}]
+                   ]
 
         lis = list(zip(*dictstr))
         liststr = list(lis[1])
@@ -486,14 +503,14 @@ class Test_Ntv_tabular(unittest.TestCase):
 class Test_Ntv_function(unittest.TestCase):
 
     def test_obj_ntv(self):
-        l_val_s = [{'tst':[1,2,3]}, {'tst':[1,2,3], 'tst2':5}, [1,2,3], 5, 'test']
+        l_val_s = [{'tst':[1,2,3]}, {'tst': 1},  {'tst':[1,2,3], 'tst2':5}, [1,2,3], 5, 'test']
         l_name = ['tst', '']
         l_typ = ['int32', '']
         test_s = list(product(l_val_s, l_name, l_typ))
         for tst in test_s:
             self.assertEqual(Ntv.obj_ntv(*tst, True), NtvSingle(*tst).to_obj(), 
                              Ntv.obj({tst[1]+':'+tst[2]:tst[0]}).to_obj())
-        l_val_l = [{}, {'tst':1, 'tst2':5}, [], [1,2]]
+        l_val_l = [{}, {'tst': 1}, {'tst':1, 'tst2':5}, [], [1,2]]
         test_l = list(product(l_val_l, l_name, l_typ))
         for tst in test_l:
             #print(tst)
@@ -516,10 +533,8 @@ class Test_Ntv_function(unittest.TestCase):
                     ['point', {"::point": [1, 2]}, ('', '', '')],
                     ['', {"::point": [1, 2]}, ('', '::', 'point')],
                     ['fr.', {"::fr.reg": [1, 2]}, ('', '::', 'reg')],
-                    #['', {"::json": [1, 2]}, ('', '::', 'json')],
                     ['', {"::json": [1, 2]}, ('', '', '')],
                     ['json', {"::json": [1, 2]}, ('', '', '')],
-                    #['json', {"::": [1, 2]}, ('', '::', 'json')],
                     ['json', {"::": [1, 2]}, ('', '', '')],
                     ['array', {":array": [1, 2]}, ('', '', '')],
                     ]
