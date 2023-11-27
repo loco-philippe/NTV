@@ -297,7 +297,8 @@ NTVtypeName     = ["$"] JsonString              ; REQ3
 JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
 
 JsonNTVnamed   = beginObject JsonNTVMember endObject 
-JsonNTVsimple  = JsonNTVvalue
+JsonNTVsimple  = JsonNTVvalue / ArrayValue         ; REQ5
+ArrayValue     = beginArray JsonNTVvalue endArray
 
 JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
 
@@ -322,7 +323,8 @@ JsonString = JsonString  ; indicates that rule is defined in RFC8259
           <li>simple format (if NTVname and JsonType are empty string): <ul empty="true">
             <li><em>JsonNTVvalue</em></li></ul></li></ul></t>
         <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
-          <li>If JsonNTVname is empty, simple format is used</li></ol></li></ul>
+          <li>If JsonNTVname is empty, simple format is used</li>
+          <li>If JsonNTVname is empty and JsonNTVvalue is a JsonObject with a single member, ArrayValue is used</li></ol></li></ul>
         <t>This format allows full compatibility with existing JSON structures:<ul>
           <li>a JsonNumber, JsonString, JsonNull or JsonBoolean is the representation of a Vsingle entity,</li>
           <li>a JsonObject with a single member is the representation of an NVsingle or TVsingle entity,</li>
@@ -343,7 +345,7 @@ JsonString = JsonString  ; indicates that rule is defined in RFC8259
 
 JsonNTVname = NTVname JsonSepType
 JsonSepType = [singleSep [JsonNTVtype]]/[listSep JsonNTVtype]
-    ; REQ5 REQ6
+    ; REQ6 REQ7
 
 NTVname = JsonString
 
@@ -353,7 +355,7 @@ listSep     = "::"     ; NTVlist separator
         </sourcecode></figure>
         <t>For NTVsingle entities:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
           <li><t>If JsonNTVtype is not "json", JsonSepType is identical to singleSep joined with JsonNTVtype,</t>
-          <t>else if JsonNTVvalue is not a JsonArray and not a JsonUnnamed, JsonSepType is empty,</t>
+          <t>else if JsonNTVvalue is not a JsonArray and not a JsonObject, JsonSepType is empty,</t>
           <t>else JsonSepType is identical to singleSep.</t></li></ol></li></ul>
         <t>For NTVlist entities:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
           <li><t>If JsonNTVtype is not empty, JsonSepType is identical to listSep joined with JsonNTVtype</t>
@@ -369,10 +371,10 @@ listSep     = "::"     ; NTVlist separator
 ; JSON representation of NtvType (JsonNTVtype)
 
 JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
-    ; REQ7
+    ; REQ8
 
 relativeNTVtypeLongName = *NamespaceName NTVtypeName
-    ; REQ7
+    ; REQ8
             ]]>
         </sourcecode></figure>
         <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
@@ -396,7 +398,7 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
-    ; REQ8
+    ; REQ9
 
 JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
