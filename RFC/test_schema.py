@@ -14,10 +14,10 @@ schntv = {   "$schema": "https://json-schema.org/draft/2020-12/schema",
     "properties": {
         "E": { "enum" : ["NtvSingle", "NtvList"] },
         "N":   { "type": "string" },
-        "T":   { "$ref": "#/$defs/types" } 
+        "T":   { "$ref": "#/$defs/types" },
     },
+    
     "$defs":{
-        "json":    { "type": [ "boolean", "array", "null", "object", "number", "integer", "string" ] },
         "listNTV": { "type": "array", "items": { "$ref": "#" } },
         "types":   { "enum": [ "int32", "float", "point", "date", "string", "boolean", "object", "json", ""] } 
     }, 
@@ -26,7 +26,7 @@ schntv = {   "$schema": "https://json-schema.org/draft/2020-12/schema",
         "if":  {"properties":{ "E": {"const": "NtvList"} } },
         "then":{"properties":{ "V":{ "$ref": "#/$defs/listNTV" } },
                 "required": ["E", "V"] },
-        "else":{"properties":{ "V":{ "$ref": "#/$defs/json" } },
+        "else":{"properties":{ "V": True },
                 "required": ["E", "V", "T"] } 
         }
     ] }
@@ -38,6 +38,7 @@ val4 = {"E": "NtvSingle", "T": "boolean", "N": "val4", "V": True}
 
 lis1 = {"E": "NtvList", "N": "lis1", "V": [val1, val2] }
 lis2 = {"E": "NtvList", "N": "lis1", "V": [lis1, val3] }
+lis3 = {"E": "NtvList", "N": "lis1", "V": 45 }
 
 print(validate(val1, schema=schntv))
 print(validate(val2, schema=schntv))
@@ -51,16 +52,14 @@ schntv2 = {   "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "NTV values",
     "description": "validation of NTV values",   
     "type": "object",
-    "properties": {"E": { }, "N": { }, "T": { } },
+    #"properties": {"E": { }, "N": { }, "T": { } },
     
     "$comment": "test consistency of the V",
     "allOf": [ 
-        #{"if":  {"properties":{ "T": {"const": "int32"}, "E": {"const": "NtvSingle"} } },
-        #"then":{"properties":{ "V":{"type": "integer"} } } },
+        {"if":  {"properties":{ "T": {"const": "int32"}, "E": {"const": "NtvSingle"} } },
+         "then":{"properties":{ "V": {"type": "integer"} } } },
         {"if":  {"properties":{ "T": {"const": "date"}, "E": {"const": "NtvSingle"} } },
-        #"then":{"properties":{ "V": {"type": "string", "pattern": "((19|20)\d{2}-(0[1-9]|1[1,2])-0[1-9]|[12][0-9]|3[01])"} } } }
-        #"then":{"properties":{ "V": {"type": "string", "pattern": "(0[1-9]|1[0-2])[-/](0[1-9]|[12]\d|3[01])[-/](19\d\d|20\d\d)"} } } }
-        "then":{"properties":{ "V": {"type": "string", "pattern": "0[1-9]|1[0-2]"} } } }
+         "then":{"properties":{ "V": {"pattern": "(19\d\d|20\d\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])"} } } }
     ] }
 
 print(validate(lis2, schema=schntv2))
@@ -68,11 +67,13 @@ print(validate(lis2, schema=schntv2))
 #val2 = {"E": "NtvSingle", "T": "int32", "N": "val2", "V": 3.5}
 #print(validate(val2, schema=schntv2))
 
-"""a = [{'test:int32':25, ':date': "(800)FLOWERS"}, 32]
-validate(Ntv.obj(a).expand(), schema=schntv2)
-"""
-#a = [{'test:int32':25, ':date': '2001-12-25'}, 32]
-a = [{'test:int32':25, ':date': 'a0'}, 32]
-validate(Ntv.obj(a).expand(), schema=schntv2)
 a = [{'test:int32':25, ':date': '2001-13-25'}, 32]
 validate(Ntv.obj(a).expand(), schema=schntv2)
+
+'''
+exemple :
+ { 'test': 45}
+ { 'N': 'test', 'T': 'json', 'V': 45}
+ 
+ { "properties": { "N":"test"}
+'''
