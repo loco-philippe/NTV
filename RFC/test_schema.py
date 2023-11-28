@@ -10,11 +10,10 @@ schntv = {   "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "NTV",
     "description": "schema for NTV entities",
     
-    "type": "object",
     "properties": {
         "E": { "enum" : ["NtvSingle", "NtvList"] },
-        "N":   { "type": "string" },
-        "T":   { "$ref": "#/$defs/types" },
+        "N": { "type": "string" },
+        "T": { "$ref": "#/$defs/types" },
     },
     
     "$defs":{
@@ -40,29 +39,28 @@ lis1 = {"E": "NtvList", "N": "lis1", "V": [val1, val2] }
 lis2 = {"E": "NtvList", "N": "lis1", "V": [lis1, val3] }
 lis3 = {"E": "NtvList", "N": "lis1", "V": 45 }
 
-print(validate(val1, schema=schntv))
-print(validate(val2, schema=schntv))
-print(validate(val3, schema=schntv))
-print(validate(val4, schema=schntv))
-print(validate(lis1, schema=schntv))
-print(validate(lis2, schema=schntv))
+validate(val1, schema=schntv)
+validate(val2, schema=schntv)
+validate(val3, schema=schntv)
+validate(val4, schema=schntv)
+validate(lis1, schema=schntv)
+validate(lis2, schema=schntv)
 
 schntv2 = {   "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://example.com/ntv.schema.json",
     "title": "NTV values",
     "description": "validation of NTV values",   
-    "type": "object",
-    #"properties": {"E": { }, "N": { }, "T": { } },
     
     "$comment": "test consistency of the V",
     "allOf": [ 
         {"if":  {"properties":{ "T": {"const": "int32"}, "E": {"const": "NtvSingle"} } },
          "then":{"properties":{ "V": {"type": "integer"} } } },
+        
         {"if":  {"properties":{ "T": {"const": "date"}, "E": {"const": "NtvSingle"} } },
          "then":{"properties":{ "V": {"pattern": "(19\d\d|20\d\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])"} } } }
     ] }
 
-print(validate(lis2, schema=schntv2))
+validate(lis2, schema=schntv2)
 
 #val2 = {"E": "NtvSingle", "T": "int32", "N": "val2", "V": 3.5}
 #print(validate(val2, schema=schntv2))
@@ -70,10 +68,33 @@ print(validate(lis2, schema=schntv2))
 a = [{'test:int32':25, ':date': '2001-13-25'}, 32]
 validate(Ntv.obj(a).expand(), schema=schntv2)
 
-'''
-exemple :
- { 'test': 45}
- { 'N': 'test', 'T': 'json', 'V': 45}
- 
- { "properties": { "N":"test"}
-'''
+a= {'test': 45, 'str': 'truc'}
+
+scha = {'properties': {'test': {"maximum": 100}}}
+validate(a, schema=scha)
+
+
+#exemple :
+a = { 'test': 45 }
+n = { 'E': 'NtvSingle', 'N': 'test', 'T': 'json', 'V': 45}
+
+#single :   "properties": {"xx": { yy } }
+#      ->   "properties": {"N": { "const": "xx"},"V": { yy }}
+scha = { "properties": { "test": { "maximum": 100}}}
+validate(a, schema=scha) 
+
+schn = { "properties": {"N": { "const": "test"},"V": { "maximum": 100}}}
+validate(n, schema=schn) 
+
+a = { 'test': 45, 'str': 'truc'}  
+n = {'E': 'NtvList', 'N': '', 'T': '',
+     'V': [{'E': 'NtvSingle', 'N': 'test', 'T': 'json', 'V': 45},
+           {'E': 'NtvSingle', 'N': 'str', 'T': 'json', 'V': 'truc'}]}
+
+#list :     "properties": {"xx": { yy } } 
+#      ->   "properties": {"V" : {"contains": {"N": { "const": "xx"},"V": { yy }}}}
+scha = { "properties": { "test": { "maximum": 100}}}
+validate(a, schema=scha)
+
+schn = { "properties": {"V" : {"contains": {"properties": {"N": { "const": "test"},"V": { "maximum": 100}}}}}}
+validate(n, schema=schn)  
