@@ -98,3 +98,49 @@ validate(a, schema=scha)
 
 schn = { "properties": {"V" : {"contains": {"properties": {"N": { "const": "test"},"V": { "maximum": 100}}}}}}
 validate(n, schema=schn)  
+
+
+"""
+json :
+    properties:
+        {name: value_schema}
+    propertiesType:
+        {name: type_schema}
+    patternProperties:
+        {pattern_name: pat_schema}
+    patternPropertiesType:
+        {pattern_name: type_schema}
+    additionalProperties: add_schema
+    additionalPropertiesType: add_type_schema
+    unevaluatedProperties: uneval_schema
+    unevaluatedPropertiesType: uneval_type_schema    
+    required: [req_name]
+    propertyNames: names_schema
+    minProperties: int
+    maxProperties: int
+    
+    items: items_schema
+    prefixItems: [name_schema]
+    prefixItemsType: [name_type_schema]
+    unevaluatedItems: uneval_schema
+    unevaluatedItemsType: uneval_type_schema
+    contains: cont_schema
+    containsType: cont_type_schema
+    minContains: int
+    minContainsType: int
+    maxContains: int
+    maxContainsType: int
+    minItems: int
+    maxItems: int
+    uniqueItems: boolean
+    
+NTV:
+    items
+    namesValues: {}
+    namesTypes: {}
+    typesValues: {}
+    patternxxx: {}
+    additionalxxx
+    unevaluatedxxx
+    
+"""

@@ -415,7 +415,7 @@ class Test_Ntv_compare(unittest.TestCase):
         self.assertTrue(Ntv.obj([1,4]) < Ntv.obj({'test':{'truc':2}}))
         self.assertTrue(Ntv.obj([1,4]) < Ntv.obj([[2]]))
         
-class Test_Ntv_indexing(unittest.TestCase):
+class Test_Ntv_pointer(unittest.TestCase):
     
     def test_pointer_RFC(self):
         ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
@@ -434,8 +434,11 @@ class Test_Ntv_indexing(unittest.TestCase):
     def test_json_pointer(self):
         ntv = Ntv.obj({'a': [1, [2, 3, 4], [5, 6]], 
                        'b': 'ert',
-                       'dic': {'v1': 'val1', 'v2': 'val2'}})
-        pointers = ['/a/1/1', '']
+                       'dic': {'v1': 'val1', 'v2': 'val2'},
+                       'dicsingle': {'sing': 1}})
+        pointers = ['/a/1/1', '', '/dicsingle', '/dicsingle/sing']
+        self.assertTrue(ntv['/dicsingle/0'] == ntv['/dicsingle/sing'] ==
+                        ntv['dicsingle'][0] == ntv['dicsingle']['sing'])
         for pointer in pointers:
             #self.assertEqual(pointer, ntv[pointer].json_pointer())
             self.assertEqual(pointer, ntv[pointer].pointer().json())

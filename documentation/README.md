@@ -19,3 +19,16 @@ The documentation presents :
 - Release
   - [v0](https://github.com/loco-philippe/NTV/blob/main/documentation/release/0.x.rst)
   - [v1](https://github.com/loco-philippe/NTV/blob/main/documentation/release/1.x.rst)
+
+## Roadmap
+
+- **NTV schema** : use data schema compatible with Json-schema
+- **tabular data** : specific Internet-Draft for this format
+- **indicators** : extract structural data
+- **types** : tools to control (NTV_values, NTV_type)
+- **CBOR interface** : using CBOR tags
+- **types catalog** : compatibility with others catalogs
+- **visualization** : add visualization tools (Mermaid extension and other tools)
+- **NTV editor** : HTML/JavaScript to build and understand NTV structure and JSON-NTV format
+- **JavaScript** : add NTV javascript tool
+- **NTVpath** : extension of JSONpath to NTV data
