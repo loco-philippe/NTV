@@ -309,7 +309,10 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', {'Ntv3': {'Ntv1': 1, 'Ntv2': '2'}}],
                    ['NtvList', [{" a": 2}] ],
                    #['NtvList', {"test": [{"a": 2}]}]
-                   ['NtvList', {"test": {"a": 2}}]
+                   ['NtvList', {"test": {"a": 2}}],
+                   ['NtvList', {'::json': [[1, 2], [3, 4]]}],
+                   ['NtvList', {'::json': [1, 2]}],
+                   ['NtvList', [{":": [1, 2]}, {":": [3, 4]}]]
                    ]
 
         lis = list(zip(*dictstr))
@@ -536,14 +539,14 @@ class Test_Ntv_function(unittest.TestCase):
                     ['point', {"::point": [1, 2]}, ('', '', '')],
                     ['', {"::point": [1, 2]}, ('', '::', 'point')],
                     ['fr.', {"::fr.reg": [1, 2]}, ('', '::', 'reg')],
-                    ['', {"::json": [1, 2]}, ('', '', '')],
+                    ['', {"::json": [1, 2]}, ('', '::', 'json')],
                     ['json', {"::json": [1, 2]}, ('', '', '')],
                     ['json', {"::": [1, 2]}, ('', '', '')],
                     ['array', {":array": [1, 2]}, ('', '', '')],
                     ]
         for data in list_obj:
             ntv = Ntv.obj(data[1])
-            # print(ntv)
+            #print(ntv, data[0], data[1], data[2])
             self.assertEqual(ntv.json_name(data[0]), list(data[2]))
 
     def test_cast(self):
