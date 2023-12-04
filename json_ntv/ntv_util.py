@@ -43,7 +43,12 @@ class NtvUtil:
     @staticmethod
     def decode_ntv_tab(ntv, ntv_to_val):
         '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
-
+        
+        *parameters:*
+        
+        - **ntv**: Ntv data to decode,
+        - **ntv_to_val**: method to convert external value form ntv in internal Field value
+        
         *Returns tuple: (name, dtype, codec, parent, keys, coef, leng)*
 
         - name (None or string): name of the Field

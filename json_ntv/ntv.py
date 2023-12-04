@@ -503,6 +503,7 @@ class Ntv(ABC):
             'leaves': NtvSingle entities
             'inner': NtvList entities
             'all': all entities  '''
+        name = '' if name is None else name
         match nodes:
             case 'simple':
                 self.ntv_name = str(name)
