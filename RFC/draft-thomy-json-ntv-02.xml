@@ -28,7 +28,7 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author> 
-    <date year="2023" month="09"/>
+    <date year="2023" month="12" day="07"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
     <keyword>JSON</keyword>
@@ -38,7 +38,8 @@
     <abstract pn="section-abstract">
       <t>This document describes a set of simple rules for unambiguously and concisely encoding semantic data into 
       JSON Data Interchange Format. These rules are based on an NTV (Named and Typed Values) data structure applicable
-      to any simple or complex data. The JSON-NTV format is its JSON translation.</t>
+      to any simple or complex data. </t>
+      <t>The JSON-NTV format is its JSON translation.</t>
     </abstract>
   </front>
   &nbsp;
@@ -281,7 +282,62 @@ NTVtypeName     = ["$"] JsonString              ; REQ3
               <li><em>"fr.$example.one" is a name of a custom NTVtype</em></li>
               <li><em>"fr.BAN.$test" is a name of a custom NTVtype</em></li></ul></li></ul></t>
         </section>
-      </section>      
+      </section> 
+      <section><name>Properties</name>
+        <section><name>NTV tree</name>
+          <t>An NTV entity is a tree where the leaf nodes are the NTVsingle entities and where the inner nodes are the NTVlist entities.</t>
+          <t>Therefore the tree property are applicable:</t><ul>
+            <li>tree indicators can be calculate:<ul>
+              <li>breadth : number of NTVsingle entities (leaves)</li>
+              <li>size : number of NTV entities (nodes)</li>
+              <li>height :  length of the longest downward path to a leaf</li></ul></li>
+            <li>An ordering list of nodes can be defined to explore the tree for example according to the DFS pre-ordering algorithm,</li></ul>
+        </section>
+        <section><name>NTV Pointer</name>
+          <t>A NTV Pointer is a string syntax for identifying a specific NTV entity within a NTV tree.</t>
+          <t>The syntax defined for JSON Pointer <xref target="RFC6901"/> is applicable.</t>
+          <t>The reference token in a NTV Pointer is the NTVname if it exists otherwise the zero-based index of the NTV entity in the NTVvalue list.</t>
+        </section>
+        <section><name>NTV Comparison</name>
+          <t>Three levels of equality are defined.</t>
+          <t><strong>Strict equality:</strong></t><ul empty="true">
+            <li>Two NTV entities are strictly equals if : <ul>
+              <li>the NTVname are identical</li>
+              <li>the NTVtypes are identical</li>
+              <li>the NTVvalue are identical<ul>
+                <li>if the NTVvalue is a list of NTV entities, each NTV entity has to be identical</li>
+                <li>if the NTVvalue is a JSONvalue, the JSONvalues have to be identical</li></ul></li></ul></li></ul>
+          <t><strong>Structural equality:</strong></t><ul empty="true">
+            <li>Two NTV entities are structurally equals if :<ul>
+              <li>the NTVname are identical</li>
+              <li>the NTVtypes of NTVsingle are identical</li>
+              <li>the NTVvalue are structurally identical:<ul>
+                <li>if the NTVvalue is a list of NTV entities, each NTV entity has to be structurally identical</li>
+                <li>if the NTVvalue is a JSONvalue, the JSONvalues have to be identical</li></ul></li></ul></li>
+            <li><em>Example of structural equality (JsonNTV representation):</em><ul empty="true">
+              <li><em> {"::int32": [10, 20] }   and   [{":int32": 10}, {":int32": 20}]</em></li></ul></li></ul>
+          <t><strong>Semantic equality:</strong></t><ul empty="true">
+            <li>Two NTV entities are semantically equals if :<ul>
+              <li>the NTVname are identical</li>
+              <li>the NTVvalue are semantically identical:<ul>
+                <li>if the NTVvalue is a list of NTV entities, each NTV entity has to be semantically identical</li>
+                <li>if the NTVvalue is a JSONvalue, the native entity associated to the JSONvalue have to be identical</li></ul></li></ul></li>
+            <li><em>Example of semantic equality (JsonNTV representation):</em><ul empty="true">
+              <li><em> {":datetime": "2011-11-04T10:05:23+00:00" } and {":datetime": "2011-11-04T11:05:23+01:00"}</em></li></ul></li></ul>
+        </section>
+        <section><name>NTV Canonical</name>
+          <t>The NTVtype of the NTVlist entities is only useful for constructing the JSON representation (two NTVlists with two different NTVtypes are equal 
+          according to the structural equality criteria).</t>
+          <t>A canonical (single) format is chosen to facilitate sharing and analysis of NTV and JsonNTV data. It is defined by setting a value 
+          for the NTVtype of an NTVlist entity.</t> 
+          <t>The rule is as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
+            <li><t>If an included entity is an NTVlist with an empty NTVtype, its NTVtype is empty</t>
+            <t>If all included entities have an NTVtype 'json', its NTVtype is empty.</t>
+            <t>In other cases, the NTVtype is the same as that of the first included entity.</t></li></ol></li></ul>
+          <t>This rule is simple to implement and allows you to have a compact JsonNTV format (another more complex choice would have been to take
+           the most frequent NTVtype among the included entities).</t>
+        </section>
+      </section>     
     </section>
     &nbsp;
     <section><name>JsonNTV</name>
@@ -294,10 +350,10 @@ NTVtypeName     = ["$"] JsonString              ; REQ3
             <![CDATA[
 ; JSON representation of NTV entities (JsonNTV)
 
-JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ5
 
 JsonNTVnamed   = beginObject JsonNTVMember endObject 
-JsonNTVsimple  = JsonNTVvalue / ArrayValue         ; REQ5
+JsonNTVsimple  = JsonNTVvalue / ArrayValue         ; REQ6
 ArrayValue     = beginArray JsonNTVvalue endArray
 
 JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
@@ -345,7 +401,7 @@ JsonString = JsonString  ; indicates that rule is defined in RFC8259
 
 JsonNTVname = NTVname JsonSepType
 JsonSepType = [singleSep [JsonNTVtype]]/[listSep JsonNTVtype]
-    ; REQ6 REQ7
+    ; REQ7 REQ8
 
 NTVname = JsonString
 
@@ -371,10 +427,10 @@ listSep     = "::"     ; NTVlist separator
 ; JSON representation of NtvType (JsonNTVtype)
 
 JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
-    ; REQ8
+    ; REQ9
 
 relativeNTVtypeLongName = *NamespaceName NTVtypeName
-    ; REQ8
+    ; REQ9
             ]]>
         </sourcecode></figure>
         <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
@@ -398,7 +454,7 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
-    ; REQ9
+    ; REQ10
 
 JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
@@ -537,6 +593,7 @@ NTVsingleValue     = JsonValue
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6901.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
       </references>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>
+<!DOCTYPE rfc [<!ENTITY nbsp    "&#160;"><!ENTITY zwsp   "&#8203;"><!ENTITY nbhy   "&#8209;"><!ENTITY wj     "&#8288;">]>
+<rfc
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  category="info"
+  docName="draft-thomy-ntv-tab-00"
+  ipr="trust200902"
+  obsoletes=""
+  updates=""
+  submissionType="IETF"
+  xml:lang="en"
+  version="2">
+
+  <front>
+    <title>NTV tabular format (NTV-TAB)</title>
+    <seriesInfo name="Internet-Draft" value="draft-thomy-ntv-tab-00"/>
+    <author fullname="Philippe THOMY" initials="P." surname="THOMY">
+      <organization>Loco-labs</organization>
+      <address>
+        <postal>
+          <street>476 chemin du gaf de Famian</street>
+          <city>BOLLENE</city>
+          <code>84 500</code>
+          <country>FR</country>
+        </postal>        
+        <email>philippe@loco-labs.io</email>  
+        <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
+      </address>
+    </author> 
+    <date year="2023" month="12" day="07"/>
+    <area>General</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+    <keyword>JSON</keyword>
+    <keyword>semantic</keyword>
+    <keyword>data interchange format</keyword>
+    <keyword>tabular</keyword>
+    <keyword>ABNF</keyword>
+    <abstract pn="section-abstract">
+      <t>This document describes a set of simple rules for unambiguously and concisely encoding tabular data into JSON Data Interchange Format.
+       These rules are based on the NTV (Named and Typed Values) structure declined to tabular and multi-dimensional structures.</t>
+      <t>The JSON-TAB format is its JSON translation.</t>
+    </abstract>
+  </front>
+  &nbsp;
+  <middle>
+    <section><name>Introduction</name>
+      <section><name>Presentation</name>
+      </section>
+    </section>
+    &nbsp;
+    <section anchor="IANA"><name>IANA Considerations</name>
+      <t>Any JsonValue is a JsonNTVValue and conversely, any JsonNTVvalue is a JsonValue.</t>
+      <t>Thus, any JSON data may or may not be treated as JsonNTV data, so there is no need to create a specific MIME media type for JsonNTV.</t>
+      <t>All properties of the MIME media type "application/json" are applicable.</t>
+    </section>
+    <section anchor="Security"><name>Security Considerations</name>
+      <t>The format used for NTV data exchanges is the JSON format. 
+      So, all the security considerations of <xref target="RFC8259"/> apply.</t>
+      <t>The NTV structure provides no cryptographic integrity protection of any kind.</t>
+    </section>
+  </middle>
+  &nbsp;
+  <back>
+    <references><name>References</name>
+      <references><name>Normative References</name>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7946.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6901.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
+      </references>
+      <references><name>Informative References</name>
+        <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
+          <title>JSON-ND</title><author initials="G" surname="Kleidon"></author><date year="2020"/></front></reference>
+        <reference anchor="JSON-NTV" target="https://github.com/loco-philippe/NTV#readme"><front>
+          <title>JSON-NTV</title><author initials="P" surname="Thomy"></author><date year="2022"/></front></reference>      
+        <reference anchor="OLC" target="https://github.com/google/open-location-code"><front>
+          <title>Open Location Code</title><author><organization>"Google"</organization></author><date year="2016"/></front></reference>            
+        <reference anchor="W3C TAB" target="https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/"><front>
+          <title>Recommendation : Model for Tabular Data and Metadata on the Web</title>
+          <author><organization>"W3C"</organization></author><date year="17 December 2015"/></front></reference>            
+        <reference anchor="ISO 3166-1 alpha-2" target="https://www.iso.org/standard/72482.html"><front>
+          <title>Codes for the representation of names of countries and their subdivisions - Part 1: Country code</title>
+          <author><organization>"ISO"</organization></author><date year="2020"/></front></reference>            
+      </references>
+    </references>
+    &nbsp;
+    <section><name>Appendixxxxxx</name>
+    </section>
+    <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
+      <t>TBD</t>
+    </section>
+    <section anchor="Contributors" numbered="false"><name>Contributors</name> 
+      <t>TBD</t>
+    </section>
+ </back>
+</rfc>
