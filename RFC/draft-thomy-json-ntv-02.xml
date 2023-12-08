@@ -100,15 +100,15 @@
             <li>all NTV entities are trees</li>
             <li>tree properties are applicable to NTV entities</li></ul></li></ul></t>
       </section>     
-      <section><name>Requirements Language</name>
+      <section><name>Conventions Used in This Document</name>
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
           RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <xref target="RFC2119"/>
           <xref target="RFC8174"/> when, and only when, they appear in all capitals, as shown here.</t>
         <t>This document also uses the following terms:</t><dl newline="true">    
-          <dt><strong>JsonType, JsonText, JsonName, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber,
+          <dt><strong>JsonText, JsonName, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber,
            JsonString, JsonFalse, JsonNull, JsonTrue:</strong></dt>
-          <dd>These terms are defined as type, text, name, value, object, member, element, array, number, string, false, 
-          null, true in the JSON grammar.</dd>
+          <dd>These terms are defined as text, name, value, object, member, element, array, number, string, false, 
+          null, true in the JSON grammar <xref target="RFC8174"/>.</dd>
           <dt><strong>JsonPrimitive:</strong></dt>
           <dd>A JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull.</dd>
           <dt><strong>JsonUnnamed:</strong></dt>
@@ -210,7 +210,7 @@
               <li><em>[ { ":point" : [2.3522, 48.8566]}, {":point" : [4.8357, 45.7640]} ] </em></li></ul></li>
             <li><em>where NTVlistType is "point" for the global NTVlist</em><ul empty="true">
               <li><em>{ "::point" : [ [2.3522, 48.8566], [4.8357, 45.7640] ] }</em></li></ul></li></ul>
-          <t><em>If JSON-value is { "::dat" : ["2022-01-28T18-23-54", {":point": [1.1, 2.2] ] } }, 
+          <t><em>If JsonValue is { "::dat" : ["2022-01-28T18-23-54", {":point": [1.1, 2.2] ] } }, 
           the parsers deduce that the first NTVvalue has a  "dat" NTVtype and the second a "point" NTVtype.</em></t>
         </section>
       </section>
