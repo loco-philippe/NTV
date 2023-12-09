@@ -163,29 +163,29 @@
         <t>This category is the usual representation of a Field with different values (Full format) or with several identical values (Unique format).</t>
         <t><strong>Full format</strong> :</t> 
         <t>The NTVvalue of the NTVfield is the list of NTVcells.</t><ul empty="true">
-          <li><em>Example JsonNTVvalue ( "price" field)</em> : <ul empty="true">
+          <li><em>Example JsonNTVvalue ( "price" Field)</em> : <ul empty="true">
             <li><em>[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]</em></li></ul></li></ul>
         <t><strong>Unique format</strong> :</t>
         <t>The NTVfield is identical to the NTVcell.</t><ul empty="true">
-          <li><em>Example JsonNTVvalue ( "period" field)</em> : <ul empty="true"> 
+          <li><em>Example JsonNTVvalue ( "period" Field)</em> : <ul empty="true"> 
             <li><em>"2nd half 2022"</em></li></ul></li></ul>
         <t>Note : </t><ul empty="true">
           <li>The Unique format also makes it possible to represent tabular metadata</li></ul>
       </section>
       <section><name>default NTVfield formats</name>
         <t>This category completes the simple formats with the other most common representations of a Field : </t><ul>
-          <li>Categorical field (Complete format)</li>
-          <li>Periodic field (Primary format)</li>
-          <li>Sparse field (Sparse format)</li></ul>
-        <t>The NTVfield is a NVlist where the NTVname is the name of the field and the NTVvalue is the list of two NTVentities.</t>
+          <li>Categorical Field (Complete format)</li>
+          <li>Periodic Field (Primary format)</li>
+          <li>Sparse Field (Sparse format)</li></ul>
+        <t>The NTVfield is a NVlist where the NTVname is the name of the Field and the NTVvalue is the list of two NTVentities.</t>
         <t><strong>Complete format</strong> :</t> 
         <t>The "complete format" is equivalent to the format used to store categorical variables.</t>
         <t>The Field is a NVlist composed with two NTV entities :</t><ul>
-          <li>Component: TVlist of different field NTVcells (Codec),</li>
+          <li>Component: TVlist of different Field NTVcells (Codec),</li>
           <li>Coding: Vlist of indexes of NTVcells in Component (Keys)</li></ul>
         <t>The list of values is reconstituted by replacing the integers in the coding Vlist with the value at the coding index in the component TVlist 
         (e.g. pandas categories and codes).</t><ul empty="true">
-          <li><em>Example JsonNTVvalue ( "product" field)</em> : <ul empty="true">
+          <li><em>Example JsonNTVvalue ( "product" Field)</em> : <ul empty="true">
             <li><em>[ [ "orange" , "pepper" , "apple" , "banana" ], [ 2, 2, 0, 0, 1, 1, 3, 3 ] ]</em></li></ul></li></ul>
         <t><strong>Sparse format</strong> :</t> 
         <t>A specific format (one dimensional sparse LIL format) is used for sparse data. It is defined by:</t><ul>
@@ -197,12 +197,12 @@
           <li>Coding: Vlist of 'sp_index' completed with -1</li></ul>
         <t>The list of values is equivalent to the list of 'fill_value' where the values with index in the Coding Vlist 
         are replaced by the corresponding value in the Component TVlist.</t><ul empty="true">
-          <li><em>Example JsonNTVvalue ( "food" field)</em> : <ul empty="true">
+          <li><em>Example JsonNTVvalue ( "food" Field)</em> : <ul empty="true">
             <li><em>[ [ “vegetable” , “vegetable” , “fruit”], [ 4, 5, -1 ] ]     'fruit' is the 'fill_value'</em></li></ul></li></ul>
         <t><strong>Primary format</strong> :</t> 
         <t>This format is equivalent to the Complete format where the Keys Vlist is calculated with the "repetition coefficient".</t>
         <t>The Field is a NVlist composed with two NTV entities :</t><ul>
-          <li>Component: TVlist of different field NTVcells (Codec),</li>
+          <li>Component: TVlist of different Field NTVcells (Codec),</li>
           <li>Coding: Vlist with a single integer (Repetition coefficient)</li></ul>
         <t>The Keys list is generated with the formula:</t><ul empty="true">
           <li>keys[ikey] = ( ikey % ( coef * period ) ) // coef</li>
@@ -224,8 +224,58 @@
             <li><em>(implicit Keys :  [ 0, 0, 1, 1, 2, 2, 3, 3 ] )</em></li></ul></li></ul>
       </section>
       <section><name>Optimized NTVfield formats</name>
+        <t>This category reduces the weight of complete format with optimized keys. The length of keys is reduced with using of derived (Relative format)
+         or coupled (Implicit format) relationships between two fields.</t>
+        <t>The NTVfield is a NVlist where the NTVname is the name of the field and the NTVvalue is the list of two or three NTVentities.</t>
+        <t><strong>Implicit format</strong> :</t> 
+        <t>This representation is associated with "coupled" Fields. These Fields have a one-to-one correspondence.</t>
+        <t>The Field is a NVlist composed with two NTV entities :</t><ul>
+          <li>Component: TVlist of different field NTVcells (Codec),</li>
+          <li>Ref: Vsingle entity index or name of the coupled Field.</li></ul>
+        <t>This format is equivalent to the complete format where Keys is the Keys of the Field (with Complete format) defined by Ref.</t><ul empty="true">
+          <li><em>Example JsonNTVvalue ( "weight" Field is associated with "packaging" Field )</em> : <ul empty="true">
+            <li><em>[ [ "1 kg" , "10 kg" ], "packaging"]</em></li>
+            <li><em>( implicit Keys :  [ 0, 1, 0, 1, 0, 1, 0, 1 ] )</em></li></ul></li></ul>
+        <t><strong>Relative format</strong> :</t> 
+        <t>This representation is associated with "derived" Fields. These Fields have a one-to-many correspondence.</t>
+        <t>The values of a "derived" Field are inferred from the values of the Field defined by Ref.</t>
+        <t>The Field is a NVlist composed with three NTV entities :</t><ul>
+          <li>Component: TVlist of different field NTVcells (Codec),</li>
+          <li>Ref: Vsingle entity index or name of the coupled Field,</li>
+          <li>Coding : Vlist of relative indexes of NTVcells in Component (Relative Keys).</li></ul>
+        <t>This format is equivalent to the Complete format where the Keys Vlist is obtained by replacing the values of the Keys Vlist of the associated Field
+         with the corresponding values in the Relative Keys (the length of the Relative Keys is the length of the Codec of the associated Field).</t><ul empty="true">
+          <li><em>Example JsonNTVvalue ( "food" Field is associated with "product" Field )</em> : <ul empty="true">
+            <li><em>[ [ "fruit" , "vegetable" ], "product", [ 0, 1, 0, 0 ] ]</em></li>
+            <li><em>(the Vlist Keys is obtained by replacing the values 0, 1, 2, 3 of the Vlist Keys of the "product" Field by the values 0, 1, 0, 0 
+            of the Relative Keys i.e.: [ 0, 0, 0, 0, 1 , 1, 0, 0] )</em></li></ul></li></ul>
       </section>
       <section><name>Synthesis</name>
+        <t>The NTVfield structure corresponding to the format defined above are in <xref target="table4"/>:</t>
+        <table anchor="table4" align="center" pn="table-4"><name>NTVfield formats</name><thead>
+          <tr><th colspan="2" align="center">Structure</th><th align="center">Component</th><th align="center">Ref</th><th align="center">Coding</th></tr>
+          <tr><th align="center">format</th><th align="center">NTV</th><th align="center">TVlist</th><th align="center">Vsingle</th><th align="center">Vlist</th></tr>
+          </thead><tbody>
+          <tr><td>Relative</td><td><t>NTVlist</t><t>len = 3</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td><t>Relative Keys</t><t>len &lt; len(Field)</t></td></tr>
+          <tr><td>Complete</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>Keys</t><t>len = len(Field)</t></td></tr>
+          <tr><td>Sparse</td><td><t>NTVlist</t><t>len = 2</t></td><td><t>sp_value</t><t>+ fill_value</t></td><td> </td><td><t>sp_index + -1</t><t>1 &lt; len &lt; len(Field)</t></td></tr>
+          <tr><td>Implicit</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td> </td></tr>
+          <tr><td>Primary</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>coef</t><t>len = 1</t></td></tr>
+          <tr><td>Unique</td><td colspan="4" align="center">NTVsingle</td></tr>
+          <tr><td>Full</td><td colspan="4" align="center">NTVlist &nbsp; &nbsp; &nbsp; &nbsp; len = len(Field)</td></tr>
+          </tbody></table>
+        <t> Three levels are available to convert tabular data in JSON structure.</t><ul>
+          <li><t><strong>Level 0: "simple"</strong> is the usual representation of tabular data.</t>
+          <t>Fields are converted with the Simple or Unique format.</t></li>
+          <li><t><strong>Level 1: "default"</strong> avoids duplication of information by adding simple encoding.</t>
+          <t>Fields are converted according to their own structure (simple, unique, categorical, sparse, periodic). </t></li>
+          <li><t><strong>Level 2: "optimize"</strong> avoids duplication of information and minimizes encoding. It is the usual representation of multi-dimensional data.</t>
+          <t>This level requires an analysis of the relationships between Fields ("partition")</t></li></ul>
+
+        
+
+
+
       </section>
     </section>
     <section><name>Examples</name>
