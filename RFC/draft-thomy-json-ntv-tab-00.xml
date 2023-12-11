@@ -162,11 +162,12 @@
       <section><name>simple NTVfield formats</name>
         <t>This category is the usual representation of a Field with different values (Full format) or with several identical values (Unique format).</t>
         <t><strong>Full format</strong> :</t> 
-        <t>The NTVvalue of the NTVfield is the list of NTVcells.</t><ul empty="true">
+        <t>The NTVfield is a NTVlist where the NTVname is the name of the Field, the NTVtype is the default type of the NTVcells and 
+        the NTVvalue is the list of NTVcells.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "price" Field)</em> : <ul empty="true">
             <li><em>[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]</em></li></ul></li></ul>
         <t><strong>Unique format</strong> :</t>
-        <t>The NTVfield is identical to the NTVcell.</t><ul empty="true">
+        <t>The NTVfield is a NTVsingle identical to the NTVcell.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "period" Field)</em> : <ul empty="true"> 
             <li><em>"2nd half 2022"</em></li></ul></li></ul>
         <t>Note : </t><ul empty="true">
@@ -198,7 +199,7 @@
         <t>The list of values is equivalent to the list of 'fill_value' where the values with index in the Coding Vlist 
         are replaced by the corresponding value in the Component TVlist.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "food" Field)</em> : <ul empty="true">
-            <li><em>[ [ “vegetable” , “vegetable” , “fruit”], [ 4, 5, -1 ] ]     'fruit' is the 'fill_value'</em></li></ul></li></ul>
+            <li><em>[ [ "vegetable" , "vegetable" , "fruit"], [ 4, 5, -1 ] ]     'fruit' is the 'fill_value'</em></li></ul></li></ul>
         <t><strong>Primary format</strong> :</t> 
         <t>This format is equivalent to the Complete format where the Keys Vlist is calculated with the "repetition coefficient".</t>
         <t>The Field is a NVlist composed with two NTV entities :</t><ul>
@@ -254,8 +255,7 @@
         <t>The NTVfield structure corresponding to the format defined above are in <xref target="table4"/>:</t>
         <table anchor="table4" align="center" pn="table-4"><name>NTVfield formats</name><thead>
           <tr><th colspan="2" align="center">Structure</th><th align="center">Component</th><th align="center">Ref</th><th align="center">Coding</th></tr>
-          <tr><th align="center">format</th><th align="center">NTV</th><th align="center">TVlist</th><th align="center">Vsingle</th><th align="center">Vlist</th></tr>
-          </thead><tbody>
+          <tr><th align="center">format</th><th align="center">NTV</th><th align="center">TVlist</th><th align="center">Vsingle</th><th align="center">Vlist</th></tr></thead><tbody>
           <tr><td>Relative</td><td><t>NTVlist</t><t>len = 3</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td><t>Relative Keys</t><t>len &lt; len(Field)</t></td></tr>
           <tr><td>Complete</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>Keys</t><t>len = len(Field)</t></td></tr>
           <tr><td>Sparse</td><td><t>NTVlist</t><t>len = 2</t></td><td><t>sp_value</t><t>+ fill_value</t></td><td> </td><td><t>sp_index + -1</t><t>1 &lt; len &lt; len(Field)</t></td></tr>
@@ -264,12 +264,11 @@
           <tr><td>Unique</td><td colspan="4" align="center">NTVsingle</td></tr>
           <tr><td>Full</td><td colspan="4" align="center">NTVlist &nbsp; &nbsp; &nbsp; &nbsp; len = len(Field)</td></tr></tbody></table>
         <t> Three levels are available to convert tabular data in JSON structure <xref target="table5"/>.</t><ul>
-          <li><t><strong>Level 0: "simple"</strong> is the usual representation of tabular data.</t>
-          <t>Fields are converted with the Simple or Unique format.</t></li>
+          <li><t><strong>Level 0: "simple"</strong> is the usual representation of tabular data.</t><t>Fields are converted with the Simple or Unique format.</t></li>
           <li><t><strong>Level 1: "default"</strong> avoids duplication of information by adding simple encoding.</t>
-          <t>Fields are converted according to their own structure (simple, unique, categorical, sparse, periodic). </t></li>
+            <t>Fields are converted according to their own structure (simple, unique, categorical, sparse, periodic). </t></li>
           <li><t><strong>Level 2: "optimize"</strong> avoids duplication of information and minimizes encoding. It is the usual representation of multi-dimensional data.</t>
-          <t>This level requires an analysis of the relationships between Fields ("partition")</t></li></ul>
+            <t>This level requires an analysis of the relationships between Fields ("partition")</t></li></ul>
         <table anchor="table5" align="center" pn="table-5"><name>NTVfield levels</name><thead>
           <tr><th colspan="2" align="center">Level</th><th colspan="2" align="center">Structure</th></tr>
           <tr><th align="center">n°</th><th align="center">mode</th><th align="center">Type Field</th><th align="center">format</th></tr></thead><tbody>
@@ -290,7 +289,7 @@
     </section>
     <section><name>Examples</name>
       <section><name>Field examples</name>
-        <t>The examples in <xref target="tabular structure"/>have the following JSON format <xref target="table6"/>:</t>
+        <t>The example in <xref target="tabular structure"/>have the following JSON representation <xref target="table6"/>:</t>
         <table anchor="table6" align="center" pn="table-6"><name>NTVfield examples</name><thead>
           <tr><th align="center">Format</th><th align="center">JsonNTV Representations</th></tr></thead><tbody>
           <tr><td>Full</td><td><t>{ "price::float": [ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ] }</t>
@@ -298,13 +297,70 @@
             <t>[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]</t></td></tr>
           <tr><td>Complete</td><td><t>{"product":[{"::string":["orange","pepper","apple","banana"]},[2,2,0,0,1,1,3,3]]}</t>
             <t>{"product": [ ["orange","pepper","apple","banana"], [2, 2, 0, 0, 1, 1, 3, 3] ]}</t>
-            <t>[ ["orange","pepper","apple","banana"], [2, 2, 0, 0, 1, 1, 3, 3] ]</t></td></tr>        
-          </tbody></table>
+            <t>[ ["orange","pepper","apple","banana"], [2, 2, 0, 0, 1, 1, 3, 3] ]</t></td></tr>                  
+          <tr><td>Unique</td><td><t>{ "period": "2nd half 2022" }</t><t>"2nd half 2022"</t></td></tr>        
+          <tr><td>Implicit</td><td><t>{ "weight": [ { "::string": [ "1 kg" , "10 kg" ] }, "packaging" ] }</t><t>[ [ "1 kg" , "10 kg" ], 3 ]</t></td></tr>                  
+          <tr><td>Relative</td><td><t>{"food": [ {"::string": [ "fruit" , "vegetable" ]}, "product", [ 0, 1, 0, 0 ]] }</t>
+            <t>[ [ "fruit" , "vegetable" ], 1, [ 0, 1, 0, 0 ] ]</t></td></tr>                  
+          <tr><td>Sparse</td><td><t>{"food": [ {"::string": [ "vegetable", "vegetable", "fruit" ]}, [ 4, 5, -1]] }</t>
+            <t>[ [ "vegetable", "vegetable", "fruit" ], [ 4, 5, -1] ]</t></td></tr>                  
+          <tr><td>Primary</td><td><t>{"packaging": [ {"::string": [ "cardboard", "bag" ]}, [1] ] }</t><t>[ [ "cardboard", "bag" ], [1] ]</t>
+          <t>{"product": [{"::string": ["apple", "orange", "peppers", "banana"]}, [2]]}</t><t>[ [ "apple", "orange", "peppers", "banana" ], [2] ]</t></td></tr>                  
+        </tbody></table>
       </section>
+      <section><name>Properties</name>
+      
+      </section>
+        <section><name>Properties</name>
+        
+        </section>
       <section><name>Dataset examples</name>
+        <t>The examples in <xref target="table7"/> below illustrate the optimize level:</t>
+        <table anchor="table7" align="center" pn="table-7"><name>optimize level examples</name><thead>
+            <tr><th colspan="2" align="center">Data</th><th align="center">Optimize level</th></tr>
+            <tr><th align="center">category</th><th align="center">Full format</th><th align="center">JsonNTV</th></tr></thead><tbody>
+            <tr><td>matrix</td><td><t>[['a', 'a', 'b', 'b', 'c', 'c'],</t><t>[10, 20, 10, 20, 10, 20],</t><t>[1, 2, 3, 4, 5, 6]]</t></td>
+              <td><t>[[['a', 'b', 'c'], [2]],</t><t>[[10, 20], [1]],</t><t>[1, 2, 3, 4, 5, 6]]</t></td></tr>
+            <tr><td>single</td><td><t>[[1, 2, 3, 4, 5, 6],</t><t>['a', 'a', 'a', 'a', 'a', 'a']]</t></td><td><t>[[1, 2, 3, 4, 5, 6],</t><t>'a']</t></td></tr>
+            <tr><td>complete</td><td>[[1, 2, 3, 3, 5, 5]]</td><td>[[[1, 2, 3, 5], [0, 1, 2, 2, 3, 3]]]</td></tr>         
+            <tr><td>coupled</td><td><t>[[1, 2, 3, 3, 5, 5],</t><t> ['a', 'b', 'c', 'c', 'e', 'e']]</t></td><td>
+              <t>[[[1, 2, 3, 5], [0, 1, 2, 2, 3, 3]],</t><t> [['a', 'b', 'c', 'e'], 0]]</t></td></tr>
+            <tr><td>derived</td><td><t>[[1, 2, 3, 4, 5, 6],</t><t>['a', 'a', 'b', 'b', 'c', 'c'],</t><t>[10, 10, 10, 10, 20, 20]]</t></td>
+              <td><t>[[1, 2, 3, 4, 5, 6],</t><t> [['a', 'b', 'c'], [0, 0, 1, 1, 2, 2]],</t><t>[[10, 20], 1, [0, 0, 1]]]</t></td></tr>
+            <tr><td><t>matrix +</t><t>coupled</t></td><td><t>[['a', 'a', 'b', 'b', 'c', 'c', 'd', 'd'],</t><t>[10, 20, 10, 20, 10, 20, 10, 20],</t>
+              <t>['t1', 't1', 't2', 't2', 't3', 't3', 't4', 't4'],</t><t>[1, 2, 3, 4, 5, 6, 7, 8]]</t></td>
+              <td><t>[[['a', 'b', 'c', 'd'], [2]],</t><t>[[10, 20], [1]],</t><t>[['t1', 't2', 't3', 't4'], 0],</t><t> [1, 2, 3, 4, 5, 6, 7, 8]]</t></td></tr>
+            <tr><td><t>matrix +</t><t>coupled +</t><t>derived</t></td><td><t>[['a', 'a', 'b', 'b', 'c', 'c', 'd', 'd'],</t><t>[10, 20, 10, 20, 10, 20, 10, 20],</t>
+              <t>['t1', 't1', 't2', 't2', 't3', 't3', 't4', 't4'],</t><t>[100, 100, 200, 200, 200, 200, 200, 200],</t><t>[1, 2, 3, 4, 5, 6, 7, 8]]</t></td>
+              <td><t>[[['a', 'b', 'c', 'd'], [2]],</t><t>[[10, 20], [1]],</t><t>[['t1', 't2', 't3', 't4'], 0],</t><t> [[100, 200], 0, [0, 1, 1, 1]],</t>
+              <t> [1, 2, 3, 4, 5, 6, 7, 8]]</t></td></tr></tbody></table>
+        <t>The examples in <xref target="table8"/> below illustre NTVdataset with a length equal to 0, 1 or 2:</t>
+        <table anchor="table8" align="center" pn="table-8"><name>NTVdataset with length 0, 1 or 2</name><tbody>
+          <tr><td>[ ] or { }</td><td><em>Empty NTVdataset</em></td></tr>
+          <tr><td>[25]	or [[25]]</td><td><em>NTVdataset with 1 NTVfield and length 1</em></td></tr>
+          <tr><td>[2, 1]	or [[2], [1]]	 or [2, [1]]</td><td><em>NTVdataset with 2 NTVfield and length 1</em></td></tr>
+          <tr><td>[[2, 1]]</td><td><em>NTVdataset with 1 NTVfield and length 2</em></td></tr>
+          <tr><td>[[2, 1], [4, 3]]</td><td><em>NTVdataset with 2 NTVfield and length 2</em></td></tr></tbody></table>
       </section>
     </section>    
     <section><name>Parsing a JSON-value</name>
+      <t>A NTV parser generates a NTV entity from a JSON-value.</t>
+      <t>The decoding NTV entity is directly converted into the NTVdataset and a list of NTVfields.</t>
+      <t>For each NTVfield the format is deduced following the structure defined in the table xxx.</t>
+      <t>For each format, a decoder converts the NTVvalue of the NTVfield into the chosen object.</t>
+      <t><em>Note :</em></t><ul empty="true">
+        <li><em>Several NTVvalue are ambiguous to deduce the Field format : </em><ul>
+          <li><em>[ list-data, integer, list-integer ] : Full or Relative format ?</em></li>
+          <li><em>[ list-data, string, list-integer ] : Full or Relative format ?</em></li>
+          <li><em>[ list-data, integer ]  : Full or Implicit format ?</em></li>
+          <li><em>[ list-data, string ]  : Full or Implicit format ?</em></li>
+          <li><em>[ list-data, list-integer ] : Full or Complete/Sparse/Primary format ?</em></li></ul></li>
+        <li><em>The full format is not retained for those NTVvalue.</em></li>
+        <li><em>To avoid this ambiguity, precautions can be taken for data with a Full format:</em><ul>
+          <li><em>a name can be added to the list-data (e.g. { "data": list-data}),</em></li>
+          <li><em>the order of data can be changed (e.g. [ integer, list-data ])</em></li>
+          <li><em>a type can be added (e.g. { "::json": [ list-data, list-integer ] } )</em></li>
+          <li><em>an additional field can be added (e.g. [ list-data, integer, list-integer, {"format": "full"} ] ).</em></li></ul></li></ul>
     </section>
     &nbsp;
     <section anchor="IANA"><name>IANA Considerations</name>
