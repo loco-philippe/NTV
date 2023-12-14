@@ -258,7 +258,7 @@
           <tr><th align="center">format</th><th align="center">NTV</th><th align="center">TVlist</th><th align="center">Vsingle</th><th align="center">Vlist</th></tr></thead><tbody>
           <tr><td>Relative</td><td><t>NTVlist</t><t>len = 3</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td><t>Relative Keys</t><t>len &lt; len(Field)</t></td></tr>
           <tr><td>Complete</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>Keys</t><t>len = len(Field)</t></td></tr>
-          <tr><td>Sparse</td><td><t>NTVlist</t><t>len = 2</t></td><td><t>sp_value</t><t>+ fill_value</t></td><td> </td><td><t>sp_index + -1</t><t>1 &lt; len &lt; len(Field)</t></td></tr>
+          <tr><td>Sparse</td><td><t>NTVlist</t><t>len = 2</t></td><td><t>sp_value</t><t>+ fill_value</t></td><td> </td><td><t>sp_index + -1</t><t>1&lt;len&lt;len(Field)</t></td></tr>
           <tr><td>Implicit</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td> </td></tr>
           <tr><td>Primary</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>coef</t><t>len = 1</t></td></tr>
           <tr><td>Unique</td><td colspan="4" align="center">NTVsingle</td></tr>
@@ -295,45 +295,67 @@
           <tr><td>Full</td><td><t>{ "price::float": [ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ] }</t>
             <t>{ "price": [ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ] }</t>
             <t>[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]</t></td></tr>
-          <tr><td>Complete</td><td><t>{"product":[{"::string":["orange","pepper","apple","banana"]},[2,2,0,0,1,1,3,3]]}</t>
-            <t>{"product": [ ["orange","pepper","apple","banana"], [2, 2, 0, 0, 1, 1, 3, 3] ]}</t>
-            <t>[ ["orange","pepper","apple","banana"], [2, 2, 0, 0, 1, 1, 3, 3] ]</t></td></tr>                  
+          <tr><td>Complete</td><td><t>{"product":[["orange","pepper","apple","banana"],</t><t>[2,2,0,0,1,1,3,3]]}</t>
+            <t>{"product": [ ["orange","pepper","apple","banana"],</t><t>[2, 2, 0, 0, 1, 1, 3, 3] ]}</t>
+            <t>[ ["orange","pepper","apple","banana"],</t><t>[2, 2, 0, 0, 1, 1, 3, 3] ]</t></td></tr>                  
           <tr><td>Unique</td><td><t>{ "period": "2nd half 2022" }</t><t>"2nd half 2022"</t></td></tr>        
-          <tr><td>Implicit</td><td><t>{ "weight": [ { "::string": [ "1 kg" , "10 kg" ] }, "packaging" ] }</t><t>[ [ "1 kg" , "10 kg" ], 3 ]</t></td></tr>                  
-          <tr><td>Relative</td><td><t>{"food": [ {"::string": [ "fruit" , "vegetable" ]}, "product", [ 0, 1, 0, 0 ]] }</t>
+          <tr><td>Implicit</td><td><t>{"weight":[{"::string":["1 kg","10 kg"]},"packaging"]}</t><t>[["1 kg","10 kg"],3]</t></td></tr>                  
+          <tr><td>Relative</td><td><t>{"food": [ {"::string": [ "fruit" , "vegetable" ]},</t><t>"product", [ 0, 1, 0, 0 ]] }</t>
             <t>[ [ "fruit" , "vegetable" ], 1, [ 0, 1, 0, 0 ] ]</t></td></tr>                  
-          <tr><td>Sparse</td><td><t>{"food": [ {"::string": [ "vegetable", "vegetable", "fruit" ]}, [ 4, 5, -1]] }</t>
-            <t>[ [ "vegetable", "vegetable", "fruit" ], [ 4, 5, -1] ]</t></td></tr>                  
-          <tr><td>Primary</td><td><t>{"packaging": [ {"::string": [ "cardboard", "bag" ]}, [1] ] }</t><t>[ [ "cardboard", "bag" ], [1] ]</t>
-          <t>{"product": [{"::string": ["apple", "orange", "peppers", "banana"]}, [2]]}</t><t>[ [ "apple", "orange", "peppers", "banana" ], [2] ]</t></td></tr>                  
+          <tr><td>Sparse</td><td><t>{"food":[{"::string":["vegetable","vegetable","fruit"]},</t><t>[4,5,-1]]}</t>
+            <t>[["vegetable","vegetable","fruit"],[4,5, 1]]</t></td></tr>                  
+          <tr><td>Primary</td><td><t>{"packaging":[{"::string":["cardboard","bag"]},[1]]}</t><t>[["cardboard","bag"],[1]]</t>
+          <t>{"product":[["apple","orange","peppers","banana"],[2]]}</t><t>[["apple","orange","peppers","banana"],[2]]</t></td></tr>                  
         </tbody></table>
       </section>
-      <section><name>Properties</name>
-      
-      </section>
-        <section><name>Properties</name>
-        
+      <section><name>Properties</name>    
+        <section><name>Dataset size</name>
+          <t>As explain in <xref target="tabular structure"/> cells are often duplicated in a Field. The principle of defined formats is
+           to replace duplicated data with encoding based on integers.</t>
+          <t>This optimization considerably reduces the size of a representation of a Dataset. <xref target="sizing"/> details the methodology to optimize this size.</t>
         </section>
+        <section><name>Cells format</name>
+          <t>NTVcells in a NTVDataset are any NTVsingle. We can therefore include in a NTVdataset the data associated with the types defined in the NTV format.
+          For example:
+          - a date
+          - a wgs84 coordinate
+          - a dataset
+          - an email address
+          - a custom format
+          - NTV data
+          
+          In a JSON representation, NTVsingle </t>
+
+
+        <t><em>Examples of NTV extended representation:</em></t><ul empty="true">
+          <li><ul empty="true"><li><t><em>{ "python date" : [ datetime.date(2022, 1, 18), datetime.date(2023, 1, 12) ] }</em></t></li></ul></li>
+          <li><em>this "json like" structure can be converted in JsonNTV format:</em></li>
+          <li><ul empty="true"><li><t><em>{ "python date::date" : [ "2022-01-18", "2023-01-12" ] }</em></t></li></ul></li></ul>
+
+
+
+        </section>
+      </section>
       <section><name>Dataset examples</name>
         <t>The examples in <xref target="table7"/> below illustrate the optimize level:</t>
         <table anchor="table7" align="center" pn="table-7"><name>optimize level examples</name><thead>
             <tr><th colspan="2" align="center">Data</th><th align="center">Optimize level</th></tr>
-            <tr><th align="center">category</th><th align="center">Full format</th><th align="center">JsonNTV</th></tr></thead><tbody>
-            <tr><td>matrix</td><td><t>[['a', 'a', 'b', 'b', 'c', 'c'],</t><t>[10, 20, 10, 20, 10, 20],</t><t>[1, 2, 3, 4, 5, 6]]</t></td>
-              <td><t>[[['a', 'b', 'c'], [2]],</t><t>[[10, 20], [1]],</t><t>[1, 2, 3, 4, 5, 6]]</t></td></tr>
-            <tr><td>single</td><td><t>[[1, 2, 3, 4, 5, 6],</t><t>['a', 'a', 'a', 'a', 'a', 'a']]</t></td><td><t>[[1, 2, 3, 4, 5, 6],</t><t>'a']</t></td></tr>
-            <tr><td>complete</td><td>[[1, 2, 3, 3, 5, 5]]</td><td>[[[1, 2, 3, 5], [0, 1, 2, 2, 3, 3]]]</td></tr>         
-            <tr><td>coupled</td><td><t>[[1, 2, 3, 3, 5, 5],</t><t> ['a', 'b', 'c', 'c', 'e', 'e']]</t></td><td>
-              <t>[[[1, 2, 3, 5], [0, 1, 2, 2, 3, 3]],</t><t> [['a', 'b', 'c', 'e'], 0]]</t></td></tr>
-            <tr><td>derived</td><td><t>[[1, 2, 3, 4, 5, 6],</t><t>['a', 'a', 'b', 'b', 'c', 'c'],</t><t>[10, 10, 10, 10, 20, 20]]</t></td>
-              <td><t>[[1, 2, 3, 4, 5, 6],</t><t> [['a', 'b', 'c'], [0, 0, 1, 1, 2, 2]],</t><t>[[10, 20], 1, [0, 0, 1]]]</t></td></tr>
-            <tr><td><t>matrix +</t><t>coupled</t></td><td><t>[['a', 'a', 'b', 'b', 'c', 'c', 'd', 'd'],</t><t>[10, 20, 10, 20, 10, 20, 10, 20],</t>
-              <t>['t1', 't1', 't2', 't2', 't3', 't3', 't4', 't4'],</t><t>[1, 2, 3, 4, 5, 6, 7, 8]]</t></td>
-              <td><t>[[['a', 'b', 'c', 'd'], [2]],</t><t>[[10, 20], [1]],</t><t>[['t1', 't2', 't3', 't4'], 0],</t><t> [1, 2, 3, 4, 5, 6, 7, 8]]</t></td></tr>
-            <tr><td><t>matrix +</t><t>coupled +</t><t>derived</t></td><td><t>[['a', 'a', 'b', 'b', 'c', 'c', 'd', 'd'],</t><t>[10, 20, 10, 20, 10, 20, 10, 20],</t>
-              <t>['t1', 't1', 't2', 't2', 't3', 't3', 't4', 't4'],</t><t>[100, 100, 200, 200, 200, 200, 200, 200],</t><t>[1, 2, 3, 4, 5, 6, 7, 8]]</t></td>
-              <td><t>[[['a', 'b', 'c', 'd'], [2]],</t><t>[[10, 20], [1]],</t><t>[['t1', 't2', 't3', 't4'], 0],</t><t> [[100, 200], 0, [0, 1, 1, 1]],</t>
-              <t> [1, 2, 3, 4, 5, 6, 7, 8]]</t></td></tr></tbody></table>
+            <tr><th align="center">type</th><th align="center">Full format</th><th align="center">JsonNTV</th></tr></thead><tbody>
+            <tr><td>matrix</td><td><t>[['a','a','b','b','c','c'],</t><t>[10,20,10,20,10,20],</t><t>[1,2,3,4,5,6]]</t></td>
+              <td><t>[[['a','b','c'],[2]],</t><t>[[10,20],[1]],</t><t>[1,2,3,4,5,6]]</t></td></tr>
+            <tr><td>single</td><td><t>[[1,2,3,4,5,6],</t><t>['a','a','a','a','a','a']]</t></td><td><t>[[1,2,3,4,5,6],</t><t>'a']</t></td></tr>
+            <tr><td>complete</td><td>[[1,2,3,3,5,5]]</td><td>[[[1,2,3,5],[0,1,2,2,3,3]]]</td></tr>         
+            <tr><td>coupled</td><td><t>[[1,2,3,3,5,5],</t><t> ['a','b','c','c','e','e']]</t></td><td>
+              <t>[[[1,2,3,5],[0,1,2,2,3,3]],</t><t> [['a','b','c','e'],0]]</t></td></tr>
+            <tr><td>derived</td><td><t>[[1,2,3,4,5,6],</t><t>['a','a','b','b','c','c'],</t><t>[10,10,10,10,20,20]]</t></td>
+              <td><t>[[1,2,3,4,5,6],</t><t> [['a','b','c'],[0,0,1,1,2,2]],</t><t>[[10,20],1,[0,0,1]]]</t></td></tr>
+            <tr><td><t>matrix</t><t>+</t><t>coupled</t></td><td><t>[[6,6,7,7,8,8,9,9],</t><t>[10,20,10,20,10,20,10,20],</t>
+              <t>[1,1,2,2,3,3,4,4],</t><t>[1,2,3,4,5,6,7,8]]</t></td>
+              <td><t>[[[6,7,8,9],[2]],</t><t>[[10,20],[1]],</t><t>[[1,2,3,4],0],</t><t> [1,2,3,4,5,6,7,8]]</t></td></tr>
+            <tr><td><t>matrix</t><t>+</t><t>coupled</t><t>+</t><t>derived</t></td><td><t>[[6,6,7,7,8,8,9,9],</t><t>[10,20,10,20,10,20,10,20],</t>
+              <t>[1,1,2,2,3,3,4,4],</t><t>[11,11,22,22,22,22,22,22],</t><t>[1,2,3,4,5,6,7,8]]</t></td>
+              <td><t>[[[6,7,8,9],[2]],</t><t>[[10,20],[1]],</t><t>[[1,2,3,4],0],</t><t> [[11,22],0,[0,1,1,1]],</t>
+              <t> [1 2,3,4,5,6,7,8]]</t></td></tr></tbody></table>
         <t>The examples in <xref target="table8"/> below illustre NTVdataset with a length equal to 0, 1 or 2:</t>
         <table anchor="table8" align="center" pn="table-8"><name>NTVdataset with length 0, 1 or 2</name><tbody>
           <tr><td>[ ] or { }</td><td><em>Empty NTVdataset</em></td></tr>
@@ -400,7 +422,97 @@
       </references>
     </references>
     &nbsp;
-    <section><name>Appendixxxxxx</name>
+    <section anchor="sizing"><name>Dataset sizing</name>
+      <t>This appendix presents an analysis of NTVdataset size optimization with the defined formats.</t>
+      <section><name>Methodology</name>
+        <t>The principle of defined formats is to replace duplicated data with encoding based on integers.</t>
+        <t>We define the size of a Dataset representation (SZ) as the sum of the encoding size and the size of unencoded unduplicated values. 
+        The coding is modeled as being the product of the values remaining to be represented (nv - nc) with an average coding size (sc):</t><ul empty="true">
+          <li>SZ = nc * sv + (nv - nc) * sc</li>
+          <li>where : <ul empty="true">
+            <li>nv : number of values </li>
+            <li>sv : mean value size</li>
+            <li>nc : number of different values</li>
+            <li>sc : mean coding size</li></ul></li>
+          <li>example : <ul empty="true">
+            <li>Full format : {"product": ["orange","apple","apple","apple","orange","orange"]}</li>
+            <li>Complete format : {"product": [ ["orange","apple"], [1, 0, 0, 0, 1, 1] ]}</li>
+            <li>SZ = 9 + 8 + 7 + 6 * 1 = 30 (including double quotes), </li>
+            <li>nv = 9 (including the Field name), </li>
+            <li>sv = (9 + 8 * 3 + 7 * 3) / 7 = 7.71</li>
+            <li>nc = 3 (including the Field name)</li>
+            <li>sc = (30 - 3 * 7.71) / (9 - 3) = 1.15 (sc = (SZ - nc * sv) / (nv - nc))</li></ul></li>
+          <li>In this example the JSON overhead (coma, space, curly bracket, square bracket) is not included.</li></ul>
+        <t>SZ is maximal when there is no coding (sc = sv) and minimal when the coding is perfect (sc = 0): </t><ul empty="true">
+          <li>SZmax = nv * sv</li>
+          <li>SZmin = nc * sv</li></ul>
+        <t>We then define the following indicators:</t><ul> 
+          <li>unicity level UL  = nc / nv<ul empty="true">
+            <li>UL = SZmin / SZmax</li>
+            <li>1 - UL = (SZmax - SZmin) / SZmax</li>
+            <li>UL characterizes the nature of the data independently of the coding and represents the maximum achievable gain (1-UL).</li>
+            <li>maximum UL = 1 (unduplicated data)</li>
+            <li>minimum UL = 0 (full duplicated data = empty data)</li></ul></li>
+          <li>object lightness OL = sc / sv<ul empty="true">
+            <li>OL = (SZ - SZmin) / (SZmax - SZmin)</li>
+            <li>1 - OL = (SZmax - SZ) / (SZmax - SZmin)</li>
+            <li>OL caractérise l'efficacité du codage</li>
+            <li>maximum OL = 1 (no coding)</li>
+            <li>minimum OL = 0 (perfect coding)</li></ul></li></ul>
+        <t>The optimization of the size of the representation is then evaluated by comparing the size obtained without coding 
+        and that obtained with coding:</t><ul empty="true">
+          <li>G = (SZmax -  SZ) / SZmax = (1 - UL) * (1 - OL) </li>
+          <li>R = 1 - G = SZ / SZmax = UL + OL - UL * OL</li>
+          <li>The maximum G gain is 1 - UL, the minimum G gain is 0.</li>
+          <li>If the data is empty, UL = OL = 0 and the gain is equal to 1.</li></ul>
+        <t>The indicators are deduced from the following four measurable values:</t><ul>
+          <li>number of cells in the dataset (nv)</li>
+          <li>number of different cells in the dataset (nc)</li>
+          <li>size of the dataset with the format to study (SZ)</li>
+          <li>size of the dataset with Full format (SZmax)</li></ul>
+        <t>We then deduce sv = SZmax / nv as well as sc = (SZ - nc * sv) / (nv - nc)</t>
+        <t>In the example above, the indicators are:</t><ul empty="true">
+          <li> UL = 3 / 9 = 0.33</li>
+          <li> OL = 1.15 / 7.71 = 0.15</li>
+          <li> G = 0.67 * 0.85 = 0.57</li>
+          <li> SZmax = 9 * 7.71 = 69.4 </li>
+          <li> SZmin = 3 * 7.71 = 23.1 </li>
+          <li>The Complete format is close to the minimum size (SZ = 30) and its size is less than half the size of the Full format (43 %).</li></ul>
+      </section>
+      <section><name>Formats</name>
+        <t>The formats used to represent an NTVfield are in general form:</t><ul>
+          <li>list of part of NTVcells</li>
+          <li>list of integers used to encode other NTVcells</li></ul>
+        <t>The size of this format can then be written (without taking into account the overhead linked to the format):</t><ul empty="true">
+          <li>SZ = nc * sv + k * nv * si</li>
+          <li>where :<ul empty="true">
+            <li>nv : number of values</li> 
+            <li>sv : mean value size</li>
+            <li>nc : number of different Field values</li>
+            <li>si : integer size</li>
+            <li>k: specific coefficient of the coding used</li></ul></li></ul>
+        <t>Comparison with the structure defined in the previous chapter allows us to deduce the parameters:</t><ul empty="true">
+          <li>UL = nc/nv</li>
+          <li>sc = si * k * nv/(nv-nc)</li>
+          <li>OL = si/sv * k * nv/(nv-nc)</li>
+          <li>G = 1- nc/nv - si/sv * k</li>
+          <li>R = nc/nv + si/sv * k</li></ul>
+        <t>The gain G is therefore equal to the maximum gain 1-UL reduced by the weight of the coding corresponding to the parameter k weighted by the average size 
+        of the values compared to an integer.</t>
+        <t><xref target="table9"/> below specifies the values of k for the different formats:</t>
+        <table anchor="table9" align="center" pn="table-9"><name>coding coefficient</name><thead>
+          <tr><th align="center">Format</th><th align="center">k coefficient</th><th align="center">comments</th></tr></thead><tbody>
+          <tr><td>Full</td><td>0</td><td>R = 1</td></tr>
+          <tr><td>Unique</td><td>0</td><td>R = 1/nv (nc = 1)</td></tr>
+          <tr><td>Complete</td><td>1</td><td>R = nc/nv + si/sv</td></tr>
+          <tr><td>Primary</td><td>1 / nv</td><td>R = nc/nv + si/sv/nv</td></tr>
+          <tr><td>Coupled</td><td>1 / nv</td><td>R = nc/nv + si/sv/nv</td></tr>
+          <tr><td>Sparse</td><td>2 * ns / nv</td><td>R = nc/nv + 2*si/sv*ns/nv</td></tr>
+          <tr><td>Derived</td><td>nd / nv</td><td>R = nc/nv + si/sv*nd/nv</td></tr></tbody></table>  
+        <ul empty="true"><li><ul empty="true">
+          <li><em>ns: number of values distinct from the 'fill_value'</em></li>
+          <li><em>nd: number of different values in the parent Field</em></li></ul></li></ul>
+      </section>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>

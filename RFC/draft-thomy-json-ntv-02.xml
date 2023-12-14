@@ -186,7 +186,7 @@
           <li><strong>NTVsingle</strong> for the primitive entity,</li>
           <li><strong>NTVlist</strong> for an ordered sequence of NTV entities</li></ul></t>
         <t>An NTV entity is therefore a tree where the leaves nodes are the NTVsingle entities and where the inner nodes are the NTVlist entities</t>
-        <section><name>NTVsingle</name>
+        <section anchor="NTVsingle"><name>NTVsingle</name>
           <t>The data triplet of NTVsingle entities is composed by:</t><ul>
             <li><strong>NTVsingleValue</strong>: This NTVvalue is the JSON representation (JsonValue) of the main content of the NTV entity,</li>
             <li><strong>NTVsingleType</strong>: This NTVtype defines the type of entity and the conversion rules between the native entity 
@@ -573,23 +573,54 @@ NTVsingleValue     = JsonValue
           <li>strict equality between two NTV entities is equivalent to equality between JsonNTV representations</li>
           <li>the JsonValue is the canonical NTV entity</li></ul>
       </section>
-      <section><name>NTV extended structure</name>
-        <t>The NTVvalue of NTV entities are JsonValue. In the NTV extended structure, NTVvalue can be every kind of data.</t>
+      <section><name>extended NTV structure</name>
+        <t>The NTVvalue of NTV entities are JsonValue. In the extended NTV structure, NTVvalue can be every kind of data.</t>
         <t>With this structure, the NTV representation is a "json like" data where:</t><ul>
           <li>JsonNTVvalue is always NTVvalue,</li>
           <li>JsonNTVtype is optional (if NTVtype can be deduced from the NTVvalue),</li>
           <li>JsonNTVname is optional (if NTVname can be deduced from the NTVvalue).</li></ul>
-        <t><em>Examples of NTV extended representation:</em></t><ul empty="true">
+        <t><em>Examples of extended NTV representation:</em></t><ul empty="true">
           <li><ul empty="true"><li><t><em>{ "python date" : [ datetime.date(2022, 1, 18), datetime.date(2023, 1, 12) ] }</em></t></li></ul></li>
           <li><em>this "json like" structure can be converted in JsonNTV format:</em></li>
           <li><ul empty="true"><li><t><em>{ "python date::date" : [ "2022-01-18", "2023-01-12" ] }</em></t></li></ul></li></ul>
       </section>
+      <section><name>nested NTVsingle entities</name>
+        <t>As defined in <xref target="NTVsingle"/> an entity with Json representation can be taken into account.</t>
+        <t><xref target="global"/> defines usual NTVtypes (e.g. date, coordinate, email) but also NTVtypes associated to structured data 
+        (e.g. dataset, NTV data, custom format):</t>
+        <t>The example in <xref target="nested NTVsingle"/> is the representation of a NTVlist with three NTVsingle:</t><ul>
+          <li>"dataset" is a NTVsingle build with a 'tab' structure (NTVdataset defined in <xref target="NTV-TAB"/>). This NTVdataset includes in 'field2' an NTV structure,</li>
+          <li>"ntvdata" is a NTVsingle build with a 'ntv' structure. This structure includes an other NTV structure,</li> 
+          <li>"sensor" is a NTVsingle build with a custom structure. This structure includes a NTVdataset.</li></ul>
+        <figure anchor="nested NTVsingle" align="left" suppress-title="false" pn="figure-7">
+          <name>Nested NTVsingle</name><sourcecode><![CDATA[
+ex_list = {
+  "structure": {
+    "dataset:tab":{
+      "field1": [1,2,3], 
+      "field2": [4,5,{":ntv": {"min": 6, "max": 7}]
+    },
+    "ntvdata:ntv":{
+      "equinox:date": "2024-03-20",
+      "paris:point": [2.35, 48.85],
+      "other data:ntv": {"val1": 1, "val2": 2} 
+    },
+    "sensor:$sensor": [
+      8.51, 3.5, 4.2, 
+      {":tab": [[1,2,3,4], [5,6,7,8]]}
+    ] 
+  }
+}
+        ]]></sourcecode></figure>
+        <t>Nested NTVsingle is treated as simple NTVsingle and can be used with extended NTV structures.</t>
+      </section>  
     </section>  
     &nbsp;
     <section anchor="IANA"><name>IANA Considerations</name>
-      <t>Any JsonValue is a JsonNTVValue and conversely, any JsonNTVvalue is a JsonValue.</t>
-      <t>Thus, any JSON data may or may not be treated as JsonNTV data, so there is no need to create a specific MIME media type for JsonNTV.</t>
-      <t>All properties of the MIME media type "application/json" are applicable.</t>
+      <t>No IANA actions are required :</t><ul empty="true">
+        <li>Any JsonValue is a JsonNTVValue and conversely, any JsonNTVvalue is a JsonValue.</li>
+        <li>Thus, any JSON data may or may not be treated as JsonNTV data, so there is no need to create a specific MIME media type for JsonNTV.</li>
+        <li>All properties of the MIME media type "application/json" are applicable.</li></ul>
     </section>
     <section anchor="Security"><name>Security Considerations</name>
       <t>The format used for NTV data exchanges is the JSON format. 
@@ -612,6 +643,8 @@ NTVsingleValue     = JsonValue
       <references><name>Informative References</name>
         <reference anchor="DFS" target="https://en.wikipedia.org/wiki/Depth-first_search"><front>
           <title>Depth-first search algorithm</title><author><organization>"Wikipedia"</organization></author></front></reference>
+        <reference anchor="NTV-TAB" target="https://datatracker.ietf.org/doc/draft-thomy-json-ntv/"><front>
+          <title>NTV tabular format (NTV-TAB)</title><author initials="P" surname="Thomy"></author><date year="2023"/></front></reference>
         <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
           <title>JSON-ND</title><author initials="G" surname="Kleidon"></author><date year="2020"/></front></reference>
         <reference anchor="JSON-NTV" target="https://github.com/loco-philippe/NTV#readme"><front>
@@ -627,7 +660,7 @@ NTVsingleValue     = JsonValue
       </references>
     </references>
     &nbsp;
-    <section><name>Global NTVtype and Namespace</name>
+    <section anchor="global"><name>Global NTVtype and Namespace</name>
       <t>The structure of NTVtype by Namespace makes it possible to have NTVtype or Namespace corresponding to recognized standards at the global level.</t>
       <t>A standard NTVtype / Namespace is a NTVtype / Namespace defined in the Global Namespace.</t>
       <t>The standard NTVtype and Namespace are listed below.</t>
@@ -754,7 +787,7 @@ NTVsingleValue     = JsonValue
       </section>
     </section>
     <section><name>Complete ABNF notation</name>
-        <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-7">
+        <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-8">
           <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
             <![CDATA[
 ; representation of NtvType and Namespace (LongName)
