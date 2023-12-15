@@ -28,7 +28,7 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author> 
-    <date year="2023" month="12" day="07"/>
+    <date year="2023" month="12" day="15"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
     <keyword>JSON</keyword>
@@ -155,19 +155,21 @@
       <section><name>NTV structure</name>
         <t>A Dataset is represented by the following NTV entities:</t><ul>
           <li>NTVcell represents a Cell. NTVcell is a NTVsingle.</li>
-          <li>NTVfield represents a Field. NTVfield is a NTV entity depending on the format chosen to represent the Field (simple format, default format, optimized format).</li>
+          <li>NTVfield represents a Field. NTVfield is a NTV entity depending on the format chosen to represent the Field (simple format, default format, optimized format).
+          A NTVfield contains a NTVlist of part of the NTVcells (Codec) and optionnaly coding data.</li>
           <li>NTVdataset represents the Dataset. NTVdataset is a NVlist where the NTVname is the name of the Dataset and the NTVvalue is the list of NTVfields.</li></ul>
-        <t>The JSON format of a NTVdataset is the JSON-NTV format.</t>
+        <t>The JSON format of a NTVdataset is his JSON-NTV format.</t>
       </section>
       <section><name>simple NTVfield formats</name>
         <t>This category is the usual representation of a Field with different values (Full format) or with several identical values (Unique format).</t>
         <t><strong>Full format</strong> :</t> 
-        <t>The NTVfield is a NTVlist where the NTVname is the name of the Field, the NTVtype is the default type of the NTVcells and 
-        the NTVvalue is the list of NTVcells.</t><ul empty="true">
+        <t>The Full format is the format that does not use any coding. Codec and NTVfield are identical. The NTVfield is therefore a NTVlist where 
+        the NTVname is the name of the Field, the NTVtype is the default type of the NTVcells and the NTVvalue is the list of NTVcells.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "price" Field)</em> : <ul empty="true">
             <li><em>[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]</em></li></ul></li></ul>
         <t><strong>Unique format</strong> :</t>
-        <t>The NTVfield is a NTVsingle identical to the NTVcell.</t><ul empty="true">
+        <t>The Unique format is used when all NTVcells are identical. The Codec is the NTVcell.Codec and NTVfield are identical (coding is implict).
+        The NTVfield is therefore the NTVcell.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "period" Field)</em> : <ul empty="true"> 
             <li><em>"2nd half 2022"</em></li></ul></li></ul>
         <t>Note : </t><ul empty="true">
@@ -178,13 +180,13 @@
           <li>Categorical Field (Complete format)</li>
           <li>Periodic Field (Primary format)</li>
           <li>Sparse Field (Sparse format)</li></ul>
-        <t>The NTVfield is a NVlist where the NTVname is the name of the Field and the NTVvalue is the list of two NTVentities.</t>
+        <t>In those formats, Codec is explicit and is the TVlist of different Field NTVcells (Codec). The NTVfield is a NVlist where the NTVname is the name of the Field.</t>
         <t><strong>Complete format</strong> :</t> 
         <t>The "complete format" is equivalent to the format used to store categorical variables.</t>
-        <t>The Field is a NVlist composed with two NTV entities :</t><ul>
-          <li>Component: TVlist of different Field NTVcells (Codec),</li>
+        <t>The NTVfield is a NVlist composed with two NTV entities :</t><ul>
+          <li>Codec: TVlist of different Field NTVcells (Codec),</li>
           <li>Coding: Vlist of indexes of NTVcells in Component (Keys)</li></ul>
-        <t>The list of values is reconstituted by replacing the integers in the coding Vlist with the value at the coding index in the component TVlist 
+        <t>The list of NTVcells is reconstituted by replacing the integers in the coding Vlist with the NTVcell at the coding index in the Codec 
         (e.g. pandas categories and codes).</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "product" Field)</em> : <ul empty="true">
             <li><em>[ [ "orange" , "pepper" , "apple" , "banana" ], [ 2, 2, 0, 0, 1, 1, 3, 3 ] ]</em></li></ul></li></ul>
@@ -193,23 +195,23 @@
           <li>'fill_value': it should be most common value</li>
           <li>'sp_value': it is a list storing only values distinct from the 'fill_value'</li>
           <li>'sp_index': list of index of 'sp-value' in the sparse data list</li></ul>
-        <t>The Field is a NVlist composed with three NTV entities :</t><ul>
-          <li>Component: TVlist of different 'sp_value' completed with 'fill_value' ,</li>
-          <li>Ref: Vlist of indexes of Component value in 'sp_value' ,</li>
-          <li>Coding: Vlist of 'sp_index' completed with -1</li></ul>
-        <t>The list of values is equivalent to the list of 'fill_value' where the values with index in the Coding Vlist 
-        are replaced by the corresponding value in the Component TVlist.</t><ul empty="true">
+        <t>The NTVfield is a NVlist composed with three NTV entities :</t><ul>
+          <li>Codec: TVlist of different Field NTVcells (Codec),</li>
+          <li>Ref: Vlist of indexes of Codec value in 'sp_value' ,</li>
+          <li>Coding: Vlist of 'sp_index'</li></ul>
+        <t>The list of NTVcells is reconstituted by replacing in a list of 'fill_value', the values with index in the Coding Vlist  
+        are replaced by the corresponding value defined by the Ref index in the Codec TVlist.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "food" Field)</em> : <ul empty="true">
             <li><em>[ [ "vegetable" , "fruit"], [0, 0], [ 4, 5 ] ]     'fruit' is the 'fill_value'</em></li></ul></li></ul>
         <t><strong>Primary format</strong> :</t> 
         <t>This format is equivalent to the Complete format where the Keys Vlist is calculated with the "repetition coefficient".</t>
-        <t>The Field is a NVlist composed with two NTV entities :</t><ul>
-          <li>Component: TVlist of different Field NTVcells (Codec),</li>
+        <t>The NTVfield is a NVlist composed with two NTV entities :</t><ul>
+          <li>Codec: TVlist of different Field NTVcells (Codec),</li>
           <li>Coding: Vlist with a single integer (Repetition coefficient)</li></ul>
-        <t>The Keys list is generated with the formula:</t><ul empty="true">
+        <t>The Keys Vlist is generated with the formula:</t><ul empty="true">
           <li>keys[ikey] = ( ikey % ( coef * period ) ) // coef</li>
           <li>where:<ul empty="true">
-            <li>keys: is the Keys list</li>
+            <li>keys: is the Keys Vlist</li>
             <li>ikey: is the index of a key value</li>
             <li>coef: is the Repetition coefficient</li>
             <li>period: is the length of Codec</li></ul></li>
@@ -217,37 +219,37 @@
             <li><em>keys = [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2]</em></li></ul></li></ul>         
         <t>The Repetition coefficient is the number of adjacent identical values in the Keys list.</t><ul empty="true">
           <li><em>Example "packaging"</em> : <ul empty="true">
-            <li><em>component: [ "bag" , "cardboard" ]</em></li>
+            <li><em>Codec: [ "bag" , "cardboard" ]</em></li>
             <li><em>Coefficient: 1</em></li>
             <li><em>(implicit Keys :  [ 0, 1, 0, 1, 0, 1, 0, 1 ] )</em></li></ul></li>
           <li><em>Example "product"</em> : <ul empty="true">
-            <li><em>component: [ "apple" , "orange" , "pepper" , "banana" ] </em></li>
+            <li><em>Codec: [ "apple" , "orange" , "pepper" , "banana" ] </em></li>
             <li><em>Coefficient: 2</em></li>
             <li><em>(implicit Keys :  [ 0, 0, 1, 1, 2, 2, 3, 3 ] )</em></li></ul></li></ul>
       </section>
       <section><name>Optimized NTVfield formats</name>
-        <t>This category reduces the weight of complete format with optimized keys. The length of keys is reduced with using of derived (Relative format)
-         or coupled (Implicit format) relationships between two fields.</t>
-        <t>The NTVfield is a NVlist where the NTVname is the name of the field and the NTVvalue is the list of two or three NTVentities.</t>
+        <t>This category of formats reduces the size of Complete format with optimized Keys. The length of Keys is reduced with using of derived (Relative format)
+         or coupled (Implicit format) relationships between two Fields.</t>
+        <t>In those formats, Codec is explicit and is the TVlist of different Field NTVcells (Codec). The NTVfield is a NVlist where the NTVname is the name of the Field.</t>
         <t><strong>Implicit format</strong> :</t> 
         <t>This representation is associated with "coupled" Fields. These Fields have a one-to-one correspondence.</t>
-        <t>The Field is a NVlist composed with two NTV entities :</t><ul>
-          <li>Component: TVlist of different field NTVcells (Codec),</li>
+        <t>The NTVfield is a NVlist composed with two NTV entities :</t><ul>
+          <li>Codec: TVlist of different field NTVcells (Codec),</li>
           <li>Ref: Vsingle entity index or name of the coupled Field.</li></ul>
-        <t>This format is equivalent to the complete format where Keys is the Keys of the Field (with Complete format) defined by Ref.</t><ul empty="true">
+        <t>This format is equivalent to the Complete format where Keys is the Keys of the Field (with Complete format) defined by Ref.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "weight" Field is associated with "packaging" Field )</em> : <ul empty="true">
             <li><em>[ [ "1 kg" , "10 kg" ], "packaging"]</em></li>
             <li><em>( implicit Keys :  [ 0, 1, 0, 1, 0, 1, 0, 1 ] )</em></li></ul></li></ul>
         <t><strong>Relative format</strong> :</t> 
         <t>This representation is associated with "derived" Fields. These Fields have a one-to-many correspondence.</t>
-        <t>The values of a "derived" Field are inferred from the values of the Field defined by Ref.</t>
+        <t>The values of a "derived" Field are inferred from the values of the parent Field.</t>
         <t>The Field is a NVlist composed with three NTV entities :</t><ul>
-          <li>Component: TVlist of different field NTVcells (Codec),</li>
-          <li>Ref: Vsingle entity index or name of the coupled Field,</li>
-          <li>Coding : Vlist of relative indexes of NTVcells in Component (Relative Keys).</li></ul>
-        <t>This format is equivalent to the Complete format where the Keys Vlist is obtained by replacing the values of the Keys Vlist of the associated Field
-         with the corresponding values in the Relative Keys (the length of the Relative Keys is the length of the Codec of the associated Field).</t><ul empty="true">
-          <li><em>Example JsonNTVvalue ( "food" Field is associated with "product" Field )</em> : <ul empty="true">
+          <li>Codec: TVlist of different field NTVcells (Codec),</li>
+          <li>Ref: Vsingle entity index or name of the parent Field,</li>
+          <li>Coding : Vlist of relative indexes of NTVcells in Codec (Relative Keys).</li></ul>
+        <t>This format is equivalent to the Complete format where the Keys Vlist is obtained by replacing the values of the Keys Vlist of the parent Field
+         with the corresponding values in the Relative Keys (the length of the Relative Keys is the length of the Codec of the parent Field).</t><ul empty="true">
+          <li><em>Example JsonNTVvalue ( "food" Field - "product" Field is the parent Field of "food" Field)</em> : <ul empty="true">
             <li><em>[ [ "fruit" , "vegetable" ], "product", [ 0, 1, 0, 0 ] ]</em></li>
             <li><em>(the Vlist Keys is obtained by replacing the values 0, 1, 2, 3 of the Vlist Keys of the "product" Field by the values 0, 1, 0, 0 
             of the Relative Keys i.e.: [ 0, 0, 0, 0, 1 , 1, 0, 0] )</em></li></ul></li></ul>
@@ -255,13 +257,13 @@
       <section><name>Synthesis</name>
         <t>The NTVfield structure corresponding to the format defined above are in <xref target="table4"/>:</t>
         <table anchor="table4" align="center" pn="table-4"><name>NTVfield formats</name><thead>
-          <tr><th colspan="2" align="center">Structure</th><th align="center">Component</th><th align="center">Ref</th><th align="center">Coding</th></tr>
+          <tr><th colspan="2" align="center">Structure</th><th align="center">Codec</th><th align="center">Ref</th><th align="center">Coding</th></tr>
           <tr><th align="center">format</th><th align="center">NTV</th><th align="center">TVlist</th><th align="center">Vsingle</th><th align="center">Vlist</th></tr></thead><tbody>
-          <tr><td>Relative</td><td><t>NTVlist</t><t>len = 3</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td><t>Relative Keys</t><t>len &lt; len(Field)</t></td></tr>
-          <tr><td>Complete</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>Keys</t><t>len = len(Field)</t></td></tr>
-          <tr><td>Sparse</td><td><t>NTVlist</t><t>len = 2</t></td><td><t>sp_value</t><t>+ fill_value</t></td><td> </td><td><t>sp_index + -1</t><t>1&lt;len&lt;len(Field)</t></td></tr>
-          <tr><td>Implicit</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td><t>index</t><t>or name</t></td><td> </td></tr>
-          <tr><td>Primary</td><td><t>NTVlist</t><t>len = 2</t></td><td>Codec</td><td> </td><td><t>coef</t><t>len = 1</t></td></tr>
+          <tr><td>Relative</td><td><t>NTVlist</t><t>len = 3</t></td><td>x</td><td><t>index</t><t>or name</t></td><td><t>Relative Keys</t><t>len &lt; len(Field)</t></td></tr>
+          <tr><td>Complete</td><td><t>NTVlist</t><t>len = 2</t></td><td>x</td><td> </td><td><t>Keys</t><t>len = len(Field)</t></td></tr>
+          <tr><td>Sparse</td>  <td><t>NTVlist</t><t>len = 3</t></td><td>x</td><td><t>list of index</t><t>sp_value</t></td><td><t>sp_index</t><t>1&lt;len&lt;len(Field)</t></td></tr>
+          <tr><td>Implicit</td><td><t>NTVlist</t><t>len = 2</t></td><td>x</td><td><t>index</t><t>or name</t></td><td> </td></tr>
+          <tr><td>Primary</td> <td><t>NTVlist</t><t>len = 2</t></td><td>x</td><td> </td><td><t>coef</t><t>len = 1</t></td></tr>
           <tr><td>Unique</td><td colspan="4" align="center">NTVsingle</td></tr>
           <tr><td>Full</td><td colspan="4" align="center">NTVlist &nbsp; &nbsp; &nbsp; &nbsp; len = len(Field)</td></tr></tbody></table>
         <t> Three levels are available to convert tabular data in JSON structure <xref target="table5"/>.</t><ul>
@@ -309,46 +311,6 @@
           <t>{"product":[["apple","orange","peppers","banana"],[2]]}</t><t>[["apple","orange","peppers","banana"],[2]]</t></td></tr>                  
         </tbody></table>
       </section>
-      <section><name>Properties</name>    
-        <section><name>Dataset size</name>
-          <t>As explain in <xref target="tabular structure"/> cells are often duplicated in a Field. The principle of defined formats is
-           to replace duplicated data with encoding based on integers.</t>
-          <t>This optimization considerably reduces the size of a representation of a Dataset. <xref target="sizing"/> details the methodology to optimize this size.</t>
-        </section>
-        <section><name>Nested NTV-TAB structure</name>
-          <t>NTVcells in a NTVDataset are any NTVsingle. We can therefore include in a NTVdataset the data associated with the types defined in the NTV format.</t>
-          <t>The 'tab' and the 'field' NTVtypes are associated to NTVdataset and NTVfield. A NTVcell can also be a NTVdataset or a NTVfield.
-          <figure anchor="nested TAB" align="left" suppress-title="false" pn="figure-7"><name>Nested Dataset</name><sourcecode><![CDATA[
-nested_dataset = {
-  "structure": {
-    "dataset:tab":{
-      "field1": [1,2,3], 
-      "field2": [4,5,{":ntv": {"min": 6, "max": 7}]
-    },
-    "ntvdata:ntv":{
-      "equinox:date": "2024-03-20",
-      "paris:point": [2.35, 48.85],
-      "other data:ntv": {"val1": 1, "val2": 2} 
-    },
-    "sensor:$sensor": [
-      8.51, 3.5, 4.2, 
-      {":tab": [[1,2,3,4], [5,6,7,8]]}
-    ] 
-  }
-}
-        ]]></sourcecode></figure>
-  
-
-
-        <t><em>Examples of NTV extended representation:</em></t><ul empty="true">
-          <li><ul empty="true"><li><t><em>{ "python date" : [ datetime.date(2022, 1, 18), datetime.date(2023, 1, 12) ] }</em></t></li></ul></li>
-          <li><em>this "json like" structure can be converted in JsonNTV format:</em></li>
-          <li><ul empty="true"><li><t><em>{ "python date::date" : [ "2022-01-18", "2023-01-12" ] }</em></t></li></ul></li></ul>
-
-
-
-        </section>
-      </section>
       <section><name>Dataset examples</name>
         <t>The examples in <xref target="table7"/> below illustrate the optimize level:</t>
         <table anchor="table7" align="center" pn="table-7"><name>optimize level examples</name><thead>
@@ -377,7 +339,41 @@ nested_dataset = {
           <tr><td>[[2, 1]]</td><td><em>NTVdataset with 1 NTVfield and length 2</em></td></tr>
           <tr><td>[[2, 1], [4, 3]]</td><td><em>NTVdataset with 2 NTVfield and length 2</em></td></tr></tbody></table>
       </section>
-    </section>    
+    </section>   
+    <section><name>Properties</name>    
+      <section><name>Dataset size</name>
+        <t>As explain in <xref target="tabular structure"/> cells are often duplicated in a Field. The principle of defined formats is
+          to replace duplicated data with encoding based on integers.</t>
+        <t>This optimization considerably reduces the size of a representation of a Dataset. <xref target="sizing"/> details the methodology to optimize this size.</t>
+      </section>
+      <section><name>Nested NTV-TAB structure</name>
+        <t>NTVcells in a NTVdataset are any NTVsingle. We can therefore include in a NTVdataset the data associated with the types defined in the NTV format.</t>
+        <t>The 'tab' and the 'field' NTVtypes are associated to NTVdataset and NTVfield. A NTVcell can also include a NTVdataset or a NTVfield.</t>
+        <t><xref target="nested TAB"/> is an example of nested Dataset. The 'nested' JsonNTV is the representation of a Dataset with length equal 2 and composed 
+        with two Fields 'field1' and 'field2'.</t><ul>
+          <li>'field1' is a Field with two Cells 'dataset1' ans 'dataset2' which are Dataset. 'field1' is represented with a Full format NTVfield.</li>
+          <li>'field2' is a Field with two Cells 'field2_1' ans 'field2_2' which are Field. 'field2' is represented with a Full format NTVfield.</li></ul>     
+        <figure anchor="nested TAB" align="left" suppress-title="false"><name>Nested Dataset</name><sourcecode><![CDATA[
+nested = {
+  "field1": {
+    "dataset1:tab":{
+      "dts1_field1": [1,2,3], 
+      "dts1_field2": [4,5,6]
+    },
+    "dataset2:tab":{
+      "dts2_field1": [10,20,30], 
+      "dts2_field2": [40,50,60],
+      "dts2_field3": [70,80,90]
+    },
+  },
+  "field2":{
+    "field2_1:field": [1,2,3],
+    "field2_2:field": [4,5,6],
+  }
+}
+        ]]></sourcecode></figure>
+      </section>
+    </section> 
     <section><name>Parsing a JSON-value</name>
       <t>A NTV parser generates a NTV entity from a JSON-value.</t>
       <t>The decoding NTV entity is directly converted into the NTVdataset and a list of NTVfields.</t>
@@ -422,6 +418,8 @@ nested_dataset = {
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
       </references>
       <references><name>Informative References</name>
+        <reference anchor="TABLE" target="https://specs.frictionlessdata.io/table-schema/#language"><front>
+          <title>Table Schema</title><author><organization>"FrictionLess"</organization></author><date year="2021"/></front></reference>
         <reference anchor="JSON-NTV" target="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html"><front>
           <title>Internet-Draft JSON-NTV</title><author initials="P" surname="Thomy"></author><date year="2022"/></front></reference>      
         <reference anchor="OLC" target="https://github.com/google/open-location-code"><front>
@@ -525,6 +523,88 @@ nested_dataset = {
         <ul empty="true"><li><ul empty="true">
           <li><em>ns: number of values distinct from the 'fill_value'</em></li>
           <li><em>nd: number of different values in the parent Field</em></li></ul></li></ul>
+      </section>
+    </section>
+    <section><name>Table schema compatibility</name>
+      <t>This appendix presents the compatibility between Tableschema <xref target="TABLE"/> and the NTV-TAB format.</t>
+      <section><name>Table schema</name>
+        <t>Table Schema is a simple language- and implementation-agnostic way to declare a schema for tabular data. A Table Schema is represented by a descriptor. 
+        The descriptor MUST be a JSON object with defined properties (JsonMember).</t>
+        <t>Table Schema define following descriptors and properties:</t><ul>
+          <li>Fields property<ul empty="true">
+            <li>Fields property MUST be an array where each entry in the array is a field descriptor (as defined below).</li></ul></li>
+          <li>Field descriptor<ul empty="true">
+            <li>A field descriptor MUST be a JSON object that describes a single field.</li></ul></li>
+          <li>Field properties<ul empty="true">
+            <li>The field descriptor object MAY contain any number of other properties. Some specific properties are defined below. Of these, 
+            only the name property is REQUIRED.</li>
+            <li>Defined Properties:<ul>
+              <li>name</li>
+              <li>title</li>
+              <li>description</li>
+              <li>example</li>
+              <li>type / format</li>
+              <li>constraints</li></ul></li>
+            <li>The constraints property on Table Schema Fields can be used by consumers to list constraints for validating field values.</li></ul></li>
+          <li>Table properties<ul empty="true">
+            <li>In additional to field descriptors, there are the following "table level" properties:<ul>
+              <li>missingValues</li>
+              <li>primaryKey</li>
+              <li>foreignKeys</li></ul></li></ul></li></ul>
+      </section>
+      <section><name>Compatibility</name>
+        <t>Three levels of compatibility are addressed :</t><ul>
+          <li>Concepts<ul empty="true">
+            <li>The concepts are equivalent between Table Schema and NTV-TAB :<ul>
+              <li>Table is equivalent to Dataset</li>
+              <li>Field in Table Schema is equivalent to the NTVfield</li>
+              <li>Name in Table Schema is equivalent to the NTVname of the NTVfield </li>
+              <li>Type / Format in Table Schema is equivalent to the NTVtype of the NTVfield </li></ul></li></ul></li>
+          <li>Type / Format<ul empty="true">
+            <li>NTVtype combines the concepts of type and format. The correspondence table in the NTV specification gives the link between an NTVtype 
+            and the corresponding type/format.</li></ul></li>
+          <li>Constraints<ul empty="true">
+            <li>Constraints are applicable to each value in a Table Field. Validating constraints for all values in a Table Field is equivalent 
+            to validating a constraint for all values in the Codec list.</li></ul></li></ul>
+        <t>These compatibility levels are reached, which makes it possible to validate an NTVdataset with a schema defined according to the Table Schema format.</t>
+        <t>The following principles should then be considered to validate an NTVdataset:</t><ul>
+          <li>The NTVfields names must be identical to the Schema names,</li>
+          <li>If the NTVtype of Codec data is not 'json', it must match the Type/Format defined in the Schema,</li>
+          <li>If the constrainst are valid with the Codec data, they are valid with the Field.</li></ul>
+      </section>
+      <section><name>Example</name>
+        <t><xref target="tab dataset"/> is an example of Dataset with Full format ('tab_data1' without NTVtypes) and with other formats ('tab_data2').</t>     
+        <figure anchor="tab dataset" align="left" suppress-title="false"><name>Dataset example</name><sourcecode><![CDATA[
+tab_data1 = {
+  "index":    [100, 200, 300, 400, 500, 600],
+  "dates":    ["1964-01-01", "1985-02-05", "2022-01-21", "1964-01-01", "1985-02-05", "2022-01-21"], 
+  "value":    [10, 10, 20, 20, 30, 30],
+  "coord":    [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
+  "names":    ["john", "eric", "judith", "mila", "hector", "maria"],
+  "unique":   ["true, "true", "true", "true", "true", "true"] 
+}
+tab_data2 = {
+  "index":         [100, 200, 300, 400, 500, 600],
+  "dates":         {"::date": ["1964-01-01", "1985-02-05", "2022-01-21"], [1]}, 
+  "value":         [[10, 20, 30], [2]],
+  "coord::point":  [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
+  "names::string": ["john", "eric", "judith", "mila", "hector", "maria"],
+  "unique":        True 
+}
+        ]]></sourcecode></figure>
+        <t>The schema in <xref target="tab schema"/> is valid with 'tab_data1' and 'tab_data2' formats</t>
+        <figure anchor="tab schema" align="left" suppress-title="false"><name>Schema example</name><sourcecode><![CDATA[
+tab_schema = {
+  "fields": [
+    {"name": "index", "type": "integer", "constraint":{"minimum":50}},
+    {"name": "dates", "type": "date"},
+    {"name": "value", "type": "integer"},
+    {"name": "coord", "type": "geopoint", "format": "array"},
+    {"name": "names"},
+    {"name": "unique", "type": "boolean"}
+  ]
+}
+        ]]></sourcecode></figure>
       </section>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
