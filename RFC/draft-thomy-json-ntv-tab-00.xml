@@ -193,13 +193,14 @@
           <li>'fill_value': it should be most common value</li>
           <li>'sp_value': it is a list storing only values distinct from the 'fill_value'</li>
           <li>'sp_index': list of index of 'sp-value' in the sparse data list</li></ul>
-        <t>The Field is a NVlist composed with two NTV entities :</t><ul>
-          <li>Component: TVlist of 'sp_value' completed with 'fill_value' ,</li>
+        <t>The Field is a NVlist composed with three NTV entities :</t><ul>
+          <li>Component: TVlist of different 'sp_value' completed with 'fill_value' ,</li>
+          <li>Ref: Vlist of indexes of Component value in 'sp_value' ,</li>
           <li>Coding: Vlist of 'sp_index' completed with -1</li></ul>
         <t>The list of values is equivalent to the list of 'fill_value' where the values with index in the Coding Vlist 
         are replaced by the corresponding value in the Component TVlist.</t><ul empty="true">
           <li><em>Example JsonNTVvalue ( "food" Field)</em> : <ul empty="true">
-            <li><em>[ [ "vegetable" , "vegetable" , "fruit"], [ 4, 5, -1 ] ]     'fruit' is the 'fill_value'</em></li></ul></li></ul>
+            <li><em>[ [ "vegetable" , "fruit"], [0, 0], [ 4, 5 ] ]     'fruit' is the 'fill_value'</em></li></ul></li></ul>
         <t><strong>Primary format</strong> :</t> 
         <t>This format is equivalent to the Complete format where the Keys Vlist is calculated with the "repetition coefficient".</t>
         <t>The Field is a NVlist composed with two NTV entities :</t><ul>
@@ -314,17 +315,29 @@
            to replace duplicated data with encoding based on integers.</t>
           <t>This optimization considerably reduces the size of a representation of a Dataset. <xref target="sizing"/> details the methodology to optimize this size.</t>
         </section>
-        <section><name>Cells format</name>
-          <t>NTVcells in a NTVDataset are any NTVsingle. We can therefore include in a NTVdataset the data associated with the types defined in the NTV format.
-          For example:
-          - a date
-          - a wgs84 coordinate
-          - a dataset
-          - an email address
-          - a custom format
-          - NTV data
-          
-          In a JSON representation, NTVsingle </t>
+        <section><name>Nested NTV-TAB structure</name>
+          <t>NTVcells in a NTVDataset are any NTVsingle. We can therefore include in a NTVdataset the data associated with the types defined in the NTV format.</t>
+          <t>The 'tab' and the 'field' NTVtypes are associated to NTVdataset and NTVfield. A NTVcell can also be a NTVdataset or a NTVfield.
+          <figure anchor="nested TAB" align="left" suppress-title="false" pn="figure-7"><name>Nested Dataset</name><sourcecode><![CDATA[
+nested_dataset = {
+  "structure": {
+    "dataset:tab":{
+      "field1": [1,2,3], 
+      "field2": [4,5,{":ntv": {"min": 6, "max": 7}]
+    },
+    "ntvdata:ntv":{
+      "equinox:date": "2024-03-20",
+      "paris:point": [2.35, 48.85],
+      "other data:ntv": {"val1": 1, "val2": 2} 
+    },
+    "sensor:$sensor": [
+      8.51, 3.5, 4.2, 
+      {":tab": [[1,2,3,4], [5,6,7,8]]}
+    ] 
+  }
+}
+        ]]></sourcecode></figure>
+  
 
 
         <t><em>Examples of NTV extended representation:</em></t><ul empty="true">
