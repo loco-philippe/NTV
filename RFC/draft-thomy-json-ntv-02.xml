@@ -691,6 +691,7 @@ ex_list = {
           <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>year</td><td>fullyear <xref target="RFC3339"/></td><td>1998</td></tr>
           <tr><td>month</td><td>month <xref target="RFC3339"/></td><td>10</td></tr>
+          <tr><td>yearmonth</td><td>year + month (ISO8601-1)</td><td>1998-10</td></tr>
           <tr><td>day</td><td>mday <xref target="RFC3339"/> day of month</td><td>21</td></tr>
           <tr><td>wday</td><td>wday <xref target="RFC3339"/> day of week</td><td>7</td></tr>
           <tr><td>yday</td><td>yday <xref target="RFC3339"/> day of year</td><td>360</td></tr>
@@ -722,6 +723,8 @@ ex_list = {
           <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>loc</td><td>generic NTVtype</td><td></td></tr>
           <tr><td>point (loc)</td><td>Point coordinates <xref target="RFC7946"/></td><td>[ 5.12, 45.256 ] <em>(lon, lat)</em></td></tr>
+          <tr><td>pointstr (loc)</td><td>Point coordinates (string)</td><td>"5.12, 45.256" <em>(lon, lat)</em></td></tr>
+          <tr><td>pointobj (loc)</td><td>Point coordinates (object)</td><td>{"lon": 5.12, "lat": 45.256}</td></tr>
           <tr><td>multipoint</td><td>MultiPoint coordinates <xref target="RFC7946"/></td>
             <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" NTVtypeName</em></t></td></tr>
           <tr><td>line (loc)</td><td>LineString coordinates <xref target="RFC7946"/></td>
@@ -753,10 +756,18 @@ ex_list = {
         <table anchor="table9" align="left" pn="table-9"><name>Structured NTVtype</name><thead>
           <tr><th>NTVtypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>uri</td><td>URI (RFC3986)</td><td><t>"https://www.ietf.org/rfc/rfc3986.txt"</t>
-            <t>"urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"</t>
-            <t>"geo:13.4125,103.86673" (RFC5870)</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t>
+            <t>"geo:13.4125,103.86673" (RFC5870)</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t> 
             <t>"tel:+1-201-555-0123" (RFC3966)</t></td></tr>
-          <tr><td>email</td><td>adress (RFC5322)</td><td>"John Doe &lt;jdoe@machine.example&gt;"</td></tr>
+          <tr><td>uriref</td><td>URI-reference (RFC3986)</td><td>"www.example.com/questions/3456/my-document"</td></tr>
+          <tr><td>uritem</td><td>URI-template (RFC6570)</td><td>"{+x,hello,y}"</td></tr>
+          <tr><td>binary</td><td>base64 (RFC4648)</td><td> </td></tr>
+          <tr><td>uuid</td><td>UUID (RFC4122)</td><td>"f81d4fae-7dec-11d0-a765-00a0c91e6bf6" </td></tr>
+          <tr><td>email</td><td>address (RFC5322)</td><td>"John Doe &lt;jdoe@machine.example&gt;"</td></tr>
+          <tr><td>idnemail</td><td>internationalized adress (RFC6531)</td><td> </td></tr>
+          <tr><td>hostname</td><td>Host Names (RFC1123)</td><td>"en.wikipedia.org"</td></tr>
+          <tr><td>idnhostname</td><td>internationalized Host Names (RFC5890)</td><td> </td></tr>
+          <tr><td>ipv4</td><td>IPv4 address (RFC2673)</td><td>"192.168.1.1"</td></tr>
+          <tr><td>ipv6</td><td>IPv6 address (RFC2373)</td><td><t>"2001:0db8:85a3:0000:00</t><t>00:8a2e:0370:7334"</t></td></tr>
           <tr><td>file</td><td>file-hier-part (RFC8089)</td>
             <td><t>"///path/to/file"</t><t>"//host.example.com/path/to/file"</t></td></tr></tbody></table>
         <t>Keywords are not defined as Normalized String (eg. "id", "mandatory", "units"), they can be used as custom NTVtype 
