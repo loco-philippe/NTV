@@ -759,6 +759,8 @@ ex_list = {
             <t>"geo:13.4125,103.86673" (RFC5870)</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t> 
             <t>"tel:+1-201-555-0123" (RFC3966)</t></td></tr>
           <tr><td>uriref</td><td>URI-reference (RFC3986)</td><td>"www.example.com/questions/3456/my-document"</td></tr>
+          <tr><td>iri</td><td>internationalized URI (RFC3987)</td><td>"http://www.example.org/D%FCrst"</td></tr>
+          <tr><td>iriref</td><td>IRI-reference (RFC3987)</td><td>"www.example.org/D%FCrst"</td></tr>
           <tr><td>uritem</td><td>URI-template (RFC6570)</td><td>"{+x,hello,y}"</td></tr>
           <tr><td>binary</td><td>base64 (RFC4648)</td><td> </td></tr>
           <tr><td>uuid</td><td>UUID (RFC4122)</td><td>"f81d4fae-7dec-11d0-a765-00a0c91e6bf6" </td></tr>
@@ -766,6 +768,9 @@ ex_list = {
           <tr><td>idnemail</td><td>internationalized adress (RFC6531)</td><td> </td></tr>
           <tr><td>hostname</td><td>Host Names (RFC1123)</td><td>"en.wikipedia.org"</td></tr>
           <tr><td>idnhostname</td><td>internationalized Host Names (RFC5890)</td><td> </td></tr>
+          <tr><td>jpointer</td><td>JSON pointer (RFC6901)</td><td>"/foo/0"</td></tr>
+          <tr><td>rjpointer</td><td>relative JSON pointer (I-D)</td><td>"1/nested/objects"</td></tr>
+          <tr><td>regex</td><td>regular expression (ECMA 262)</td><td>"[Ss]mith\\\\b"</td></tr>
           <tr><td>ipv4</td><td>IPv4 address (RFC2673)</td><td>"192.168.1.1"</td></tr>
           <tr><td>ipv6</td><td>IPv6 address (RFC2373)</td><td><t>"2001:0db8:85a3:0000:00</t><t>00:8a2e:0370:7334"</t></td></tr>
           <tr><td>file</td><td>file-hier-part (RFC8089)</td>

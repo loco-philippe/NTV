@@ -48,12 +48,12 @@ parsable and pattern formats (datation) and topojson (location) are not included
 | string               | uuid                               | uuid                                          |
 | string               | uri                                | uri                                           |
 | string               | uri-reference                      | uriref                                        |
-| string               | uri-template                       | uritem                                        | xxx
-| string               | iri                                | iri                                           | xxx
-| string               | iri-reference                      | iriref                                        | xxx
-| string               | json-pointer                       | jpointer                                      | xxx
-| string               | relative-json-pointer              | rjpointer                                     | xxx
-| string               | regex                              | regex                                         | xxx
+| string               | uri-template                       | uritem                                        |
+| string               | iri                                | iri                                           |
+| string               | iri-reference                      | iriref                                        |
+| string               | json-pointer                       | jpointer                                      |
+| string               | relative-json-pointer              | rjpointer                                     |
+| string               | regex                              | regex                                         |
 | number               | default                            | number                                        |
 | integer              | default                            | int                                           |
 | boolean              | default                            | boolean                                       |
