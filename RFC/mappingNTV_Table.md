@@ -8,7 +8,7 @@
 | string               | default                            | string                                        |
 | string               | email                              | email                                         |
 | string               | uri                                | uri                                           |
-| string               | binary (base64 string)             | binary                                        |
+| string               | binary (base64 string)             | binary                                        | base64, base32, base16
 | string               | uuid                               | uuid                                          |
 | number               | default                            | number                                        |
 | integer              | default                            | int                                           |
@@ -62,3 +62,24 @@ parsable and pattern formats (datation) and topojson (location) are not included
 | null                 | default (date ISO8601)             | date                                          |
 | -any-                | -any-                              | $xxx (custom type)                            |
 
+
+## mapping YANG
+
+|----------------------|------------------------------------|-----------------------------------------------|
+| type                 | NTVtype                            |comments                                       |
+|----------------------|------------------------------------|-----------------------------------------------|
+| int8                 | int8                               |                                               |
+| int16                | int16                              |                                               |
+| int32                | int32                              |                                               |
+| int64                | int64                              |                                               |
+| uint8                | uint8                              |                                               |
+| uint16               | uint16                             |                                               |
+| uint32               | uint32                             |                                               |
+| uint64               | uint64                             |                                               |
+| string               | string                             |                                               |
+| bit                  | bit                                |                                               |
+| binary               | binary                             |                                               |
+| leafref              | ref                                |                                               |
+| -any-                | -any-                              | $xxx (custom type)                            |
+
+enumeration, bits, leafref, 
