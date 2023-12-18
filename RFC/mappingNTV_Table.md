@@ -8,7 +8,7 @@
 | string               | default                            | string                                        |
 | string               | email                              | email                                         |
 | string               | uri                                | uri                                           |
-| string               | binary (base64 string)             | binary                                        | base64, base32, base16
+| string               | binary (base64 string)             | base64                                        |
 | string               | uuid                               | uuid                                          |
 | number               | default                            | number                                        |
 | integer              | default                            | int                                           |
@@ -62,7 +62,7 @@ parsable and pattern formats (datation) and topojson (location) are not included
 | null                 | default (date ISO8601)             | date                                          |
 | -any-                | -any-                              | $xxx (custom type)                            |
 
-
+Keywords $key, $ref, $anchor, $ref, $defs, 
 ## mapping YANG
 
 |----------------------|------------------------------------|-----------------------------------------------|
