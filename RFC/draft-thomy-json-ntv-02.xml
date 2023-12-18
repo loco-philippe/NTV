@@ -288,10 +288,9 @@ NTVtypeName     = ["$"] JsonString              ; REQ3
     </section>
     &nbsp;
     <section><name>JsonNTV</name>
-      <section anchor="JsonNTV format"><name>JsonNTV format</name>
-        <t>The JsonNTV format is the JSON representation of an NTV entity (JsonValue) as defined in 
-        <xref target="JsonNTV-abnf" derivedContent="Figure 3"/>, 
-        which uses ABNF from <xref target="RFC5234"/>.</t>
+      <section><name>JsonNTV format</name>
+        <t>The JsonNTV format is the JSON representation of an NTV entity (JsonValue). This JsonValue is converted in JsonText with a Json generator.
+        The JsonNTV format is defined in <xref target="JsonNTV-abnf" derivedContent="Figure 3"/>, which uses ABNF from <xref target="RFC5234"/>.</t>
         <figure anchor="JsonNTV-abnf" align="left" suppress-title="false">
           <name>JsonNTV - ABNF</name><sourcecode type="abnf" markers="false">
             <![CDATA[
@@ -328,10 +327,6 @@ JsonString = JsonString  ; indicates that rule is defined in RFC8259
         <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
           <li>If JsonNTVname is empty, simple format is used</li>
           <li>If JsonNTVname is empty and JsonNTVvalue is a JsonObject with a single member, ArrayValue is used</li></ol></li></ul>
-        <t>This format allows full compatibility with existing JSON structures:<ul>
-          <li>a JsonNumber, JsonString, JsonNull or JsonBoolean has the same representation as a Vsingle entity,</li>
-          <li>a JsonArray has the same representation as a Vlist entity composed with named entities,</li>
-          <li>a JsonObject has the same representation as a Vlist entity composed with unnamed entities.</li></ul></t>
         <t><em>Note :</em><ul>
           <li><em>JsonNTV : 21, { ":" : 21 } and { ":json" : 21 } represent the same Vsingle entity,</em></li></ul></t>
       </section>
@@ -521,8 +516,13 @@ NTVsingleValue     = JsonValue
       </section>
       <section><name>NTV Pointer</name>
         <t>A NTV Pointer is a string syntax for identifying a specific NTV entity within a NTV tree.</t>
-        <t>The syntax defined for JSON Pointer <xref target="RFC6901"/> is applicable.</t>
-        <t>The reference token in a NTV Pointer is the NTVname if it exists otherwise the zero-based index of the NTV entity in the NTVvalue list.</t>
+        <t>The syntax defined for JSON Pointer <xref target="RFC6901"/> (json-pointer, reference-token) 
+        is transposable to NTV Pointer (ntv-pointer, reference-token):</t><ul>
+          <li>The ntv-pointer is a Unicode string containing a sequence of zero or more reference-tokens, each prefixed by a '/'.</li>
+          <li>The reference-token is the NTVname if it exists otherwise the zero-based index of the NTV entity in the NTVvalue list.</li></ul>
+        <t>The ntv-pointer is equal to the json-pointer of the JsonNTV representation in most cases except :</t><ul>
+          <li>if the JsonNTV is a JsonObject with a single member where the value is a JsonPrimitive,</li>
+          <li>- if the JsonNTV contains a JsonArray containing a JsonObject with a single member where the value is a JsonPrimitive</li></ul>
       </section>
       <section><name>NTV Comparison</name>
         <t>Three levels of equality are defined.</t>
@@ -563,15 +563,14 @@ NTVsingleValue     = JsonValue
         <t>This rule is simple to implement and allows you to have a compact JsonNTV format (another more complex choice would have been to take
           the most frequent NTVtype among the included entities).</t>
       </section>
-      <section><name>NTV as a JSON metalanguage</name>
-        <t> As defined in <xref target="JsonNTV format"/> JsonValues and NTV entities have the same Json representation.</t>
-        <t>But in fact, there is a one-to-one correspondence between Json entities and NTV entities:</t><ul>
-          <li>a JsonPrimitive is a Vsingle where NTVvalue is the JsonPrimitive (and a Vsingle where NTVvalue is the JsonPrimitive is a JsonPrimitive),</li>
-          <li>a JsonArray is a Vlist composed with named Vlist or named Vsingle (and a Vlist composed with named Vlist or named Vsingle) is a JsonArray, </li>
-          <li>a JsonObject is a Vlist composed with unnamed Vlist or unnamed Vsingle (and a Vlist composed with unnamed Vlist or unnamed Vsingle) is a JsonObject</li></ul>
-        <t>This equivalence has several consequences for NTV entities corresponding to JsonValues:</t><ul>
-          <li>strict equality between two NTV entities is equivalent to equality between JsonNTV representations</li>
-          <li>the JsonValue is the canonical NTV entity</li></ul>
+      <section><name>JSON as a subtype of NTV</name>
+        <t>The <xref target="JsonNTV format"/> shows that there is an equivalence between Json entities (JsonArray, JsonObject, JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull)
+         and the corresponding NTV entities called JNTV (resp. NTVarray, NTVobject, NTVnumber, NTVstring, NTVfalse, NTVtrue , NTVnull).</t>
+        <t>JNTV entities have several properties:</t><ul>
+          <li>JNTV and JSON structures are substitutable with respect to functions associated with Json structures (e.g. generation of the JsonText format),</li>
+          <li>Strict equality or Structural equality between two JNTV entities are equivalent to equality between JsonNTV representations</li>
+          <li>JNTV are canonical NTV entity</li>
+          <li>NTV Pointer of JNTV are identical to Json Pointer of JsonNTV representations</li></ul>
       </section>
       <section><name>extended NTV structure</name>
         <t>The NTVvalue of NTV entities are JsonValue. In the extended NTV structure, NTVvalue can be every kind of data.</t>
@@ -882,6 +881,50 @@ ListJsonNTVmember  = [JsonNTVMember *( vSep JsonNTVMember)]
 NTVsingleValue     = JsonValue
             ]]>
       </sourcecode></figure>
+    </section>
+    <section anchor="JsonNTV format"><name>JSON-NTV equivalence</name>
+      <t>This Appendix shows that we can associate with each JsonValue an NTV entity whose JSON representation (JsonNtv) is identical to the JsonValue.</t>
+      <t>To do this, let's call NTVarray, NTVobject, NTVnumber, NTVstring, NTVfalse, NTVtrue, NTVnull the entities defined below.</t><ul>
+        <li>Json primitives<ul empty="true">
+          <li>An NTVprimitive entity (resp. NTVnumber, NTVstring, NTVfalse, NTVtrue or NTVnull) is a Vsingle entity whose NTVvalue is a 
+          JsonPrimitive (resp. JsonNumber, JsonString, JsonFalse, JsonTrue or JsonNull).</li>
+          <li>For example, the NTVstring entity associated with the JsonString "foo" has the following attributes:<ul>
+            <li>NTVname: empty,</li>
+            <li>NTVtype: "json",</li>
+            <li>NTVvalue: "foo".</li></ul></li>
+          <li>Given the NTV rules, the JsonNtv is equal to the NTVvalue and therefore the JsonPrimitive. Conversely, an NTV parser converts a JsonPrimitive 
+          into the corresponding NTVprimitive.</li></ul></li>
+        <li>Json Array<ul empty="true">
+          <li>The NTVarray entity is the Vlist entity composed of the NTV entities associated with the JsonElements of the JsonArray.</li>
+          <li>For example, for a JsonArray composed of the JsonNumber represented by 25 and the JsonArray represented by [1,2],
+           the NTVarray has the following attributes:<ul>
+            <li>NTVname: None</li>
+            <li>NTVtype: None</li>
+            <li>NTVvalue: composed of NTVnumber 25 and the NTVarray corresponding to the JsonArray [1,2]</li></ul></li>
+          <li>As before, taking into account the NTV rules, the JsonNtv is equal to the json representation of the NTVvalue which is identical to the JsonArray.</li>
+          <li>Conversely, an NTV parser converts a JsonArray into the corresponding NTVarray.</li></ul></li>
+        <li>JsonObject<ul empty="true">
+          <li>Let's call NTVmember the NTV entity associated with the JsonObject corresponding to a JsonMember (key/val). 
+          This JsonObject has the representation {key: val}.</li>
+          <li>If val is a Json Primitive, NTVmember is an NVsingle:<ul>
+            <li>NTVname:key</li>
+            <li>NTVtype: "json"</li>
+            <li>NTVvalue: val</li></ul></li>
+          <li>If val is a JsonArray or JsonObject, NTVmember is an NVlist:<ul>
+            <li>NTVname:key</li>
+            <li>NTVtype: None</li>
+            <li>NTVvalue: composed of NTV entities associated with the elements of the JsonArray (or members of the JsonObject)</li></ul></li>
+          <li>The NTVobject entity is the Vlist entity composed of the NTVmember entities associated with the JsonMembers of the JsonObject.</li>
+          <li>For example, for a JsonObject composed of the JsonMember represented by "foo": 25 and the JsonMember represented by "bar": [1,2], 
+          the NTVObject will be:<ul>
+            <li>NTVname: None</li>
+            <li>NTVtype: None</li>
+            <li>NTVvalue: composed of NVsingle (NTVname: "foo", NTVtype: "json", NTVvalue: 25) and NVlist (NTVname: "bar", NTVtype: None, 
+            NTVvalue: composed of NTVnumber 1 and NTVnumber 2).</li></ul></li>
+          <li>Similarly to the JsonArray, given the NTV rules, the JsonNtv is equal to the json representation of the NTVvalue which is identical to the JsonObject.</li>
+          <li>Conversely, an NTV parser converts a JsonObject into the corresponding NTVObject.</li>
+        </ul></li></ul>
+      <t>Thus, for all Json entities, we have an equivalence with an NTV entity</t>
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>
