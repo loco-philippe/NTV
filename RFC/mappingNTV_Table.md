@@ -2,6 +2,8 @@
 
 ## mapping NTV-Table Schema
 
+The mapping concerns Table Schema types and formats [Table schema](https://specs.frictionlessdata.io/table-schema/#types-and-formats). Parsable and pattern formats (datation) and topojson (location) are not included
+
 |----------------------|------------------------------------|-----------------------------------------------|
 | type                 | format                             | NTVtype                                       |
 |----------------------|------------------------------------|-----------------------------------------------|
@@ -27,9 +29,9 @@
 | geojson              | default (geojson spec)             | geojson                                       |
 | -any-                | -any-                              | $xxx (custom type)                            |
 
-parsable and pattern formats (datation) and topojson (location) are not included
-
 ## mapping NTV-JSON Schema
+
+The mapping concerns JSON-schema [specification](https://json-schema.org/draft/2020-12/json-schema-validation) primitive types, defined formats and String-Encoded data .
 
 |----------------------|------------------------------------|-----------------------------------------------|
 | type                 | format                             | NTVtype                                       |
@@ -54,9 +56,9 @@ parsable and pattern formats (datation) and topojson (location) are not included
 | string               | json-pointer                       | jpointer                                      |
 | string               | relative-json-pointer              | rjpointer                                     |
 | string               | regex                              | regex                                         |
-| number               | default                            | number                                        |
-| integer              | default                            | int                                           |
-| boolean              | default                            | boolean                                       |
+| number               |                                    | number                                        |
+| integer              |                                    | int                                           |
+| boolean              |                                    | boolean                                       |
 | object               |                                    | object                                        |
 | array                |                                    | array                                         |
 | contentEncoding      | base64                             | base64                                        |
@@ -65,10 +67,9 @@ parsable and pattern formats (datation) and topojson (location) are not included
 | contentEncoding      | binary                             | binary                                        |
 | null                 |                                    | null                                          |
 
-Built-in types with Keywords : $key, $ref, $anchor, $ref, $defs are not included. 
-
 ## mapping YANG
 
+The mapping concerns YANG build-in types defined [RFC7950](https://www.rfc-editor.org/rfc/rfc7950.html#page-24). Enumeration, leafref, identityref, instance-identifier, union are not included.
 |----------------------|------------------------------------|-----------------------------------------------|
 | type                 | NTVtype                            |comments                                       |
 |----------------------|------------------------------------|-----------------------------------------------|
@@ -86,7 +87,3 @@ Built-in types with Keywords : $key, $ref, $anchor, $ref, $defs are not included
 | string               | string                             |                                               |
 | bit                  | bit                                |                                               |
 | binary               | binary                             |                                               |
-| leafref              | ref                                |                                               |
-| -any-                | -any-                              | $xxx (custom type)                            |
-
-Built-in types : enumeration, bits, leafref, identityref, instance-identifier, union are not included.

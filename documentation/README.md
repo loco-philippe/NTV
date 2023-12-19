@@ -7,7 +7,7 @@ The documentation presents :
 - [a general presentation](https://github.com/loco-philippe/NTV/blob/main/documentation/NTV_presentation.pdf)
 - [the JSON-NTV specification](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) (Json for NTV data)
 - [an example of namespace](https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-namespace-fr.pdf)
-- [the JSON-TAB specification](https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-TAB-standard.pdf) (Json for tabular data)
+- [the NTV-TAB specification](https://loco-philippe.github.io/ES/NTV%20tabular%20format%20(NTV-TAB).htm) (Json for tabular data)
 
 ## Python Connectors documentation
 

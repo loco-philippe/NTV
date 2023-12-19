@@ -1,0 +1,3183 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html -->
+<html lang="en" class="Internet-Draft"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>NTV tabular format (NTV-TAB)</title>
+<meta content="Philippe THOMY" name="author">
+<meta content="
+       This document describes a set of simple rules for unambiguously and concisely encoding semantic tabular and multidimensional data (NTV-TAB format).
+       These rules are based on the NTV structure and its JSON representation (JSON-NTV format). 
+    " name="description">
+<meta content="xml2rfc 3.18.2" name="generator">
+<meta content="JSON" name="keyword">
+<meta content="semantic" name="keyword">
+<meta content="data interchange format" name="keyword">
+<meta content="tabular" name="keyword">
+<meta content="ABNF" name="keyword">
+<meta content="draft-thomy-ntv-tab-00" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.18.2
+    Python 3.9.18
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.0
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.3
+    platformdirs 4.1.0
+    pycountry 23.12.11
+    PyYAML 6.0.1
+    requests 2.31.0
+    setuptools 58.1.0
+    six 1.16.0
+    wcwidth 0.2.12
+    weasyprint 60.2
+-->
+<link href="https://www.ietf.org/a/www/www6s/staging/draft-thomy-ntv-tab-00.xml" rel="alternate" type="application/rfc+xml">
+<link href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans'); /* Sans-serif */
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif'); /* Serif (print) */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono'); /* Monospace */
+
+:root {
+  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+  --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+  --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+}
+
+@viewport {
+  zoom: 1.0;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-wrap: break-word;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+svg[font-family~="serif" i], svg [font-family~="serif" i] {
+  font-family: var(--font-serif);
+}
+svg[font-family~="sans-serif" i], svg [font-family~="sans-serif" i] {
+  font-family: var(--font-sans);
+}
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  display: table;
+  border: none;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.ulBare, li.ulBare {
+  margin-left: 0em !important;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef,
+.iref + a[href].internal {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre {
+  background-color: #f9f9f9;
+  font-family: var(--font-mono);
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+blockquote > *:last-child {
+  margin-bottom: 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+/* Fix PDF info block run off issue */
+@media print {
+  #identifiers dd {
+    float: none;
+  }
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: var(--font-sans);
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  .breakable pre {
+    break-inside: auto;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.sourcecode pre,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin-bottom: 0.25em;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0.5em;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .artwork > pre,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Avoid narrow tables forcing too narrow table captions, which may render badly */
+table {
+  min-width: 20em;
+}
+/* ol type a */
+ol.type-a { list-style-type: lower-alpha; }
+ol.type-A { list-style-type: upper-alpha; }
+ol.type-i { list-style-type: lower-roman; }
+ol.type-I { list-style-type: lower-roman; }
+/* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+table {
+  border: 1px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+}
+tr {
+  break-inside: avoid;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f8f8f8;
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+/* Add support for keepWithNext */
+.keepWithNext {
+  break-after: avoid-page;
+  break-after: avoid-page;
+}
+/* Add support for keepWithPrevious */
+.keepWithPrevious {
+  break-before: avoid-page;
+}
+/* Change the approach to avoiding breaks inside artwork etc. */
+figure, pre, table, .artwork, .sourcecode  {
+  break-before: auto;
+  break-after: auto;
+}
+/* Avoid breaks between <dt> and <dd> */
+dl {
+  break-before: auto;
+  break-inside: auto;
+}
+dt {
+  break-before: auto;
+  break-after: avoid-page;
+}
+dd {
+  break-before: avoid-page;
+  break-after: auto;
+  orphans: 3;
+  widows: 3
+}
+span.break, dd.break {
+  margin-bottom: 0;
+  min-height: 0;
+  break-before: auto;
+  break-inside: auto;
+  break-after: auto;
+}
+/* Undo break-before ToC */
+@media print {
+  #toc {
+    break-before: auto;
+  }
+}
+/* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+ul.compact p, .ulCompact p,
+ol.compact p, .olCompact p {
+ margin: 0;
+}
+/* But the list as a whole needs the extra space at the end */
+section ul.compact,
+section .ulCompact,
+section ol.compact,
+section .olCompact {
+  margin-bottom: 1em;                    /* same as p not within ul.compact etc. */
+}
+/* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+tt, code {
+  background-color: transparent;
+}
+p tt, p code, li tt, li code {
+  background-color: #f8f8f8;
+}
+/* Tweak the pre margin -- 0px doesn't come out well */
+pre {
+   margin-top: 0.5px;
+}
+/* Tweak the compact list text */
+ul.compact, .ulCompact,
+ol.compact, .olCompact,
+dl.compact, .dlCompact {
+  line-height: normal;
+}
+/* Don't add top margin for nested lists */
+li > ul, li > ol, li > dl,
+dd > ul, dd > ol, dd > dl,
+dl > dd > dl {
+  margin-top: initial;
+}
+/* Elements that should not be rendered on the same line as a <dt> */
+/* This should match the element list in writer.text.TextWriter.render_dl() */
+dd > div.artwork:first-child,
+dd > aside:first-child,
+dd > figure:first-child,
+dd > ol:first-child,
+dd > div.sourcecode:first-child,
+dd > table:first-child,
+dd > ul:first-child {
+  clear: left;
+}
+/* fix for weird browser behaviour when <dd/> is empty */
+dt+dd:empty::before{
+  content: "\00a0";
+}
+/* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+li > p {
+  margin-bottom: 0.5em
+}
+/* Don't let p margin spill out from inside list items */
+li > p:last-of-type:only-child {
+  margin-bottom: 0;
+}
+</style>
+<link href="./NTV tabular format (NTV-TAB)_files/rfc-local.css" rel="stylesheet" type="text/css">
+<script type="application/javascript">async function addMetadata(){try{const e=document.styleSheets[0].cssRules;for(let t=0;t<e.length;t++)if(/#identifiers/.exec(e[t].selectorText)){const a=e[t].cssText.replace("#identifiers","#external-updates");document.styleSheets[0].insertRule(a,document.styleSheets[0].cssRules.length)}}catch(e){console.log(e)}const e=document.getElementById("external-metadata");if(e)try{var t,a="",o=function(e){const t=document.getElementsByTagName("meta");for(let a=0;a<t.length;a++)if(t[a].getAttribute("name")===e)return t[a].getAttribute("content");return""}("rfc.number");if(o){t="https://www.rfc-editor.org/rfc/rfc"+o+".json";try{const e=await fetch(t);a=await e.json()}catch(e){t=document.URL.indexOf("html")>=0?document.URL.replace(/html$/,"json"):document.URL+".json";const o=await fetch(t);a=await o.json()}}if(!a)return;e.style.display="block";const s="",d="https://datatracker.ietf.org/doc",n="https://datatracker.ietf.org/ipr/search",c="https://www.rfc-editor.org/info",l=a.doc_id.toLowerCase(),i=a.doc_id.slice(0,3).toLowerCase(),f=a.doc_id.slice(3).replace(/^0+/,""),u={status:"Status",obsoletes:"Obsoletes",obsoleted_by:"Obsoleted By",updates:"Updates",updated_by:"Updated By",see_also:"See Also",errata_url:"Errata"};let h="<dl style='overflow:hidden' id='external-updates'>";["status","obsoletes","obsoleted_by","updates","updated_by","see_also","errata_url"].forEach(e=>{if("status"==e){a[e]=a[e].toLowerCase();var t=a[e].split(" "),o=t.length,w="",p=1;for(let e=0;e<o;e++)p<o?w=w+r(t[e])+" ":w+=r(t[e]),p++;a[e]=w}else if("obsoletes"==e||"obsoleted_by"==e||"updates"==e||"updated_by"==e){var g,m="",b=1;g=a[e].length;for(let t=0;t<g;t++)a[e][t]&&(a[e][t]=String(a[e][t]).toLowerCase(),m=b<g?m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>, ":m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>",b++);a[e]=m}else if("see_also"==e){var y,L="",C=1;y=a[e].length;for(let t=0;t<y;t++)if(a[e][t]){a[e][t]=String(a[e][t]);var _=a[e][t].slice(0,3),v=a[e][t].slice(3).replace(/^0+/,"");L=C<y?"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>, ":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>, ":"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>",C++}a[e]=L}else if("errata_url"==e){var R="";R=a[e]?R+"<a href='"+a[e]+"'>Errata exist</a> | <a href='"+d+"/"+l+"'>Datatracker</a>| <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>":"<a href='"+d+"/"+l+"'>Datatracker</a> | <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>",a[e]=R}""!=a[e]?"Errata"==u[e]?h+=`<dt>More info:</dt><dd>${a[e]}</dd>`:h+=`<dt>${u[e]}:</dt><dd>${a[e]}</dd>`:"Errata"==u[e]&&(h+=`<dt>More info:</dt><dd>${a[e]}</dd>`)}),h+="</dl>",e.innerHTML=h}catch(e){console.log(e)}else console.log("Could not locate metadata <div> element");function r(e){return e.charAt(0).toUpperCase()+e.slice(1)}}window.removeEventListener("load",addMetadata),window.addEventListener("load",addMetadata);</script>
+</head>
+<body class="xml2rfc">
+<script src="./NTV tabular format (NTV-TAB)_files/metadata.min.js.téléchargement"></script>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">NTV tabular format (NTV-TAB)</td>
+<td class="right">December 2023</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">THOMY</td>
+<td class="center">Expires 21 June 2024</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Internet Engineering Task Force</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-thomy-ntv-tab-00</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2023-12-19" class="published">19 December 2023</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2024-06-21">21 June 2024</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">P. THOMY</div>
+<div class="org">Loco-labs</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">NTV tabular format (NTV-TAB)</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes a set of simple rules for unambiguously and concisely encoding semantic tabular and multidimensional data (NTV-TAB format).
+       These rules are based on the NTV structure and its JSON representation (JSON-NTV format).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 21 June 2024.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2023 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1" class="auto internal xref">1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.1" class="auto internal xref">1.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-presentation" class="internal xref">Presentation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2" class="auto internal xref">1.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-key-design-features" class="internal xref">Key design features</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3" class="auto internal xref">1.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-conventions-used-in-this-do" class="internal xref">Conventions Used in This Document</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2" class="auto internal xref">2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-tabular-data" class="internal xref">Tabular data</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1" class="auto internal xref">2.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-principles" class="internal xref">Principles</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2" class="auto internal xref">2.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-tabular-structure" class="internal xref">Tabular structure</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3" class="auto internal xref">2.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-field-structure" class="internal xref">Field structure</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.4" class="auto internal xref">2.4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-representation" class="internal xref">Representation</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3" class="auto internal xref">3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntv-tab-format" class="internal xref">NTV-TAB format</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1" class="auto internal xref">3.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntv-structure" class="internal xref">NTV structure</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2" class="auto internal xref">3.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-simple-ntvfield-formats" class="internal xref">simple NTVfield formats</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3" class="auto internal xref">3.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-default-ntvfield-formats" class="internal xref">default NTVfield formats</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4" class="auto internal xref">3.4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-optimized-ntvfield-formats" class="internal xref">Optimized NTVfield formats</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
+                <p id="section-toc.1-1.3.2.5.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5" class="auto internal xref">3.5</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-synthesis" class="internal xref">Synthesis</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4" class="auto internal xref">4</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-examples" class="internal xref">Examples</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1" class="auto internal xref">4.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-field-examples" class="internal xref">Field examples</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2" class="auto internal xref">4.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-examples" class="internal xref">Dataset examples</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5" class="auto internal xref">5</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-properties" class="internal xref">Properties</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.1" class="auto internal xref">5.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-json-representation" class="internal xref">JSON representation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.2" class="auto internal xref">5.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-size" class="internal xref">Dataset size</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3" class="auto internal xref">5.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-nested-ntv-tab-structure" class="internal xref">Nested NTV-TAB structure</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6" class="auto internal xref">6</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-parsing-a-json-value" class="internal xref">Parsing a JSON-value</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-7" class="auto internal xref">7</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-8" class="auto internal xref">8</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-9" class="auto internal xref">9</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-9.1" class="auto internal xref">9.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-9.2" class="auto internal xref">9.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A" class="auto internal xref">Appendix A</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-sizing" class="internal xref">Dataset sizing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1" class="auto internal xref">A.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-methodology" class="internal xref">Methodology</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2" class="auto internal xref">A.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-formats" class="internal xref">Formats</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B" class="auto internal xref">Appendix B</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-table-schema-compatibility" class="internal xref">Table schema compatibility</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                <p id="section-toc.1-1.11.2.1.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1" class="auto internal xref">B.1</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-table-schema" class="internal xref">Table schema</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                <p id="section-toc.1-1.11.2.2.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2" class="auto internal xref">B.2</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-compatibility" class="internal xref">Compatibility</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
+                <p id="section-toc.1-1.11.2.3.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.3" class="auto internal xref">B.3</a>.&nbsp;&nbsp;<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-example" class="internal xref">Example</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-C" class="auto internal xref"></a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-D" class="auto internal xref"></a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-contributors" class="internal xref">Contributors</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-E" class="auto internal xref"></a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1" class="section-number selfRef">1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<section id="section-1.1">
+        <h3 id="name-presentation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.1" class="section-number selfRef">1.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-presentation" class="section-name selfRef">Presentation</a>
+        </h3>
+<p id="section-1.1-1">The main operational standard used to exchange textual tabular data is CSV format <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#RFC4180" class="cite xref">RFC4180</a>]</span>.
+        Unfortunately CSV format is obsolete (last revision in 2005) and current CSV tools do not comply with the standard.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">It is therefore important to define an alternative format that meets the expectations of tabular and multidimensional data exchanges.
+        The NTV-TAB format proposed here is a response to this need.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.1-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-1.2">
+        <h3 id="name-key-design-features">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2" class="section-number selfRef">1.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-key-design-features" class="section-name selfRef">Key design features</a>
+        </h3>
+<p id="section-1.2-1">The format's focus is on simplicity, lightness and web usage.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">The key features of this format are the following:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-3.1">
+            <p id="section-1.2-3.1.1">JSON as the base format<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.2-3.1.2.1">JSON is simple and readable as simple text<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.1.2.2">JSON supports rich structure including nesting and basic types<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.1.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.1.2.3">JSON is web-native and very widely used and supported<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.1.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.1.2.4">JSON format has binary representation (i.e. CBOR format)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.1.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.2">
+            <p id="section-1.2-3.2.1">optimized representations<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.2-3.2.2.1">from the simplest to the most optimized, are available<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.2.2.2">avoid data duplication,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.2.2.3">reduce the size of data,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.2.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.2.2.4">allows strict and unambiguous reversibility (lossless round-trip)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.2.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.3">
+            <p id="section-1.2-3.3.1">high semantic level of data (JSON-NTV as a grammar)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.3.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.2-3.3.2.1">Take into account most common data formats used in Internet standards<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.3.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.3.2.2">wide variety of data typing<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.3.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.3.2.3">meta-data (header or schema) can be integrate<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.3.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-1.2-3.3.2.4">common format between tabular and multidimensional data<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.3.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-1.2-3.4">simple, compact, extensible and self-describing<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.2-3.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="section-1.3">
+        <h3 id="name-conventions-used-in-this-do">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3" class="section-number selfRef">1.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-conventions-used-in-this-do" class="section-name selfRef">Conventions Used in This Document</a>
+        </h3>
+<p id="section-1.3-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
+          RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#RFC2119" class="cite xref">RFC2119</a>]</span>
+          <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they appear in all capitals, as shown here.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-1" class="pilcrow">¶</a></p>
+<p id="section-1.3-2">This document also uses the following terms:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlNewline" id="section-1.3-3">
+          <dt id="section-1.3-3.1"><strong> JsonText, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber,
+           JsonString, JsonFalse, JsonNull, JsonTrue :</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.2">These terms are defined in <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#JSON-NTV" class="cite xref">JSON-NTV</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-3.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.3"><strong>NTV, NTVlist, NVlist, Vlist, TVlist, NTVsingle, NVsingle, TVsingle, Vsingle, NTVname, NTVtype, NTVvalue, 
+          JsonNTVtype, JsonNTVname, JsonPrimitive, JsonUnnamed, JsonNamed:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.4">These terms are defined in <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#JSON-NTV" class="cite xref">JSON-NTV</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-3.4" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.5"><strong>Row, Column, Table, Cell:</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.6">These terms are defined in <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#W3C_TAB" class="cite xref">W3C_TAB</a>]</span>.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-3.6" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.7"><strong>Dataset</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.8">A Dataset is equivalent to a Table<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-3.8" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.3-3.9"><strong>Field</strong></dt>
+          <dd style="margin-left: 1.5em" id="section-1.3-3.10">A Field is equivalent to a Column<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-1.3-3.10" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</section>
+<section id="section-2">
+      <h2 id="name-tabular-data">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2" class="section-number selfRef">2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-tabular-data" class="section-name selfRef">Tabular data</a>
+      </h2>
+<section id="section-2.1">
+        <h3 id="name-principles">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1" class="section-number selfRef">2.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-principles" class="section-name selfRef">Principles</a>
+        </h3>
+<p id="section-2.1-1"><em><strong>Tabular data</strong> is data that is structured into rows, each of which contains information about some things. 
+      Each row contains the same number of cells (although some of these cells may be empty), which provide values of properties of the thing described by the row.
+       In tabular data, cells within the same column provide values for the same property of the things described by each row. 
+       This is what differentiates tabular data from other line-oriented formats. </em><span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#W3C_TAB" class="cite xref">W3C_TAB</a>]</span><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">Two main uses are identified for tabular data:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-3.1">a flow-oriented use for which each row is independent of the others. The dataset is then seen as a list of rows whose number can be variable. 
+        This is for example the case of a list of measurements from a sensor.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.1-3.2">a structure-oriented use for which the rows are not independent and contribute to describing the same object. 
+        This is for example the case of a grade table for a class which integrates the students, courses, periods, etc.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1-3.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-2.1-4">This document deals with this second use.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="tabular_structure">
+<section id="section-2.2">
+        <h3 id="name-tabular-structure">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2" class="section-number selfRef">2.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-tabular-structure" class="section-name selfRef">Tabular structure</a>
+        </h3>
+<p id="section-2.2-1">In structure-oriented use, columns and rows are not equivalent, the columns (or Fields) represent the 'semantics' of the data and the rows represent
+         a specific combination of Field's values according to the structure defined by the tabular data (Dataset). The nature of the rows is often implicit.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">Two basic patterns are present in Datasets:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-3.1">
+            <strong>Tree pattern</strong>: A tree is represented in tabular form by a list of paths between each leaf and the node. 
+          The columns then represent the levels of the tree.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-3.2">
+            <strong>Matrix pattern</strong>: A matrix (or multidimensional data) is represented in tabular form by a column of the values of the matrix 
+          and additional columns represent the coordinates of each of the values.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-3.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-2.2-4"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table1" class="auto internal xref">Table 1</a> and <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table2" class="auto internal xref">Table 2</a> present an example of such patterns<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-4" class="pilcrow">¶</a></p>
+<span id="name-tree-pattern"></span><div id="table1">
+<table class="left" id="table-1">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-1" class="selfRef">Table 1</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-tree-pattern" class="selfRef">Tree pattern</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Root</th>
+              <th class="text-left" rowspan="1" colspan="1">level 1</th>
+              <th class="text-left" rowspan="1" colspan="1">level 2</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">A</td>
+              <td class="text-left" rowspan="1" colspan="1">B</td>
+              <td class="text-left" rowspan="1" colspan="1">D</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">A</td>
+              <td class="text-left" rowspan="1" colspan="1">B</td>
+              <td class="text-left" rowspan="1" colspan="1">E</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">A</td>
+              <td class="text-left" rowspan="1" colspan="1">C</td>
+              <td class="text-left" rowspan="1" colspan="1">F</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">A</td>
+              <td class="text-left" rowspan="1" colspan="1">C</td>
+              <td class="text-left" rowspan="1" colspan="1">G</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<span id="name-matrix-pattern"></span><div id="table2">
+<table class="left" id="table-2">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-2" class="selfRef">Table 2</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-matrix-pattern" class="selfRef">Matrix pattern</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+              <th class="text-left" rowspan="1" colspan="1">row</th>
+              <th class="text-left" rowspan="1" colspan="1">col</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">A</td>
+              <td class="text-left" rowspan="1" colspan="1">C</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">A</td>
+              <td class="text-left" rowspan="1" colspan="1">D</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3</td>
+              <td class="text-left" rowspan="1" colspan="1">B</td>
+              <td class="text-left" rowspan="1" colspan="1">C</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4</td>
+              <td class="text-left" rowspan="1" colspan="1">B</td>
+              <td class="text-left" rowspan="1" colspan="1">D</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-2.2-7">Taking these structures into account leads to significant duplication of data. In the general case, Datasets mix these different structures.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-7" class="pilcrow">¶</a></p>
+<p id="section-2.2-8">If we now observe the relationships between Fields <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#TAB-ANA" class="cite xref">TAB-ANA</a>]</span>, we can identify four main uses:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-9.1">
+            <strong>association</strong>: this consists of coupling each value of a Field to a single value of another Field ("coupled" relationship between two fields),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-9.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-9.2">
+            <strong>classification</strong>: This involves grouping the data by category in order - for example - to be able to make a statistical use of it, 
+           ("derived" relationship between two fields),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-9.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-9.3">
+            <strong>crossing</strong>: This consists of representing all the combinations between the two Fields, 
+          such as in matrix representations ("crossed" relationship between two fields),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-9.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-9.4">
+            <strong>characterization</strong>: It corresponds to the documentation of defined properties (no specific relationship).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-9.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-2.2-10"><em>Example: Price list of different foods based on packaging for the year 2022.</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table3" class="auto internal xref">Table 3</a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-10" class="pilcrow">¶</a></p>
+<span id="name-price-list"></span><div id="table3">
+<table class="left" id="table-3">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-3" class="selfRef">Table 3</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-price-list" class="selfRef">Price list</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Id</th>
+              <th class="text-left" rowspan="1" colspan="1">Product</th>
+              <th class="text-left" rowspan="1" colspan="1">Food</th>
+              <th class="text-left" rowspan="1" colspan="1">Packaging</th>
+              <th class="text-left" rowspan="1" colspan="1">Weight</th>
+              <th class="text-left" rowspan="1" colspan="1">Price</th>
+              <th class="text-left" rowspan="1" colspan="1">Period</th>
+              <th class="text-left" rowspan="1" colspan="1">Availability</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">11</td>
+              <td class="text-left" rowspan="1" colspan="1">apple</td>
+              <td class="text-left" rowspan="1" colspan="1">fruit</td>
+              <td class="text-left" rowspan="1" colspan="1">bag</td>
+              <td class="text-left" rowspan="1" colspan="1">1 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">Yes</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">12</td>
+              <td class="text-left" rowspan="1" colspan="1">apple</td>
+              <td class="text-left" rowspan="1" colspan="1">fruit</td>
+              <td class="text-left" rowspan="1" colspan="1">cardboard</td>
+              <td class="text-left" rowspan="1" colspan="1">10 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">9</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">Yes</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">13</td>
+              <td class="text-left" rowspan="1" colspan="1">orange</td>
+              <td class="text-left" rowspan="1" colspan="1">fruit</td>
+              <td class="text-left" rowspan="1" colspan="1">bag</td>
+              <td class="text-left" rowspan="1" colspan="1">1 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">end of 2022</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">14</td>
+              <td class="text-left" rowspan="1" colspan="1">orange</td>
+              <td class="text-left" rowspan="1" colspan="1">fruit</td>
+              <td class="text-left" rowspan="1" colspan="1">cardboard</td>
+              <td class="text-left" rowspan="1" colspan="1">10 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">18</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">end of 2022</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">15</td>
+              <td class="text-left" rowspan="1" colspan="1">pepper</td>
+              <td class="text-left" rowspan="1" colspan="1">vegetable</td>
+              <td class="text-left" rowspan="1" colspan="1">bag</td>
+              <td class="text-left" rowspan="1" colspan="1">1 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">1.5</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">end of 2022</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">16</td>
+              <td class="text-left" rowspan="1" colspan="1">pepper</td>
+              <td class="text-left" rowspan="1" colspan="1">vegetable</td>
+              <td class="text-left" rowspan="1" colspan="1">cardboard</td>
+              <td class="text-left" rowspan="1" colspan="1">10 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">13</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">end of 2022</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">17</td>
+              <td class="text-left" rowspan="1" colspan="1">banana</td>
+              <td class="text-left" rowspan="1" colspan="1">fruit</td>
+              <td class="text-left" rowspan="1" colspan="1">bag</td>
+              <td class="text-left" rowspan="1" colspan="1">1 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">0.5</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">Yes</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">18</td>
+              <td class="text-left" rowspan="1" colspan="1">banana</td>
+              <td class="text-left" rowspan="1" colspan="1">fruit</td>
+              <td class="text-left" rowspan="1" colspan="1">cardboard</td>
+              <td class="text-left" rowspan="1" colspan="1">10 kg</td>
+              <td class="text-left" rowspan="1" colspan="1">4</td>
+              <td class="text-left" rowspan="1" colspan="1">2nd half 2022</td>
+              <td class="text-left" rowspan="1" colspan="1">Yes</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-2.2-12"><em>We find here:</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-12" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-13.1">
+            <em>association: between "Packaging" and "Weight",</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-13.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-13.2">
+            <em>classification: between "Product" and "Food",</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-13.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-13.3">
+            <em>crossing: between "Product" and "Weight",</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-13.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.2-13.4">
+            <em>characterization: between "Product" and "Availability"</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.2-13.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+<section id="section-2.3">
+        <h3 id="name-field-structure">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3" class="section-number selfRef">2.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-field-structure" class="section-name selfRef">Field structure</a>
+        </h3>
+<p id="section-2.3-1">A Field is an ordered set of Cells.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">To represent this structure, several representations are possible depending on the nature of the data:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.3-3.1">the simplest format is to represent a Field by the list of Cells with the same order for all Fields. 
+          This format is interesting when the data is little duplicated,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.3-3.2">when the data is repetitive, a second option is to represent on the one hand the list of different data and on the other hand their position in the list 
+          (i.e. categorical data),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3-3.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.3-3.3">another special case also concerns repetitive data for which one value is highly predominant (sparse data). 
+          In this case, it is sufficient to provide only the position in the list of data except for the one that is predominant,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3-3.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-2.3-3.4">a last option consists in representing the Field according to its dependence with another Field (coupled, derived or crossed relationship). 
+          This leads to an optimized data volume.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.3-3.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="section-2.4">
+        <h3 id="name-representation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.4" class="section-number selfRef">2.4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-representation" class="section-name selfRef">Representation</a>
+        </h3>
+<p id="section-2.4-1">Three representations are available for a tabular object : row-oriented (list of Rows), cells-oriented (list of Cells), field-oriented (list of Fields).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.4-1" class="pilcrow">¶</a></p>
+<p id="section-2.4-2">The field-oriented representation is retained because it takes into account the semantics carried by the Fields as well as the inter-Field analysis presented above.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.4-2" class="pilcrow">¶</a></p>
+<p id="section-2.4-3">A Dataset is then seen as a set of Fields representing the properties of the entire Dataset.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.4-3" class="pilcrow">¶</a></p>
+<p id="section-2.4-4">The order of Fields or Rows is not relevant.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-2.4-4" class="pilcrow">¶</a></p>
+</section>
+</section>
+<section id="section-3">
+      <h2 id="name-ntv-tab-format">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3" class="section-number selfRef">3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntv-tab-format" class="section-name selfRef">NTV-TAB format</a>
+      </h2>
+<section id="section-3.1">
+        <h3 id="name-ntv-structure">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1" class="section-number selfRef">3.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntv-structure" class="section-name selfRef">NTV structure</a>
+        </h3>
+<p id="section-3.1-1">A Dataset is represented by the following NTV entities:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-2.1">NTVcell represents a Cell. NTVcell is a NTVsingle.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-2.2">NTVfield represents a Field. NTVfield is a NTV entity depending on the format chosen to represent the Field (simple format, default format, optimized format).
+          A NTVfield contains a NTVlist of part of the NTVcells (Codec) and optionnaly coding data.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-2.3">NTVdataset represents the Dataset. NTVdataset is a NVlist where the NTVname is the name of the Dataset and the NTVvalue is the list of NTVfields.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.1-3">The JSON format of a NTVdataset is his JSON-NTV format.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.1-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-3.2">
+        <h3 id="name-simple-ntvfield-formats">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2" class="section-number selfRef">3.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-simple-ntvfield-formats" class="section-name selfRef">simple NTVfield formats</a>
+        </h3>
+<p id="section-3.2-1">This category is the usual representation of a Field with different values (Full format) or with several identical values (Unique format).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2"><strong>Full format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">The Full format is the format that does not use any coding. Codec and NTVfield are identical. The NTVfield is therefore a NTVlist where 
+        the NTVname is the name of the Field, the NTVtype is the default type of the NTVcells and the NTVvalue is the list of NTVcells.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-4.1">
+            <p id="section-3.2-4.1.1"><em>Example JsonNTVvalue ( "price" Field)</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-4.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-4.1.2.1">
+                <em>[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-4.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.2-5"><strong>Unique format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-5" class="pilcrow">¶</a></p>
+<p id="section-3.2-6">The Unique format is used when all NTVcells are identical. The Codec is the NTVcell.Codec and NTVfield are identical (coding is implict).
+        The NTVfield is therefore the NTVcell.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-7.1">
+            <p id="section-3.2-7.1.1"><em>Example JsonNTVvalue ( "period" Field)</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-7.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-7.1.2.1">
+                <em>"2nd half 2022"</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-7.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.2-8">Note :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-8" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.2-9.1">The Unique format also makes it possible to represent tabular metadata<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.2-9.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="section-3.3">
+        <h3 id="name-default-ntvfield-formats">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3" class="section-number selfRef">3.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-default-ntvfield-formats" class="section-name selfRef">default NTVfield formats</a>
+        </h3>
+<p id="section-3.3-1">This category completes the simple formats with the other most common representations of a Field :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-2.1">Categorical Field (Complete format)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-2.2">Periodic Field (Primary format)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-2.3">Sparse Field (Sparse format)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.3-3">In those formats, Codec is explicit and is the TVlist of different Field NTVcells (Codec). The NTVfield is a NVlist where the NTVname is the name of the Field.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4"><strong>Complete format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-5">The "complete format" is equivalent to the format used to store categorical variables.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-5" class="pilcrow">¶</a></p>
+<p id="section-3.3-6">The NTVfield is a NVlist composed with two NTV entities :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-7.1">Codec: TVlist of different Field NTVcells (Codec),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-7.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-7.2">Coding: Vlist of indexes of NTVcells in Component (Keys)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-7.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.3-8">The list of NTVcells is reconstituted by replacing the integers in the coding Vlist with the NTVcell at the coding index in the Codec 
+        (e.g. pandas categories and codes).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-8" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-9.1">
+            <p id="section-3.3-9.1.1"><em>Example JsonNTVvalue ( "product" Field)</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-9.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-9.1.2.1">
+                <em>[ [ "orange" , "pepper" , "apple" , "banana" ], [ 2, 2, 0, 0, 1, 1, 3, 3 ] ]</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-9.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.3-10"><strong>Sparse format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-10" class="pilcrow">¶</a></p>
+<p id="section-3.3-11">A specific format (one dimensional sparse LIL format) is used for sparse data. It is defined by:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-11" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-12.1">'fill_value': it should be most common value<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-12.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-12.2">'sp_value': it is a list storing only values distinct from the 'fill_value'<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-12.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-12.3">'sp_index': list of index of 'sp-value' in the sparse data list<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-12.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.3-13">The NTVfield is a NVlist composed with three NTV entities :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-13" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-14.1">Codec: TVlist of different Field NTVcells (Codec),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-14.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-14.2">Ref: Vlist of indexes of Codec value in 'sp_value' ,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-14.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-14.3">Coding: Vlist of 'sp_index'<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-14.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.3-15">The list of NTVcells is reconstituted by replacing in a list of 'fill_value', the values with index in the Coding Vlist  
+          by the corresponding value defined by the Ref index in the Codec TVlist.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-15" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-16.1">
+            <p id="section-3.3-16.1.1"><em>Example JsonNTVvalue ( "food" Field)</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-16.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-16.1.2.1">
+                <em>[ [ "vegetable" , "fruit"], [0, 0], [ 4, 5 ] ]     'fruit' is the 'fill_value' - 0 is the index of "vegetable"</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-16.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.3-17"><strong>Primary format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-17" class="pilcrow">¶</a></p>
+<p id="section-3.3-18">This format is equivalent to the Complete format where the Keys Vlist is calculated with the "repetition coefficient".<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-18" class="pilcrow">¶</a></p>
+<p id="section-3.3-19">The NTVfield is a NVlist composed with two NTV entities :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-19" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-20.1">Codec: TVlist of different Field NTVcells (Codec),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-20.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.3-20.2">Coding: Vlist with a single integer (Repetition coefficient)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-20.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.3-21">The Keys Vlist is generated with the formula:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-21" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-22.1">keys[ikey] = ( ikey % ( coef * period ) ) // coef<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="section-3.3-22.2">
+            <p id="section-3.3-22.2.1">where:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-22.2.2.1">keys: is the Keys Vlist<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-22.2.2.2">ikey: is the index of a key value<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-22.2.2.3">coef: is the Repetition coefficient<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.2.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-22.2.2.4">period: is the length of Codec<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.2.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal ulEmpty" id="section-3.3-22.3">
+            <p id="section-3.3-22.3.1"><em>Example: coef = 2, period = 3, Keys length = 12</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.3.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-22.3.2.1">
+                <em>keys = [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2]</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-22.3.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.3-23">The Repetition coefficient is the number of adjacent identical values in the Keys list.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-23" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-24.1">
+            <p id="section-3.3-24.1.1"><em>Example "packaging"</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-24.1.2.1">
+                <em>Codec: [ "bag" , "cardboard" ]</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-24.1.2.2">
+                <em>Coefficient: 1</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.1.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-24.1.2.3">
+                <em>(implicit Keys :  [ 0, 1, 0, 1, 0, 1, 0, 1 ] )</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.1.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal ulEmpty" id="section-3.3-24.2">
+            <p id="section-3.3-24.2.1"><em>Example "product"</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.3-24.2.2.1">
+                <em>Codec: [ "apple" , "orange" , "pepper" , "banana" ] </em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-24.2.2.2">
+                <em>Coefficient: 2</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.3-24.2.2.3">
+                <em>(implicit Keys :  [ 0, 0, 1, 1, 2, 2, 3, 3 ] )</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.3-24.2.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+<section id="section-3.4">
+        <h3 id="name-optimized-ntvfield-formats">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4" class="section-number selfRef">3.4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-optimized-ntvfield-formats" class="section-name selfRef">Optimized NTVfield formats</a>
+        </h3>
+<p id="section-3.4-1">This category of formats reduces the size of Complete format with optimized Keys. The length of Keys is reduced with using of derived (Relative format)
+         or coupled (Implicit format) relationships between two Fields.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">In those formats, Codec is explicit and is the TVlist of different Field NTVcells (Codec). The NTVfield is a NVlist where the NTVname is the name of the Field.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.4-3"><strong>Implicit format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-3" class="pilcrow">¶</a></p>
+<p id="section-3.4-4">This representation is associated with "coupled" Fields. These Fields have a one-to-one correspondence.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-4" class="pilcrow">¶</a></p>
+<p id="section-3.4-5">The NTVfield is a NVlist composed with two NTV entities :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.4-6.1">Codec: TVlist of different field NTVcells (Codec),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-6.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.4-6.2">Ref: Vsingle entity index or name of the coupled Field.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-6.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.4-7">This format is equivalent to the Complete format where Keys is the Keys of the Field (with Complete format) defined by Ref.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.4-8.1">
+            <p id="section-3.4-8.1.1"><em>Example JsonNTVvalue ( "weight" Field is associated with "packaging" Field )</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-8.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.4-8.1.2.1">
+                <em>[ [ "1 kg" , "10 kg" ], "packaging"]</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-8.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.4-8.1.2.2">
+                <em>( implicit Keys :  [ 0, 1, 0, 1, 0, 1, 0, 1 ] )</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-8.1.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-3.4-9"><strong>Relative format</strong> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-9" class="pilcrow">¶</a></p>
+<p id="section-3.4-10">This representation is associated with "derived" Fields. These Fields have a one-to-many correspondence.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-10" class="pilcrow">¶</a></p>
+<p id="section-3.4-11">The values of a "derived" Field are inferred from the values of the parent Field.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-11" class="pilcrow">¶</a></p>
+<p id="section-3.4-12">The Field is a NVlist composed with three NTV entities :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-12" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.4-13.1">Codec: TVlist of different field NTVcells (Codec),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-13.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.4-13.2">Ref: Vsingle entity index or name of the parent Field,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-13.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.4-13.3">Coding : Vlist of relative indexes of NTVcells in Codec (Relative Keys).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-13.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.4-14">This format is equivalent to the Complete format where the Keys Vlist is obtained by replacing the values of the Keys Vlist of the parent Field
+         with the corresponding values in the Relative Keys (the length of the Relative Keys is the length of the Codec of the parent Field).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-14" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.4-15.1">
+            <p id="section-3.4-15.1.1"><em>Example JsonNTVvalue ( "food" Field - "product" Field is the parent Field of "food" Field)</em> :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-15.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-3.4-15.1.2.1">
+                <em>[ [ "fruit" , "vegetable" ], "product", [ 0, 1, 0, 0 ] ]</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-15.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="section-3.4-15.1.2.2">
+                <em>(the Vlist Keys is obtained by replacing the values 0, 1, 2, 3 of the Vlist Keys of the "product" Field by the values 0, 1, 0, 0 
+            of the Relative Keys i.e.: [ 0, 0, 0, 0, 1 , 1, 0, 0] )</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.4-15.1.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+<section id="section-3.5">
+        <h3 id="name-synthesis">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5" class="section-number selfRef">3.5. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-synthesis" class="section-name selfRef">Synthesis</a>
+        </h3>
+<p id="section-3.5-1">The NTVfield structure corresponding to the format defined above are in <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table4" class="auto internal xref">Table 4</a>:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-1" class="pilcrow">¶</a></p>
+<span id="name-ntvfield-formats"></span><div id="table4">
+<table class="center" id="table-4">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-4" class="selfRef">Table 4</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntvfield-formats" class="selfRef">NTVfield formats</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="2">Structure</th>
+              <th class="text-center" rowspan="1" colspan="1">Codec</th>
+              <th class="text-center" rowspan="1" colspan="1">Ref</th>
+              <th class="text-center" rowspan="1" colspan="1">Coding</th>
+            </tr>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">format</th>
+              <th class="text-center" rowspan="1" colspan="1">NTV</th>
+              <th class="text-center" rowspan="1" colspan="1">TVlist</th>
+              <th class="text-center" rowspan="1" colspan="1">Vsingle</th>
+              <th class="text-center" rowspan="1" colspan="1">Vlist</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Relative</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.1.2.1">NTVlist<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.1.2.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.1.2.2">len = 3<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.1.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">x</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.1.4.1">index<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.1.4.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.1.4.2">or name<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.1.4.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.1.5.1">Relative Keys<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.1.5.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.1.5.2">len &lt; len(Field)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.1.5.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Complete</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.2.2.1">NTVlist<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.2.2.2">len = 2<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.2.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">x</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.2.5.1">Keys<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.2.5.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.2.5.2">len = len(Field)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.2.5.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Sparse</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.3.2.1">NTVlist<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.3.2.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.3.2.2">len = 3<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.3.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">x</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.3.4.1">list of index<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.3.4.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.3.4.2">sp_value<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.3.4.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.3.5.1">sp_index<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.3.5.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.3.5.2">1&lt;len&lt;len(Field)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.3.5.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Implicit</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.4.2.1">NTVlist<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.4.2.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.4.2.2">len = 2<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.4.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">x</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.4.4.1">index<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.4.4.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.4.4.2">or name<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.4.4.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Primary</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.5.2.1">NTVlist<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.5.2.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.5.2.2">len = 2<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.5.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">x</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-3.5-2.2.5.5.1">coef<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.5.5.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2.2.5.5.2">len = 1<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.5.5.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+              <td class="text-center" rowspan="1" colspan="4">NTVsingle</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Full</td>
+              <td class="text-center" rowspan="1" colspan="4">
+                <p id="section-3.5-2.2.7.2.1">NTVlist        len = len(Field)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-2.2.7.2.1" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-3.5-3"> Three levels are available to convert tabular data in JSON structure <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table5" class="auto internal xref">Table 5</a>.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5-4.1">
+            <p id="section-3.5-4.1.1"><strong>Level 0: "simple"</strong> is the usual representation of tabular data.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-4.1.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-4.1.2">Fields are converted with the Simple or Unique format.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-4.1.2" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.5-4.2">
+            <p id="section-3.5-4.2.1"><strong>Level 1: "default"</strong> avoids duplication of information by adding simple encoding.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-4.2.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-4.2.2">Fields are converted according to their own structure (simple, unique, categorical, sparse, periodic).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-4.2.2" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.5-4.3">
+            <p id="section-3.5-4.3.1"><strong>Level 2: "optimize"</strong> avoids duplication of information and minimizes encoding. It is the usual representation of multidimensional data.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-4.3.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-4.3.2">This level requires an analysis of the relationships between Fields ("partition")<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-3.5-4.3.2" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<span id="name-ntvfield-levels"></span><div id="table5">
+<table class="center" id="table-5">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-5" class="selfRef">Table 5</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntvfield-levels" class="selfRef">NTVfield levels</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="2">Level</th>
+              <th class="text-center" rowspan="1" colspan="2">Structure</th>
+            </tr>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1"> </th>
+              <th class="text-center" rowspan="1" colspan="1">mode</th>
+              <th class="text-center" rowspan="1" colspan="1">Type Field</th>
+              <th class="text-center" rowspan="1" colspan="1">format</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="2" colspan="1">0</td>
+              <td class="text-left" rowspan="2" colspan="1">simple</td>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Simple</td>
+              <td class="text-left" rowspan="1" colspan="1">Full</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="5" colspan="1">1</td>
+              <td class="text-left" rowspan="5" colspan="1">default</td>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Simple</td>
+              <td class="text-left" rowspan="1" colspan="1">Full</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Sparse</td>
+              <td class="text-left" rowspan="1" colspan="1">Sparse</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Categorical</td>
+              <td class="text-left" rowspan="1" colspan="1">Complete</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Periodic</td>
+              <td class="text-left" rowspan="1" colspan="1">Primary</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="6" colspan="1">2</td>
+              <td class="text-left" rowspan="6" colspan="1">optimize</td>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Root coupled</td>
+              <td class="text-left" rowspan="1" colspan="1">Full</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Root derived</td>
+              <td class="text-left" rowspan="1" colspan="1">Complete</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Primary</td>
+              <td class="text-left" rowspan="1" colspan="1">Primary</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Derived</td>
+              <td class="text-left" rowspan="1" colspan="1">Relative</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Coupled</td>
+              <td class="text-left" rowspan="1" colspan="1">Implicit</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+</section>
+<section id="section-4">
+      <h2 id="name-examples">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4" class="section-number selfRef">4. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-examples" class="section-name selfRef">Examples</a>
+      </h2>
+<section id="section-4.1">
+        <h3 id="name-field-examples">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1" class="section-number selfRef">4.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-field-examples" class="section-name selfRef">Field examples</a>
+        </h3>
+<p id="section-4.1-1">The example in <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#tabular_structure" class="auto internal xref">Section 2.2</a> has the following JSON representation <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table6" class="auto internal xref">Table 6</a>:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-1" class="pilcrow">¶</a></p>
+<span id="name-ntvfield-examples"></span><div id="table6">
+<table class="center" id="table-6">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-6" class="selfRef">Table 6</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntvfield-examples" class="selfRef">NTVfield examples</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Format</th>
+              <th class="text-center" rowspan="1" colspan="1">JsonNTV Representations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Full</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.1.2.1">{ "price::float": [ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ] }<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.1.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.1.2.2">{ "price": [ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ] }<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.1.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.1.2.3">[ 1, 9, 2, 18, 1.5, 13, 0.5, 4 ]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.1.2.3" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Complete</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.2.2.1">{"product":[["orange","pepper","apple","banana"],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.2.2.2">[2,2,0,0,1,1,3,3]]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.2.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.2.2.3">{"product": [ ["orange","pepper","apple","banana"],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.2.2.3" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.2.2.4">[2, 2, 0, 0, 1, 1, 3, 3] ]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.2.2.4" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.2.2.5">[ ["orange","pepper","apple","banana"],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.2.2.5" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.2.2.6">[2, 2, 0, 0, 1, 1, 3, 3] ]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.2.2.6" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.3.2.1">{ "period": "2nd half 2022" }<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.3.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.3.2.2">"2nd half 2022"<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.3.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Implicit</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.4.2.1">{"weight":[{"::string":["1 kg","10 kg"]},"packaging"]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.4.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.4.2.2">[["1 kg","10 kg"],3]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.4.2.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Relative</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.5.2.1">{"food": [ {"::string": [ "fruit" , "vegetable" ]},<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.5.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.5.2.2">"product", [ 0, 1, 0, 0 ]] }<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.5.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.5.2.3">[ [ "fruit" , "vegetable" ], 1, [ 0, 1, 0, 0 ] ]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.5.2.3" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Sparse</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.6.2.1">{"food":[{"::string":["vegetable","vegetable","fruit"]},<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.6.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.6.2.2">[4,5,-1]]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.6.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.6.2.3">[["vegetable","vegetable","fruit"],[4,5, 1]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.6.2.3" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Primary</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.1-2.2.7.2.1">{"packaging":[{"::string":["cardboard","bag"]},[1]]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.7.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.7.2.2">[["cardboard","bag"],[1]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.7.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.7.2.3">{"product":[["apple","orange","peppers","banana"],[2]]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.7.2.3" class="pilcrow">¶</a></p>
+<p id="section-4.1-2.2.7.2.4">[["apple","orange","peppers","banana"],[2]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.1-2.2.7.2.4" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+<section id="section-4.2">
+        <h3 id="name-dataset-examples">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2" class="section-number selfRef">4.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-examples" class="section-name selfRef">Dataset examples</a>
+        </h3>
+<p id="section-4.2-1">The examples in <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table7" class="auto internal xref">Table 7</a> below illustrate the optimize level:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-1" class="pilcrow">¶</a></p>
+<span id="name-optimize-level-examples"></span><div id="table7">
+<table class="center" id="table-7">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-7" class="selfRef">Table 7</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-optimize-level-examples" class="selfRef">optimize level examples</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="2">Data</th>
+              <th class="text-center" rowspan="1" colspan="1">Optimize level</th>
+            </tr>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">type</th>
+              <th class="text-center" rowspan="1" colspan="1">Full format</th>
+              <th class="text-center" rowspan="1" colspan="1">JsonNTV</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">matrix</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.1.2.1">[['a','a','b','b','c','c'],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.1.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.1.2.2">[10,20,10,20,10,20],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.1.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.1.2.3">[1,2,3,4,5,6]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.1.2.3" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.1.3.1">[[['a','b','c'],[2]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.1.3.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.1.3.2">[[10,20],[1]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.1.3.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.1.3.3">[1,2,3,4,5,6]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.1.3.3" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">single</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.2.2.1">[[1,2,3,4,5,6],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.2.2.2">['a','a','a','a','a','a']]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.2.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.2.3.1">[[1,2,3,4,5,6],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.2.3.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.2.3.2">'a']<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.2.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">complete</td>
+              <td class="text-left" rowspan="1" colspan="1">[[1,2,3,3,5,5]]</td>
+              <td class="text-left" rowspan="1" colspan="1">[[[1,2,3,5],[0,1,2,2,3,3]]]</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">coupled</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.4.2.1">[[1,2,3,3,5,5],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.4.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.4.2.2"> ['a','b','c','c','e','e']]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.4.2.2" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.4.3.1">[[[1,2,3,5],[0,1,2,2,3,3]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.4.3.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.4.3.2"> [['a','b','c','e'],0]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.4.3.2" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">derived</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.5.2.1">[[1,2,3,4,5,6],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.5.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.5.2.2">['a','a','b','b','c','c'],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.5.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.5.2.3">[10,10,10,10,20,20]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.5.2.3" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.5.3.1">[[1,2,3,4,5,6],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.5.3.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.5.3.2"> [['a','b','c'],[0,0,1,1,2,2]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.5.3.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.5.3.3">[[10,20],1,[0,0,1]]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.5.3.3" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.6.1.1">matrix<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.1.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.1.2">+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.1.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.1.3">coupled<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.1.3" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.6.2.1">[[6,6,7,7,8,8,9,9],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.2.2">[10,20,10,20,10,20,10,20],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.2.3">[1,1,2,2,3,3,4,4],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.2.3" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.2.4">[1,2,3,4,5,6,7,8]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.2.4" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.6.3.1">[[[6,7,8,9],[2]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.3.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.3.2">[[10,20],[1]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.3.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.3.3">[[1,2,3,4],0],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.3.3" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.6.3.4"> [1,2,3,4,5,6,7,8]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.6.3.4" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.7.1.1">matrix<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.1.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.1.2">+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.1.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.1.3">coupled<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.1.3" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.1.4">+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.1.4" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.1.5">derived<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.1.5" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.7.2.1">[[6,6,7,7,8,8,9,9],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.2.2">[10,20,10,20,10,20,10,20],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.2.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.2.3">[1,1,2,2,3,3,4,4],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.2.3" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.2.4">[11,11,22,22,22,22,22,22],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.2.4" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.2.5">[1,2,3,4,5,6,7,8]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.2.5" class="pilcrow">¶</a></p>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <p id="section-4.2-2.2.7.3.1">[[[6,7,8,9],[2]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.3.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.3.2">[[10,20],[1]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.3.2" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.3.3">[[1,2,3,4],0],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.3.3" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.3.4"> [[11,22],0,[0,1,1,1]],<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.3.4" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.7.3.5"> [1 2,3,4,5,6,7,8]]<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-2.2.7.3.5" class="pilcrow">¶</a></p>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-4.2-3">The examples in <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table8" class="auto internal xref">Table 8</a> below illustre NTVdataset with a length equal to 0, 1 or 2:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-4.2-3" class="pilcrow">¶</a></p>
+<span id="name-ntvdataset-with-length-0-1-"></span><div id="table8">
+<table class="center" id="table-8">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-8" class="selfRef">Table 8</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-ntvdataset-with-length-0-1-" class="selfRef">NTVdataset with length 0, 1 or 2</a>
+          </caption>
+<tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[ ] or { }</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <em>Empty NTVdataset</em>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[25] or [[25]]</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <em>NTVdataset with 1 NTVfield and length 1</em>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[2, 1] or [[2], [1]] or [2, [1]]</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <em>NTVdataset with 2 NTVfield and length 1</em>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[[2, 1]]</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <em>NTVdataset with 1 NTVfield and length 2</em>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[[2, 1], [4, 3]]</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <em>NTVdataset with 2 NTVfield and length 2</em>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+</section>
+<section id="section-5">
+      <h2 id="name-properties">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5" class="section-number selfRef">5. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-properties" class="section-name selfRef">Properties</a>
+      </h2>
+<section id="section-5.1">
+        <h3 id="name-json-representation">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.1" class="section-number selfRef">5.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-json-representation" class="section-name selfRef">JSON representation</a>
+        </h3>
+<p id="section-5.1-1">NTV-TAB format defines the representation of a Dataset into the NTV format. This conversion is reversible (lossless).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Furthermore, the NTV format defines the conversion into JSON format. This conversion is also reversible.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">The exchange format (JsonText) of a Dataset is therefore obtained by a representation in NTV-TAB format then a conversion to JSON format and finally a
+         conversion to text format (or binary format with CBOR conversion). The data is reconstituted identically by reverse conversions.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.1-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-5.2">
+        <h3 id="name-dataset-size">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.2" class="section-number selfRef">5.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-size" class="section-name selfRef">Dataset size</a>
+        </h3>
+<p id="section-5.2-1">As explain in <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#tabular_structure" class="auto internal xref">Section 2.2</a> cells are often duplicated in a Field. The principle of NTV-TAB format is
+          to replace duplicated data with encoding based on integers.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">This optimization considerably reduces the size of a representation of a Dataset. <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#sizing" class="auto internal xref">Appendix A</a> details the methodology to optimize this size.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.2-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-5.3">
+        <h3 id="name-nested-ntv-tab-structure">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3" class="section-number selfRef">5.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-nested-ntv-tab-structure" class="section-name selfRef">Nested NTV-TAB structure</a>
+        </h3>
+<p id="section-5.3-1">NTVcells in a NTVdataset are any NTVsingle. We can therefore include in a NTVdataset the data associated with the types defined in the NTV format.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">The 'tab' and the 'field' NTVtypes are associated to NTVdataset and NTVfield. A NTVcell can also include a NTVdataset or a NTVfield.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#nested_TAB" class="auto internal xref">Figure 1</a> is an example of nested Dataset. The 'nested' JsonNTV is the representation of a Dataset with length equal 2 and composed 
+        with two Fields 'field1' and 'field2'.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-4.1">'field1' is a Field with two Cells 'dataset1' ans 'dataset2' which are Dataset. 'field1' is represented with a Full format NTVfield.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.3-4.2">'field2' is a Field with two Cells 'field2_1' ans 'field2_2' which are Field. 'field2' is represented with a Full format NTVfield.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-5.3-4.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<span id="name-nested-dataset"></span><div id="nested_TAB">
+<figure id="figure-1">
+          <div class="sourcecode" id="section-5.3-5.1">
+<pre>nested = {
+  "field1": {
+    "dataset1:tab":{
+      "dts1_field1": [1,2,3],
+      "dts1_field2": [4,5,6]
+    },
+    "dataset2:tab":{
+      "dts2_field1": [10,20,30],
+      "dts2_field2": [40,50,60],
+      "dts2_field3": [70,80,90]
+    },
+  },
+  "field2":{
+    "field2_1:field": [1,2,3],
+    "field2_2:field": [4,5,6],
+  }
+}
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#figure-1" class="selfRef">Figure 1</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-nested-dataset" class="selfRef">Nested Dataset</a>
+          </figcaption></figure>
+</div>
+</section>
+</section>
+<section id="section-6">
+      <h2 id="name-parsing-a-json-value">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6" class="section-number selfRef">6. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-parsing-a-json-value" class="section-name selfRef">Parsing a JSON-value</a>
+      </h2>
+<p id="section-6-1">A NTV parser generates a NTV entity from a JSON-value.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">The decoding NTV entity is directly converted into the NTVdataset and a list of NTVfields.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">For each NTVfield the format is deduced following the structure defined in the table xxx.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-3" class="pilcrow">¶</a></p>
+<p id="section-6-4">For each format, a decoder converts the NTVvalue of the NTVfield into the chosen object.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-4" class="pilcrow">¶</a></p>
+<p id="section-6-5"><em>Note :</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-6-6.1">
+          <p id="section-6-6.1.1"><em>Several NTVvalue are ambiguous to deduce the Field format : </em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-6.1.2.1">
+              <em>[ list-data, integer, list-integer ] : Full or Relative format ?</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.1.2.2">
+              <em>[ list-data, string, list-integer ] : Full or Relative format ?</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.2.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.1.2.3">
+              <em>[ list-data, integer ]  : Full or Implicit format ?</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.2.3" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.1.2.4">
+              <em>[ list-data, string ]  : Full or Implicit format ?</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.2.4" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.1.2.5">
+              <em>[ list-data, list-integer ] : Full or Complete/Primary format ?</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.2.5" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.1.2.6">
+              <em>[ list-data, list-integer, list-integer ] : Full or Sparse format ?</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.1.2.6" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+        <li class="normal ulEmpty" id="section-6-6.2">
+          <em>The full format is not retained for those NTVvalue.</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal ulEmpty" id="section-6-6.3">
+          <p id="section-6-6.3.1"><em>To avoid this ambiguity, precautions can be taken for Dataset with length = 2 or 3 and with a Full format:</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-6.3.2.1">
+              <em>a name can be added to the list-data (e.g. { "data": list-data}),</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.3.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.3.2.2">
+              <em>the order of data can be changed (e.g. [ integer, list-data ])</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.3.2.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.3.2.3">
+              <em>a type can be added (e.g. { "::json": [ list-data, list-integer ] } )</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.3.2.3" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-6.3.2.4">
+              <em>an additional field can be added (e.g. [ list-data, integer, list-integer, {"format": "full"} ] ).</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-6-6.3.2.4" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+      </ul>
+</section>
+<div id="IANA">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-7" class="section-number selfRef">7. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">Any JsonValue is a JsonNTVValue and conversely, any JsonNTVvalue is a JsonValue.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">Thus, any JSON data may or may not be treated as JsonNTV data, so there is no need to create a specific MIME media type for JsonNTV.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-7-2" class="pilcrow">¶</a></p>
+<p id="section-7-3">All properties of the MIME media type "application/json" are applicable.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-7-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Security">
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-8" class="section-number selfRef">8. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">The format used for NTV data exchanges is the JSON format. 
+      So, all the security considerations of <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#RFC8259" class="cite xref">RFC8259</a>]</span> apply.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">The NTV structure provides no cryptographic integrity protection of any kind.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-8-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-references">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-9" class="section-number selfRef">9. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-9.1" class="section-number selfRef">9.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4180">[RFC4180]</dt>
+        <dd>
+<span class="refAuthor">Shafranovich, Y.</span>, <span class="refTitle">"Common Format and MIME Type for Comma-Separated Values (CSV) Files"</span>, <span class="seriesInfo">RFC 4180</span>, <span class="seriesInfo">DOI 10.17487/RFC4180</span>, <time datetime="2005-10" class="refDate">October 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4180">https://www.rfc-editor.org/info/rfc4180</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8259">[RFC8259]</dt>
+      <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#section-9.2" class="section-number selfRef">9.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="TABLE">[TABLE]</dt>
+        <dd>
+<span class="refAuthor">"FrictionLess"</span>, <span class="refTitle">"Table Schema"</span>, <time datetime="2021" class="refDate">2021</time>, <span>&lt;<a href="https://specs.frictionlessdata.io/table-schema/#language">https://specs.frictionlessdata.io/table-schema/#language</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JSON-NTV">[JSON-NTV]</dt>
+        <dd>
+<span class="refAuthor">Thomy, P.</span>, <span class="refTitle">"JSON semantic format (JSON-NTV)"</span>, <time datetime="2023" class="refDate">2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/draft-thomy-json-ntv/">https://datatracker.ietf.org/doc/draft-thomy-json-ntv/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="TAB-ANA">[TAB-ANA]</dt>
+        <dd>
+<span class="refAuthor">Thomy, P.</span>, <span class="refTitle">"Tabular dataset analysis"</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://github.com/loco-philippe/tab-analysis/blob/main/docs/tabular_analysis.pdf">https://github.com/loco-philippe/tab-analysis/blob/main/docs/tabular_analysis.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="W3C_TAB">[W3C_TAB]</dt>
+      <dd>
+<span class="refAuthor">"W3C"</span>, <span class="refTitle">"Recommendation : Model for Tabular Data and Metadata on the Web"</span>, <span>17 December 2015</span>, <span>&lt;<a href="https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/">https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="sizing">
+<section id="appendix-A">
+      <h2 id="name-dataset-sizing">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A" class="section-number selfRef">Appendix A. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-sizing" class="section-name selfRef">Dataset sizing</a>
+      </h2>
+<p id="appendix-A-1">This appendix presents an analysis of NTVdataset size optimization with the defined formats.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A-1" class="pilcrow">¶</a></p>
+<section id="appendix-A.1">
+        <h3 id="name-methodology">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1" class="section-number selfRef">A.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-methodology" class="section-name selfRef">Methodology</a>
+        </h3>
+<p id="appendix-A.1-1">The principle of defined formats is to replace duplicated data with encoding based on integers.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-2">We define the size of a Dataset representation (SZ) as the sum of the encoding size and the size of unencoded unduplicated values. 
+        The coding is modeled as being the product of the values remaining to be represented (nv - nc) with an average coding size (sc):<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-2" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-3.1">SZ = nc * sv + (nv - nc) * sc<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-3.2">
+            <p id="appendix-A.1-3.2.1">where :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-3.2.2.1">nv : number of values<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.2.2.2">sv : mean value size<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.2.2.3">nc : number of different values<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.2.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.2.2.4">sc : mean coding size<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.2.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-3.3">
+            <p id="appendix-A.1-3.3.1">example :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-3.3.2.1">Full format : {"product": ["orange","apple","apple","apple","orange","orange"]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.3.2.2">Complete format : {"product": [ ["orange","apple"], [1, 0, 0, 0, 1, 1] ]}<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.3.2.3">SZ = 9 + 8 + 7 + 6 * 1 = 30 (including double quotes),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.3.2.4">nv = 9 (including the Field name),<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.4" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.3.2.5">sv = (9 + 8 * 3 + 7 * 3) / 7 = 7.71<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.5" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.3.2.6">nc = 3 (including the Field name)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.6" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-3.3.2.7">sc = (30 - 3 * 7.71) / (9 - 3) = 1.15 (sc = (SZ - nc * sv) / (nv - nc))<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.3.2.7" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-3.4">In this example the JSON overhead (coma, space, curly bracket, square bracket) is not included.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-3.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.1-4">SZ is maximal when there is no coding (sc = sv) and minimal when the coding is perfect (sc = 0):<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-5.1">SZmax = nv * sv<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-5.2">SZmin = nc * sv<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-5.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.1-6">We then define the following indicators:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-7.1">
+            <p id="appendix-A.1-7.1.1">unicity level UL  = nc / nv<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-7.1.2.1">UL = SZmin / SZmax<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.1.2.2">1 - UL = (SZmax - SZmin) / SZmax<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.1.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.1.2.3">UL characterizes the nature of the data independently of the coding and represents the maximum achievable gain (1-UL).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.1.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.1.2.4">maximum UL = 1 (unduplicated data)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.1.2.4" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.1.2.5">minimum UL = 0 (full duplicated data = empty data)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.1.2.5" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="appendix-A.1-7.2">
+            <p id="appendix-A.1-7.2.1">object lightness OL = sc / sv<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-7.2.2.1">OL = (SZ - SZmin) / (SZmax - SZmin)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.2.2.2">1 - OL = (SZmax - SZ) / (SZmax - SZmin)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.2.2.3">OL characterizes coding efficiency<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.2.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.2.2.4">maximum OL = 1 (no coding)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.2.2.4" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.1-7.2.2.5">minimum OL = 0 (perfect coding)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-7.2.2.5" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="appendix-A.1-8">The optimization of the size of the representation is then evaluated by comparing the size obtained without coding 
+        and that obtained with coding:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-8" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-9.1">G = (SZmax -  SZ) / SZmax = (1 - UL) * (1 - OL)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-9.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-9.2">R = 1 - G = SZ / SZmax = UL + OL - UL * OL<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-9.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-9.3">The maximum G gain is 1 - UL, the minimum G gain is 0.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-9.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-9.4">If the data is empty, UL = OL = 0 and the gain is equal to 1.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-9.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.1-10">The indicators are deduced from the following four measurable values:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-11.1">number of cells in the dataset (nv)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-11.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="appendix-A.1-11.2">number of different cells in the dataset (nc)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-11.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="appendix-A.1-11.3">size of the dataset with the format to study (SZ)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-11.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="appendix-A.1-11.4">size of the dataset with Full format (SZmax)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-11.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.1-12">We then deduce sv = SZmax / nv as well as sc = (SZ - nc * sv) / (nv - nc)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-12" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-13">In the example above, the indicators are:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-13" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-14.1"> UL = 3 / 9 = 0.33<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-14.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-14.2"> OL = 1.15 / 7.71 = 0.15<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-14.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-14.3"> G = 0.67 * 0.85 = 0.57<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-14.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-14.4"> SZmax = 9 * 7.71 = 69.4<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-14.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-14.5"> SZmin = 3 * 7.71 = 23.1<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-14.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.1-14.6">The Complete format is close to the minimum size (SZ = 30) and its size is less than half the size of the Full format (43 %).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.1-14.6" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="appendix-A.2">
+        <h3 id="name-formats">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2" class="section-number selfRef">A.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-formats" class="section-name selfRef">Formats</a>
+        </h3>
+<p id="appendix-A.2-1">The formats used to represent an NTVfield are in general form:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.2-2.1">list of part of NTVcells<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="appendix-A.2-2.2">list of integers used to encode other NTVcells<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-2.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.2-3">The size of this format can then be written (without taking into account the overhead linked to the format):<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.2-4.1">SZ = nc * sv + k * nv * si<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.2-4.2">
+            <p id="appendix-A.2-4.2.1">where :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.2-4.2.2.1">nv : number of values<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.2-4.2.2.2">sv : mean value size<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.2-4.2.2.3">nc : number of different Field values<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.2.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.2-4.2.2.4">si : integer size<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.2.2.4" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.2-4.2.2.5">k: specific coefficient of the coding used<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-4.2.2.5" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="appendix-A.2-5">Comparison with the structure defined in the previous chapter allows us to deduce the parameters:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.2-6.1">UL = nc/nv<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-6.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.2-6.2">sc = si * k * nv/(nv-nc)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-6.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.2-6.3">OL = si/sv * k * nv/(nv-nc)<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-6.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.2-6.4">G = 1- nc/nv - si/sv * k<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-6.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal ulEmpty" id="appendix-A.2-6.5">R = nc/nv + si/sv * k<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-6.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="appendix-A.2-7">The gain G is therefore equal to the maximum gain 1-UL reduced by the weight of the coding corresponding to the parameter k weighted by the average size 
+        of the values compared to an integer.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-8"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table9" class="auto internal xref">Table 9</a> below specifies the values of k for the different formats:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-8" class="pilcrow">¶</a></p>
+<span id="name-coding-coefficient"></span><div id="table9">
+<table class="center" id="table-9">
+          <caption>
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#table-9" class="selfRef">Table 9</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-coding-coefficient" class="selfRef">coding coefficient</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Format</th>
+              <th class="text-center" rowspan="1" colspan="1">k coefficient</th>
+              <th class="text-center" rowspan="1" colspan="1">comments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Full</td>
+              <td class="text-left" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">R = 1</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Unique</td>
+              <td class="text-left" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">R = 1/nv (nc = 1)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Complete</td>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">R = nc/nv + si/sv</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Primary</td>
+              <td class="text-left" rowspan="1" colspan="1">1 / nv</td>
+              <td class="text-left" rowspan="1" colspan="1">R = nc/nv + si/sv/nv</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Coupled</td>
+              <td class="text-left" rowspan="1" colspan="1">1 / nv</td>
+              <td class="text-left" rowspan="1" colspan="1">R = nc/nv + si/sv/nv</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Sparse</td>
+              <td class="text-left" rowspan="1" colspan="1">2 * ns / nv</td>
+              <td class="text-left" rowspan="1" colspan="1">R = nc/nv + 2*si/sv*ns/nv</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Derived</td>
+              <td class="text-left" rowspan="1" colspan="1">nd / nv</td>
+              <td class="text-left" rowspan="1" colspan="1">R = nc/nv + si/sv*nd/nv</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.2-10.1">
+            <ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.2-10.1.1.1">
+                <em>ns: number of values distinct from the 'fill_value'</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-10.1.1.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-A.2-10.1.1.2">
+                <em>nd: number of different values in the parent Field</em><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-A.2-10.1.1.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+</section>
+</div>
+<section id="appendix-B">
+      <h2 id="name-table-schema-compatibility">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B" class="section-number selfRef">Appendix B. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-table-schema-compatibility" class="section-name selfRef">Table schema compatibility</a>
+      </h2>
+<p id="appendix-B-1">This appendix presents the compatibility between Tableschema <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#TABLE" class="cite xref">TABLE</a>]</span> and the NTV-TAB format.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B-1" class="pilcrow">¶</a></p>
+<section id="appendix-B.1">
+        <h3 id="name-table-schema">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1" class="section-number selfRef">B.1. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-table-schema" class="section-name selfRef">Table schema</a>
+        </h3>
+<p id="appendix-B.1-1">Table Schema is a simple language- and implementation-agnostic way to declare a schema for tabular data. A Table Schema is represented by a descriptor. 
+        The descriptor MUST be a JSON object with defined properties (JsonMember).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.1-2">Table Schema define following descriptors and properties:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B.1-3.1">
+            <p id="appendix-B.1-3.1.1">Fields property<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.1-3.1.2.1">Fields property MUST be an array where each entry in the array is a field descriptor (as defined below).<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.1.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="appendix-B.1-3.2">
+            <p id="appendix-B.1-3.2.1">Field descriptor<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.1-3.2.2.1">A field descriptor MUST be a JSON object that describes a single field.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.2.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="appendix-B.1-3.3">
+            <p id="appendix-B.1-3.3.1">Field properties<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.1-3.3.2.1">The field descriptor object MAY contain any number of other properties. Some specific properties are defined below. Of these, 
+            only the name property is REQUIRED.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal ulEmpty" id="appendix-B.1-3.3.2.2">
+                <p id="appendix-B.1-3.3.2.2.1">Defined Properties:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B.1-3.3.2.2.2.1">name<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.2.1" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.3.2.2.2.2">title<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.3.2.2.2.3">description<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.2.3" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.3.2.2.2.4">example<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.2.4" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.3.2.2.2.5">type / format<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.2.5" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.3.2.2.2.6">constraints<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.2.2.6" class="pilcrow">¶</a>
+</li>
+                </ul>
+</li>
+              <li class="normal ulEmpty" id="appendix-B.1-3.3.2.3">The constraints property on Table Schema Fields can be used by consumers to list constraints for validating field values.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.3.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="appendix-B.1-3.4">
+            <p id="appendix-B.1-3.4.1">Table properties<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.4.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.1-3.4.2.1">
+                <p id="appendix-B.1-3.4.2.1.1">In additional to field descriptors, there are the following "table level" properties:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.4.2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B.1-3.4.2.1.2.1">missingValues<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.4.2.1.2.1" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.4.2.1.2.2">primaryKey<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.4.2.1.2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.1-3.4.2.1.2.3">foreignKeys<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.1-3.4.2.1.2.3" class="pilcrow">¶</a>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+<section id="appendix-B.2">
+        <h3 id="name-compatibility">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2" class="section-number selfRef">B.2. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-compatibility" class="section-name selfRef">Compatibility</a>
+        </h3>
+<p id="appendix-B.2-1">Three levels of compatibility are addressed :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B.2-2.1">
+            <p id="appendix-B.2-2.1.1">Concepts<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.2-2.1.2.1">
+                <p id="appendix-B.2-2.1.2.1.1">The concepts are equivalent between Table Schema and NTV-TAB :<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.1.2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B.2-2.1.2.1.2.1">Table is equivalent to Dataset<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.1.2.1.2.1" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.2-2.1.2.1.2.2">Field in Table Schema is equivalent to the NTVfield<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.1.2.1.2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.2-2.1.2.1.2.3">Name in Table Schema is equivalent to the NTVname of the NTVfield<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.1.2.1.2.3" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="appendix-B.2-2.1.2.1.2.4">Type / Format in Table Schema is equivalent to the NTVtype of the NTVfield<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.1.2.1.2.4" class="pilcrow">¶</a>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="appendix-B.2-2.2">
+            <p id="appendix-B.2-2.2.1">Type / Format<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.2-2.2.2.1">NTVtype combines the concepts of type and format. The correspondence table in the NTV specification <span>[<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#JSON-NTV" class="cite xref">JSON-NTV</a>]</span> gives the link between an NTVtype 
+            and the corresponding type/format.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.2.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="appendix-B.2-2.3">
+            <p id="appendix-B.2-2.3.1">Constraints<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.3.1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-B.2-2.3.2.1">Constraints are applicable to each value in a Table Field. Validating constraints for all values in a Table Field is equivalent 
+            to validating a constraint for all values in the Codec list.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-2.3.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="appendix-B.2-3">These compatibility levels are reached, which makes it possible to validate an NTVdataset with a schema defined according to the Table Schema format.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.2-4">The following principles should then be considered to validate an NTVdataset:<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B.2-5.1">The NTVfields names must be identical to the Schema names,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="appendix-B.2-5.2">If the NTVtype of Codec data is not 'json', it must match the Type/Format defined in the Schema,<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-5.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="appendix-B.2-5.3">If the constrainst are valid with the Codec data, they are valid with the Field.<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.2-5.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+<section id="appendix-B.3">
+        <h3 id="name-example">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.3" class="section-number selfRef">B.3. </a><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-example" class="section-name selfRef">Example</a>
+        </h3>
+<p id="appendix-B.3-1"><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#tab_dataset" class="auto internal xref">Figure 2</a> is an example of Dataset with Full format ('tab_data1' without NTVtypes) and with other formats ('tab_data2').<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.3-1" class="pilcrow">¶</a></p>
+<span id="name-dataset-example"></span><div id="tab_dataset">
+<figure id="figure-2">
+          <div class="sourcecode" id="appendix-B.3-2.1">
+<pre>tab_data1 = {
+  "index":  [100, 200, 300, 400, 500, 600],
+  "dates":  ["1964-01-01", "1985-02-05", "2022-01-21", "1964-01-01",
+             "1985-02-05", "2022-01-21"],
+  "value":  [10, 10, 20, 20, 30, 30],
+  "coord":  [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
+  "names":  ["john", "eric", "judith", "mila", "hector", "maria"],
+  "unique": ["true, "true", "true", "true", "true", "true"]
+}
+tab_data2 = {
+  "index": [100, 200, 300, 400, 500, 600],
+  "dates": {"::date":[["1964-01-01","1985-02-05","2022-01-21"],[1]},
+  "value": [[10, 20, 30], [2]],
+  "coord::point": [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
+  "names::string":["john", "eric", "judith", "mila", "hector",
+                   "maria"],
+  "unique":        True
+}
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#figure-2" class="selfRef">Figure 2</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-dataset-example" class="selfRef">Dataset example</a>
+          </figcaption></figure>
+</div>
+<p id="appendix-B.3-3">The schema in <a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#tab_schema" class="auto internal xref">Figure 3</a> is valid with 'tab_data1' and 'tab_data2' formats<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-B.3-3" class="pilcrow">¶</a></p>
+<span id="name-schema-example"></span><div id="tab_schema">
+<figure id="figure-3">
+          <div class="sourcecode" id="appendix-B.3-4.1">
+<pre>tab_schema = {
+  "fields": [
+    {"name":"index", "type":"integer", "constraint":{"minimum":50}},
+    {"name":"dates", "type":"date"},
+    {"name":"value", "type":"integer"},
+    {"name":"coord", "type":"geopoint", "format":"array"},
+    {"name":"names"},
+    {"name":"unique", "type":"boolean"}
+  ]
+}
+</pre>
+</div>
+<figcaption><a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#figure-3" class="selfRef">Figure 3</a>:
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-schema-example" class="selfRef">Schema example</a>
+          </figcaption></figure>
+</div>
+</section>
+</section>
+<div id="Acknowledgements">
+<section id="appendix-C">
+      <h2 id="name-acknowledgements">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="appendix-C-1">TBD<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-C-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Contributors">
+<section id="appendix-D">
+      <h2 id="name-contributors">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-contributors" class="section-name selfRef">Contributors</a>
+      </h2>
+<p id="appendix-D-1">TBD<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#appendix-D-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-E">
+      <h2 id="name-authors-address">
+<a href="https://www.ietf.org/archive/id/draft-thomy-ntv-tab-00.html#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Philippe THOMY</span></div>
+<div dir="auto" class="left"><span class="org">Loco-labs</span></div>
+<div dir="auto" class="left"><span class="street-address">476 chemin du gaf de Famian</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">84 500</span> <span class="locality">BOLLENE</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">France</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:philippe@loco-labs.io" class="email">philippe@loco-labs.io</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://github.com/loco-philippe/NTV/blob/main/README.md" class="url">https://github.com/loco-philippe/NTV/blob/main/README.md</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+
+
+</body></html>

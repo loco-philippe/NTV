@@ -28,7 +28,7 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author> 
-    <date year="2023" month="12" day="07"/>
+    <date year="2023" month="12" day="19"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
     <keyword>JSON</keyword>
@@ -74,6 +74,7 @@
               <li><em>{"cities::point": {"paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640]}}      named format for primitive entities</em></li></ul></li></ul>
         <t>A JSON-NTV generator produces a JSON value from a NTV entity and vice versa a JSON-NTV parser transforms a 
         JSON value into a NTV entity. </t>
+        <t>The document <xref target="NTV-TAB"/> presents a variation of this format for tabular and multidimensional data.</t>
         <t>The conversion between NTV entity and native entity is outside the scope of this note.</t>
       </section>
       <section><name>Key design features</name>
@@ -639,11 +640,12 @@ ex_list = {
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6901.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
       </references>
       <references><name>Informative References</name>
         <reference anchor="DFS" target="https://en.wikipedia.org/wiki/Depth-first_search"><front>
           <title>Depth-first search algorithm</title><author><organization>"Wikipedia"</organization></author></front></reference>
-        <reference anchor="NTV-TAB" target="https://datatracker.ietf.org/doc/draft-thomy-json-ntv/"><front>
+        <reference anchor="NTV-TAB" target="https://datatracker.ietf.org/doc/draft-thomy-ntv-tab/"><front>
           <title>NTV tabular format (NTV-TAB)</title><author initials="P" surname="Thomy"></author><date year="2023"/></front></reference>
         <reference anchor="JSON-ND" target="https://github.com/glenkleidon/JSON-ND"><front>
           <title>JSON-ND</title><author initials="G" surname="Kleidon"></author><date year="2020"/></front></reference>
@@ -656,7 +658,13 @@ ex_list = {
           <author><organization>"W3C"</organization></author><date year="17 December 2015"/></front></reference>            
         <reference anchor="ISO 3166-1 alpha-2" target="https://www.iso.org/standard/72482.html"><front>
           <title>Codes for the representation of names of countries and their subdivisions - Part 1: Country code</title>
-          <author><organization>"ISO"</organization></author><date year="2020"/></front></reference>            
+          <author><organization>"ISO"</organization></author><date year="2020"/></front></reference>    
+        <reference anchor="TABLE SCHEMA" target="https://specs.frictionlessdata.io/table-schema/#types-and-formats"><front>
+          <title>Table Schema specification</title>
+          <author><organization>"Frictionless"</organization></author><date year="5 October 2021"/></front></reference>      
+        <reference anchor="JSON SCHEMA" target="https://json-schema.org/draft/2020-12/json-schema-validation"><front>
+          <title>JSON Schema validation</title>
+          <author><organization>"JSON Schema"</organization></author><date year="16 June 2022"/></front></reference>
       </references>
     </references>
     &nbsp;
@@ -827,10 +835,11 @@ NTVtypeName     = ["$"] JsonString              ; REQ3
 
 ; JSON representation of NTV entities (JsonNTV)
 
-JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ5
 
 JsonNTVnamed   = beginObject JsonNTVMember endObject 
-JsonNTVsimple  = JsonNTVvalue
+JsonNTVsimple  = JsonNTVvalue / ArrayValue         ; REQ6
+ArrayValue     = beginArray JsonNTVvalue endArray
 
 JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
 
@@ -849,9 +858,9 @@ JsonString = JsonString  ; indicates that rule is defined in RFC8259
 
 ; JSON representation of NTVname and NTVtype (JsonNTVname)
 
-JsonNTVname    = NTVname JsonSepType
-JsonSepType    = [singleSep [JsonNTVtype]] / [listSep JsonNTVtype]
-    ; REQ5 REQ6
+JsonNTVname = NTVname JsonSepType
+JsonSepType = [singleSep [JsonNTVtype]]/[listSep JsonNTVtype]
+    ; REQ7 REQ8
 
 NTVname = JsonString
 
@@ -861,10 +870,10 @@ listSep     = "::"     ; NTVlist separator
 ; JSON representation of NtvType (JsonNTVtype)
 
 JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
-    ; REQ7
+    ; REQ9
 
 relativeNTVtypeLongName = *NamespaceName NTVtypeName
-    ; REQ7
+    ; REQ9
 
 ; JSON representation of NTVvalue (JsonNTVvalue)
 
@@ -872,7 +881,7 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
-    ; REQ8
+    ; REQ10
 
 JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
@@ -926,6 +935,91 @@ NTVsingleValue     = JsonValue
           <li>Conversely, an NTV parser converts a JsonObject into the corresponding NTVObject.</li>
         </ul></li></ul>
       <t>Thus, for all Json entities, we have an equivalence with an NTV entity</t>
+    </section>
+    <section anchor="mapping"><name>Mapping NTVtypes</name>
+      <t>This Appendix presents the mapping between NTVtypes and the types defined in Data schemas or Data languages.</t>
+      <section><name>Table-Schema</name>
+        <t>The mapping concerns Table Schema types and formats <xref target="TABLE SCHEMA"/>. 
+        Parsable and pattern formats (datation) and topojson (location) are not included</t>
+        <table anchor="table12" align="left" pn="table-12"><name>Table-Schema types</name><thead>
+          <tr><th>type</th><th>format</th><th>NTVtype</th></tr></thead><tbody>
+          <tr><td>string</td><td>default</td><td>string</td></tr>
+          <tr><td>string</td><td>email</td><td>email</td></tr>
+          <tr><td>string</td><td>uri</td><td>uri</td></tr>
+          <tr><td>string</td><td>binary (base64 string)</td><td>base64</td></tr>
+          <tr><td>string</td><td>uuid</td><td>uuid</td></tr>
+          <tr><td>number</td><td>default</td><td>number</td></tr>
+          <tr><td>integer</td><td>default</td><td>int</td></tr>
+          <tr><td>boolean</td><td>default</td><td>boolean</td></tr>
+          <tr><td>object</td><td>default (json)</td><td>json</td></tr>
+          <tr><td>array</td><td>default (json array)</td><td>array</td></tr>
+          <tr><td>date</td><td>default (date ISO8601)</td><td>date</td></tr>
+          <tr><td>time</td><td>default (time ISO8601)</td><td>time</td></tr>
+          <tr><td>datetime</td><td>default (datetime ISO8601 in UTC)</td><td>datetime</td></tr>
+          <tr><td>year</td><td>default</td><td>year</td></tr>
+          <tr><td>yearmonth</td><td>default</td><td>yearmonth</td></tr>
+          <tr><td>duration</td><td>default (lexical duration ISO8601)</td><td>duration</td></tr>
+          <tr><td>geopoint</td><td>default (string &quot;lon, lat&quot;)</td><td>pointstr</td></tr>
+          <tr><td>geopoint</td><td>array (array [lon, lat])</td><td>point</td></tr>
+          <tr><td>geopoint</td><td>object (eg {&quot;lon&quot;: 90, &quot;lat&quot;: 45})</td><td>pointobj</td></tr>
+          <tr><td>geojson</td><td>default (geojson spec)</td><td>geojson</td></tr>
+          <tr><td>-any-</td><td>-any-</td><td>$xxx (custom type)</td></tr></tbody></table>
+      </section>
+      <section><name>JSON Schema</name>
+        <t>The mapping concerns JSON-schema <xref target="JSON SCHEMA"/> primitive types, defined formats and String-Encoded data .</t>
+        <table anchor="table13" align="left" pn="table-13"><name>JSON Schema types</name><thead>
+          <tr><th>type</th><th>format</th><th>NTVtype</th></tr></thead><tbody>
+          <tr><td>string</td><td></td><td>string</td></tr>
+          <tr><td>string</td><td>date-time</td><td>datetime</td></tr>
+          <tr><td>string</td><td>time</td><td>time</td></tr>
+          <tr><td>string</td><td>date</td><td>date</td></tr>
+          <tr><td>string</td><td>duration</td><td>duration</td></tr>
+          <tr><td>string</td><td>email</td><td>email</td></tr>
+          <tr><td>string</td><td>idn-email</td><td>idnemail</td></tr>
+          <tr><td>string</td><td>hostname</td><td>hostname</td></tr>
+          <tr><td>string</td><td>idn-hostname</td><td>idnhostname</td></tr>
+          <tr><td>string</td><td>ipv4</td><td>ipv4</td></tr>
+          <tr><td>string</td><td>ipv6</td><td>ipv6</td></tr>
+          <tr><td>string</td><td>uuid</td><td>uuid</td></tr>
+          <tr><td>string</td><td>uri</td><td>uri</td></tr>
+          <tr><td>string</td><td>uri-reference</td><td>uriref</td></tr>
+          <tr><td>string</td><td>uri-template</td><td>uritem</td></tr>
+          <tr><td>string</td><td>iri</td><td>iri</td></tr>
+          <tr><td>string</td><td>iri-reference</td><td>iriref</td></tr>
+          <tr><td>string</td><td>json-pointer</td><td>jpointer</td></tr>
+          <tr><td>string</td><td>relative-json-pointer</td><td>rjpointer</td></tr>
+          <tr><td>string</td><td>regex</td><td>regex</td></tr>
+          <tr><td>number</td><td></td><td>number</td></tr>
+          <tr><td>integer</td><td></td><td>int</td></tr>
+          <tr><td>boolean</td><td></td><td>boolean</td></tr>
+          <tr><td>object</td><td></td><td>object</td></tr>
+          <tr><td>array</td><td></td><td>array</td></tr>
+          <tr><td>contentEncoding</td><td>base64</td><td>base64</td></tr>
+          <tr><td>contentEncoding</td><td>base32</td><td>base32</td></tr>
+          <tr><td>contentEncoding</td><td>base16</td><td>base16</td></tr>
+          <tr><td>contentEncoding</td><td>binary</td><td>binary</td></tr>
+          <tr><td>null</td><td></td><td>null</td></tr></tbody></table>
+      </section>
+      <section><name>JSON Schema</name>
+        <t>The mapping concerns YANG build-in types defined <xref target="RFC7950"/>. 
+        Enumeration, leafref, identityref, instance-identifier, union are not included.</t>
+        <table anchor="table14" align="left" pn="table-14"><name>YANG types</name><thead>
+          <tr><th>type</th><th>NTVtype</th><th>comments</th></tr></thead><tbody>
+          <tr><td>boolean</td><td>boolean</td><td></td></tr>
+          <tr><td>decimal64</td><td>decimal64</td><td></td></tr>
+          <tr><td>empty</td><td>null</td><td></td></tr>
+          <tr><td>int8</td><td>int8</td><td></td></tr>
+          <tr><td>int16</td><td>int16</td><td></td></tr>
+          <tr><td>int32</td><td>int32</td><td></td></tr>
+          <tr><td>int64</td><td>int64</td><td></td></tr>
+          <tr><td>uint8</td><td>uint8</td><td></td></tr>
+          <tr><td>uint16</td><td>uint16</td><td></td></tr>
+          <tr><td>uint32</td><td>uint32</td><td></td></tr>
+          <tr><td>uint64</td><td>uint64</td><td></td></tr>
+          <tr><td>string</td><td>string</td><td></td></tr>
+          <tr><td>bit</td><td>bit</td><td></td></tr>
+          <tr><td>binary</td><td>binary</td><td></td></tr></tbody></table>
+      </section>  
     </section>
     <section anchor="Acknowledgements" numbered="false"><name>Acknowledgements</name>
       <t>TBD</t>

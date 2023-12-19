@@ -28,7 +28,7 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author> 
-    <date year="2023" month="12" day="15"/>
+    <date year="2023" month="12" day="19"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
     <keyword>JSON</keyword>
@@ -87,8 +87,6 @@
           <dd>A Dataset is equivalent to a Table</dd>
           <dt><strong>Field</strong></dt>
           <dd>A Field is equivalent to a Column</dd>
-          <dt><strong>Dataset</strong></dt>
-          <dd>A Dataset is equivalent to a Table</dd>
         </dl>
       </section>
     </section>
@@ -444,8 +442,8 @@ nested = {
       <references><name>Informative References</name>
         <reference anchor="TABLE" target="https://specs.frictionlessdata.io/table-schema/#language"><front>
           <title>Table Schema</title><author><organization>"FrictionLess"</organization></author><date year="2021"/></front></reference>
-        <reference anchor="JSON-NTV" target="https://www.ietf.org/archive/id/draft-thomy-json-ntv-01.html"><front>
-          <title>JSON semantic format (JSON-NTV)</title><author initials="P" surname="Thomy"></author><date year="2022"/></front></reference>
+        <reference anchor="JSON-NTV" target="https://datatracker.ietf.org/doc/draft-thomy-json-ntv/"><front>
+          <title>JSON semantic format (JSON-NTV)</title><author initials="P" surname="Thomy"></author><date year="2023"/></front></reference>
         <reference anchor="TAB-ANA" target="https://github.com/loco-philippe/tab-analysis/blob/main/docs/tabular_analysis.pdf"><front>
           <title>Tabular dataset analysis</title><author initials="P" surname="Thomy"></author><date year="2022"/></front></reference>                     
         <reference anchor="W3C TAB" target="https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/"><front>
@@ -582,7 +580,7 @@ nested = {
               <li>Name in Table Schema is equivalent to the NTVname of the NTVfield </li>
               <li>Type / Format in Table Schema is equivalent to the NTVtype of the NTVfield </li></ul></li></ul></li>
           <li>Type / Format<ul empty="true">
-            <li>NTVtype combines the concepts of type and format. The correspondence table in the NTV specification gives the link between an NTVtype 
+            <li>NTVtype combines the concepts of type and format. The correspondence table in the NTV specification <xref target="JSON-NTV"/> gives the link between an NTVtype 
             and the corresponding type/format.</li></ul></li>
           <li>Constraints<ul empty="true">
             <li>Constraints are applicable to each value in a Table Field. Validating constraints for all values in a Table Field is equivalent 
@@ -597,19 +595,21 @@ nested = {
         <t><xref target="tab dataset"/> is an example of Dataset with Full format ('tab_data1' without NTVtypes) and with other formats ('tab_data2').</t>     
         <figure anchor="tab dataset" align="left" suppress-title="false"><name>Dataset example</name><sourcecode><![CDATA[
 tab_data1 = {
-  "index":    [100, 200, 300, 400, 500, 600],
-  "dates":    ["1964-01-01", "1985-02-05", "2022-01-21", "1964-01-01", "1985-02-05", "2022-01-21"], 
-  "value":    [10, 10, 20, 20, 30, 30],
-  "coord":    [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
-  "names":    ["john", "eric", "judith", "mila", "hector", "maria"],
-  "unique":   ["true, "true", "true", "true", "true", "true"] 
+  "index":  [100, 200, 300, 400, 500, 600],
+  "dates":  ["1964-01-01", "1985-02-05", "2022-01-21", "1964-01-01",
+             "1985-02-05", "2022-01-21"], 
+  "value":  [10, 10, 20, 20, 30, 30],
+  "coord":  [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
+  "names":  ["john", "eric", "judith", "mila", "hector", "maria"],
+  "unique": ["true, "true", "true", "true", "true", "true"] 
 }
 tab_data2 = {
-  "index":         [100, 200, 300, 400, 500, 600],
-  "dates":         {"::date": ["1964-01-01", "1985-02-05", "2022-01-21"], [1]}, 
-  "value":         [[10, 20, 30], [2]],
-  "coord::point":  [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
-  "names::string": ["john", "eric", "judith", "mila", "hector", "maria"],
+  "index": [100, 200, 300, 400, 500, 600],
+  "dates": {"::date":[["1964-01-01","1985-02-05","2022-01-21"],[1]}, 
+  "value": [[10, 20, 30], [2]],
+  "coord::point": [[1,2], [3,4], [5,6], [7,8], [3,4], [5,6]],
+  "names::string":["john", "eric", "judith", "mila", "hector",
+                   "maria"],
   "unique":        True 
 }
         ]]></sourcecode></figure>
@@ -617,12 +617,12 @@ tab_data2 = {
         <figure anchor="tab schema" align="left" suppress-title="false"><name>Schema example</name><sourcecode><![CDATA[
 tab_schema = {
   "fields": [
-    {"name": "index", "type": "integer", "constraint":{"minimum":50}},
-    {"name": "dates", "type": "date"},
-    {"name": "value", "type": "integer"},
-    {"name": "coord", "type": "geopoint", "format": "array"},
-    {"name": "names"},
-    {"name": "unique", "type": "boolean"}
+    {"name":"index", "type":"integer", "constraint":{"minimum":50}},
+    {"name":"dates", "type":"date"},
+    {"name":"value", "type":"integer"},
+    {"name":"coord", "type":"geopoint", "format":"array"},
+    {"name":"names"},
+    {"name":"unique", "type":"boolean"}
   ]
 }
         ]]></sourcecode></figure>
