@@ -682,8 +682,9 @@ ex_list = {
           <tr><td>int</td><td>JsonNumber <xref target="RFC8259"/></td><td>integer</td></tr>
           <tr><td>int8, int16, int32, int64</td><td>JsonNumber <xref target="RFC8259"/></td><td>signed integer</td></tr>
           <tr><td>uint8, uint16, uint32, uint64</td><td>JsonNumber <xref target="RFC8259"/></td><td>unsigned integer</td></tr>
-          <tr><td>float</td><td>JsonNumber <xref target="RFC8259"/></td><td>floating point real</td></tr>
-          <tr><td>float16, float32, float64</td><td>JsonNumber <xref target="RFC8259"/></td><td>floating point real</td></tr></tbody></table>
+          <tr><td>decimal64</td><td>JsonNumber <xref target="RFC8259"/></td><td>decimal floating point</td></tr>
+          <tr><td>float</td><td>JsonNumber <xref target="RFC8259"/></td><td>binary floating point</td></tr>
+          <tr><td>float16, float32, float64</td><td>JsonNumber <xref target="RFC8259"/></td><td>binary floating point</td></tr></tbody></table>
       </section>
       <section><name>Binary encoding</name>
         <table anchor="table5" align="left" pn="table-5"><name>Binary NTVtype</name><thead>

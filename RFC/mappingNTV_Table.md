@@ -34,7 +34,7 @@ parsable and pattern formats (datation) and topojson (location) are not included
 |----------------------|------------------------------------|-----------------------------------------------|
 | type                 | format                             | NTVtype                                       |
 |----------------------|------------------------------------|-----------------------------------------------|
-| string               | default                            | string                                        |
+| string               |                                    | string                                        |
 | string               | date-time                          | datetime                                      |
 | string               | time                               | time                                          |
 | string               | date                               | date                                          |
@@ -57,17 +57,24 @@ parsable and pattern formats (datation) and topojson (location) are not included
 | number               | default                            | number                                        |
 | integer              | default                            | int                                           |
 | boolean              | default                            | boolean                                       |
-| object               | default (json)                     | json                                          |
-| array                | default (json array)               | array                                         |
-| null                 | default (date ISO8601)             | date                                          |
-| -any-                | -any-                              | $xxx (custom type)                            |
+| object               |                                    | object                                        |
+| array                |                                    | array                                         |
+| contentEncoding      | base64                             | base64                                        |
+| contentEncoding      | base32                             | base32                                        |
+| contentEncoding      | base16                             | base16                                        |
+| contentEncoding      | binary                             | binary                                        |
+| null                 |                                    | null                                          |
 
-Keywords $key, $ref, $anchor, $ref, $defs, 
+Built-in types with Keywords : $key, $ref, $anchor, $ref, $defs are not included. 
+
 ## mapping YANG
 
 |----------------------|------------------------------------|-----------------------------------------------|
 | type                 | NTVtype                            |comments                                       |
 |----------------------|------------------------------------|-----------------------------------------------|
+| boolean              | boolean                            |                                               |
+| decimal64            | decimal64                          |                                               |
+| empty                | null                               |                                               |
 | int8                 | int8                               |                                               |
 | int16                | int16                              |                                               |
 | int32                | int32                              |                                               |
@@ -82,4 +89,4 @@ Keywords $key, $ref, $anchor, $ref, $defs,
 | leafref              | ref                                |                                               |
 | -any-                | -any-                              | $xxx (custom type)                            |
 
-enumeration, bits, leafref, 
+Built-in types : enumeration, bits, leafref, identityref, instance-identifier, union are not included.
