@@ -30,7 +30,8 @@ class NtvUtil:
         elif ':' in string:
             sep = ':'
         if sep is None:
-            return (string, None, None)
+            #return (string, None, None)
+            return (string, None, None) if string[-1]!='.' else (None, string, None)
         split = string.rsplit(sep, 2)
         if len(split) == 1:
             return (string, None, sep)
@@ -330,7 +331,7 @@ class NtvConnector(ABC):
             case _:
                 if not obj.__class__.__name__ in NtvConnector.castable:
                     raise NtvError(obj.__class__.__name__ +
-                                   'is not valid for NTV')
+                                   ' is not valid for NTV')
                 return False
 
     @staticmethod
