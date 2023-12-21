@@ -195,6 +195,7 @@ class Ntv(ABC):
             return value
         ntv_value, ntv_name, str_typ, sep, is_json = Ntv.decode_json(value)
         sep = def_sep if not sep else sep
+        sep = None if str_typ and str_typ[-1] == '.' and sep == ':' else sep
         if isinstance(ntv_value, (list, dict)) and sep in (None, '::'):
             return Ntv._create_ntvlist(str_typ, def_type, sep, ntv_value,
                                        typ_auto, no_typ, ntv_name, fast)
@@ -202,7 +203,8 @@ class Ntv(ABC):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
         if sep is None and not isinstance(ntv_value, dict):
-            is_single_json = isinstance(value, (int, str, float, bool))
+            #is_single_json = isinstance(value, (int, str, float, bool))
+            is_single_json = isinstance(ntv_value, (int, str, float, bool))
             ntv_type = agreg_type(str_typ, def_type, is_single_json)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
         raise NtvError('separator ":" is not compatible with value')
@@ -473,11 +475,13 @@ class Ntv(ABC):
         - **NTV entity** or **jsonNTV**
         '''
         ntv = copy.copy(self)
-        cont = Ntv.obj('...') if self.json_array else Ntv.obj({'...':''})            
+        cont = Ntv.obj('___') if self.json_array else Ntv.obj({'___':''})            
         if isinstance(self, NtvSingle):
             return ntv
         if level == 0:
-            ntv.ntv_value = [NtvSingle('...',ntv_type=ntv.type_str)]
+            #ntv.ntv_value = [NtvSingle('___',ntv_type=ntv.type_str)]
+            ntv.ntv_value = [Ntv.obj('___',no_typ=True)]
+            #ntv.ntv_value = [Ntv.obj('___',typ_auto=True)]
         if len(self) <= maxi:
             ntv.ntv_value = [child.reduce(False, maxi, level-1) for child in ntv]
             return ntv

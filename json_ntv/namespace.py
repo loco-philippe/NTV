@@ -201,8 +201,9 @@ def agreg_type(str_typ, def_type, single):
     if isinstance(str_typ, NtvType):
         str_typ = str_typ.long_name
     def_type = str_type(def_type, single)
-    if not str_typ and (isinstance(def_type, NtvType) or
-                        (not isinstance(def_type, NtvType) and not single)):
+    #if not str_typ and (isinstance(def_type, NtvType) or
+    #                    (not isinstance(def_type, NtvType) and not single)):
+    if not str_typ and (not single or isinstance(def_type, NtvType)):
         return def_type
     if not str_typ:
         return NtvType('json')
