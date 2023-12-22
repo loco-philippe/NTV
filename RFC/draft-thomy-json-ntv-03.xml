@@ -396,7 +396,7 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
-    ; REQ8
+    ; REQ8 REQ9
 
 JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
@@ -411,8 +411,10 @@ NTVsingleValue     = JsonValue
           <li>a JsonArray where JsonElements are the JsonNTV of included NTV entities,</li>
           <li>a JsonObject where the JsonMembers are the JsonMembers of the JsonNTV of included NTV entities.</li></ul></t>
         <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
-          <li><t>if NTVlistValue has more than one NTV entities and if all NTVname are different and not empty, JsonNTVobject is used,</t>
-          <t>else JsonNTVarray is used</t></li></ol></li></ul>
+          <li>NTVlist with multiple NTV entities : if all JsonNTVname of NTV entities are different and not empty, 
+          JsonNTVobjectValue is used else JsonNTVarrayValue is used</li>
+          <li>NTVlist with single NTV entity : if JsonNTVname of the NTVlist is not empty JsonNTVobjectValue is used 
+          else JsonNTVarrayValue is used</li></ol></li></ul>
         <t><em>Example:</em><ul empty="true">
           <li><em>{ ":point" : [2.3522, 48.8566], ":point" : [4.8357, 45.7640] }   is not a valid JsonNTV</em></li></ul></t>
       </section>
@@ -496,9 +498,9 @@ NTVsingleValue     = JsonValue
       </section>
       <section><name>NTVtype decoding</name>             
         <t>NTVtype is inferred from the JsonNTVtype:</t><ul empty="true"><li><ol type="PARS%d:" group="parsing reqs">
-            <li><t>If JsonNTVtype is a valid NTVtypeLongName NTVtype is the decoded JsonNTVtype,</t>
-            <t>else NTVtype is "json" NTVtype if concatened ParentNTVtypeLongName with JsonNTVtype is empty,</t>
-            <t>else NTVtype is the decoded of concatenation of ParentNTVtypeLongName with JsonNTVtype if it is a valid  NTVtypeLongName,</t>
+            <li><t>If JsonNTVtype is a valid NTVtypeLongName : NTVtype is the decoded JsonNTVtype,</t>
+            <t>else if concatened ParentNTVtypeLongName with JsonNTVtype is empty : NTVtype is "json",</t>
+            <t>else if the decoded of concatenation of ParentNTVtypeLongName with JsonNTVtype is a valid  NTVtypeLongName : NTVtype is it,</t>
             <t>else NTVtype is the defaultNTVtype</t></li></ol></li></ul>
         <t>The <xref target="JSON-NTV"/> repository gives some examples of NTV usage.</t>
       </section>
@@ -558,8 +560,9 @@ NTVsingleValue     = JsonValue
         <t>A canonical (single) format is chosen to facilitate sharing and analysis of NTV and JsonNTV data. It is defined by setting a value 
         for the NTVtype of an NTVlist entity.</t> 
         <t>The rule is as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
-          <li><t>If an included entity is an NTVlist with an empty NTVtype, its NTVtype is empty</t>
-          <t>If all included entities have an NTVtype 'json', its NTVtype is empty.</t>
+          <li><t>NTVtype is empty, if an included entity is an NTVlist with an empty NTVtype,</t>
+          <t>NTVtype is empty, if all included entities have an NTVtype 'json',</t>
+          <t>NTVtype is the common Namespace, if the common Namespace is not the GlobalNamespace,</t>
           <t>In other cases, the NTVtype is the same as that of the first included entity.</t></li></ol></li></ul>
         <t>This rule is simple to implement and allows you to have a compact JsonNTV format (another more complex choice would have been to take
           the most frequent NTVtype among the included entities).</t>
@@ -668,15 +671,15 @@ ex_list = {
       </references>
     </references>
     &nbsp;
-    <section anchor="global"><name>Global NTVtype and Namespace</name>
-      <t>The structure of NTVtype by Namespace makes it possible to have NTVtype or Namespace corresponding to recognized standards at the global level.</t>
-      <t>A standard NTVtype / Namespace is a NTVtype / Namespace defined in the Global Namespace.</t>
-      <t>The standard NTVtype and Namespace are listed below.</t>
+    <section anchor="global"><name>Global DataType and Namespace</name>
+      <t>The structure of DataType by Namespace makes it possible to have DataType or Namespace corresponding to recognized standards at the global level.</t>
+      <t>A standard DataType / Namespace is a DataType / Namespace defined in the Global Namespace.</t>
+      <t>The standard DataType and Namespace are listed below.</t>
       <section><name>Json</name>
-        <t>Json NTVtype have a generic NTVtype : "json"</t>
-        <table anchor="table3" align="left" pn="table-3"><name>Json NTVtype</name><thead>
-          <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
-          <tr><td>json</td><td>generic NTVtype</td><td></td></tr>
+        <t>Json DataType have a generic DataType : "json"</t>
+        <table anchor="table3" align="left" pn="table-3"><name>Json DataType</name><thead>
+          <tr><th>DataTypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+          <tr><td>json</td><td>generic DataType</td><td></td></tr>
           <tr><td>number (json)</td><td>JsonNumber <xref target="RFC8259"/></td><td>10</td></tr>
           <tr><td>boolean (json)</td><td>JsonBoolean <xref target="RFC8259"/></td><td>"true"</td></tr>
           <tr><td>null (json)</td><td>JsonNull <xref target="RFC8259"/></td><td>"null"</td></tr>
@@ -685,8 +688,8 @@ ex_list = {
           <tr><td>object (json)</td><td>JsonObject <xref target="RFC8259"/></td><td>{"value1": 1, "value2": 2}</td></tr></tbody></table>
       </section>
       <section><name>Numbers</name>
-        <table anchor="table4" align="left" pn="table-4"><name>Numbers NTVtype</name><thead>
-          <tr><th>NTVtypeName</th><th>NTVvalue</th><th>comment</th></tr></thead><tbody>
+        <table anchor="table4" align="left" pn="table-4"><name>Numbers DataType</name><thead>
+          <tr><th>DataTypeName</th><th>NTVvalue</th><th>comment</th></tr></thead><tbody>
           <tr><td>int</td><td>JsonNumber <xref target="RFC8259"/></td><td>integer</td></tr>
           <tr><td>int8, int16, int32, int64</td><td>JsonNumber <xref target="RFC8259"/></td><td>signed integer</td></tr>
           <tr><td>uint8, uint16, uint32, uint64</td><td>JsonNumber <xref target="RFC8259"/></td><td>unsigned integer</td></tr>
@@ -695,8 +698,8 @@ ex_list = {
           <tr><td>float16, float32, float64</td><td>JsonNumber <xref target="RFC8259"/></td><td>binary floating point</td></tr></tbody></table>
       </section>
       <section><name>Binary encoding</name>
-        <table anchor="table5" align="left" pn="table-5"><name>Binary NTVtype</name><thead>
-          <tr><th>NTVtypeName</th><th>NTVvalue</th><th>comment</th></tr></thead><tbody>
+        <table anchor="table5" align="left" pn="table-5"><name>Binary DataType</name><thead>
+          <tr><th>DataTypeName</th><th>NTVvalue</th><th>comment</th></tr></thead><tbody>
           <tr><td>bit</td><td>binary digit</td><td>string "0" or "1"</td></tr>
           <tr><td>binary</td><td>bit string</td><td>string of bit array</td></tr>
           <tr><td>base16</td><td>base16 encoding <xref target="RFC4648"/></td><td>string of hexadecimal array</td></tr>
@@ -704,9 +707,9 @@ ex_list = {
           <tr><td>base64</td><td>base64 encoding <xref target="RFC4648"/></td><td>string of tetrasexagesimal array</td></tr></tbody></table>
       </section>
       <section><name>Datation</name>
-        <t>Datation NTVtype have a generic NTVtype : "dat"</t>
-        <table anchor="table6" align="left" pn="table-6"><name>Datation NTVtype</name><thead>
-          <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+        <t>Datation DataType have a generic DataType : "dat"</t>
+        <table anchor="table6" align="left" pn="table-6"><name>Datation DataType</name><thead>
+          <tr><th>DataTypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>year</td><td>fullyear <xref target="RFC3339"/></td><td>1998</td></tr>
           <tr><td>month</td><td>month <xref target="RFC3339"/></td><td>10</td></tr>
           <tr><td>yearmonth</td><td>year + month (ISO8601-1)</td><td>1998-10</td></tr>
@@ -717,7 +720,7 @@ ex_list = {
           <tr><td>hour</td><td>hour <xref target="RFC3339"/></td><td>20</td></tr>
           <tr><td>minute</td><td>minute <xref target="RFC3339"/></td><td>18</td></tr>
           <tr><td>second</td><td>second <xref target="RFC3339"/></td><td>54</td></tr>
-          <tr><td>dat</td><td>generic NTVtype</td><td> </td></tr>
+          <tr><td>dat</td><td>generic DataType</td><td> </td></tr>
           <tr><td>date (dat)</td><td>date <xref target="RFC3339"/></td><td>"2022-01-28""</td></tr>
           <tr><td>time (dat)</td><td>timespec-base [time-fraction]<xref target="RFC3339"/></td><td>"T18:23:54",  "18:23", "T18"</td></tr>
           <tr><td>timetz (dat)</td><td>timespec-base [time-fraction] time-zone<xref target="RFC3339"/></td><td>"T18:23:54+0400"</td></tr>
@@ -726,33 +729,33 @@ ex_list = {
             <td>"2022-01-28T18-23-54+0400"</td></tr></tbody></table>
       </section>
       <section><name>Period and Duration</name>
-        <table anchor="table7" align="left" pn="table-7"><name>Period and Duration NTVtype</name><thead>
-          <tr><th>NTVtypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+        <table anchor="table7" align="left" pn="table-7"><name>Period and Duration DataType</name><thead>
+          <tr><th>DataTypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>duration</td><td>duration <xref target="RFC3339"/></td><td>"P3Y6M4DT12H30M5S"</td></tr>
-          <tr><td>timearray</td><td>JsonArray</td><td><t>[dat1, dat2]</t><t><em>dat1, dat2 have "dat" NTVtypeName</em></t></td></tr>
+          <tr><td>timearray</td><td>JsonArray</td><td><t>[dat1, dat2]</t><t><em>dat1, dat2 have "dat" DataTypeName</em></t></td></tr>
           <tr><td>period</td><td>period <xref target="RFC3339"/></td>
             <td><t>"2022-01-01 / 2022-01-30"</t><t>"2022-01-01 / P3Y6M4DT12H30M5S"</t></td></tr></tbody></table>
       </section>
       <section><name>Location</name>
-        <t>Location NTVtype have a generic NTVtype : "loc".</t>
+        <t>Location DataType have a generic DataType : "loc".</t>
         <t>The CRS (Coordinate Reference Systems) is geographic, using the World Geodetic System 1984 (WGS 84) datum, 
         with longitude and latitude units of decimal degrees (EPSG:4326).</t>
-        <table anchor="table8" align="left" pn="table-8"><name>Location NTVtype</name><thead>
-          <tr><th>NTVtypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
-          <tr><td>loc</td><td>generic NTVtype</td><td></td></tr>
+        <table anchor="table8" align="left" pn="table-8"><name>Location DataType</name><thead>
+          <tr><th>DataTypeName (generic)</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+          <tr><td>loc</td><td>generic DataType</td><td></td></tr>
           <tr><td>point (loc)</td><td>Point coordinates <xref target="RFC7946"/></td><td>[ 5.12, 45.256 ] <em>(lon, lat)</em></td></tr>
           <tr><td>pointstr (loc)</td><td>Point coordinates (string)</td><td>"5.12, 45.256" <em>(lon, lat)</em></td></tr>
           <tr><td>pointobj (loc)</td><td>Point coordinates (object)</td><td>{"lon": 5.12, "lat": 45.256}</td></tr>
           <tr><td>multipoint</td><td>MultiPoint coordinates <xref target="RFC7946"/></td>
-            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" NTVtypeName</em></t></td></tr>
+            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" DataTypeName</em></t></td></tr>
           <tr><td>line (loc)</td><td>LineString coordinates <xref target="RFC7946"/></td>
-            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" NTVtypeName</em></t></td></tr>
+            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" DataTypeName</em></t></td></tr>
           <tr><td>multiline</td><td>MultiLineString coordinates <xref target="RFC7946"/></td>
-            <td><t>[li1, li2, li3]</t><t><em>lix has "line" NTVtypeName</em></t></td></tr>
+            <td><t>[li1, li2, li3]</t><t><em>lix has "line" DataTypeName</em></t></td></tr>
           <tr><td>polygon (loc)</td><td>Polygon coordinates <xref target="RFC7946"/></td>
-            <td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" NTVtypeName (ring)</em></t></td></tr>
+            <td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" DataTypeName (ring)</em></t></td></tr>
           <tr><td>multipolygon (loc)</td><td>MultiPolygon coordinates <xref target="RFC7946"/></td>
-            <td><t>[pl1, pl2, pl3]</t><t><em>plx has "polygon" NTVtypeName</em></t></td></tr>
+            <td><t>[pl1, pl2, pl3]</t><t><em>plx has "polygon" DataTypeName</em></t></td></tr>
           <tr><td>geometry (loc)</td><td>Geometry coordinates <xref target="RFC7946"/></td>
             <td><t>point, line or polygon</t><t>coordinates</t></td></tr>
           <tr><td>multigeometry (loc)</td><td>MultiGeometry coordinates <xref target="RFC7946"/></td>
@@ -762,17 +765,17 @@ ex_list = {
           <tr><td>codeolc (loc)</td><td>Open Location Code <xref target="OLC"/></td><td>"8FW4V75V+8F6"</td></tr></tbody></table>
       </section>
       <section><name>Structured data</name>
-        <table anchor="table9" align="left" pn="table-9"><name>Structured NTVtype</name><thead>
-          <tr><th>NTVtypeName</th><th>NTVvalue</th></tr></thead><tbody>
+        <table anchor="table9" align="left" pn="table-9"><name>Structured DataType</name><thead>
+          <tr><th>DataTypeName</th><th>NTVvalue</th></tr></thead><tbody>
           <tr><td>row</td><td>row <xref target="W3C TAB"/></td></tr>
           <tr><td>field</td><td>column <xref target="W3C TAB"/></td></tr>
           <tr><td>tab</td><td>table <xref target="W3C TAB"/></td></tr>
           <tr><td>ntv</td><td>JsonNTV</td></tr></tbody></table>
-          <t>The data structure associated to this NTVtypeName are defined in specific document.</t>
+          <t>The data structure associated to this DataTypeName are defined in specific document.</t>
       </section>
       <section><name>Normalized String</name>
-        <table anchor="table10" align="left" pn="table-10"><name>Structured NTVtype</name><thead>
-          <tr><th>NTVtypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+        <table anchor="table10" align="left" pn="table-10"><name>Structured DataType</name><thead>
+          <tr><th>DataTypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
           <tr><td>uri</td><td>URI (RFC3986)</td><td><t>"https://www.ietf.org/rfc/rfc3986.txt"</t>
             <t>"geo:13.4125,103.86673" (RFC5870)</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t> 
             <t>"tel:+1-201-555-0123" (RFC3966)</t></td></tr>
@@ -792,7 +795,7 @@ ex_list = {
           <tr><td>ipv6</td><td>IPv6 address (RFC2373)</td><td><t>"2001:0db8:85a3:0000:00</t><t>00:8a2e:0370:7334"</t></td></tr>
           <tr><td>file</td><td>file-hier-part (RFC8089)</td>
             <td><t>"///path/to/file"</t><t>"//host.example.com/path/to/file"</t></td></tr></tbody></table>
-        <t>Keywords are not defined as Normalized String (eg. "id", "mandatory", "units"), they can be used as custom NTVtype 
+        <t>Keywords are not defined as Normalized String (eg. "id", "mandatory", "units"), they can be used as custom DataType 
         (eg. "$id", "$mandatory", "$units")</t>
       </section>
       <section><name>Namespace</name>
@@ -802,17 +805,17 @@ ex_list = {
         <t><em>Example :</em></t><ul empty="true">
           <li><em>"fr." is the France JsonNamespace</em></li>
           <li><em>"un." is The United Nations JsonNamespace</em></li></ul>   
-        <t>Each Namespace defines a list of included NTVtype and Namespace.</t>
+        <t>Each Namespace defines a list of included DataType and Namespace.</t>
       </section>
-      <section><name>Custom NTVtype and Namespace</name>
-        <t>Custom NTVtype and Namespace can be created in any Namespace. </t>
-        <t><xref target="table11"/> below presents some examples of custom NTVtype.</t>
-        <table anchor="table11" align="left" pn="table-11"><name>Examples of custom NTVtype</name><thead>
-          <tr><th>JsonNTVtype</th><th>comment or JsonNTV example</th></tr></thead><tbody>
+      <section><name>Custom DataType and Namespace</name>
+        <t>Custom DataType and Namespace can be created in any Namespace. </t>
+        <t><xref target="table11"/> below presents some examples of custom DataType.</t>
+        <table anchor="table11" align="left" pn="table-11"><name>Examples of custom DataType</name><thead>
+          <tr><th>JsonDataType</th><th>comment or JsonNTV example</th></tr></thead><tbody>
           <tr><td>"$id"</td><td><t>defined in the global Namespace</t><t>eg. { ":$id": 5426849" }</t></td></tr>
           <tr><td>"$iata"</td><td><t>IATA airport code</t><t>eg. {"Paris Nord:$iata": "CDG"}</t></td></tr>
           <tr><td>"$uic.station"</td><td><t>UIC station code</t><t>eg. {"Nantes station:$uic.station" : "8748100"}</t></td></tr>
-          <tr><td>"fr.$city"</td><td><t>NTVtype "city" in "fr." Namespace</t><t>eg. {":fr.$city" : "Paris"}</t></td></tr>
+          <tr><td>"fr.$city"</td><td><t>DataType "city" in "fr." Namespace</t><t>eg. {":fr.$city" : "Paris"}</t></td></tr>
           <tr><td>"$schemaorg."</td><td><t>"schemaorg" catalog</t><t>eg. { ":$schemaorg.propertyID": "NO2" }</t>
             <t>{ ":$schemaorg.unitText": "mg/m3"}</t></td></tr>
           <tr><td>"$darwincore."</td><td><t>"darwincore" catalog</t><t>eg. { ":$darwincore.acceptedNameUsage": "Tamias minimus" }</t></td>
@@ -936,13 +939,13 @@ NTVsingleValue     = JsonValue
         </ul></li></ul>
       <t>Thus, for all Json entities, we have an equivalence with an NTV entity</t>
     </section>
-    <section anchor="mapping"><name>Mapping NTVtypes</name>
-      <t>This Appendix presents the mapping between NTVtypes and the types defined in Data schemas or Data languages.</t>
+    <section anchor="mapping"><name>Mapping DataTypes</name>
+      <t>This Appendix presents the mapping between DataTypes and the types defined in Data schemas or Data languages.</t>
       <section><name>Table-Schema</name>
         <t>The mapping concerns Table Schema types and formats <xref target="TABLE SCHEMA"/>. 
         Parsable and pattern formats (datation) and topojson (location) are not included</t>
         <table anchor="table12" align="left" pn="table-12"><name>Table-Schema types</name><thead>
-          <tr><th>type</th><th>format</th><th>NTVtype</th></tr></thead><tbody>
+          <tr><th>type</th><th>format</th><th>DataType</th></tr></thead><tbody>
           <tr><td>string</td><td>default</td><td>string</td></tr>
           <tr><td>string</td><td>email</td><td>email</td></tr>
           <tr><td>string</td><td>uri</td><td>uri</td></tr>
@@ -968,7 +971,7 @@ NTVsingleValue     = JsonValue
       <section><name>JSON Schema</name>
         <t>The mapping concerns JSON-schema <xref target="JSON SCHEMA"/> primitive types, defined formats and String-Encoded data .</t>
         <table anchor="table13" align="left" pn="table-13"><name>JSON Schema types</name><thead>
-          <tr><th>type</th><th>format</th><th>NTVtype</th></tr></thead><tbody>
+          <tr><th>type</th><th>format</th><th>DataType</th></tr></thead><tbody>
           <tr><td>string</td><td></td><td>string</td></tr>
           <tr><td>string</td><td>date-time</td><td>datetime</td></tr>
           <tr><td>string</td><td>time</td><td>time</td></tr>
@@ -1000,11 +1003,11 @@ NTVsingleValue     = JsonValue
           <tr><td>contentEncoding</td><td>binary</td><td>binary</td></tr>
           <tr><td>null</td><td></td><td>null</td></tr></tbody></table>
       </section>
-      <section><name>JSON Schema</name>
+      <section><name>YANG</name>
         <t>The mapping concerns YANG build-in types defined <xref target="RFC7950"/>. 
         Enumeration, leafref, identityref, instance-identifier, union are not included.</t>
         <table anchor="table14" align="left" pn="table-14"><name>YANG types</name><thead>
-          <tr><th>type</th><th>NTVtype</th><th>comments</th></tr></thead><tbody>
+          <tr><th>type</th><th>DataType</th><th>comments</th></tr></thead><tbody>
           <tr><td>boolean</td><td>boolean</td><td></td></tr>
           <tr><td>decimal64</td><td>decimal64</td><td></td></tr>
           <tr><td>empty</td><td>null</td><td></td></tr>
