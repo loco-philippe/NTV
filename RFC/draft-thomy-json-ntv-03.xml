@@ -1004,7 +1004,7 @@ NTVsingleValue     = JsonValue
           <tr><td>null</td><td></td><td>null</td></tr></tbody></table>
       </section>
       <section><name>YANG</name>
-        <t>The mapping concerns YANG build-in types defined <xref target="RFC7950"/>. 
+        <t>The mapping concerns YANG <xref target="RFC7950"/> build-in types defined. 
         Enumeration, leafref, identityref, instance-identifier, union are not included.</t>
         <table anchor="table14" align="left" pn="table-14"><name>YANG types</name><thead>
           <tr><th>type</th><th>DataType</th><th>comments</th></tr></thead><tbody>
