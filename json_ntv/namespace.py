@@ -398,6 +398,8 @@ class Namespace():
 
     - **name** : String - name of the namespace
     - **file** : string - location of the file init
+    - **content** : dict - {'type': <list of ntv_type names>,  
+                            'namespace': <list of namespace names>}
     - **parent** : Namespace - parent namespace
     - **custom** : boolean - True if not referenced
 
@@ -409,7 +411,6 @@ class Namespace():
 
     *dynamic values (@property)*
     - `long_name`
-    - `content`
 
     *instance methods*
     - `is_child`
@@ -547,11 +548,13 @@ class Namespace():
         else:
             config.read_string(requests.get(
                 file, allow_redirects=True).content.decode())
-        config_name = config['data']['name']
-        if config_name != name:
-            raise NtvTypeError(file + ' is not correct')
-        return {'type': json.loads(config['data']['type']),
-                'namespace': json.loads(config['data']['namespace'])}
+        #config_name = config['data']['name']
+        #if config_name != name:
+        #    raise NtvTypeError(file + ' is not correct')
+        name = 'data' if not name else name
+        #return {'type': json.loads(config['data']['type']),
+        return {'type': json.loads(config[name]['type']),
+                'namespace': json.loads(config[name]['namespace'])}
 
     @property
     def long_name(self):
