@@ -447,7 +447,7 @@ class Namespace():
             return cls(split_name[1]+'.', parent, module=module)
         raise NtvTypeError(long_name + ' is not a valid classname')
 
-    def __init__(self, name='', parent=None, module=False):
+    def __init__(self, name='', parent=None, module=False, force=False):
         '''
         Namespace constructor.
 
@@ -456,20 +456,20 @@ class Namespace():
         - **name** : String - name of the namespace
         - **parent** : Namespace - parent namespace
         - **module** : boolean (default False) - if True search data in the 
-        local .ini file, else in the distant repository
+                        local .ini file, else in the distant repository
+        - **content** : dict : {'type': <list of ntv_type names>,  
+                                'namespace': <list of namespace names>}
         '''
         if name and parent is None:
             parent = Namespace._namespaces_['']
+        #if name and name[0] != '$' and not force and \
         if name and name[0] != '$' and not parent.custom and \
           not name in parent.content['namespace']:
             raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
         self.parent = parent
-        if parent:
-            self.custom = parent.custom or name[0] == '$'
-        else:
-            self.custom = False
-        self.file = Namespace._file(self.parent , self.name, self.custom, module)
+        self.custom = parent.custom or name[0] == '$' if parent else False
+        self.file = Namespace._file(self.parent, self.name, self.custom, module)
         self.content = Namespace._content(self.file, self.name, self.custom, module)
         self._namespaces_[self.long_name] = self
 
@@ -545,16 +545,17 @@ class Namespace():
             p_file = Path(file).stem + Path(file).suffix
             config.read(Path(json_ntv.__file__
                 ).parent.joinpath(p_file))
+            #print(p_file, Path(json_ntv.__file__).parent.joinpath(p_file))
         else:
             config.read_string(requests.get(
                 file, allow_redirects=True).content.decode())
-        #config_name = config['data']['name']
-        #if config_name != name:
-        #    raise NtvTypeError(file + ' is not correct')
-        name = 'data' if not name else name
-        #return {'type': json.loads(config['data']['type']),
-        return {'type': json.loads(config[name]['type']),
-                'namespace': json.loads(config[name]['namespace'])}
+        config_name = config['data']['name']
+        if config_name != name:
+            raise NtvTypeError(file + ' is not correct')
+        #name = 'data' if not name else name
+        #return {'type': json.loads(config[name]['type']),
+        return {'type': json.loads(config['data']['type']),
+                'namespace': json.loads(config['data']['namespace'])}
 
     @property
     def long_name(self):

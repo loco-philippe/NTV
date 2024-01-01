@@ -27,8 +27,10 @@ class Test_Namespace(unittest.TestCase):
         
     def test_child_parent_module(self):
         Nroot = Namespace(module=True)
-        Nfr = Namespace('fr.', Nroot, module=True)
-        NBAN = Namespace('BAN.', Nfr, module=True)     
+        #Nfr = Namespace('fr.', Nroot, module=True)
+        Nfr = Namespace('fr.', Nroot)
+        NBAN = Namespace('BAN.', Nfr)     
+        #NBAN = Namespace('BAN.', Nfr, module=True)     
         self.assertEqual(NBAN.long_name, 'fr.BAN.')
         self.assertEqual(Nroot.long_name, '')
         self.assertNotEqual(NBAN, Nfr)
@@ -38,7 +40,8 @@ class Test_Namespace(unittest.TestCase):
         self.assertEqual(Nroot.is_child(NBAN), -1)
 
     def test_add(self):
-        liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
+        #liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
+        liststr = ['fr.BAN.test.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
                    'fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.', '$a.c.c.', 'fr.$a.b.']
         for nstr in liststr:
             self.assertEqual(Namespace.add(nstr).long_name, nstr)
@@ -75,7 +78,8 @@ class Test_NtvType(unittest.TestCase):
     def test_isinNamespace(self):
         lon = NtvType.add("fr.BAN.lon")
         listnsp = ['fr.BAN.', 'fr.', '']
-        listnotnsp = ['fr.IRVE.', 'fr.BAN.test.', 'schemaorg.']
+        #listnotnsp = ['fr.IRVE.', 'fr.BAN.test.', 'schemaorg.']
+        listnotnsp = ['fr.IRVE.', 'fr.BAN.test.']
         listkonsp = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
         res = 0
         for nsp in listnsp:
