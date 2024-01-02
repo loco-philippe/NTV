@@ -418,7 +418,8 @@ class Namespace():
     '''
     _namespaces_ = {}
     _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
-    _global_ = "NTV_global_namespace.ini"
+    #_global_ = "NTV_global_namespace.ini"
+    _global_ = "config/NTV_global_namespace.ini"
 
     @classmethod
     def namespaces(cls):
@@ -426,7 +427,7 @@ class Namespace():
         return [nam.long_name for nam in cls._namespaces_.values()]
 
     @classmethod
-    def add(cls, long_name, module=False):
+    def add(cls, long_name, module=False, force=False):
         '''activate and return a valid Namespace defined by the long_name.
                 
         *parameters :*
@@ -441,10 +442,10 @@ class Namespace():
         if len(split_name) == 1 or split_name[-1] != '':
             raise NtvTypeError(long_name + ' is not a valid classname')
         if len(split_name) == 2:
-            return cls(split_name[0]+'.', module=module)
+            return cls(split_name[0]+'.', module=module, force=force)
         if len(split_name) == 3:
             parent = Namespace.add(split_name[0]+'.')
-            return cls(split_name[1]+'.', parent, module=module)
+            return cls(split_name[1]+'.', parent, module=module, force=force)
         raise NtvTypeError(long_name + ' is not a valid classname')
 
     def __init__(self, name='', parent=None, module=False, force=False):
@@ -462,8 +463,8 @@ class Namespace():
         '''
         if name and parent is None:
             parent = Namespace._namespaces_['']
-        #if name and name[0] != '$' and not force and \
-        if name and name[0] != '$' and not parent.custom and \
+        #if name and name[0] != '$' and not parent.custom and \
+        if name and name[0] != '$' and not force and \
           not name in parent.content['namespace']:
             raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
@@ -513,12 +514,13 @@ class Namespace():
             config = configparser.ConfigParser()
             if module:
                 p_file = Path(parent.file).stem + Path(parent.file).suffix
-                config.read(Path(json_ntv.__file__
-                    ).parent.joinpath(p_file))
+                config.read(Path(json_ntv.__file__).parent / 'config' / p_file)
             else:
                 config.read_string(requests.get(
                     parent.file, allow_redirects=True).content.decode())
             return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[name]
+        #if module:
+        #    return str(Path(json_ntv.__file__).parent / Namespace._global_)
         return Namespace._pathconfig_ + Namespace._global_
 
     @staticmethod

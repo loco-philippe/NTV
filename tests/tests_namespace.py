@@ -42,9 +42,12 @@ class Test_Namespace(unittest.TestCase):
     def test_add(self):
         #liststr = ['fr.BAN.test.', 'schemaorg.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
         liststr = ['fr.BAN.test.', 'fr.', 'fr.IRVE.', 'fr.IRVE.',
-                   'fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.', '$a.c.c.', 'fr.$a.b.']
+                   'fr.$IRVE.', '$a.', '$b.$c.', '$a.$c.']
         for nstr in liststr:
             self.assertEqual(Namespace.add(nstr).long_name, nstr)
+        liststr = ['$a.c.c.', 'fr.$a.b.']
+        for nstr in liststr:
+            self.assertEqual(Namespace.add(nstr, force=True).long_name, nstr)
     
     def test_add_ko(self):
         liststr = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
