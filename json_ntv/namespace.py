@@ -229,7 +229,27 @@ def _join_type(namesp, str_typ):
             namesp_split.append(name)
     return '.'.join(namesp_split)
 
-
+def from_file(file, name, long_parent=None):
+    long_parent = '' if not long_parent else long_parent
+    if name[0] != '$':
+        raise NtvTypeError(name + ' is not a custom NTVtype')
+    if not long_parent in Namespace.namespaces():        
+        raise NtvTypeError(long_parent + ' is not a valid NTVtype')
+    schema_nsp = Namespace(name, long_parent)
+    config = configparser.ConfigParser()
+    config.read(file)
+    _add_file(config, schema_nsp)
+        
+def _add_file(config, namesp):
+    if namesp.name in config.sections():    
+        confname = config[namesp.name]
+        if 'type' in confname:
+            for nspname in json.loads(confname['namespace']):
+                nsp = Namespace(nspname, namesp, force=True)
+                _add_file(config, nsp) 
+            for typ in json.loads(confname['type']):
+                NtvType(typ, namesp, force=True)
+                
 def relative_type(str_def, str_typ):
     '''return relative str_typ string from NtvType or Namespace str_def
 
@@ -304,7 +324,7 @@ class NtvType():
         return [nam.long_name for nam in cls._types_.values()]
 
     @classmethod
-    def add(cls, long_name, module=False):
+    def add(cls, long_name, module=False, force=False):
         '''activate and return a valid NtvType defined by the long name
         
         *parameters :*
@@ -321,13 +341,13 @@ class NtvType():
         if split_name[-1] == '':
             raise NtvTypeError(long_name + ' is not a valid NTVtype')
         if len(split_name) == 1:
-            return cls(split_name[0])
+            return cls(split_name[0], force=force)
         if len(split_name) == 2:
-            nspace = Namespace.add(split_name[0]+'.', module=module)
-            return cls(split_name[1], nspace)
+            nspace = Namespace.add(split_name[0]+'.', module=module, force=force)
+            return cls(split_name[1], nspace, force=force)
         raise NtvTypeError(long_name + ' is not a valid NTVtype')
 
-    def __init__(self, name, nspace=None):
+    def __init__(self, name, nspace=None, force=False):
         '''NtvType constructor.
 
         *Parameters*
@@ -345,7 +365,8 @@ class NtvType():
             name = 'json'
         if not nspace:
             nspace = Namespace._namespaces_['']
-        if name[0] != '$' and not nspace.custom and not name in nspace.content['type']:
+        #if name[0] != '$' and not nspace.custom and not name in nspace.content['type']:
+        if name[0] != '$' and not force and not name in nspace.content['type']:
             raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
         self.nspace = nspace
@@ -462,7 +483,7 @@ class Namespace():
         - **content** : dict : {'type': <list of ntv_type names>,  
                                 'namespace': <list of namespace names>}
         '''
-        if name and parent is None:
+        if name and not parent:
             parent = Namespace._namespaces_['']
         #if name and name[0] != '$' and not parent.custom and \
         if name and name[0] != '$' and not force and \

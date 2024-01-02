@@ -68,10 +68,12 @@ class Test_NtvType(unittest.TestCase):
         
     def test_add(self):
         liststr = ['fr.BAN.lon', 'fr.BAN.$lon', 'year', 'fr.reg', 'fr.BAN.numero',
-                   'fr.reg', 'fr.$IRVE.$a', '$a.$c', 'fr.$c', '$a.c.c.d', 'fr.$a.b.d']
+                   'fr.reg', 'fr.$IRVE.$a', '$a.$c', 'fr.$c']
         for tstr in liststr:
             self.assertEqual(NtvType.add(tstr).long_name, tstr)
-    
+        liststr = ['$a.c.c.d', 'fr.$a.b.d']
+        for tstr in liststr:
+            self.assertEqual(NtvType.add(tstr, force=True).long_name, tstr)    
     def test_add_ko(self):
         liststr = ['fr.BAN.test', 'fr', 'fr.BANN.lon']
         for tstr in liststr:
