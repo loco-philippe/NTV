@@ -16,7 +16,9 @@ import json
 
 class NtvUtil:
     ''' The NtvUtil class includes static methods used by several NTV classes '''
-
+    
+    _namespaces_ = {}
+    
     @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type_str and separator from string'''

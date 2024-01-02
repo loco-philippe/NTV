@@ -30,12 +30,12 @@ ENTITY = 'E'
 NTVSINGLE = 'S'
 NTVLIST = 'L'
 
-class Ntv(ABC):
+class Ntv(ABC, NtvUtil):
     ''' The Ntv class is an abstract class used by `NtvSingle`and `NtvList` classes.
 
     *Attributes :*
     - **ntv_name** :  String - name of the NTV entity
-    - **ntv_type**:   NtvType - type of the entity
+    - **ntv_type**:   NtvType or Namespace - type of the entity
     - **ntv_value**:  value of the entity
 
     *Internal attributes :*
@@ -106,7 +106,7 @@ class Ntv(ABC):
         - **ntv_name** : String (default None) - name of the NTV entity
         - **ntv_type**: String or NtvType or Namespace (default None) - type of the entity
         '''
-        if isinstance(ntv_type, (NtvType, Namespace)):
+        if ntv_type.__class__.__name__ in ['NtvType', 'Namespace']:
             self.ntv_type = ntv_type
         elif ntv_type and ntv_type[-1] != '.':
             self.ntv_type = NtvType.add(ntv_type)
@@ -142,6 +142,8 @@ class Ntv(ABC):
         is the ntv_type of the first Ntv in the ntv_value
         - **fast** : boolean (default False) - if True, Ntv entity is created without conversion
         - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
+        #print('obj : ', Namespace.namespaces(), '\n')
+
         if isinstance(data, tuple):
             return Ntv.from_att(*data, decode_str=decode_str, fast=fast)
         # if isinstance(data, str) and data.lstrip() and data.lstrip()[0] in '{[':
@@ -409,7 +411,7 @@ class Ntv(ABC):
                     or not NtvConnector.is_json_class(self.val))
         if implicit and not explicit:
             json_type = ''
-        json_sep = self._obj_sep(json_type, def_type)
+        json_sep = self._obj_sep(json_name, json_type, def_type)
         if string:
             return json_name + json_sep + json_type
         return [json_name, json_sep, json_type]
@@ -869,6 +871,7 @@ class Ntv(ABC):
     @staticmethod
     def _create_ntvlist(str_typ, def_type, sep, ntv_value, typ_auto, no_typ, ntv_name, fast):
         '''return a NtvList with parameters from Ntv.from_obj method'''
+        #print('ntvlist', str_typ, def_type, type(str_typ), type(def_type))
         def_type = agreg_type(str_typ, def_type, False)
         sep_val = ':' if sep and def_type else None
         if isinstance(ntv_value, dict):
@@ -954,7 +957,7 @@ class NtvSingle(Ntv):
             return None
         return NtvConnector.uncast(self, **option)[0]
 
-    def _obj_sep(self, json_type, def_type=None): # REQ5
+    def _obj_sep(self, json_name, json_type, def_type=None): # REQ5
         ''' return separator to include in json_name'''
         if json_type or not def_type and isinstance(self.ntv_value, (list, dict)):
             return ':'
@@ -1090,9 +1093,9 @@ class NtvList(Ntv):
         self.ntv_value.insert(idx, ntv)
         ntv.parent = self      
         
-    def _obj_sep(self, json_type, def_type=None):
+    def _obj_sep(self, json_name, json_type, def_type=None):
         ''' return separator to include in json_name'''
-        return '::' if json_type else ''
+        return '::' if (json_type and json_type[-1] != '.') or (json_type and json_name) else ''
 
     def obj_value(self, def_type=None, **kwargs):
         '''return the ntv_value with different formats defined by kwargs

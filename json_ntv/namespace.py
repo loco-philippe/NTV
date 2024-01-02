@@ -186,10 +186,10 @@ import configparser
 from pathlib import Path
 import json
 import requests
-from time import time
 
 import json_ntv
-
+from json_ntv.ntv_util import NtvUtil
+    
 def agreg_type(str_typ, def_type, single):
     '''aggregate str_typ and def_type to return an NtvType or a Namespace if not single
 
@@ -201,15 +201,11 @@ def agreg_type(str_typ, def_type, single):
     if isinstance(str_typ, NtvType):
         str_typ = str_typ.long_name
     def_type = str_type(def_type, single)
-    #if not str_typ and (isinstance(def_type, NtvType) or
-    #                    (not isinstance(def_type, NtvType) and not single)):
     if not str_typ and (not single or isinstance(def_type, NtvType)):
         return def_type
     if not str_typ:
         return NtvType('json')
-    clas = NtvType
-    if str_typ[-1] == '.':
-        clas = Namespace
+    clas = Namespace if str_typ[-1] == '.' else NtvType
     if not def_type:
         return clas.add(str_typ)
     if clas == NtvType or clas == Namespace and not single:
@@ -217,8 +213,7 @@ def agreg_type(str_typ, def_type, single):
             return clas.add(str_typ)
         except NtvTypeError:
             return clas.add(_join_type(def_type.long_name, str_typ))
-    raise NtvTypeError(str_typ + 'and' +
-                       def_type.long_name + 'are incompatible')
+    raise NtvTypeError(str_typ + ' and ' + def_type.long_name + ' are incompatible')
 
 
 def _join_type(namesp, str_typ):
@@ -243,10 +238,11 @@ def from_file(file, name, long_parent=None):
 def _add_file(config, namesp):
     if namesp.name in config.sections():    
         confname = config[namesp.name]
-        if 'type' in confname:
+        if 'namespace' in confname:
             for nspname in json.loads(confname['namespace']):
                 nsp = Namespace(nspname, namesp, force=True)
                 _add_file(config, nsp) 
+        if 'type' in confname:
             for typ in json.loads(confname['type']):
                 NtvType(typ, namesp, force=True)
                 
@@ -285,16 +281,16 @@ def str_type(long_name, single):
         return NtvType('json')
     if not long_name and not single:
         return None
-    if isinstance(long_name, (NtvType, Namespace)):
+    if long_name.__class__.__name__ in ['NtvType', 'Namespace']:
         return long_name
     if not isinstance(long_name, str):
-        raise NtvTypeError('the name is not a string')
+        raise NtvTypeError('the long_name is not a string')
     if long_name[-1] == '.':
         return Namespace.add(long_name)
     return NtvType.add(long_name)
 
 
-class NtvType():
+class NtvType(NtvUtil):
     ''' type of NTV entities.
 
     *Attributes :*
@@ -364,8 +360,7 @@ class NtvType():
         if not name and not nspace:
             name = 'json'
         if not nspace:
-            nspace = Namespace._namespaces_['']
-        #if name[0] != '$' and not nspace.custom and not name in nspace.content['type']:
+            nspace = NtvUtil._namespaces_['']
         if name[0] != '$' and not force and not name in nspace.content['type']:
             raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
@@ -412,7 +407,7 @@ class NtvType():
         return self.nspace.is_child(Namespace.add(long_name))
 
 
-class Namespace():
+class Namespace(NtvUtil):
     ''' Namespace of NTV entities.
 
     *Attributes :*
@@ -437,16 +432,13 @@ class Namespace():
     - `is_child`
     - `is_parent`
     '''
-    _namespaces_ = {}
-    #_pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
     _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/json_ntv/config/'
-    #_global_ = "NTV_global_namespace.ini"
     _global_ = "NTV_global_namespace.ini"
 
     @classmethod
     def namespaces(cls):
         '''return the list of Namespace created'''
-        return [nam.long_name for nam in cls._namespaces_.values()]
+        return [nam.long_name for nam in NtvUtil._namespaces_.values()]
 
     @classmethod
     def add(cls, long_name, module=False, force=False):
@@ -459,7 +451,7 @@ class Namespace():
         local .ini file, else in the distant repository
         '''
         if long_name in Namespace.namespaces():
-            return cls._namespaces_[long_name]
+            return NtvUtil._namespaces_[long_name]
         split_name = long_name.rsplit('.', 2)
         if len(split_name) == 1 or split_name[-1] != '':
             raise NtvTypeError(long_name + ' is not a valid classname')
@@ -484,8 +476,7 @@ class Namespace():
                                 'namespace': <list of namespace names>}
         '''
         if name and not parent:
-            parent = Namespace._namespaces_['']
-        #if name and name[0] != '$' and not parent.custom and \
+            parent = NtvUtil._namespaces_['']
         if name and name[0] != '$' and not force and \
           not name in parent.content['namespace']:
             raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
@@ -493,9 +484,8 @@ class Namespace():
         self.parent = parent
         self.custom = parent.custom or name[0] == '$' if parent else False
         self.file = Namespace._file(self.parent, self.name, self.custom, module)
-        #print(self.file, self.name, self.custom, module)
         self.content = Namespace._content(self.file, self.name, self.custom, module)
-        self._namespaces_[self.long_name] = self
+        NtvUtil._namespaces_[self.long_name] = self
 
     def __eq__(self, other):
         ''' equal if name and parent are equal'''
@@ -542,8 +532,6 @@ class Namespace():
                 config.read_string(requests.get(
                     parent.file, allow_redirects=True).content.decode())
             return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[name]
-        #if module:
-        #    return str(Path(json_ntv.__file__).parent / Namespace._global_)
         return Namespace._pathconfig_ + Namespace._global_
 
     @staticmethod
@@ -569,17 +557,12 @@ class Namespace():
         if module:
             p_file = Path(file).stem + Path(file).suffix
             config.read(Path(json_ntv.__file__).parent / 'config' / p_file)
-            #config.read(Path(json_ntv.__file__
-            #    ).parent.joinpath(p_file))
-            #print(p_file, Path(json_ntv.__file__).parent.joinpath(p_file))
         else:
             config.read_string(requests.get(
                 file, allow_redirects=True).content.decode())
         config_name = config['data']['name']
         if config_name != name:
             raise NtvTypeError(file + ' is not correct')
-        #name = 'data' if not name else name
-        #return {'type': json.loads(config[name]['type']),
         return {'type': json.loads(config['data']['type']),
                 'namespace': json.loads(config['data']['namespace'])}
 
