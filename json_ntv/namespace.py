@@ -417,9 +417,10 @@ class Namespace():
     - `is_parent`
     '''
     _namespaces_ = {}
-    _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
+    #_pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/config/'
+    _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/json_ntv/config/'
     #_global_ = "NTV_global_namespace.ini"
-    _global_ = "config/NTV_global_namespace.ini"
+    _global_ = "NTV_global_namespace.ini"
 
     @classmethod
     def namespaces(cls):
@@ -444,7 +445,7 @@ class Namespace():
         if len(split_name) == 2:
             return cls(split_name[0]+'.', module=module, force=force)
         if len(split_name) == 3:
-            parent = Namespace.add(split_name[0]+'.')
+            parent = Namespace.add(split_name[0]+'.', force=force)
             return cls(split_name[1]+'.', parent, module=module, force=force)
         raise NtvTypeError(long_name + ' is not a valid classname')
 
@@ -471,6 +472,7 @@ class Namespace():
         self.parent = parent
         self.custom = parent.custom or name[0] == '$' if parent else False
         self.file = Namespace._file(self.parent, self.name, self.custom, module)
+        #print(self.file, self.name, self.custom, module)
         self.content = Namespace._content(self.file, self.name, self.custom, module)
         self._namespaces_[self.long_name] = self
 
@@ -545,8 +547,9 @@ class Namespace():
         config = configparser.ConfigParser()
         if module:
             p_file = Path(file).stem + Path(file).suffix
-            config.read(Path(json_ntv.__file__
-                ).parent.joinpath(p_file))
+            config.read(Path(json_ntv.__file__).parent / 'config' / p_file)
+            #config.read(Path(json_ntv.__file__
+            #    ).parent.joinpath(p_file))
             #print(p_file, Path(json_ntv.__file__).parent.joinpath(p_file))
         else:
             config.read_string(requests.get(
