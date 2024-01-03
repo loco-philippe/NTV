@@ -225,6 +225,7 @@ def _join_type(namesp, str_typ):
     return '.'.join(namesp_split)
 
 def from_file(file, name, long_parent=None):
+    '''create a new Ntvtype with all subtypes'''
     long_parent = '' if not long_parent else long_parent
     if name[0] != '$':
         raise NtvTypeError(name + ' is not a custom NTVtype')
@@ -312,12 +313,11 @@ class NtvType(NtvUtil):
     *instance methods*
     - `isin_namespace`
     '''
-    _types_ = {}
 
-    @classmethod
-    def types(cls):
+    @staticmethod
+    def types():
         '''return the list of NtvType created'''
-        return [nam.long_name for nam in cls._types_.values()]
+        return [nam.long_name for nam in NtvUtil._types_.values()]
 
     @classmethod
     def add(cls, long_name, module=False, force=False):
@@ -332,7 +332,7 @@ class NtvType(NtvUtil):
         if long_name == '':
             return None
         if long_name in NtvType.types():
-            return cls._types_[long_name]
+            return NtvUtil._types_[long_name]
         split_name = long_name.rsplit('.', 1)
         if split_name[-1] == '':
             raise NtvTypeError(long_name + ' is not a valid NTVtype')
@@ -366,7 +366,7 @@ class NtvType(NtvUtil):
         self.name = name
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
-        self._types_[self.long_name] = self
+        NtvUtil._types_[self.long_name] = self
         return
 
     def __eq__(self, other):
@@ -421,8 +421,10 @@ class Namespace(NtvUtil):
 
     The methods defined in this class are :
 
-    *classmethods*
+    *staticmethods*
     - `namespaces`
+    
+    *classmethods*
     - `add`
 
     *dynamic values (@property)*
@@ -435,8 +437,8 @@ class Namespace(NtvUtil):
     _pathconfig_ = 'https://raw.githubusercontent.com/loco-philippe/NTV/master/json_ntv/config/'
     _global_ = "NTV_global_namespace.ini"
 
-    @classmethod
-    def namespaces(cls):
+    @staticmethod
+    def namespaces():
         '''return the list of Namespace created'''
         return [nam.long_name for nam in NtvUtil._namespaces_.values()]
 

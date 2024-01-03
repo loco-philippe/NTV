@@ -18,6 +18,7 @@ class NtvUtil:
     ''' The NtvUtil class includes static methods used by several NTV classes '''
     
     _namespaces_ = {}
+    _types_ = {}
     
     @staticmethod
     def from_obj_name(string):
