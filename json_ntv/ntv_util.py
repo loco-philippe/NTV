@@ -96,7 +96,7 @@ class NtvConnector(ABC):
 
     A NtvConnector child is defined by:
     - clas_obj: str - define the class name of the object to convert
-    - clas_typ: str - define the NTVtype of the converted object
+    - clas_typ: str - define the Datatype of the converted object
     - to_obj_ntv: method - converter from JsonNTV to the object
     - to_json_ntv: method - converter from the object to JsonNTV
     

@@ -7,24 +7,24 @@ Created on Jan 20 2023
 The `namespace` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
  
-It contains the `Namespace` and the `NtvType` classes and the `str_type` method for NTV entities.    
+It contains the `Namespace` and the `Datatype` classes and the `str_type` method for NTV entities.    
       
 # 0 - Presentation
 
-The NTVtype is defined by a name and a Namespace. The name is unique in the Namespace
+The Datatype is defined by a name and a Namespace. The name is unique in the Namespace
 
 A Namespace is represented by a string followed by a point.
 Namespaces may be nested (the global Namespace is represented by an empty string).
 
-The Namespace representations are added to the value of an NTVtype to have an absolute
-representation of an NTVtype (long_name).
+The Namespace representations are added to the value of an Datatype to have an absolute
+representation of an Datatype (long_name).
 
-*Example for an absolute representation of an NTVtype defined in two nested Namespace :*
+*Example for an absolute representation of an Datatype defined in two nested Namespace :*
 *“ns1.ns2.type”*
 *where:*
 - *ns1. is a Namespace defined in the global Namespace,*
 - *ns2. is a Namespace defined in the ns1. Namespace,*
-- *type is a NTVtype defined in the ns2. Namespace*
+- *type is a Datatype defined in the ns2. Namespace*
 
 # 1 - Global Namespace
 
@@ -86,7 +86,7 @@ The global namespace can include the following structures:
 
 ## 1.5 - Tabular data
 
-| NTVtype  | NTVvalue                                               |
+| Datatype  | NTVvalue                                               |
 |----------|--------------------------------------------------------|
 | row      | JSON-array of JSON-NTV                                 |
 | field    | JSON-array of NTVvalue (following JSON-TAB format)     |
@@ -112,7 +112,7 @@ Namespaces could also be defined to reference for example:
 - geopolitical entities: ISO3166-1 country code (for example "fr." for France)
 - data catalogs, for example:
 
-| NTVtype      | example JSON-NTV                                                     |
+| Datatype      | example JSON-NTV                                                     |
 |--------------|----------------------------------------------------------------------|
 | schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>{ “:schemaorg.unitText”:”µg/m3”}</div>  |
 | darwincore.  | { “:darwincore.acceptedNameUsage”: “Tamias minimus” }                |
@@ -191,33 +191,33 @@ import json_ntv
 from json_ntv.ntv_util import NtvUtil
     
 def agreg_type(str_typ, def_type, single):
-    '''aggregate str_typ and def_type to return an NtvType or a Namespace if not single
+    '''aggregate str_typ and def_type to return an Datatype or a Namespace if not single
 
     *Parameters*
 
-        - **str_typ** : NtvType or String (long_name) - NtvType to aggregate
-        - **def_typ** : NtvType or String (long_name) - default NtvType or Namespace
+        - **str_typ** : Datatype or String (long_name) - Datatype to aggregate
+        - **def_typ** : Datatype or String (long_name) - default Datatype or Namespace
         - **single** : Boolean - Ntv entity concerned (True if NtvSingle)'''
-    if isinstance(str_typ, NtvType):
+    if isinstance(str_typ, Datatype):
         str_typ = str_typ.long_name
     def_type = str_type(def_type, single)
-    if not str_typ and (not single or isinstance(def_type, NtvType)):
+    if not str_typ and (not single or isinstance(def_type, Datatype)):
         return def_type
     if not str_typ:
-        return NtvType('json')
-    clas = Namespace if str_typ[-1] == '.' else NtvType
+        return Datatype('json')
+    clas = Namespace if str_typ[-1] == '.' else Datatype
     if not def_type:
         return clas.add(str_typ)
-    if clas == NtvType or clas == Namespace and not single:
+    if clas == Datatype or clas == Namespace and not single:
         try:
             return clas.add(str_typ)
-        except NtvTypeError:
+        except DatatypeError:
             return clas.add(_join_type(def_type.long_name, str_typ))
-    raise NtvTypeError(str_typ + ' and ' + def_type.long_name + ' are incompatible')
+    raise DatatypeError(str_typ + ' and ' + def_type.long_name + ' are incompatible')
 
 
 def _join_type(namesp, str_typ):
-    '''join Namespace string and NtvType or Namespace string'''
+    '''join Namespace string and Datatype or Namespace string'''
     namesp_split = namesp.split('.')[:-1]
     for name in str_typ.split('.'):
         if not name in namesp_split:
@@ -228,9 +228,9 @@ def from_file(file, name, long_parent=None):
     '''create a new Ntvtype with all subtypes'''
     long_parent = '' if not long_parent else long_parent
     if name[0] != '$':
-        raise NtvTypeError(name + ' is not a custom NTVtype')
+        raise DatatypeError(name + ' is not a custom Datatype')
     if not long_parent in Namespace.namespaces():        
-        raise NtvTypeError(long_parent + ' is not a valid NTVtype')
+        raise DatatypeError(long_parent + ' is not a valid Datatype')
     schema_nsp = Namespace(name, long_parent)
     config = configparser.ConfigParser()
     config.read(file)
@@ -245,14 +245,14 @@ def _add_file(config, namesp):
                 _add_file(config, nsp) 
         if 'type' in confname:
             for typ in json.loads(confname['type']):
-                NtvType(typ, namesp, force=True)
+                Datatype(typ, namesp, force=True)
                 
 def relative_type(str_def, str_typ):
-    '''return relative str_typ string from NtvType or Namespace str_def
+    '''return relative str_typ string from Datatype or Namespace str_def
 
     *Parameters*
 
-        - **str_def** : String - long_name of the Namespace or NtvType
+        - **str_def** : String - long_name of the Namespace or Datatype
         - **str_type** : String - long_name of Ntvtype to be relative '''
     if not str_def and not str_typ:
         return ''
@@ -272,26 +272,26 @@ def relative_type(str_def, str_typ):
 
 
 def str_type(long_name, single):
-    ''' create a NtvType or a Namespace from a string
+    ''' create a Datatype or a Namespace from a string
 
     *Parameters*
 
-        - **long_name** : String - name of the Namespace or NtvType
+        - **long_name** : String - name of the Namespace or Datatype
         - **single** : Boolean - If True, default type is 'json', else None'''
     if not long_name and single:
-        return NtvType('json')
+        return Datatype('json')
     if not long_name and not single:
         return None
-    if long_name.__class__.__name__ in ['NtvType', 'Namespace']:
+    if long_name.__class__.__name__ in ['Datatype', 'Namespace']:
         return long_name
     if not isinstance(long_name, str):
-        raise NtvTypeError('the long_name is not a string')
+        raise DatatypeError('the long_name is not a string')
     if long_name[-1] == '.':
         return Namespace.add(long_name)
-    return NtvType.add(long_name)
+    return Datatype.add(long_name)
 
 
-class NtvType(NtvUtil):
+class Datatype(NtvUtil):
     ''' type of NTV entities.
 
     *Attributes :*
@@ -316,53 +316,53 @@ class NtvType(NtvUtil):
 
     @staticmethod
     def types():
-        '''return the list of NtvType created'''
+        '''return the list of Datatype created'''
         return [nam.long_name for nam in NtvUtil._types_.values()]
 
     @classmethod
     def add(cls, long_name, module=False, force=False):
-        '''activate and return a valid NtvType defined by the long name
+        '''activate and return a valid Datatype defined by the long name
         
         *parameters :*
 
-        - **long_name** : String - absolut name of the NtvType
+        - **long_name** : String - absolut name of the Datatype
         - **module** : boolean (default False) - if True search data in the 
         local .ini file, else in the distant repository
         '''
         if long_name == '':
             return None
-        if long_name in NtvType.types():
+        if long_name in Datatype.types():
             return NtvUtil._types_[long_name]
         split_name = long_name.rsplit('.', 1)
         if split_name[-1] == '':
-            raise NtvTypeError(long_name + ' is not a valid NTVtype')
+            raise DatatypeError(long_name + ' is not a valid Datatype')
         if len(split_name) == 1:
             return cls(split_name[0], force=force)
         if len(split_name) == 2:
             nspace = Namespace.add(split_name[0]+'.', module=module, force=force)
             return cls(split_name[1], nspace, force=force)
-        raise NtvTypeError(long_name + ' is not a valid NTVtype')
+        raise DatatypeError(long_name + ' is not a valid Datatype')
 
     def __init__(self, name, nspace=None, force=False):
-        '''NtvType constructor.
+        '''Datatype constructor.
 
         *Parameters*
 
         - **name** : string - name of the Type
         - **nspace** : Namespace (default None) - namespace associated'''
-        if isinstance(name, NtvType):
+        if isinstance(name, Datatype):
             self.name = name.name
             self.nspace = name.nspace
             self.custom = name.custom
             return
         if not name or not isinstance(name, str):
-            raise NtvTypeError('null name is not allowed')
+            raise DatatypeError('null name is not allowed')
         if not name and not nspace:
             name = 'json'
         if not nspace:
             nspace = NtvUtil._namespaces_['']
         if name[0] != '$' and not force and not name in nspace.content['type']:
-            raise NtvTypeError(name + ' is not defined in ' + nspace.long_name)
+            raise DatatypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
@@ -392,7 +392,7 @@ class NtvType(NtvUtil):
 
     @property
     def gen_type(self):
-        '''return the generic type of the NtvType'''
+        '''return the generic type of the Datatype'''
         if self.custom:
             return ''
         return self.nspace.content['type'][self.name]
@@ -456,13 +456,13 @@ class Namespace(NtvUtil):
             return NtvUtil._namespaces_[long_name]
         split_name = long_name.rsplit('.', 2)
         if len(split_name) == 1 or split_name[-1] != '':
-            raise NtvTypeError(long_name + ' is not a valid classname')
+            raise DatatypeError(long_name + ' is not a valid classname')
         if len(split_name) == 2:
             return cls(split_name[0]+'.', module=module, force=force)
         if len(split_name) == 3:
             parent = Namespace.add(split_name[0]+'.', force=force)
             return cls(split_name[1]+'.', parent, module=module, force=force)
-        raise NtvTypeError(long_name + ' is not a valid classname')
+        raise DatatypeError(long_name + ' is not a valid classname')
 
     def __init__(self, name='', parent=None, module=False, force=False):
         '''
@@ -481,7 +481,7 @@ class Namespace(NtvUtil):
             parent = NtvUtil._namespaces_['']
         if name and name[0] != '$' and not force and \
           not name in parent.content['namespace']:
-            raise NtvTypeError(name + ' is not defined in ' + parent.long_name)
+            raise DatatypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
         self.parent = parent
         self.custom = parent.custom or name[0] == '$' if parent else False
@@ -564,7 +564,7 @@ class Namespace(NtvUtil):
                 file, allow_redirects=True).content.decode())
         config_name = config['data']['name']
         if config_name != name:
-            raise NtvTypeError(file + ' is not correct')
+            raise DatatypeError(file + ' is not correct')
         return {'type': json.loads(config['data']['type']),
                 'namespace': json.loads(config['data']['namespace'])}
 
@@ -596,11 +596,11 @@ class Namespace(NtvUtil):
         return nspace.is_child(self)
 
 
-class NtvTypeError(Exception):
-    ''' NtvType or Namespace Exception'''
+class DatatypeError(Exception):
+    ''' Datatype or Namespace Exception'''
     # pass
 
 nroot = Namespace(module=True)
 for root_typ in nroot.content['type'].keys():
-    typ = NtvType.add(root_typ, module=True)
-typ_json = NtvType('json')
+    typ = Datatype.add(root_typ, module=True)
+typ_json = Datatype('json')

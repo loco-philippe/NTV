@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from numbers import Number
 import json
 
-from json_ntv.namespace import NtvType, Namespace, str_type, relative_type, agreg_type
+from json_ntv.namespace import Datatype, Namespace, str_type, relative_type, agreg_type
 from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree, NtvUtil
 from json_ntv.ntv_patch import NtvPointer
 
@@ -35,7 +35,7 @@ class Ntv(ABC, NtvUtil):
 
     *Attributes :*
     - **ntv_name** :  String - name of the NTV entity
-    - **ntv_type**:   NtvType or Namespace - type of the entity
+    - **ntv_type**:   Datatype or Namespace - type of the entity
     - **ntv_value**:  value of the entity
 
     *Internal attributes :*
@@ -104,12 +104,12 @@ class Ntv(ABC, NtvUtil):
 
         - **ntv_value**: Json entity - value of the entity
         - **ntv_name** : String (default None) - name of the NTV entity
-        - **ntv_type**: String or NtvType or Namespace (default None) - type of the entity
+        - **ntv_type**: String or Datatype or Namespace (default None) - type of the entity
         '''
-        if ntv_type.__class__.__name__ in ['NtvType', 'Namespace']:
+        if ntv_type.__class__.__name__ in ['Datatype', 'Namespace']:
             self.ntv_type = ntv_type
         elif ntv_type and ntv_type[-1] != '.':
-            self.ntv_type = NtvType.add(ntv_type)
+            self.ntv_type = Datatype.add(ntv_type)
         elif ntv_type and ntv_type[-1] == '.':
             self.ntv_type = Namespace.add(ntv_type)
         else:
@@ -186,7 +186,7 @@ class Ntv(ABC, NtvUtil):
 
         - **value**: Ntv value to convert in an Ntv entity
         - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
-        - **def_type** : NtvType or Namespace (default None) - default type of the value
+        - **def_type** : Datatype or Namespace (default None) - default type of the value
         - **def_sep**: ':', '::' or None (default None) - default separator of the value
         - **decode_str**: boolean (default False) - if True, string are loaded as json data
         - **type_auto**: boolean (default False) - if True, default type for NtvList
@@ -396,12 +396,12 @@ class Ntv(ABC, NtvUtil):
 
         *Parameters*
 
-        - **def_typ** : NtvType or Namespace (default None) - type of the parent entity
+        - **def_typ** : Datatype or Namespace (default None) - type of the parent entity
         - **string** : boolean (default False) - If True, return a string else a tuple
         - **explicit** : boolean (default False) - If True, type is always included'''
         if def_type is None:
             def_type = ''
-        elif isinstance(def_type, (NtvType, Namespace)):
+        elif isinstance(def_type, (Datatype, Namespace)):
             def_type = def_type.long_name
         json_name = self.ntv_name if self.ntv_name else ''
         json_type = relative_type(
@@ -439,7 +439,7 @@ class Ntv(ABC, NtvUtil):
 
         - **value**: Ntv value to convert in an Ntv entity
         - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
-        - **def_type** : NtvType or Namespace (default None) - default type of the value
+        - **def_type** : Datatype or Namespace (default None) - default type of the value
         - **def_sep**: ':', '::' or None (default None) - default separator of the value
         - **decode_str**: boolean (default False) - if True, string are loaded as json data
         - **type_auto**: boolean (default False) - if True, default type for NtvList
@@ -536,8 +536,8 @@ class Ntv(ABC, NtvUtil):
 
         *Parameters*
 
-        - **typ**: string, NtvType, Namespace (default None)'''
-        if typ and not isinstance(typ, (str, NtvType, Namespace)):
+        - **typ**: string, Datatype, Namespace (default None)'''
+        if typ and not isinstance(typ, (str, Datatype, Namespace)):
             raise NtvError('the type is not a valid type')
         self.ntv_type = str_type(typ, self.__class__.__name__ == 'NtvSingle')
 
@@ -652,7 +652,7 @@ class Ntv(ABC, NtvUtil):
 
         *Parameters*
 
-        - **def_type** : NtvType or Namespace (default None) - default type to apply
+        - **def_type** : Datatype or Namespace (default None) - default type to apply
         to the NTV entity
         - **encoded** : boolean (default False) - choice for return format
         (string/bytes if True, dict/list/tuple else)
@@ -673,7 +673,7 @@ class Ntv(ABC, NtvUtil):
 
         *Parameters*
 
-        - **def_type** : NtvType or Namespace (default None) - default type to apply
+        - **def_type** : Datatype or Namespace (default None) - default type to apply
         to the NTV entity
         - **encoded** : boolean (default False) - choice for return format
         (string/bytes if True, dict/list/tuple else)
@@ -738,11 +738,11 @@ class Ntv(ABC, NtvUtil):
         for leaf in ntv.tree.leaf_nodes:
             if isinstance(leaf.ntv_value, (NtvSingle, NtvList)):
                 leaf.ntv_value = leaf.ntv_value.to_obj()
-                leaf.ntv_type = NtvType('ntv')
+                leaf.ntv_type = Datatype('ntv')
             elif not leaf.is_json:
                 leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.cast(
                     leaf.ntv_value, leaf.ntv_name, leaf.type_str)
-                leaf.ntv_type = NtvType.add(type_str)
+                leaf.ntv_type = Datatype.add(type_str)
                 leaf.is_json = True
         return ntv
 
@@ -759,7 +759,7 @@ class Ntv(ABC, NtvUtil):
                     or leaf.ntv_type is None):
                 leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.uncast(
                     leaf, **kwargs)
-                leaf.ntv_type = NtvType.add(type_str) if type_str else None
+                leaf.ntv_type = Datatype.add(type_str) if type_str else None
                 leaf.is_json = NtvConnector.is_json(leaf.ntv_value)
         return ntv
 
@@ -979,7 +979,7 @@ class NtvSingle(Ntv):
             return (ntv_value, ntv_name, 'ntv')
         else:
             ntv_value, name, typ = NtvConnector.cast(ntv_value, ntv_name)  
-            ntv_type = NtvType(typ) if typ else ntv_type
+            ntv_type = Datatype(typ) if typ else ntv_type
         if not ntv_type:
             if is_json:
                 ntv_type = 'json'
@@ -987,7 +987,7 @@ class NtvSingle(Ntv):
                 ntv_type = typ
                 if not ntv_name:
                     ntv_name = name
-        elif not is_json and NtvType(ntv_type) != NtvType(typ):
+        elif not is_json and Datatype(ntv_type) != Datatype(typ):
             raise NtvError('ntv_value is not compatible with ntv_type')
         return (ntv_value, ntv_name, ntv_type)
 

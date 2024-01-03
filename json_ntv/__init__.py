@@ -10,7 +10,7 @@ This package contains the following classes:
 
 - `NTV.json_ntv.namespace` :
     - `NTV.json_ntv.namespace.Namespace`
-    - `NTV.json_ntv.namespace.NtvType`
+    - `NTV.json_ntv.namespace.Datatype`
 
         
 - `NTV.json_ntv.ntv` :
@@ -52,7 +52,7 @@ For more information, see the
 or the [github repository](https://github.com/loco-philippe/NTV).
 
 """
-from json_ntv.namespace import Namespace, NtvType, str_type, relative_type, agreg_type
+from json_ntv.namespace import Namespace, Datatype, str_type, relative_type, agreg_type
 from json_ntv.ntv_patch import NtvOp, NtvPatch, NtvPointer
 from json_ntv.ntv_comment import NtvComment
 from json_ntv.ntv import Ntv, NtvSingle, NtvList
