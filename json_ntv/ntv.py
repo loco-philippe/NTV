@@ -407,7 +407,7 @@ class Ntv(ABC, NtvUtil):
         json_type = relative_type(
             def_type, self.type_str) if self.ntv_type else ''
         implicit = isinstance(self, NtvSingle) and (json_type == 'json'  
-                    and (not def_type or def_type == 'json')
+                    and (not def_type or def_type == 'json' or def_type[-1] == '.')
                     or not NtvConnector.is_json_class(self.val))
         if implicit and not explicit:
             json_type = ''
