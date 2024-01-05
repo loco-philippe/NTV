@@ -24,3 +24,4 @@ Project1/
 .gitignore
 example/test.csv
 uses/test.csv
+NTV.egg-info/
