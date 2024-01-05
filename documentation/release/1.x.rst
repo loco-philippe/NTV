@@ -1,6 +1,19 @@
 Version 1.x
 ===========
 
+1.2.0 (2024-01-05)
+--------------------
+- **issues**
+    - bugs #7, #8, #9, #10, #11, #12
+    - use of relative Namespace in ntv_type
+
+- **NTV Structure:**
+    - update NTV_global_namespace
+    - new management of Namespace files .ini
+    - separation of NTVtype (attribute of NTV entity) and Datatype (data type used in NTVtype)
+    - add `from_file` function for creating a custom Namespace and all associated Namespace and Datatype
+
+
 1.1.0 (2023-11-23)
 --------------------
 

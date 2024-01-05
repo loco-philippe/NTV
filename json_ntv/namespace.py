@@ -1,185 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Created on Jan 20 2023
-
 @author: Philippe@loco-labs.io
 
 The `namespace` module is part of the `NTV.json_ntv` package ([specification document](
-https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
- 
-It contains the `Namespace` and the `Datatype` classes and the `str_type` method for NTV entities.    
-      
-# 0 - Presentation
+https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
 
-The Datatype is defined by a name and a Namespace. The name is unique in the Namespace
+It contains the `Namespace`, `Datatype`, `DatatypeError` classes and 
+the functions `agreg_type`, `from_file`, `relative_type` and `str_type`.
 
-A Namespace is represented by a string followed by a point.
-Namespaces may be nested (the global Namespace is represented by an empty string).
+Namespace and Datatype entities are used to define NTVtype.
 
-The Namespace representations are added to the value of an Datatype to have an absolute
-representation of an Datatype (long_name).
-
-*Example for an absolute representation of an Datatype defined in two nested Namespace :*
-*“ns1.ns2.type”*
-*where:*
-- *ns1. is a Namespace defined in the global Namespace,*
-- *ns2. is a Namespace defined in the ns1. Namespace,*
-- *type is a Datatype defined in the ns2. Namespace*
-
-# 1 - Global Namespace
-
-The structure of types by namespace makes it possible to have types corresponding
-to recognized standards at the global level.
-Generic types can also be defined (calculation of the exact type when decoding the value).
-
-The global namespace can include the following structures:
-
-## 1.1 - Simple (JSON RFC8259)
-
-| type (generic type)| value example                 |
-|--------------------|-------------------------------|
-| boolean (json)     | true                          |
-| null (json)        | null                          |
-| number (json)      | 45.2                          |
-| string (json)      | "string"                      |
-| array  (json)      | [1, 2, 3]                     |
-| object (json)      | { "str": "test", "bool": true}|
-
-## 1.2 - Datation (ISO8601 and Posix)
-
-| type (generic type)| value example                 |
-|--------------------|-------------------------------|
-| year               | 1998                          |
-| month              | 10                            |
-| day                | 21                            |
-| wday               | 2                             |
-| yday               | 251                           |
-| week               | 38                            |
-| hour               | 20                            |
-| minute             | 18                            |
-| second             | 54                            |
-| date (dat)         | “2022-01-28”                  |
-| time (dat)         | “T18:23:54”,  “18:23”, “T18”  |
-| datetime (dat)     | “2022-01-28T18-23-54Z”, “2022-01-28T18-23-54+0400”        |
-
-## 1.3 - Duration (ISO8601 and Posix)
-
-| type (generic type)| value example                 |
-|--------------------|-------------------------------|
-| period             | "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"  |
-| duration           | "P0002-10- 15T10:30:20"       |
-| timearray          | [date1, date2]                |
-
-## 1.4 - Location (RFC7946 and Open Location Code):
-
-| type (generic type) | value example                                |
-|---------------------|------------------------------|
-| point (loc)         | [ 5.12, 45.256 ] (lon, lat)  |
-| line (loc)          | [ point1, point2, point3 ]   |
-| ring                | [ point1, point2, point3 ]   |
-| multiline           | [ line1, line2, line3]       |
-| polygon (loc)       | [ ring1, ring2, ring3]       |
-| multipolygon (loc)  | [ poly1, poly2, poly3 ]      |
-| box (loc)           | [ -10.0, -10.0, 10.0, 10.0 ] |
-| geojson (loc)       | {“type”: “point”, “coordinates”: [40.0, 0.0] } |
-| codeolc (loc)       | “8FW4V75V+8F6”               |
-
-## 1.5 - Tabular data
-
-| Datatype  | NTVvalue                                               |
-|----------|--------------------------------------------------------|
-| row      | JSON-array of JSON-NTV                                 |
-| field    | JSON-array of NTVvalue (following JSON-TAB format)     |
-| table    | JSON-array of JSON-NTV fields with the same length     |
-
-
-## 1.6 - Normalized strings
-
-The type could be `uri`, cf exemples :
-- "https://www.ietf.org/rfc/rfc3986.txt"
-- "https://gallica.bnf.fr/ark:/12148/bpt6k107371t"
-- "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
-- "ni:///sha-256;UyaQV-Ev4rdLoHyJJWCi11OHfrYv9E1aGQAlMO2X_-Q"
-- "geo:13.4125,103.86673" *(RFC5870)*
-- "info:eu-repo/dai/nl/12345"
-- "mailto:John.Doe@example.com"
-- "news:comp.infosystems.www.servers.unix"
-- "urn:oasis:names:specification:docbook:dtd:xml:4.1.2"
-
-## 1.7 - Namespaces
-
-Namespaces could also be defined to reference for example:
-- geopolitical entities: ISO3166-1 country code (for example "fr." for France)
-- data catalogs, for example:
-
-| Datatype      | example JSON-NTV                                                     |
-|--------------|----------------------------------------------------------------------|
-| schemaorg.   | <div>{ “:schemaorg.propertyID”: “NO2” }</div><div>{ “:schemaorg.unitText”:”µg/m3”}</div>  |
-| darwincore.  | { “:darwincore.acceptedNameUsage”: “Tamias minimus” }                |
-
-## 1.8 - Identifiers
-
-For example :
-
-| type         | definition                      | exemple               |
-|--------------|---------------------------------|-----------------------|
-| fr.uic       | code UIC station                | 8757449               |
-| fr.iata      | code IATA airport               | CDG                   |
-
-
-# 2 - Example of using a `fr.` namespace
-
-This namespace is dedicated to datasets associated with the France geopolitical namespace
-(see also the [presentation document](
-https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-namespace-fr.pdf)).
-
-A namespace defines:
-- identifiers used to access additional data,
-- namespaces associated with catalogs or data sets,
-- structured entities used to facilitate the use of data
-
-## 2.1 - Identifiers
-They could correspond to identifiers used in many referenced datasets
-(via a data schema or a data model).
-
-For example :
-
-| type         | definition                      | example               |
-|--------------|---------------------------------|-----------------------|
-| fr.dep       | code département                | 60                    |
-| fr.cp        | code postal                     | 76450                 |
-| fr.naf       | code NAF                        | 23                    |
-| fr.siren     | code SIREN enterprise           | 418447363             |
-| fr.fantoir   | code FANTOIR voie               | 4500023086F           |
-| fr.uai       | code UAI établissement          | 0951099D              |
-| fr.aca       | code académies                  | 22                    |
-| fr.finessej  | code FINESS entité juridique    | 790001606             |
-| fr.rna       | code WALDEC association         | 843S0843004860        |
-| fr.spi       | code SPI numéro fiscal          | 1899582886173         |
-| fr.nir       | code NIR sécurité sociale       | 164026005705953       |
-
-## 2.2 Namespaces
-Namespaces could correspond to catalogs or data sets whose data types are identified
-in data models or in referenced data schemas.
-
-For example :
-
-|    type     | example JSON-NTV                                          |
-|-------------|-----------------------------------------------------------|
-| fr.sandre.  | <div>{ ":fr.sandre.CdStationHydro": K163 3010 01 }</div><div>{ ":fr.sandre.TypStationHydro": "standard" }</div>    |
-| fr.synop.   | <div>{ ":fr.synop.numer_sta": 07130 }</div><div>{  ":fr.synop.t": 300, ":fr.synop.ff": 5 }</div>                   |
-| fr.IRVE.    | <div>{ ":fr.IRVE.nom_station": "M2026" }</div><div>{ ":fr.IRVE.nom_operateur": "DEBELEC" }</div>                   |
-| fr.BAN.     | <div>{ ":fr.BAN.numero": 54 }</div><div>{ ":fr.BAN.lon": 3.5124 }</div>|
-
-## 2.3 Entities
-They could correspond to assemblies of data associated with a defined structure.
-
-For example :
-
-|    type      | example JSON-NTV                                         |
-|--------------|----------------------------------------------------------|
-| fr.parcelle  | <div>{“maParcelle:fr.parcelle”: [ 84500, 0, I, 97]}</div><div><i>(fr.cp, fr.cadastre.préfixe, fr.cadastre.section, fr.cadastre.numéro)</i></div> |
-| fr.adresse   | <div>{“monAdresse:fr.adresse”: [ 54, bis, rue de la mairie, 78730 ]</div><div><i>(fr.BAN.numero, fr.BAN.rep, fr.BAN.nom_voie, fr.cp)</i></div>  |
+For more information, see the 
+[user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html) 
+or the [github repository](https://github.com/loco-philippe/NTV).
 
 """
 import configparser
@@ -215,17 +48,15 @@ def agreg_type(str_typ, def_type, single):
             return clas.add(_join_type(def_type.long_name, str_typ))
     raise DatatypeError(str_typ + ' and ' + def_type.long_name + ' are incompatible')
 
-
-def _join_type(namesp, str_typ):
-    '''join Namespace string and Datatype or Namespace string'''
-    namesp_split = namesp.split('.')[:-1]
-    for name in str_typ.split('.'):
-        if not name in namesp_split:
-            namesp_split.append(name)
-    return '.'.join(namesp_split)
-
 def from_file(file, name, long_parent=None):
-    '''create a new Ntvtype with all subtypes'''
+    '''create a set of Datatype and Namespace associated to a custom Namespace
+    
+    *Parameters*
+
+        - **file** : .ini file - description of the Datatype and Namespace
+        - **name** : string - name of the root custom Namespace
+        - **long_parent** : longname of the parent Namespace of the root Namespace
+    '''
     long_parent = '' if not long_parent else long_parent
     if name[0] != '$':
         raise DatatypeError(name + ' is not a custom Datatype')
@@ -234,19 +65,8 @@ def from_file(file, name, long_parent=None):
     schema_nsp = Namespace(name, long_parent)
     config = configparser.ConfigParser()
     config.read(file)
-    _add_file(config, schema_nsp)
+    _add_namespace(config, schema_nsp)
         
-def _add_file(config, namesp):
-    if namesp.name in config.sections():    
-        confname = config[namesp.name]
-        if 'namespace' in confname:
-            for nspname in json.loads(confname['namespace']):
-                nsp = Namespace(nspname, namesp, force=True)
-                _add_file(config, nsp) 
-        if 'type' in confname:
-            for typ in json.loads(confname['type']):
-                Datatype(typ, namesp, force=True)
-                
 def relative_type(str_def, str_typ):
     '''return relative str_typ string from Datatype or Namespace str_def
 
@@ -289,6 +109,26 @@ def str_type(long_name, single):
     if long_name[-1] == '.':
         return Namespace.add(long_name)
     return Datatype.add(long_name)
+
+def _add_namespace(config, namesp):
+    '''create the child Namespace and the child Datatype of the parent namespace'''
+    if namesp.name in config.sections():    
+        confname = config[namesp.name]
+        if 'namespace' in confname:
+            for nspname in json.loads(confname['namespace']):
+                nsp = Namespace(nspname, namesp, force=True)
+                _add_namespace(config, nsp) 
+        if 'type' in confname:
+            for typ in json.loads(confname['type']):
+                Datatype(typ, namesp, force=True)
+                
+def _join_type(namesp, str_typ):
+    '''join Namespace string and Datatype or Namespace string'''
+    namesp_split = namesp.split('.')[:-1]
+    for name in str_typ.split('.'):
+        if not name in namesp_split:
+            namesp_split.append(name)
+    return '.'.join(namesp_split)
 
 
 class Datatype(NtvUtil):

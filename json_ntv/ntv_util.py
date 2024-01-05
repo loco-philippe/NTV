@@ -7,16 +7,26 @@ Created on Feb 27 2023
 The `ntv_util` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the classes `NtvConnector`, `NtvTree`, `NtvJsonEncoder` and `NtvError`
-for NTV entities.
+It contains the classes `NtvUtil`, `NtvConnector`, `NtvTree`, `NtvJsonEncoder` 
+and `NtvError` for NTV entities.
 """
 from abc import ABC, abstractmethod
 import datetime
 import json
 
 class NtvUtil:
-    ''' The NtvUtil class includes static methods used by several NTV classes '''
+    ''' The NtvUtil class includes static methods used by several NTV classes.
+    NtvUtil is the parent class of `Datatype`, `Namespace`, `Ntv`.
     
+    *class variables :*
+    - **_namespaces_** : list of Namespace defined
+    - **_types_** : list of Datatype defined
+    
+    *static methods :*
+    - `from_obj_name`
+    - `decode_ntv_tab`
+    
+    '''   
     _namespaces_ = {}
     _types_ = {}
     
@@ -511,8 +521,6 @@ class NtvTree:
         ''' return the list of inner nodes according to the DFS preordering algorithm'''
         return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvList']
-
-
 
 
 class NtvJsonEncoder(json.JSONEncoder):

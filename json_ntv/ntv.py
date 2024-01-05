@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Feb 27 2023
-
 @author: Philippe@loco-labs.io
 
 The `ntv` module is part of the `NTV.json_ntv` package ([specification document](
