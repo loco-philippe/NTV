@@ -137,7 +137,7 @@ class Ntv(ABC, NtvUtil):
         - **Data** can be :
             - a tuple with value, name, typ and cat (see `from_att` method)
             - a value to decode (see `from_obj`method)
-        - **no_typ** : boolean (default False) - if True, NtvList is with 'json' type
+        - **no_typ** : boolean (default False) - if True, NtvList is with None type
         - **type_auto**: boolean (default False) - if True, default type for NtvList
         is the ntv_type of the first Ntv in the ntv_value
         - **fast** : boolean (default False) - if True, Ntv entity is created without conversion
@@ -185,7 +185,7 @@ class Ntv(ABC, NtvUtil):
         *Parameters*
 
         - **value**: Ntv value to convert in an Ntv entity
-        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
+        - **no_typ** : boolean (default None) - if True, NtvList is with None type
         - **def_type** : Datatype or Namespace (default None) - default type of the value
         - **def_sep**: ':', '::' or None (default None) - default separator of the value
         - **decode_str**: boolean (default False) - if True, string are loaded as json data
@@ -871,7 +871,6 @@ class Ntv(ABC, NtvUtil):
     @staticmethod
     def _create_ntvlist(str_typ, def_type, sep, ntv_value, typ_auto, no_typ, ntv_name, fast):
         '''return a NtvList with parameters from Ntv.from_obj method'''
-        #print('ntvlist', str_typ, def_type, type(str_typ), type(def_type))
         def_type = agreg_type(str_typ, def_type, False)
         sep_val = ':' if sep and def_type else None
         if isinstance(ntv_value, dict):
@@ -884,7 +883,7 @@ class Ntv(ABC, NtvUtil):
                         for val in ntv_value]
         if typ_auto and not def_type and ntv_list:
             def_type = ntv_list[0].ntv_type
-        def_type = 'json' if no_typ else def_type
+        def_type = None if no_typ else def_type
         return NtvList(ntv_list, ntv_name, def_type, typ_auto, fast=fast)
 
     @staticmethod
