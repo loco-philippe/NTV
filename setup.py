@@ -30,5 +30,5 @@ setup(
     packages=find_packages(include=['json_ntv', 'json_ntv.*']),
     package_data={'json_ntv': ['*.ini']},
     python_requires=">=3.7, <4",
-    install_requires=['shapely', 'cbor2']
+    install_requires=['shapely', 'cbor2', 'tab_dataset']
 )
