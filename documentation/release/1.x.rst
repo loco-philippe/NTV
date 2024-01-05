@@ -11,7 +11,7 @@ Version 1.x
     - update NTV_global_namespace
     - new management of Namespace files .ini
     - separation of NTVtype (attribute of NTV entity) and Datatype (data type used in NTVtype)
-    - add `from_file` function for creating a custom Namespace and all associated Namespace and Datatype
+    - add `from_file` function for creating a custom Namespace and all childs Namespace and Datatype
 
 
 1.1.0 (2023-11-23)
