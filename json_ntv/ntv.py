@@ -1041,7 +1041,8 @@ class NtvList(Ntv):
     @property
     def json_array(self):
         ''' return the json_array dynamic attribute'''
-        set_name = {ntv.ntv_name for ntv in self}
+        #set_name = {ntv.ntv_name for ntv in self}
+        set_name = {ntv.json_name(def_type=self.type_str, string=True) for ntv in self}
         return '' in set_name or len(set_name) != len(self) or len(set_name)==1
 
     def __eq__(self, other):

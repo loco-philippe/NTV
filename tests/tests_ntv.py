@@ -358,7 +358,7 @@ class Test_Ntv_creation(unittest.TestCase):
                     [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, 22]}]],
                    ['NtvList', [[4, [5, 6]], {'heure': [datetime.time(10, 25, 10),
                                                         geometry.point.Point((3, 4))]}],
-                    [[4, [5, 6]], {'heure': [{':time': '10:25:10'}, {':point': [3.0, 4.0]}]}]],
+                    [[4, [5, 6]], {'heure': {':time': '10:25:10', ':point': [3.0, 4.0]}}]],
                    ['NtvList', [], {}],
                    ['NtvList', {'::': [{'paris': [2.1, 40.3]}, {'lyon': [2.1, 40.3]}]},
                     {'paris': [2.1, 40.3], 'lyon': [2.1, 40.3]}],
