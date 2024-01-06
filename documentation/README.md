@@ -13,7 +13,7 @@ The documentation presents :
 
 - API
   - [dev](https://loco-philippe.github.io/NTV/json_ntv.html)
-  - [v1.1.0](https://loco-philippe.github.io/NTV/v1.2.0/json_ntv.html)
+  - [v1.2.0](https://loco-philippe.github.io/NTV/v1.2.0/json_ntv.html)
   - [v1.1.0](https://loco-philippe.github.io/NTV/v1.1.0/json_ntv.html)
   - [v1.0.1](https://loco-philippe.github.io/NTV/v1.0.1/json_ntv.html)
   - [v1.0.0](https://loco-philippe.github.io/NTV/v1.0.0/json_ntv.html)

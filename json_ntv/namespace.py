@@ -65,6 +65,8 @@ def from_file(file, name, long_parent=None):
     schema_nsp = Namespace(name, long_parent)
     config = configparser.ConfigParser()
     config.read(file)
+    if not name in config.sections():    
+        raise DatatypeError(name + ' is not present in ' + file )
     _add_namespace(config, schema_nsp)
         
 def relative_type(str_def, str_typ):
