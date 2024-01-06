@@ -1104,7 +1104,8 @@ class NtvList(Ntv):
         def_type = self.ntv_type.long_name if self.ntv_type else def_type
         values = [ntv.to_obj(def_type=def_type, **opt2)
                   for ntv in self.ntv_value[:maxv]]
-        if len(values) == 1 and isinstance(values[0], dict):
+        #if len(values) == 1 and isinstance(values[0], dict):
+        if len(self) == 1 and isinstance(self[0], NtvSingle) and isinstance(values[0], dict):
             return values[0]
         if self.json_array or option['simpleval'] or option['json_array']:
             return values

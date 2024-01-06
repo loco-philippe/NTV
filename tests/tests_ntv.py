@@ -67,7 +67,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvList', '{}'],
                    ['NtvList', '[{" a": 2}]'],
                    #['NtvList', '{"test": [{"a": 2}]}']
-                   ['NtvList', '{"test": {"a": 2}}']
+                   ['NtvList', '{"test": {"a": 2}}'],
+                   ['NtvList', '{"test": [{"a": 1, "b": 2}]}']
                    ]
 
         lis = list(zip(*dictstr))
@@ -255,7 +256,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', '{}'],
                    ['NtvList', '[{" a": 2}]'],
                    #['NtvList', '{"test": [{"a": 2}]}']
-                   ['NtvList', '{"test": {"a": 2}}']
+                   ['NtvList', '{"test": {"a": 2}}'],
+                   ['NtvList', '{"test": [{"a": 1, "b": 2}]}']
                    ]
 
         lis = list(zip(*dictstr))
