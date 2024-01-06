@@ -51,6 +51,6 @@ Version 1.x
     - add JSON data expressing a sequence of operations to apply (RFC6902 - new classes `NtvPatch` and `NtvOp`), 
     - initialization of `NtvType` without distant access
     - extension of `NtvTree`: add `dic_nodes` iterator
-    - add conversion methods: `notype` (NTV entity -> NV entity), `to_list` (NtvSingle -> NtvList) and `to_single` (NtvList -> NtvSingle) 
+    - add conversion methods: `no_type` (NTV entity -> NV entity), `to_list` (NtvSingle -> NtvList) and `to_single` (NtvList -> NtvSingle) 
     - add methods to change NTV structure: `append`, `insert`, `replace`, `copy`, `remove`
     - add NTV data access `childs` method

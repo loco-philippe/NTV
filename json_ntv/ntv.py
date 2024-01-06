@@ -64,6 +64,9 @@ class Ntv(ABC, NtvUtil):
 
     *export - conversion (instance methods)*
     - `expand`
+    - `no_type`
+    - `no_name`
+    - `reduce`
     - `to_fast`
     - `to_name`
     - `to_obj`
@@ -72,7 +75,6 @@ class Ntv(ABC, NtvUtil):
     - `to_tuple`
     - `to_ntvsingle`
     - `to_ntvlist`
-    - `notype`
 
     *tree methods (instance methods)*
     - `childs`
@@ -452,14 +454,30 @@ class Ntv(ABC, NtvUtil):
             ntv.set_name(self.ntv_name)
         return ntv
 
-    def notype(self):
-        '''convert NTV entity in a NV entity (with ntv_type is 'json' or None')'''
-        no_type = copy.copy(self)
-        for ntv in NtvTree(no_type).leaf_nodes:
+    def no_type(self):
+        '''convert NTV entity in a NV entity (in which ntv_type is 'json' or None')'''
+        no_typ = copy.copy(self)
+        for ntv in NtvTree(no_typ).leaf_nodes:
             ntv.set_type('json')           
-        for ntv in NtvTree(no_type).inner_nodes:
+        for ntv in NtvTree(no_typ).inner_nodes:
             ntv.set_type()
-        return no_type
+        return no_typ
+
+    def no_name(self):
+        '''convert NTV entity in a TV entity (in which ntv_name is None)'''
+        no_nam = copy.copy(self)
+        for ntv in NtvTree(no_nam):
+            ntv.ntv_name = None           
+        return no_nam
+
+    def no_value(self):
+        '''convert NTV entity in a NV entity (in which ntv_value is ntv_type )'''
+        no_val = copy.copy(self)
+        for ntv in NtvTree(no_val).leaf_nodes:
+            ntv.ntv_value = ntv.type_str           
+            ntv.set_type('json')           
+        return no_val
+
 
     def reduce(self, obj=True, maxi=6, level=3):
         '''reduce the length and the level of the entity
