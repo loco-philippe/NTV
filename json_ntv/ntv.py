@@ -244,14 +244,19 @@ class Ntv(ABC, NtvUtil):
             - string : name of the ntv,
             - list : recursive selector
             - tuple : list of name or index '''
-        if selec is None or selec == [] or selec == () or selec == '':
+        if selec is None or selec == '': #or isinstance(self, NtvSingle):
+            return self        
+        if isinstance(selec, NtvPointer) or isinstance(selec, str) and selec[0] == '#':
+            selec = self._pointer_to_list(selec)
+        #if selec is None or selec == [] or selec == () or selec == '':
+        if selec in ([], ()):
             return self
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
             selec = selec[0]
-        if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
-            selec = list(NtvPointer(selec))
-        elif isinstance(selec, NtvPointer):
-            selec = list(selec)
+        #if isinstance(selec, str) and len(selec) > 1 and selec[0] == '/':
+            #selec = list(NtvPointer(selec))
+        #elif isinstance(selec, NtvPointer):
+        #    selec = list(selec)
         if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
         if isinstance(self, NtvSingle):
@@ -259,12 +264,27 @@ class Ntv(ABC, NtvUtil):
         if isinstance(selec, tuple):
             return [self[i] for i in selec]
         if isinstance(selec, str) and isinstance(self, NtvList):
-            ind = [ntv.ntv_name for ntv in self.ntv_value].index(selec)
+            #ind = [ntv.ntv_name for ntv in self.ntv_value].index(selec)
+            ind = [ntv.json_name(def_type=self.type_str, string=True) 
+                   for ntv in self.ntv_value].index(selec)
             return self.ntv_value[ind]
         if isinstance(selec, list) and isinstance(self, NtvList):
             return self[selec[0]][selec[1:]]
         return self.ntv_value[selec]
 
+    def _pointer_to_list(self, pointer):
+        if isinstance(pointer, str):
+            selec = list(NtvPointer(pointer[1:]))
+        elif isinstance(pointer, NtvPointer):
+            selec = list(pointer)
+        else:
+            raise NtvError('pointer is not a valid pointer')            
+        if selec[0] != self.json_name(string=True):
+            raise NtvError(selec[0] + 'is not the root json_name : ' + self.ntv_name)
+        return selec[1:]         
+        
+        
+        
     def __lt__(self, other):
         ''' return a comparison between two ntv_value'''
         # order: number > string > None
@@ -329,9 +349,11 @@ class Ntv(ABC, NtvUtil):
         - **item_idx**: Integer (default None) - index value for the pointer 
         (useful with duplicate data)'''
         if not self.parent:
-            return NtvPointer([])        
+            return NtvPointer([self.json_name(string=True)])        
+            #return NtvPointer([])        
         idx = item_idx if item_idx else self.parent.ntv_value.index(self)
-        num = index or (self.ntv_name == "" and self.parent.json_array)
+        num = index or self.parent.json_array
+        #num = index or (self.ntv_name == "" and self.parent.json_array)
         pointer = self.parent.pointer(index)
         #pointer.append(idx if num else self.ntv_name)
         pointer.append(idx if num else self.json_name(def_type=self.parent.type_str,
@@ -1063,7 +1085,8 @@ class NtvList(Ntv):
         ''' return the json_array dynamic attribute'''
         #set_name = {ntv.ntv_name for ntv in self}
         set_name = {ntv.json_name(def_type=self.type_str, string=True) for ntv in self}
-        return '' in set_name or len(set_name) != len(self) or len(set_name)==1
+        #return '' in set_name or len(set_name) != len(self) or len(set_name)==1
+        return '' in set_name or len(set_name) != len(self)
 
     def __eq__(self, other):
         ''' equal if name and value are equal'''

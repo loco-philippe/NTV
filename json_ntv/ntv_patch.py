@@ -368,11 +368,14 @@ class NtvPointer(list):
         - **default**: Str (default '') - default value if pointer is empty
         '''
         json_p = ''
-        if list_pointer == []:
+        for name in list_pointer:
+            json_p += str(name).replace('~', '~0').replace('/', '~1') + '/' 
+        return json_p[:-1]
+        '''if list_pointer == []:
             return default
         for name in list_pointer:
             json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
-        return json_p
+        return json_p'''
 
     @staticmethod
     def pointer_list(json_pointer):
@@ -381,12 +384,14 @@ class NtvPointer(list):
         split_pointer = json_pointer.split('/')
         if len(split_pointer) == 0:
             return []
-        if split_pointer[0] != '' and len(split_pointer) > 1:
+        return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/')
+                for nam in split_pointer]
+        '''if split_pointer[0] != '' and len(split_pointer) > 1:
             raise NtvOpError("json_pointer is not correct")
         if split_pointer[0] != '':
             split_pointer.insert(0, '')
         return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/')
-                for nam in split_pointer[1:]]
+                for nam in split_pointer[1:]]'''
 
 
 class NtvOpError(Exception):
