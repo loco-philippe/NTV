@@ -333,7 +333,9 @@ class Ntv(ABC, NtvUtil):
         idx = item_idx if item_idx else self.parent.ntv_value.index(self)
         num = index or (self.ntv_name == "" and self.parent.json_array)
         pointer = self.parent.pointer(index)
-        pointer.append(idx if num else self.ntv_name)
+        #pointer.append(idx if num else self.ntv_name)
+        pointer.append(idx if num else self.json_name(def_type=self.parent.type_str,
+                                                      string=True))
         return pointer
          
     @property
