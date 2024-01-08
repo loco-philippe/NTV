@@ -446,18 +446,18 @@ class Test_Ntv_pointer(unittest.TestCase):
                         ntv['dicsingle'][0] == ntv['dicsingle']['sing'])
         for pointer in pointers:
             #self.assertEqual(pointer, ntv[pointer].json_pointer())
-            self.assertEqual(pointer, ntv['#'+pointer].pointer().json())
+            self.assertEqual(pointer, str(ntv['#'+pointer].pointer()))
 
     def test_pointer(self):
         a = Ntv.obj({'test': {'t1': 1, 't2': 2, 't3': [3, 4]}})
         self.assertTrue(a.parent is None)
         self.assertEqual(list(a.pointer()), ['test'])
-        self.assertEqual(a.pointer().json(), 'test')
+        self.assertEqual(str(a.pointer()), 'test')
         self.assertEqual(a['t3'].pointer(index=True)[1], 2)
-        self.assertEqual(a['t3'].pointer(True).json(), 'test/2')
+        self.assertEqual(str(a['t3'].pointer(True)), '0/2')
         self.assertEqual(a['t3'][0].parent.parent, a)
-        self.assertEqual(list(a['t3'][0].pointer(index=True)), ['test', 2, 0])
-        self.assertEqual(a['t3'][0].pointer(index=True).json(), 'test/2/0')
+        self.assertEqual(list(a['t3'][0].pointer(index=True)), [0, 2, 0])
+        self.assertEqual(str(a['t3'][0].pointer(index=True)), '0/2/0')
                         
 class Test_Ntv_tabular(unittest.TestCase):
 
@@ -647,7 +647,8 @@ class Test_NtvTree(unittest.TestCase):
         self.assertEqual(tree.nodes[0], tree._ntv)
         self.assertEqual(
             #[node.json_pointer() for node in tree.leaf_nodes][6], '/b')
-            [node.pointer().json() for node in tree.leaf_nodes][6], '/b')
+            #[node.pointer().json() for node in tree.leaf_nodes][6], '/b')
+            [str(node.pointer()) for node in tree.leaf_nodes][6], '/b')
         self.assertEqual(tree.adjacency_list[ntv][0], ntv[0])
         self.assertEqual(tree.height, 3)
         self.assertEqual(tree.size, 11)

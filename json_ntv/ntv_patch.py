@@ -139,16 +139,16 @@ class NtvOp:
         from json_ntv.ntv import Ntv
         ntv_res = copy(ntv)
         idx = self.path[-1]
-        p_path = str(NtvPointer(self.path[:-1]))
-        path = str(self.path)
+        p_path = NtvPointer(self.path[:-1]).fragment
+        path = self.path.fragment
         if self.ope in ['move', 'copy', 'add']:
             if self.ope == 'add' and self.entity:
                 ntv = Ntv.obj(self.entity)
             elif self.ope == 'copy' and self.from_path:
-                ntv = copy(ntv_res[str(self.from_path)])
+                ntv = copy(ntv_res[self.from_path.fragment])
             elif self.ope == 'move' and self.from_path:
-                ntv = ntv_res[str(self.from_path)]
-                del ntv_res[str(NtvPointer(self.from_path[:-1]))
+                ntv = ntv_res[self.from_path.fragment]
+                del ntv_res[NtvPointer(self.from_path[:-1]).fragment
                             ][self.from_path[-1]]
                 ntv.parent = None
             else:
@@ -305,15 +305,17 @@ class NtvPatch:
 class NtvPointer(list):
     ''' The NtvPointer class defines methods to identify a node in a NTV entity
 
-    NtvPointer is child class of `list` class
+    NtvPointer is child class of `list` class (no specific attribute)
 
     *dynamic values (@property)*
+    - `fragment`
+    
+    *static method*
     - `split`
     - `pointer_json`
     - `pointer_list`
 
     *instance method*
-    - `json`
     - `append`
     '''
 
@@ -335,16 +337,12 @@ class NtvPointer(list):
 
     def __str__(self):
         '''json-text representation of the NtvPointer'''
-        return self.json()
+        return NtvPointer.pointer_json(self)
 
-    def json(self, default=''):
-        '''convert a NtvPointer into a json_pointer
-
-        *Parameters*
-
-        - **default**: Str (default '') - default value if pointer is empty
-        '''
-        return NtvPointer.pointer_json(self, default=default)
+    @property
+    def fragment(self):
+        '''convert a NtvPointer into a fragment URI'''
+        return NtvPointer.pointer_json(self, fragment=True)
 
     def append(self, child):
         '''append a child pointer into a pointer '''
@@ -360,22 +358,17 @@ class NtvPointer(list):
         return (NtvPointer(pointer[-1]), NtvPointer(pointer[:-1]))
 
     @staticmethod
-    def pointer_json(list_pointer, default=''):
+    def pointer_json(list_pointer, fragment=False):
         '''convert a list of pointer into a json_pointer
 
         *Parameters*
 
-        - **default**: Str (default '') - default value if pointer is empty
+        - **fragment**: Boolean (default False) - if True, insert '#' at the first place
         '''
-        json_p = ''
+        json_p = '' if not fragment else '#'
         for name in list_pointer:
             json_p += str(name).replace('~', '~0').replace('/', '~1') + '/' 
         return json_p[:-1]
-        '''if list_pointer == []:
-            return default
-        for name in list_pointer:
-            json_p += '/' + str(name).replace('~', '~0').replace('/', '~1')
-        return json_p'''
 
     @staticmethod
     def pointer_list(json_pointer):
@@ -386,12 +379,6 @@ class NtvPointer(list):
             return []
         return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/')
                 for nam in split_pointer]
-        '''if split_pointer[0] != '' and len(split_pointer) > 1:
-            raise NtvOpError("json_pointer is not correct")
-        if split_pointer[0] != '':
-            split_pointer.insert(0, '')
-        return [int(nam) if nam.isdigit() else nam.replace('~1', '/').replace('~0', '/')
-                for nam in split_pointer[1:]]'''
 
 
 class NtvOpError(Exception):
