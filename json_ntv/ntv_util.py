@@ -13,6 +13,7 @@ and `NtvError` for NTV entities.
 from abc import ABC, abstractmethod
 import datetime
 import json
+import re
 
 class NtvUtil:
     ''' The NtvUtil class includes static methods used by several NTV classes.
@@ -99,7 +100,14 @@ class NtvUtil:
         if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
             return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
         return (nam, typ, val, None, None, None, len(ntv))
-    
+
+    @staticmethod
+    def to_ntvpointer(jsonpointer, unique_root=False):
+        single = '/([0-9]+)(/[a-z])'
+        if unique_root and not ('0' <= jsonpointer[1] <= '9'):
+            return re.sub(single, '\g<2>', jsonpointer)[1:]
+        return re.sub(single, '\g<2>', jsonpointer)
+        
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
     for conversion between NTV-JSON data and NTV-OBJ data.
