@@ -26,6 +26,7 @@ class NtvUtil:
     *static methods :*
     - `from_obj_name`
     - `decode_ntv_tab`
+    - `to_ntv_pointer`
     
     '''   
     _namespaces_ = {}
@@ -103,6 +104,12 @@ class NtvUtil:
 
     @staticmethod
     def to_ntvpointer(jsonpointer, unique_root=False):
+        '''convert a json pointer inter a NTV pointer (string)
+        
+        *parameters:*
+        
+        - **jsonpointer**: String - json pointer to convert,
+        - **unique_root**: Boolean (default False) - True if the json root length is 1 '''
         single = '/([0-9]+)(/[a-z])'
         if unique_root and not ('0' <= jsonpointer[1] <= '9'):
             return re.sub(single, '\g<2>', jsonpointer)[1:]
