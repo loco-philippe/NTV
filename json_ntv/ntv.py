@@ -272,8 +272,8 @@ class Ntv(ABC, NtvUtil):
             selec = list(pointer)
         else:
             raise NtvError('pointer is not a valid pointer')            
-        if selec[0] != self.json_name(string=True):
-            raise NtvError(selec[0] + 'is not the root json_name : ' + self.ntv_name)
+        if not (selec[0] == self.json_name(string=True) or isinstance(selec[0], int)):
+            raise NtvError(str(selec[0]) + 'is not the root json_name : ' + self.ntv_name)
         return selec[1:]         
         
     def _string_to_ind(self, json_name):
