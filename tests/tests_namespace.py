@@ -8,7 +8,7 @@ The `NTV.test_namespace` module contains the unit tests (class unittest) for the
 `Namespace` and `Type` classes.
 """
 import unittest
-from namespace import Namespace, DatatypeError, Datatype
+from namespace import Namespace, DatatypeError, Datatype, _join_type
 #from observation import  Ilist
 
 class Test_Namespace(unittest.TestCase):
@@ -61,6 +61,20 @@ class Test_Namespace(unittest.TestCase):
             self.assertEqual(Namespace.add(nstr).file, None)        
             self.assertEqual(Namespace.add(nstr).content, {'type': {}, 'namespace': {}})        
 
+class Test_agregtype(unittest.TestCase):
+    
+    def test_join_type(self):
+        self.assertEqual(_join_type("$NTVschema.properties.prop", "property.prop.truc"),
+                         ['$NTVschema.properties.prop.property.prop.truc', 
+                          '$NTVschema.properties.property.prop.truc', 
+                          '$NTVschema.property.prop.truc'])
+        self.assertEqual(_join_type("$NTVschema.properties.prop", "properties.prop.truc"),
+                         ['$NTVschema.properties.prop.truc'])
+        self.assertEqual(_join_type("$NTVschema.properties.prop", "prop.truc"),
+                         ['$NTVschema.properties.prop.truc', '$NTVschema.prop.truc'])
+        self.assertEqual(_join_type("$NTVschema.properties.prop", "prop.truc."),
+                         ['$NTVschema.properties.prop.truc.', '$NTVschema.prop.truc.'])
+                
 class Test_Datatype(unittest.TestCase):
     
     def test_self_init(self):

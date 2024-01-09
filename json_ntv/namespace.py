@@ -42,10 +42,23 @@ def agreg_type(str_typ, def_type, single):
     if not def_type:
         return clas.add(str_typ)
     if clas == Datatype or clas == Namespace and not single:
+        """agreg = clas.add(str_typ, error=False)
+        if agreg:
+            return agreg
+        for typ in _join_type(def_type.long_name, str_typ):
+            agreg = clas.add(typ, error=False)
+            if agreg:
+                return agreg         """   
         try:
             return clas.add(str_typ)
         except DatatypeError:
-            return clas.add(_join_type(def_type.long_name, str_typ))
+            #return clas.add(_join_type(def_type.long_name, str_typ))
+            for typ in _join_type(def_type.long_name, str_typ):
+                try:
+                    return clas.add(typ)
+                except DatatypeError:
+                    pass
+
     raise DatatypeError(str_typ + ' and ' + def_type.long_name + ' are incompatible')
 
 def from_file(file, name, long_parent=None):
@@ -126,11 +139,22 @@ def _add_namespace(config, namesp):
                 
 def _join_type(namesp, str_typ):
     '''join Namespace string and Datatype or Namespace string'''
-    namesp_split = namesp.split('.')[:-1]
+    namesp_sp = namesp.split('.')
+    str_typ_sp = str_typ.split('.')
+    idx = -1
+    if str_typ_sp[0] in namesp_sp:
+        idx = namesp_sp.index(str_typ_sp[0])
+        if namesp_sp[idx:] != str_typ_sp[:len(namesp_sp[idx:])]:
+            idx = -1
+    if idx > -1:
+        namesp_sp = namesp_sp[:idx]
+    return ['.'.join(namesp_sp[:i+1]+str_typ_sp) for i in range(len(namesp_sp)-1, -1, -1)]
+    
+    """namesp_split = namesp.split('.')[:-1]
     for name in str_typ.split('.'):
         if not name in namesp_split:
             namesp_split.append(name)
-    return '.'.join(namesp_split)
+    return '.'.join(namesp_split)"""
 
 
 class Datatype(NtvUtil):
@@ -184,7 +208,7 @@ class Datatype(NtvUtil):
             nspace = Namespace.add(split_name[0]+'.', module=module, force=force)
             return cls(split_name[1], nspace, force=force)
         raise DatatypeError(long_name + ' is not a valid Datatype')
-
+        
     def __init__(self, name, nspace=None, force=False):
         '''Datatype constructor.
 
@@ -298,14 +322,14 @@ class Namespace(NtvUtil):
             return NtvUtil._namespaces_[long_name]
         split_name = long_name.rsplit('.', 2)
         if len(split_name) == 1 or split_name[-1] != '':
-            raise DatatypeError(long_name + ' is not a valid classname')
+            raise DatatypeError(long_name + ' is not a valid Namespace')
         if len(split_name) == 2:
             return cls(split_name[0]+'.', module=module, force=force)
         if len(split_name) == 3:
             parent = Namespace.add(split_name[0]+'.', force=force)
             return cls(split_name[1]+'.', parent, module=module, force=force)
-        raise DatatypeError(long_name + ' is not a valid classname')
-
+        raise DatatypeError(long_name + ' is not a valid Namespace')
+            
     def __init__(self, name='', parent=None, module=False, force=False):
         '''
         Namespace constructor.
