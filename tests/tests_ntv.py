@@ -590,7 +590,7 @@ class Test_Ntv_function(unittest.TestCase):
                      [['reg', 'fr.', False], 'fr.reg'],
                      [['point', 'fr.', False], 'point']]
         for typ in list_type:
-            # print(typ[0])
+            #print(typ[0])
             if typ[0] == [None, None, False]:
                 self.assertEqual(agreg_type(
                     typ[0][0], typ[0][1], typ[0][2]), typ[1])

@@ -273,7 +273,7 @@ class Ntv(ABC, NtvUtil):
         else:
             raise NtvError('pointer is not a valid pointer')            
         if not (selec[0] in [self.json_name(string=True), self.ntv_name]
-                or isinstance(selec[0], int)):
+                or (isinstance(selec[0], int) and selec[0] == 0)):
             raise NtvError(str(selec[0]) + 'is not the root json_name : ' + self.ntv_name)
         return selec[1:]         
         
