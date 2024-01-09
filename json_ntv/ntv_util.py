@@ -7,16 +7,31 @@ Created on Feb 27 2023
 The `ntv_util` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the classes `NtvConnector`, `NtvTree`, `NtvJsonEncoder` and `NtvError`
-for NTV entities.
+It contains the classes `NtvUtil`, `NtvConnector`, `NtvTree`, `NtvJsonEncoder` 
+and `NtvError` for NTV entities.
 """
 from abc import ABC, abstractmethod
 import datetime
 import json
+import re
 
 class NtvUtil:
-    ''' The NtvUtil class includes static methods used by several NTV classes '''
-
+    ''' The NtvUtil class includes static methods used by several NTV classes.
+    NtvUtil is the parent class of `Datatype`, `Namespace`, `Ntv`.
+    
+    *class variables :*
+    - **_namespaces_** : list of Namespace defined
+    - **_types_** : list of Datatype defined
+    
+    *static methods :*
+    - `from_obj_name`
+    - `decode_ntv_tab`
+    - `to_ntv_pointer`
+    
+    '''   
+    _namespaces_ = {}
+    _types_ = {}
+    
     @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type_str and separator from string'''
@@ -86,14 +101,27 @@ class NtvUtil:
         if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
             return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
         return (nam, typ, val, None, None, None, len(ntv))
-    
+
+    @staticmethod
+    def to_ntvpointer(jsonpointer, unique_root=False):
+        '''convert a json pointer inter a NTV pointer (string)
+        
+        *parameters:*
+        
+        - **jsonpointer**: String - json pointer to convert,
+        - **unique_root**: Boolean (default False) - True if the json root length is 1 '''
+        single = '/([0-9]+)(/[a-z])'
+        if unique_root and not ('0' <= jsonpointer[1] <= '9'):
+            return re.sub(single, '\g<2>', jsonpointer)[1:]
+        return re.sub(single, '\g<2>', jsonpointer)
+        
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
     for conversion between NTV-JSON data and NTV-OBJ data.
 
     A NtvConnector child is defined by:
     - clas_obj: str - define the class name of the object to convert
-    - clas_typ: str - define the NTVtype of the converted object
+    - clas_typ: str - define the Datatype of the converted object
     - to_obj_ntv: method - converter from JsonNTV to the object
     - to_json_ntv: method - converter from the object to JsonNTV
     
@@ -478,7 +506,7 @@ class NtvTree:
     @property
     def height(self):
         ''' return the height of the tree'''
-        return max(len(node.pointer()) for node in self.__class__(self._ntv))
+        return max(len(node.pointer()) for node in self.__class__(self._ntv)) - 1
 
     @property
     def adjacency_list(self):
@@ -508,8 +536,6 @@ class NtvTree:
         ''' return the list of inner nodes according to the DFS preordering algorithm'''
         return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvList']
-
-
 
 
 class NtvJsonEncoder(json.JSONEncoder):

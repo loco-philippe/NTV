@@ -13,7 +13,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="json_ntv",
-    version="1.1.0",
+    version="1.2.0",
     description="JSON-NTV a semantic format for interoperability",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,5 +30,5 @@ setup(
     packages=find_packages(include=['json_ntv', 'json_ntv.*']),
     package_data={'json_ntv': ['*.ini']},
     python_requires=">=3.7, <4",
-    install_requires=['shapely', 'cbor2']
+    install_requires=['shapely', 'cbor2', 'tab_dataset']
 )

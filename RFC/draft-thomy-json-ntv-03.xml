@@ -365,13 +365,13 @@ listSep     = "::"     ; NTVlist separator
         <figure anchor="JsonNTVtype-abnf" align="left" suppress-title="false" pn="figure-5">
           <name>JsonNTVtype - ABNF</name><sourcecode type="abnf" markers="false">
             <![CDATA[
-; JSON representation of NtvType or Namespace (JsonNTVtype)
+; JSON representation of NTVType (JsonNTVtype)
 
 JsonNTVtype = [ NTVtypeLongName / NTVtypeRelativeName ]
     ; REQ7
 
 NTVtypeLongName = DataTypeLongName / NamespaceLongName
-NTVtypeRelativeName = *NamespaceName (NTVtypeName / NamespaceName)
+NTVtypeRelativeName = *NamespaceName (DataTypeName / NamespaceName)
     ; REQ7
             ]]>
         </sourcecode></figure>

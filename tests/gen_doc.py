@@ -6,7 +6,7 @@ Created on Thu Mar 16 22:19:05 2023
 """
 
 from observation import Ilist, Iindex, Observation, util
-from ntv import Namespace, NtvType
+from ntv import Namespace, Datatype
 import pdoc 
 from pathlib import Path
 

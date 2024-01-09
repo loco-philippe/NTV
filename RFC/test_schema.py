@@ -120,7 +120,7 @@ json :
     maxProperties: int
     
     items: items_schema
-    prefixItems: [name_schema]
+    prefixItems: [item_schema]
     prefixItemsType: [name_type_schema]
     unevaluatedItems: uneval_schema
     unevaluatedItemsType: uneval_type_schema
