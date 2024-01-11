@@ -339,6 +339,14 @@ class NtvPointer(list):
         '''json-text representation of the NtvPointer'''
         return NtvPointer.pointer_json(self)
 
+    """def __contains__(self, item):
+        ''' list of lindex values'''
+        return item in self"""
+
+    def __getitem__(self, ind):
+        ''' return value record (value conversion)'''
+        return NtvPointer(super().__getitem__(ind))    
+    
     @property
     def fragment(self):
         '''convert a NtvPointer into a fragment URI'''
