@@ -35,3 +35,34 @@ def sh_items(schema):
     value = {'value': {'items': schema}} if schema else {}
     js_items = {'properties' : value | name | typ }
     return js_items
+
+def validate(ntv_data, sch):
+    print('validate :')
+    print('    ', ntv_data)
+    print('    ', sch)
+    
+def navigate(data, sch):
+    ntv_data = Ntv.obj(data)
+    p_data = ['']
+    sch_p = list(sch.values())[0]
+    for ntv in ntv_data.tree:
+        new_p_data = ntv.pointer()
+        if new_p_data == p_data:
+            new_sch_p = sch_p 
+            validate(ntv_data[new_p_data], new_sch_p)
+            sch_p = new_sch_p
+            p_data = new_p_data
+        elif len(new_p_data) > len(p_data):
+            if 'properties.' in sch_p:
+                new_sch_p = sch_p['properties.']
+                validate(ntv_data[new_p_data], new_sch_p)
+            else:
+                print('pas de properties')
+            sch_p = new_sch_p
+            p_data = new_p_data
+        elif len(new_p_data) == len(p_data):
+            print('coté', new_p_data[-1])
+            p_data = new_p_data
+        elif len(new_p_data) < len(p_data):
+            print('haut', new_p_data[-1])
+            p_data = new_p_data
