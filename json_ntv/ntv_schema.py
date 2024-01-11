@@ -12,6 +12,7 @@ import pathlib
 import json_ntv
 from json_ntv.ntv import Ntv
 from json_ntv.namespace import from_file
+from jsonpointer import resolve_pointer
 
 file = pathlib.Path(json_ntv.__file__).parent.parent / "RFC" / "NTV_NTVschema_namespace.ini"
 from_file(file, '$NTVschema.')
@@ -46,13 +47,22 @@ def navigate(data, sch):
     p_data = str(ntv_data.pointer())
     sch_p = '/' + list(sch.keys())[0]
     mapping = {p_data : sch_p}
-    for ntv in ntv_data.tree:
+    validate(ntv_data, sch)
+    for ntv in list(ntv_data.tree)[1:]:
+        parent_ntv = ntv.pointer[:-1]
+        parent_sch = resolve_pointer(sch, mapping[str(parent_ntv)])
         new_p_data = str(ntv.pointer())
+        if len(new_p_data) > len(p_data):
+            if 'properties.' in sch_p:
+                new_sch_p = sch_p['properties.']
+                validate(ntv_data[new_p_data], new_sch_p)
+            else:
+                print('pas de properties')
+            p_data = new_p_data        
+
         if new_p_data == p_data:
             new_sch_p = sch_p 
             validate(ntv_data[new_p_data], new_sch_p)
-            sch_p = new_sch_p
-            p_data = new_p_data
         elif len(new_p_data) > len(p_data):
             if 'properties.' in sch_p:
                 new_sch_p = sch_p['properties.']
