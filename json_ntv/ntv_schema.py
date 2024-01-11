@@ -52,6 +52,13 @@ def navigate(data, sch):
         parent_ntv = ntv.pointer[:-1]
         parent_sch = resolve_pointer(sch, mapping[str(parent_ntv)])
         new_p_data = str(ntv.pointer())
+        if 'properties.' in sch_p:
+            new_sch_p = sch_p['properties.']
+            validate(ntv_data[new_p_data], new_sch_p)
+        else:
+            print('pas de properties')
+
+
         if len(new_p_data) > len(p_data):
             if 'properties.' in sch_p:
                 new_sch_p = sch_p['properties.']
