@@ -43,10 +43,11 @@ def validate(ntv_data, sch):
     
 def navigate(data, sch):
     ntv_data = Ntv.obj(data)
-    p_data = ['']
-    sch_p = list(sch.values())[0]
+    p_data = str(ntv_data.pointer())
+    sch_p = '/' + list(sch.keys())[0]
+    mapping = {p_data : sch_p}
     for ntv in ntv_data.tree:
-        new_p_data = ntv.pointer()
+        new_p_data = str(ntv.pointer())
         if new_p_data == p_data:
             new_sch_p = sch_p 
             validate(ntv_data[new_p_data], new_sch_p)
@@ -58,7 +59,6 @@ def navigate(data, sch):
                 validate(ntv_data[new_p_data], new_sch_p)
             else:
                 print('pas de properties')
-            sch_p = new_sch_p
             p_data = new_p_data
         elif len(new_p_data) == len(p_data):
             print('coté', new_p_data[-1])
