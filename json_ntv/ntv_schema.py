@@ -22,7 +22,12 @@ from_file(file, '$NTVschema.')
 
 def validat(ntv_data, sch):
     #print('    ', ntv_data, sch)
-    return validate(ntv_data, sch) is None    
+    valid = False
+    try:
+        valid = validate(ntv_data, sch) is None
+    except :
+        print('error : ', ntv_data, 'is not valid with schema : ', sch)
+    return valid    
     
 def sh_expand(ntv_data):    
     return {'value' : [ntv.ntv_value for ntv in ntv_data.ntv_value],
@@ -55,7 +60,6 @@ def val_items(ntv_data, sch) :
 def val_simple(ntv_data, sch) :
     if not sch:
         return True
-    #print('val_simple', ntv_data, sch)
     json_data = sh_expand(ntv_data)
     valid = True
     valid &= validat(json_data['value'], sh_compact(sch)['value'])
@@ -63,11 +67,13 @@ def val_simple(ntv_data, sch) :
     valid &= validat(json_data['name'],  sh_compact(sch)['name'])
     return valid
 
-def validate_ntv(keyword, ntv_data, sch):
-    print('validate : ', keyword, ntv_data)
+def validate_ntv(keyword, ntv_data, sch, verbose):
+    if verbose:
+        print('validate : ', keyword, ntv_data)
     valid = val_items(ntv_data, sch['items.']) if 'items.' in sch.keys() else True
     valid &= val_simple(ntv_data, {key: val for key, val in sch.items() if not key == 'items.'})
-    print('valide : ', valid)
+    #if verbose:
+    #    print('valide : ', valid)
     return valid
 
 def _json(dic):
@@ -79,12 +85,12 @@ def _pure(dic, keywords=None):
     keyw += ['properties.', 'prefixItems.']
     return _json({key: val for key, val in dic.items() if not key in keyw})
 
-def navigate(data, sch):
+def navigate(data, sch, verbose=False):
     ntv_data = Ntv.obj(data)
     p_data = str(ntv_data.pointer())
     sch_p =  list(sch.keys())[0]
     mapping = {p_data : '/' + sch_p}
-    validate_ntv('global', ntv_data, _pure(sch[sch_p]))
+    valid = validate_ntv('global', ntv_data, _pure(sch[sch_p]), verbose)
     for ntv in list(ntv_data.tree)[1:]:
         parent_ntv = ntv.pointer()[:-1]
         parent_sch = resolve_pointer(sch, mapping[str(parent_ntv)])
@@ -92,18 +98,22 @@ def navigate(data, sch):
         if 'properties.' in parent_sch:
             if ntv.ntv_name in parent_sch['properties.']:
                 mapping[new_p_data] = mapping[str(parent_ntv)] + '/properties.' + '/' + ntv.ntv_name
-                validate_ntv('properties', ntv_data['#' + new_p_data], 
-                         _pure(parent_sch['properties.'][ntv.ntv_name]))
-            else:
-                print('not include', ntv_data['#' + new_p_data], True)
+                valid &= validate_ntv('properties', ntv_data['#' + new_p_data], 
+                         _pure(parent_sch['properties.'][ntv.ntv_name]), verbose)
+            elif verbose:
+                print('not include', ntv_data['#' + new_p_data])
         elif 'prefixItems.' in parent_sch:
             row = NtvPointer.pointer_list(ntv.pointer()[-1])[0]
             if len(parent_sch['prefixItems.']) > row:
                 mapping[new_p_data] = mapping[str(parent_ntv)] + '/prefixItems.' + '/' + str(row)
-                validate_ntv('prefixItems', ntv_data['#' + new_p_data], 
-                         _pure(parent_sch['prefixItems.'][row]))
-            else:
-                print('not include', ntv_data['#' + new_p_data], True)
-        else:
+                valid &= validate_ntv('prefixItems', ntv_data['#' + new_p_data], 
+                         _pure(parent_sch['prefixItems.'][row]), verbose)
+            elif verbose:
+                print('not include', ntv_data['#' + new_p_data])
+        elif verbose:
             print('pas de properties et de PrefixItems')
-
+        return valid
+    
+class NtvSchemaError(Exception):
+    ''' NtvSchema Exception'''
+    # pass
