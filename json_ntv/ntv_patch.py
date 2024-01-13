@@ -138,8 +138,8 @@ class NtvOp:
         '''applies the operation to the 'ntv' entity and return the resulting entity'''
         from json_ntv.ntv import Ntv
         ntv_res = copy(ntv)
-        idx = self.path[-1]
-        p_path = NtvPointer(self.path[:-1]).fragment
+        idx = list(self.path)[-1]
+        p_path = self.path[:-1].fragment
         path = self.path.fragment
         if self.ope in ['move', 'copy', 'add']:
             if self.ope == 'add' and self.entity:
@@ -147,9 +147,8 @@ class NtvOp:
             elif self.ope == 'copy' and self.from_path:
                 ntv = copy(ntv_res[self.from_path.fragment])
             elif self.ope == 'move' and self.from_path:
-                ntv = ntv_res[self.from_path.fragment]
-                del ntv_res[NtvPointer(self.from_path[:-1]).fragment
-                            ][self.from_path[-1]]
+                ntv = ntv_res[self.from_path.fragment]  
+                del ntv_res[self.from_path[:-1].fragment][list(self.from_path)[-1]]
                 ntv.parent = None
             else:
                 raise NtvOpError('op is not correct')
@@ -163,7 +162,7 @@ class NtvOp:
                     isinstance(idx, int) and ntv == ntv_res[path]):
                 raise NtvOpError('test is not correct')
         elif self.ope == 'remove':
-            idx = self.path[-1]
+            idx = list(self.path)[-1]
             idx = len(ntv[p_path]) - 1 if idx == '-' else idx
             ntv_res[p_path+'/'+str(idx)].remove(index=idx)
         elif self.ope == 'replace' and self.entity:
@@ -338,10 +337,6 @@ class NtvPointer(list):
     def __str__(self):
         '''json-text representation of the NtvPointer'''
         return NtvPointer.pointer_json(self)
-
-    """def __contains__(self, item):
-        ''' list of lindex values'''
-        return item in self"""
 
     def __getitem__(self, ind):
         ''' return value record (value conversion)'''

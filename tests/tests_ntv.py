@@ -453,7 +453,7 @@ class Test_Ntv_pointer(unittest.TestCase):
         self.assertTrue(a.parent is None)
         self.assertEqual(list(a.pointer()), ['test'])
         self.assertEqual(str(a.pointer()), 'test')
-        self.assertEqual(a['t3'].pointer(index=True)[1], 2)
+        self.assertEqual(list(a['t3'].pointer(index=True))[1], 2)
         self.assertEqual(str(a['t3'].pointer(True)), '0/2')
         self.assertEqual(a['t3'][0].parent.parent, a)
         self.assertEqual(list(a['t3'][0].pointer(index=True)), [0, 2, 0])
