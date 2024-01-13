@@ -1,8 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan  9 10:31:23 2024
+The `ntv_schema` module is part of the `json_ntv` package.
 
-@author: phili
+The main function `ntv_validate` validate a NTVdata against a NTVschema.
+
+It also contains functions:
+- to convert NTVschema into JSONschema : `_simple_to_jsch`, `_items_to_jsch`,
+- to validate a NTVschema : `kw_validate`, `val_items`, `val_simple`, `validat`,
+- to convert NTV entity into Json data : `_ntv_to_json`, `_json`, `_pure` 
+
+For more information, see the 
+[user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html) 
+or the [github repository](https://github.com/loco-philippe/NTV).
+
 """
 
 import pathlib
@@ -39,16 +49,18 @@ def ntv_validate(data, sch, mode=0):
         parent_sch = resolve_pointer(sch, mapping[str(parent_ntv)])
         new_p_data = str(ntv.pointer())
         if 'properties.' in parent_sch:
-            if ntv.ntv_name in parent_sch['properties.']:
+            p_prop = parent_sch['properties.']
+            if ntv.ntv_name in p_prop or ntv.ntv_name in p_prop:
                 mapping[new_p_data] = mapping[str(parent_ntv)] + '/properties.' + '/' + ntv.ntv_name
                 valid &= kw_validate('properties', ntv_data['#' + new_p_data], 
-                         _pure(parent_sch['properties.'][ntv.ntv_name]), mode)
+                         _pure(p_prop[ntv.ntv_name]), mode)
         if 'prefixItems.' in parent_sch:
-            row = NtvPointer.pointer_list(ntv.pointer()[-1])[0]
-            if len(parent_sch['prefixItems.']) > row:
+            row = list(ntv.pointer(index=True))[-1]
+            p_item = parent_sch['prefixItems.']
+            if len(p_item) > row:
                 mapping[new_p_data] = mapping[str(parent_ntv)] + '/prefixItems.' + '/' + str(row)
                 valid &= kw_validate('prefixItems ' + str(row), ntv_data['#' + new_p_data],
-                                     _pure(parent_sch['prefixItems.'][row]), mode)
+                                     _pure(p_item[row]), mode)
         if mode and not new_p_data in mapping:
             print('not include', new_p_data)
     return valid
@@ -145,7 +157,7 @@ def _ntv_to_json(ntv_data):
                 'type'  : ntv_data.type_str}
 
 def _simple_to_jsch(ntvsch):
-    '''transform a NTVntvsch into JSONntvsch'''
+    '''transform a simple NTVschema into a JSONschema'''
     jsonsch = {}
     jsonsch['type']  = ntvsch['type.']  if 'type.'  in ntvsch.keys() else {}
     jsonsch['name']  = ntvsch['name.']  if 'name.'  in ntvsch.keys() else {}
@@ -155,21 +167,26 @@ def _simple_to_jsch(ntvsch):
     return jsonsch
 
 def _items_to_jsch(schema):
+    '''transform an items NTVschema into a JSONschema'''
     schema = schema['items.'] if 'items.' in schema else schema
-    name = {'name': {'items': schema['name.']}} if 'name.' in schema else {}
-    typ  = {'type': {'items': schema['type.']}} if 'type.' in schema else {}
-    value = {'value': {'items': {k:v for k, v in schema.items() 
-                                 if not k in ['name.', 'type.']}}}
+    name  = {'name':  {'items': schema['name.']}}  if 'name.'  in schema else {}
+    typ   = {'type':  {'items': schema['type.']}}  if 'type.'  in schema else {}
+    val   = schema['value.'] if 'value.' in schema else {}
+    value = {'value': {'items': val | {k:v for k, v in schema.items() 
+                                       if not k in ['name.', 'type.']}}}
     return {'properties' : value | name | typ }
 
 def _json(dic):
+    '''transform in a schema leaf NTVkeywords into JSONkeywords'''
     return {(lambda k : k[1:] if k[0] == ':' else k)(key): _json(value) 
             for key, value in dic.items()} if isinstance(dic, dict) else dic
     
 def _pure(dic, keywords=None):
+    '''return a dict schema without keywords members'''
     keyw = list(keywords) if keywords else []
     keyw += ['properties.', 'prefixItems.']
-    return _json({key: val for key, val in dic.items() if not key in keyw})
+    return _json({key: val for key, val in dic.items() 
+                  if not key in keyw}) if isinstance(dic, dict) else dic
 
 
     
