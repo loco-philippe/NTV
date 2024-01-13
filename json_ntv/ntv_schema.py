@@ -18,6 +18,17 @@ file = pathlib.Path(json_ntv.__file__).parent.parent / "RFC" / "NTV_NTVschema_na
 from_file(file, '$NTVschema.')
 
 def ntv_validate(data, sch, mode=0):
+    '''return the validation (True/False) of 'data' conformity to a 'sch' NTVschema.
+    
+    *Parameters*
+
+        - **data**: Ntv, json-value, json_text - data to validate
+        - **sch**: json-value - NTVschema
+        - **mode**: integer (default 0) - level of information
+            - 0: no information
+            - 1: list of controls and errors
+            - 2: details of errors (traceback)
+    '''  
     ntv_data = Ntv.obj(data)
     p_data = str(ntv_data.pointer())
     sch_p =  list(sch.keys())[0]
@@ -43,6 +54,18 @@ def ntv_validate(data, sch, mode=0):
     return valid
 
 def kw_validate(keyword, ntv_data, sch, mode):
+    '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.
+    
+    *Parameters*
+
+        - **keyword**: string - context 'properties' or 'prefixItems'
+        - **ntv_data**: Ntv entity
+        - **sch**: json-value - NTVschema
+        - **mode**: integer (default 0) - level of information
+            - 0: no information
+            - 1: list of controls and errors
+            - 2: details of errors (traceback)
+    '''  
     if mode:
         print('validate : ', keyword, 
               ntv_data.ntv_name if keyword == 'properties' else '')
@@ -51,34 +74,68 @@ def kw_validate(keyword, ntv_data, sch, mode):
                                    if not key == 'items.'}, mode)
     return valid
 
-def val_items(ntv_data, sch, mode) : 
-    return validat(_sh_expand(ntv_data), _sh_items(sch), mode)
+def val_items(ntv_data, items_sch, mode) : 
+    '''return the validation (True/False) of a NTV entity conformity to a items 'sch' schema.
+    
+    *Parameters*
+
+        - **ntv_data**: Ntv entity
+        - **items_sch**: json-value - items NTVschema
+        - **mode**: integer (default 0) - level of information
+            - 0: no information
+            - 1: list of controls and errors
+            - 2: details of errors (traceback)
+    '''  
+    return validat(_ntv_to_json(ntv_data), _items_to_jsch(items_sch), mode)
     
 def val_simple(ntv_data, sch, mode) :
+    '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.
+
+    *Parameters*
+
+    - **ntv_data**: Ntv entity
+    - **sch**: json-value - NTVschema with simple keywords
+    - **mode**: integer (default 0) - level of information
+        - 0: no information
+        - 1: list of controls and errors
+        - 2: details of errors (traceback)
+    '''  
     if not sch:
         return True
-    json_data = _sh_expand(ntv_data)
+    json_data = _ntv_to_json(ntv_data)
+    json_sch  = _simple_to_jsch(sch)
     valid = True
-    valid &= validat(json_data['value'], _sh_compact(sch)['value'], mode)
-    valid &= validat(json_data['type'],  _sh_compact(sch)['type'], mode)
-    valid &= validat(json_data['name'],  _sh_compact(sch)['name'], mode)
+    for part in ['value', 'type', 'name']:
+        valid &= validat(json_data[part], json_sch[part], mode)
     return valid
 
-def validat(ntv_data, sch, mode):
+def validat(json_data, jsch, mode):
+    '''return the validation (True/False) of a json data conformity to a 'jsch' JSONschema.
+
+    *Parameters*
+    
+        - **json_data**: json_data to validate
+        - **jsch**: json-value - JSONschema
+        - **mode**: integer (default 0) - level of information
+            - 0: no information
+            - 1: list of controls and errors
+            - 2: details of errors (traceback)
+    '''  
     if mode > 1:
-        print('    ', ntv_data, sch)
+        print('    ', json_data, jsch)
     valid = False
     if mode < 2:
         try:
-            valid = validate(ntv_data, sch) is None
+            valid = validate(json_data, jsch) is None
         except :
             if mode > 0:
-                print('error : ', ntv_data, 'is not valid with schema : ', sch)
+                print('error : ', json_data, 'is not valid with schema : ', jsch)
     else:
-        valid = validate(ntv_data, sch) is None
+        valid = validate(json_data, jsch) is None
     return valid    
     
-def _sh_expand(ntv_data):    
+def _ntv_to_json(ntv_data):  
+    '''transform a Ntv entity into a json representation'''
     return {'value' : [ntv.ntv_value for ntv in ntv_data.ntv_value],
             'name'  : [ntv.ntv_name if ntv.ntv_name else None for ntv in ntv_data.ntv_value], 
             'type'  : [ntv.type_str for ntv in ntv_data.ntv_value]
@@ -87,16 +144,17 @@ def _sh_expand(ntv_data):
                 'name'  : ntv_data.ntv_name, 
                 'type'  : ntv_data.type_str}
 
-def _sh_compact(schema):
-    sch = {}
-    sch['type']  = schema['type.']  if 'type.'  in schema.keys() else {}
-    sch['name']  = schema['name.']  if 'name.'  in schema.keys() else {}
-    sch['value'] = schema['value.'] if 'value.' in schema.keys() else {}
-    sch['value'] |= {key:val for key, val in schema.items() 
+def _simple_to_jsch(ntvsch):
+    '''transform a NTVntvsch into JSONntvsch'''
+    jsonsch = {}
+    jsonsch['type']  = ntvsch['type.']  if 'type.'  in ntvsch.keys() else {}
+    jsonsch['name']  = ntvsch['name.']  if 'name.'  in ntvsch.keys() else {}
+    jsonsch['value'] = ntvsch['value.'] if 'value.' in ntvsch.keys() else {}
+    jsonsch['value'] |= {key:val for key, val in ntvsch.items() 
                      if not key in ['type.', 'name.', 'value.']}
-    return sch
+    return jsonsch
 
-def _sh_items(schema):
+def _items_to_jsch(schema):
     schema = schema['items.'] if 'items.' in schema else schema
     name = {'name': {'items': schema['name.']}} if 'name.' in schema else {}
     typ  = {'type': {'items': schema['type.']}} if 'type.' in schema else {}
