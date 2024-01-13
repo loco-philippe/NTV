@@ -41,12 +41,13 @@ class Ntv(ABC, NtvUtil):
     - **is_json**:    True if ntv_value is a json_value
 
     *dynamic values (@property)*
-    - `json_array` (abstract method)
-    - `type_str`
     - `code_ntv`
+    - `json_name_str`
+    - `json_array` (abstract method)
     - `max_len`
     - `name`
     - `tree`
+    - `type_str`
     - `val`
 
     The methods defined in this class are :
@@ -293,6 +294,138 @@ class Ntv(ABC, NtvUtil):
         res = self.to_obj(encoded=True) < other.to_obj(encoded=True) if res is None else res
         return res
 
+    @property
+    def code_ntv(self):
+        '''return a string with the NTV code composed with 1 to 3 letters:
+        - 'l' (NtvList), 's' (NtvSingle / json_value) or 'o' (NtvSingle / obj_value)
+        - 'N' if ntv_name is present else none
+        - 'T' if ntv_type is present else none'''
+        dic = {'NtvList': 'l', 'NtvSingle': 's'}
+        code = dic[self.__class__.__name__]
+        if isinstance(self, NtvSingle) and not self.is_json:
+            code = 'o'
+        if self.ntv_name:
+            code += 'N'
+        if self.ntv_type and self.ntv_type.long_name != 'json':
+            code += 'T'
+        return code
+
+    @property
+    def json_name_str(self):
+        '''return the JSON name of the NTV entity'''
+        return self.json_name(def_type=self.parent.type_str, string=True)
+    
+    @property
+    def max_len(self):
+        '''return the highest len of Ntv entity included'''
+        maxi = len(self)
+        if isinstance(self.ntv_value, (list, set)):
+            maxi = max(maxi, max(ntv.max_len for ntv in self.ntv_value))
+        return maxi
+
+    @property
+    def name(self):
+        '''return the ntv_name of the entity'''
+        return self.ntv_name
+
+    @property
+    def tree(self):
+        '''return a tree with included entities (NtvTree object)'''
+        return NtvTree(self)
+
+    @property
+    def type_str(self):
+        '''return a string with the value of the NtvType of the entity'''
+        if not self.ntv_type:
+            return ''
+        return self.ntv_type.long_name
+
+    @property
+    def val(self):
+        '''return the ntv_value of the entity'''
+        return self.ntv_value
+
+    def alike(self, ntv_value):
+        ''' return a Ntv entity with same name and type.
+
+        *Parameters*
+
+        - **ntv_value**: list of ntv values'''
+        return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
+
+    def childs(self, obj=False, nam=False, typ=False):
+        ''' return a list of child Ntv entities or child data
+        
+        *parameters*
+        
+        - **obj**: boolean (default False) - return json-value
+        - **nam**: boolean (default False) - return name (with or without type) 
+        - **typ**: boolean (default False) - return type (with or without name) 
+        '''
+        if isinstance(self, NtvSingle):
+            return []
+        if not (obj or nam or typ):
+            return self.val
+        if obj:
+            return [ntv.to_obj() for ntv in self.val]
+        return [(ntv.name if nam else '') + (' - ' if nam and typ else '') + 
+                (ntv.type_str if typ else '') for ntv in self.val]
+        
+    def expand(self, full=True, entity=True):
+        '''return a json representation of the triplet (name, type, value)
+        
+        
+        *Parameters*
+
+        - **full**: Boolean (default True) - If False only members with non empty values are present
+        - **entity**: Boolean (default True) - If True, member with entity name is added
+        '''
+        exp = {ENTITY: self.__class__.__name__} if entity else {} 
+        if isinstance(self, NtvList) and full:
+            return exp | {NAME: self.name, TYPE: self.type_str, 
+                    VALUE: [ntv.expand(full) for ntv in self.val]}
+        if isinstance(self, NtvSingle) and full:
+            return exp | {NAME: self.name, TYPE: self.type_str, VALUE: self.val}
+        exp |= {} if not self.name else {NAME: self.name}
+        if not self.type_str in ['json', ''] :
+            exp[TYPE] = self.type_str
+        if isinstance(self, NtvList):
+            exp[VALUE] = [ntv.expand(full) for ntv in self.val]
+        else:
+            exp[VALUE] = self.val
+        return exp
+        
+    def from_value(self):
+        '''return a Ntv entity from ntv_value'''
+        if isinstance(self.ntv_value, list):
+            return NtvList(self.ntv_value)
+        return Ntv.from_obj(self.ntv_value)
+    
+    def json_name(self, def_type=None, string=False, explicit=False):
+        '''return the JSON name of the NTV entity (json-ntv format)
+
+        *Parameters*
+
+        - **def_typ** : Datatype or Namespace (default None) - type of the parent entity
+        - **string** : boolean (default False) - If True, return a string else a tuple
+        - **explicit** : boolean (default False) - If True, type is always included'''
+        if def_type is None:
+            def_type = ''
+        elif isinstance(def_type, (Datatype, Namespace)):
+            def_type = def_type.long_name
+        json_name = self.ntv_name if self.ntv_name else ''
+        json_type = relative_type(
+            def_type, self.type_str) if self.ntv_type else ''
+        implicit = isinstance(self, NtvSingle) and (json_type == 'json'  
+                    and (not def_type or def_type == 'json' or def_type[-1] == '.')
+                    or not NtvConnector.is_json_class(self.val))
+        if implicit and not explicit:
+            json_type = ''
+        json_sep = self._obj_sep(json_name, json_type, def_type)
+        if string:
+            return json_name + json_sep + json_type
+        return [json_name, json_sep, json_type]
+
     @staticmethod
     def lower(val1, val2):
         ''' compare two ntv_value and return True if val1 < val2, False if val1 > val2 and 
@@ -321,163 +454,6 @@ class Ntv(ABC, NtvUtil):
                 break
         return res 
     
-    def childs(self, obj=False, nam=False, typ=False):
-        ''' return a list of child Ntv entities or child data
-        
-        *parameters*
-        
-        - **obj**: boolean (default False) - return json-value
-        - **nam**: boolean (default False) - return name (with or without type) 
-        - **typ**: boolean (default False) - return type (with or without name) 
-        '''
-        if isinstance(self, NtvSingle):
-            return []
-        if not (obj or nam or typ):
-            return self.val
-        if obj:
-            return [ntv.to_obj() for ntv in self.val]
-        return [(ntv.name if nam else '') + (' - ' if nam and typ else '') + 
-                (ntv.type_str if typ else '') for ntv in self.val]
-        
-    def pointer(self, index=False, item_idx=None):
-        '''return a nested list of pointer from root
-        
-        *Parameters*
-
-        - **index**: Boolean (default False) - use index instead of name
-        - **item_idx**: Integer (default None) - index value for the pointer 
-        (useful with duplicate data)'''
-        if not self.parent:
-            root_pointer = 0 if index else self.json_name(string=True)
-            return NtvPointer([root_pointer])        
-            #return NtvPointer([])        
-        idx = item_idx if item_idx else self.parent.ntv_value.index(self)
-        num = index or self.parent.json_array
-        #num = index or (self.ntv_name == "" and self.parent.json_array)
-        pointer = self.parent.pointer(index)
-        #pointer.append(idx if num else self.ntv_name)
-        pointer.append(idx if num else self.json_name(def_type=self.parent.type_str,
-                                                      string=True))
-        return pointer
-         
-    @property
-    def code_ntv(self):
-        '''return a string with the NTV code composed with 1 to 3 letters:
-        - 'l' (NtvList), 's' (NtvSingle / json_value) or 'o' (NtvSingle / obj_value)
-        - 'N' if ntv_name is present else none
-        - 'T' if ntv_type is present else none'''
-        dic = {'NtvList': 'l', 'NtvSingle': 's'}
-        code = dic[self.__class__.__name__]
-        if isinstance(self, NtvSingle) and not self.is_json:
-            code = 'o'
-        if self.ntv_name:
-            code += 'N'
-        if self.ntv_type and self.ntv_type.long_name != 'json':
-            code += 'T'
-        return code
-
-    @property
-    def max_len(self):
-        '''return the highest len of Ntv entity included'''
-        maxi = len(self)
-        if isinstance(self.ntv_value, (list, set)):
-            maxi = max(maxi, max(ntv.max_len for ntv in self.ntv_value))
-        return maxi
-
-    @property
-    def name(self):
-        '''return the ntv_name of the entity'''
-        return self.ntv_name
-
-    @property
-    def type_str(self):
-        '''return a string with the value of the NtvType of the entity'''
-        if not self.ntv_type:
-            return ''
-        return self.ntv_type.long_name
-
-    @property
-    def val(self):
-        '''return the ntv_value of the entity'''
-        return self.ntv_value
-
-    def alike(self, ntv_value):
-        ''' return a Ntv entity with same name and type.
-
-        *Parameters*
-
-        - **ntv_value**: list of ntv values'''
-        return self.__class__(ntv_value, self.ntv_name, self.ntv_type)
-
-    def from_value(self):
-        '''return a Ntv entity from ntv_value'''
-        if isinstance(self.ntv_value, list):
-            return NtvList(self.ntv_value)
-        return Ntv.from_obj(self.ntv_value)
-
-    def json_name(self, def_type=None, string=False, explicit=False):
-        '''return the JSON name of the NTV entity (json-ntv format)
-
-        *Parameters*
-
-        - **def_typ** : Datatype or Namespace (default None) - type of the parent entity
-        - **string** : boolean (default False) - If True, return a string else a tuple
-        - **explicit** : boolean (default False) - If True, type is always included'''
-        if def_type is None:
-            def_type = ''
-        elif isinstance(def_type, (Datatype, Namespace)):
-            def_type = def_type.long_name
-        json_name = self.ntv_name if self.ntv_name else ''
-        json_type = relative_type(
-            def_type, self.type_str) if self.ntv_type else ''
-        implicit = isinstance(self, NtvSingle) and (json_type == 'json'  
-                    and (not def_type or def_type == 'json' or def_type[-1] == '.')
-                    or not NtvConnector.is_json_class(self.val))
-        if implicit and not explicit:
-            json_type = ''
-        json_sep = self._obj_sep(json_name, json_type, def_type)
-        if string:
-            return json_name + json_sep + json_type
-        return [json_name, json_sep, json_type]
-
-    def to_ntvsingle(self, name=None, typ=None, def_type=None, **kwargs):
-        '''convert NtvList entity to NtvSingle entity
-
-        *Parameters*
-
-        - **ntv_name** : String (default None) - name of the NTV entity
-        - **ntv_type**: String (default None) - type of the entity
-        - **value**: value of the entity
-        - **fast**: boolean (default False) - Ntv is created with a list of json values
-        without control
-        '''
-        return NtvSingle(self.obj_value(def_type=def_type, **kwargs),
-                         self.name if self.name else name,
-                         self.type_str if self.type_str else typ)
-    
-    def to_ntvlist(self, def_type=None, def_sep=None, no_typ=False, decode_str=False,
-                 typ_auto=False, fast=False):
-        '''convert NtvSingle entity to NtvList entity
-
-        *Parameters*
-
-        - **value**: Ntv value to convert in an Ntv entity
-        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
-        - **def_type** : Datatype or Namespace (default None) - default type of the value
-        - **def_sep**: ':', '::' or None (default None) - default separator of the value
-        - **decode_str**: boolean (default False) - if True, string are loaded as json data
-        - **type_auto**: boolean (default False) - if True, default type for NtvList
-        is the ntv_type of the first Ntv in the ntv_value
-        - **fast** : boolean (default False) - if True, Ntv entity is created without conversion
-        '''
-        ntv = Ntv.from_obj(self.ntv_value, def_type, def_sep, no_typ, decode_str,
-                     typ_auto, fast)
-        if ntv.__class__.__name__ == 'NtvSingle':
-            return NtvList([self])
-        if self.ntv_name:
-            ntv.set_name(self.ntv_name)
-        return ntv
-
     def no_type(self):
         '''convert NTV entity in a NV entity (in which ntv_type is 'json' or None')'''
         no_typ = copy.copy(self)
@@ -537,6 +513,49 @@ class Ntv(ABC, NtvUtil):
             ntv.set_type()
             ntv.set_name()
         return only_val
+
+    @staticmethod
+    def obj_ntv(value, name='', typ='', single=False):
+        '''return a json-ntv representation without using Ntv structure.
+
+        *Parameters*
+
+        - **value** : ntv-value of the json-ntv
+        - **name** : string (default '') - ntv-name of the json-ntv
+        - **typ** : string (default '') - ntv_type of the json-ntv
+        - **single** : boolean (default False) - if True, value is a single object
+        else value is a set of objetcs.
+        '''
+        value = {} if not value else value
+        name = '' if not name else name
+        typ = '' if not typ else typ
+        ntv_list = isinstance(value, (list, dict))
+        if not single and not ntv_list:
+            raise NtvError('value is not compatible with not single NTV data')
+        sep = ':' if single else '::'
+        sep = '' if not typ and (not single or single and not ntv_list) else sep
+        name += sep + typ
+        value = [value] if not name and isinstance(value, dict) and  len(value) == 1 else value
+        return {name: value} if name else value
+
+    def pointer(self, index=False, item_idx=None):
+        '''return a nested list of pointer from root
+        
+        *Parameters*
+
+        - **index**: Boolean (default False) - use index instead of name
+        - **item_idx**: Integer (default None) - index value for the pointer 
+        (useful with duplicate data)'''
+        if not self.parent:
+            root_pointer = 0 if index else self.json_name(string=True)
+            return NtvPointer([root_pointer])        
+        idx = item_idx if item_idx else self.parent.ntv_value.index(self)
+        num = index or self.parent.json_array
+        pointer = self.parent.pointer(index)
+        pointer.append(idx if num else self.json_name_str)
+        #pointer.append(idx if num else self.json_name(def_type=self.parent.type_str,
+        #                                              string=True))
+        return pointer
     
     def reduce(self, obj=True, maxi=6, level=3):
         '''reduce the length and the level of the entity
@@ -572,6 +591,42 @@ class Ntv(ABC, NtvUtil):
         if obj:
             return ntv.to_obj()
         return ntv
+
+    def remove(self, first=True, index=None):
+        '''remove self from its parent entity.
+        
+        *parameters*
+        
+        - **first** : boolean (default True) - if True only the first instance
+        else all
+        - **index** : integer (default None) - index of self in its parent
+        '''
+        parent = self.parent
+        if not parent:
+            return
+        idx = parent.ntv_value.index(self) if index is None else index
+        if not parent[idx] == self:
+            raise NtvError('the entity is not present at the index')
+        del parent.ntv_value[idx]
+        if not first and index is None:
+            while self in parent:
+                idx = parent.ntv_value.index(self)
+                del parent.ntv_value[idx]                
+        if not self in parent:
+            self.parent = None
+        return
+            
+    def replace(self, ntv):
+        '''replace self by ntv in the tree'''
+        parent = self.parent
+        if parent:
+            idx = parent.ntv_value.index(self)
+            parent.insert(idx, ntv)
+            del parent[idx+1]
+            if not self in parent:
+                self.parent=None
+        else:
+            self = ntv
     
     def set_name(self, name='', nodes='simple'):
         '''set new names to the entity
@@ -634,6 +689,44 @@ class Ntv(ABC, NtvUtil):
             ntv.ntv_value = val.val
         return
 
+    def to_ntvsingle(self, name=None, typ=None, def_type=None, **kwargs):
+        '''convert NtvList entity to NtvSingle entity
+
+        *Parameters*
+
+        - **ntv_name** : String (default None) - name of the NTV entity
+        - **ntv_type**: String (default None) - type of the entity
+        - **value**: value of the entity
+        - **fast**: boolean (default False) - Ntv is created with a list of json values
+        without control
+        '''
+        return NtvSingle(self.obj_value(def_type=def_type, **kwargs),
+                         self.name if self.name else name,
+                         self.type_str if self.type_str else typ)
+    
+    def to_ntvlist(self, def_type=None, def_sep=None, no_typ=False, decode_str=False,
+                 typ_auto=False, fast=False):
+        '''convert NtvSingle entity to NtvList entity
+
+        *Parameters*
+
+        - **value**: Ntv value to convert in an Ntv entity
+        - **no_typ** : boolean (default None) - if True, NtvList is with 'json' type
+        - **def_type** : Datatype or Namespace (default None) - default type of the value
+        - **def_sep**: ':', '::' or None (default None) - default separator of the value
+        - **decode_str**: boolean (default False) - if True, string are loaded as json data
+        - **type_auto**: boolean (default False) - if True, default type for NtvList
+        is the ntv_type of the first Ntv in the ntv_value
+        - **fast** : boolean (default False) - if True, Ntv entity is created without conversion
+        '''
+        ntv = Ntv.from_obj(self.ntv_value, def_type, def_sep, no_typ, decode_str,
+                     typ_auto, fast)
+        if ntv.__class__.__name__ == 'NtvSingle':
+            return NtvList([self])
+        if self.ntv_name:
+            ntv.set_name(self.ntv_name)
+        return ntv
+    
     def to_mermaid(self, title='', disp=False, row=False, leaves=False):
         '''return a mermaid flowchart.
 
@@ -652,30 +745,6 @@ class Ntv(ABC, NtvUtil):
             return None
         return Ntv.obj({':$mermaid': self.to_obj()}).to_obj(format='obj', **option)
 
-    def expand(self, full=True, entity=True):
-        '''return a json representation of the triplet (name, type, value)
-        
-        
-        *Parameters*
-
-        - **full**: Boolean (default True) - If False only members with non empty values are present
-        - **entity**: Boolean (default True) - If True, member with entity name is added
-        '''
-        exp = {ENTITY: self.__class__.__name__} if entity else {} 
-        if isinstance(self, NtvList) and full:
-            return exp | {NAME: self.name, TYPE: self.type_str, 
-                    VALUE: [ntv.expand(full) for ntv in self.val]}
-        if isinstance(self, NtvSingle) and full:
-            return exp | {NAME: self.name, TYPE: self.type_str, VALUE: self.val}
-        exp |= {} if not self.name else {NAME: self.name}
-        if not self.type_str in ['json', ''] :
-            exp[TYPE] = self.type_str
-        if isinstance(self, NtvList):
-            exp[VALUE] = [ntv.expand(full) for ntv in self.val]
-        else:
-            exp[VALUE] = self.val
-        return exp
-        
     def to_repr(self, nam=True, typ=True, val=True, jsn=False, maxi=10):
         '''return a simple json representation of the Ntv entity.
 
@@ -782,30 +851,6 @@ class Ntv(ABC, NtvUtil):
             return NtvConnector.connector()['CborConnec'].to_obj_ntv(json_obj)
         return json_obj
 
-    @staticmethod
-    def obj_ntv(value, name='', typ='', single=False):
-        '''return a json-ntv representation without using Ntv structure.
-
-        *Parameters*
-
-        - **value** : ntv-value of the json-ntv
-        - **name** : string (default '') - ntv-name of the json-ntv
-        - **typ** : string (default '') - ntv_type of the json-ntv
-        - **single** : boolean (default False) - if True, value is a single object
-        else value is a set of objetcs.
-        '''
-        value = {} if not value else value
-        name = '' if not name else name
-        typ = '' if not typ else typ
-        ntv_list = isinstance(value, (list, dict))
-        if not single and not ntv_list:
-            raise NtvError('value is not compatible with not single NTV data')
-        sep = ':' if single else '::'
-        sep = '' if not typ and (not single or single and not ntv_list) else sep
-        name += sep + typ
-        value = [value] if not name and isinstance(value, dict) and  len(value) == 1 else value
-        return {name: value} if name else value
-
     def to_json_ntv(self):
         ''' create a copy where ntv-value of the self-tree nodes is converted 
         in json-value'''
@@ -861,47 +906,6 @@ class Ntv(ABC, NtvUtil):
             maxv = len(self.ntv_value) if maxi < 1 else maxi
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxv]])
         raise NtvError('the ntv entity is not consistent')
-
-    def remove(self, first=True, index=None):
-        '''remove self from its parent entity.
-        
-        *parameters*
-        
-        - **first** : boolean (default True) - if True only the first instance
-        else all
-        - **index** : integer (default None) - index of self in its parent
-        '''
-        parent = self.parent
-        if not parent:
-            return
-        idx = parent.ntv_value.index(self) if index is None else index
-        if not parent[idx] == self:
-            raise NtvError('the entity is not present at the index')
-        del parent.ntv_value[idx]
-        if not first and index is None:
-            while self in parent:
-                idx = parent.ntv_value.index(self)
-                del parent.ntv_value[idx]                
-        if not self in parent:
-            self.parent = None
-        return
-            
-    def replace(self, ntv):
-        '''replace self by ntv in the tree'''
-        parent = self.parent
-        if parent:
-            idx = parent.ntv_value.index(self)
-            parent.insert(idx, ntv)
-            del parent[idx+1]
-            if not self in parent:
-                self.parent=None
-        else:
-            self = ntv
-
-    @property
-    def tree(self):
-        '''return a tree with included entities (NtvTree object)'''
-        return NtvTree(self)
 
     @abstractmethod
     def obj_value(self):
