@@ -22,7 +22,9 @@ import requests
 
 import json_ntv
 from json_ntv.ntv_util import NtvUtil
-    
+
+SCH_ORG = 'https://schema.org/'
+
 def agreg_type(str_typ, def_type, single):
     '''aggregate str_typ and def_type to return an Datatype or a Namespace if not single
 
@@ -156,7 +158,22 @@ def _join_type(namesp, str_typ):
             namesp_split.append(name)
     return '.'.join(namesp_split)"""
 
-
+def _isin_schemaorg(name, prop=True, typ=None):
+    ''' return True if a schema.org Property is present and associated to a Type
+    or if a schema.org Type is present'''
+    n_org = name if prop else name[:-1]
+    t_org = typ[:-1] if typ else None
+    req_name = requests.get(SCH_ORG + n_org, allow_redirects=True).content.decode()
+    if not prop: 
+        return 'Type</ti' in req_name
+    is_prop = 'Property</ti' in req_name
+    if not t_org:
+        return is_prop
+    if is_prop:
+        return '/' + n_org in requests.get(SCH_ORG + t_org, allow_redirects=True
+                                      ).content.decode()
+    return False
+    
 class Datatype(NtvUtil):
     ''' type of NTV entities.
 
@@ -227,9 +244,12 @@ class Datatype(NtvUtil):
             name = 'json'
         if not nspace:
             nspace = NtvUtil._namespaces_['']
-        if name[0] != '$' and not force and not (
-                'schema.org' in nspace.file or name in nspace.content['type']):
-            raise DatatypeError(name + ' is not defined in ' + nspace.long_name)
+        if nspace.file and SCH_ORG in nspace.file:
+            if not _isin_schemaorg(name, typ=nspace.name):
+                raise DatatypeError(name + ' is not a schema.org Property associated to the ' + nspace.name + 'Type ')
+        else:       
+            if not (name[0] == '$' or force or name in nspace.content['type']):
+                raise DatatypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
@@ -346,9 +366,18 @@ class Namespace(NtvUtil):
         '''
         if name and not parent:
             parent = NtvUtil._namespaces_['']
-        if name and name[0] != '$' and not force and not (
+        '''if name and name[0] != '$' and not force and not (
            name in parent.content['namespace'] or 'schema.org' in parent.file):
-            raise DatatypeError(name + ' is not defined in ' + parent.long_name)
+            raise DatatypeError(name + ' is not defined in ' + parent.long_name)'''
+
+        if parent and parent.file and SCH_ORG in parent.file:
+            if not _isin_schemaorg(name, False):
+                raise DatatypeError(name + ' is not a schema.org Type ')
+        else:       
+            if name and not (name[0] == '$' or force or name in parent.content['namespace']):
+                raise DatatypeError(name + ' is not defined in ' + parent.long_name)
+
+
         self.name = name
         self.parent = parent
         self.custom = parent.custom or name[0] == '$' if parent else False
@@ -394,7 +423,7 @@ class Namespace(NtvUtil):
             return None
         if parent:
             if 'schema.org' in parent.file or name == 'org.':
-                return 'https://schema.org/'
+                return SCH_ORG
             config = configparser.ConfigParser()
             if module:
                 p_file = Path(parent.file).stem + Path(parent.file).suffix
@@ -463,6 +492,7 @@ class Namespace(NtvUtil):
     def is_parent(self, nspace):
         '''return the number of level between self and nspace, -1 if None'''
         return nspace.is_child(self)
+
 
 
 class DatatypeError(Exception):
