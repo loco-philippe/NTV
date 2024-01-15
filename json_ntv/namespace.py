@@ -227,7 +227,8 @@ class Datatype(NtvUtil):
             name = 'json'
         if not nspace:
             nspace = NtvUtil._namespaces_['']
-        if name[0] != '$' and not force and not name in nspace.content['type']:
+        if name[0] != '$' and not force and not (
+                'schema.org' in nspace.file or name in nspace.content['type']):
             raise DatatypeError(name + ' is not defined in ' + nspace.long_name)
         self.name = name
         self.nspace = nspace
@@ -345,8 +346,8 @@ class Namespace(NtvUtil):
         '''
         if name and not parent:
             parent = NtvUtil._namespaces_['']
-        if name and name[0] != '$' and not force and \
-          not name in parent.content['namespace']:
+        if name and name[0] != '$' and not force and not (
+           name in parent.content['namespace'] or 'schema.org' in parent.file):
             raise DatatypeError(name + ' is not defined in ' + parent.long_name)
         self.name = name
         self.parent = parent
@@ -392,6 +393,8 @@ class Namespace(NtvUtil):
         if custom:
             return None
         if parent:
+            if 'schema.org' in parent.file or name == 'org.':
+                return 'https://schema.org/'
             config = configparser.ConfigParser()
             if module:
                 p_file = Path(parent.file).stem + Path(parent.file).suffix
@@ -419,7 +422,7 @@ class Namespace(NtvUtil):
         - dict : {'type': <list of ntv_type names>,  
                   'namespace': <list of namespace names>}
         '''
-        if custom:
+        if custom or 'schema.org' in file:
             return {'type': {}, 'namespace': {}}
         config = configparser.ConfigParser()
         if module:
