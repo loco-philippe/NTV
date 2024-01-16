@@ -50,10 +50,12 @@ def ntv_validate(data, sch, mode=0):
         new_p_data = str(ntv.pointer())
         if 'properties.' in parent_sch:
             p_prop = parent_sch['properties.']
-            if ntv.ntv_name in p_prop or ntv.ntv_name in p_prop:
-                mapping[new_p_data] = mapping[str(parent_ntv)] + '/properties.' + '/' + ntv.ntv_name
+            #if ntv.ntv_name in p_prop or ntv.json_name_str in p_prop:
+            p_name = ntv.ntv_name if ntv.ntv_name in p_prop else (ntv.json_name_str if ntv.json_name_str in p_prop else None)
+            if not p_name is None:
+                mapping[new_p_data] = mapping[str(parent_ntv)] + '/properties.' + '/' + p_name
                 valid &= kw_validate('properties', ntv_data['#' + new_p_data], 
-                         _pure(p_prop[ntv.ntv_name]), mode)
+                         _pure(p_prop[p_name]), mode)
         if 'prefixItems.' in parent_sch:
             row = list(ntv.pointer(index=True))[-1]
             p_item = parent_sch['prefixItems.']
