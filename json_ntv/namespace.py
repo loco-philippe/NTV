@@ -293,6 +293,8 @@ class Datatype(NtvUtil):
         '''return the number of level between self and nspace, -1 if None'''
         return self.nspace.is_child(Namespace.add(long_name))
 
+    def validate(self, value):
+        return False
 
 class Namespace(NtvUtil):
     ''' Namespace of NTV entities.
