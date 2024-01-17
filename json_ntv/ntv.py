@@ -236,7 +236,8 @@ class Ntv(ABC, NtvUtil):
     def __iter__(self):
         ''' iterator for Ntv entities'''
         if isinstance(self, NtvSingle):
-            return iter([self.val])
+            #return iter([self.val])
+            return iter([self])
         return iter(self.val)
 
     def __getitem__(self, selec):
