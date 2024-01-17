@@ -103,7 +103,7 @@ def validat(json_data, jsch, part, mode):
     if mode > 1 and jsch:
         print('    ', part, ' : ', json_data, jsch)
     valid = False
-    if mode < 2:
+    if mode < 3:
         try:
             valid = validate(json_data, jsch) is None
         except :
@@ -115,13 +115,16 @@ def validat(json_data, jsch, part, mode):
     
 def _ntv_to_json(ntv_data):  
     '''transform a Ntv entity into a json representation'''
-    return {'value' : [ntv.ntv_value for ntv in ntv_data.ntv_value],
+    return {    'value' : ntv_data.ntv_value,
+                'name'  : ntv_data.ntv_name, 
+                'type'  : ntv_data.type_str}
+    """return {'value' : [ntv.ntv_value for ntv in ntv_data.ntv_value],
             'name'  : [ntv.ntv_name if ntv.ntv_name else None for ntv in ntv_data.ntv_value], 
             'type'  : [ntv.type_str for ntv in ntv_data.ntv_value]
             } if isinstance (ntv_data, NtvList) else {
                 'value' : ntv_data.ntv_value,
                 'name'  : ntv_data.ntv_name, 
-                'type'  : ntv_data.type_str}
+                'type'  : ntv_data.type_str}"""
 
 def _simple_to_jsch(ntvsch):
     '''transform a simple NTVschema into a JSONschema'''
@@ -131,7 +134,7 @@ def _simple_to_jsch(ntvsch):
     jsonsch['value'] = ntvsch['value.'] if 'value.' in ntvsch.keys() else {}
     jsonsch['value'] |= {key:val for key, val in ntvsch.items() 
                      if not key in ['type.', 'name.', 'value.']}
-    return jsonsch
+    return _json(jsonsch)
 
 def _json(dic):
     '''transform in a schema leaf NTVkeywords into JSONkeywords'''
