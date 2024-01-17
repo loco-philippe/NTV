@@ -634,7 +634,7 @@ class Test_Ntv_function(unittest.TestCase):
     def test_iter(self):
         ntv = Ntv.obj(0)
         for int, val in enumerate(ntv):
-            self.assertEqual(val, int)
+            self.assertEqual(val.val, int)
         ntv = Ntv.obj([0, 1, 2, 3])
         for int, val in enumerate(ntv):
             self.assertEqual(val.val, int)
