@@ -45,26 +45,34 @@ def ntv_validate(data, sch, mode=0):
     mapping = {p_data : '/' + sch_p}
     valid = kw_validate('global', ntv_data, _pure(sch[sch_p]), mode)
     for ntv in list(ntv_data.tree)[1:]:
-        parent_ntv = ntv.pointer()[:-1]
-        parent_sch = resolve_pointer(sch, mapping[str(parent_ntv)])
         new_p_data = str(ntv.pointer())
-        if 'properties.' in parent_sch:
-            p_prop = parent_sch['properties.']
-            #if ntv.ntv_name in p_prop or ntv.json_name_str in p_prop:
-            p_name = ntv.ntv_name if ntv.ntv_name in p_prop else (ntv.json_name_str if ntv.json_name_str in p_prop else None)
-            if not p_name is None:
-                mapping[new_p_data] = mapping[str(parent_ntv)] + '/properties.' + '/' + p_name
-                valid &= kw_validate('properties', ntv_data['#' + new_p_data], 
-                         _pure(p_prop[p_name]), mode)
-        if 'prefixItems.' in parent_sch:
-            row = list(ntv.pointer(index=True))[-1]
-            p_item = parent_sch['prefixItems.']
-            if len(p_item) > row:
-                mapping[new_p_data] = mapping[str(parent_ntv)] + '/prefixItems.' + '/' + str(row)
-                valid &= kw_validate('prefixItems ' + str(row), ntv_data['#' + new_p_data],
-                                     _pure(p_item[row]), mode)
-        if mode and not new_p_data in mapping:
-            print('not include', new_p_data)
+        parent_ntv = str(ntv.pointer()[:-1])
+        if not parent_ntv in mapping:
+            if mode: 
+                print('  validate : parent not include', new_p_data)
+        else:
+            #print('parent_sch : ', parent_ntv)
+            #print(mapping)
+            parent_sch = resolve_pointer(sch, mapping[parent_ntv])
+            if mode:
+                print('\nvalidation : ', new_p_data)
+            if 'properties.' in parent_sch:
+                p_prop = parent_sch['properties.']
+                #if ntv.ntv_name in p_prop or ntv.json_name_str in p_prop:
+                p_name = ntv.ntv_name if ntv.ntv_name in p_prop else (ntv.json_name_str if ntv.json_name_str in p_prop else None)
+                if not p_name is None:
+                    mapping[new_p_data] = mapping[parent_ntv] + '/properties.' + '/' + p_name
+                    valid &= kw_validate('properties', ntv_data['#' + new_p_data], 
+                             _pure(p_prop[p_name]), mode)
+            if 'prefixItems.' in parent_sch:
+                row = list(ntv.pointer(index=True))[-1]
+                p_item = parent_sch['prefixItems.']
+                if len(p_item) > row:
+                    mapping[new_p_data] = mapping[parent_ntv] + '/prefixItems.' + '/' + str(row)
+                    valid &= kw_validate('prefixItems ' + str(row), ntv_data['#' + new_p_data],
+                                         _pure(p_item[row]), mode)
+            if mode and not new_p_data in mapping:
+                print('  validate : not include', new_p_data)
     return valid
 
 def kw_validate(keyword, ntv_data, sch, mode):
@@ -81,7 +89,7 @@ def kw_validate(keyword, ntv_data, sch, mode):
             - 2: details of errors (traceback)
     '''  
     if mode:
-        print('validate : ', keyword, 
+        print('  validate : ', keyword, 
               ntv_data.ntv_name if keyword == 'properties' else '')
     valid = val_items(ntv_data, sch['items.'], mode) if 'items.' in sch.keys() else True
     valid &= val_simple(ntv_data, {key: val for key, val in sch.items() 
@@ -143,7 +151,7 @@ def validat(json_data, jsch, mode):
             valid = validate(json_data, jsch) is None
         except :
             if mode > 0:
-                print('error : ', json_data, 'is not valid with schema : ', jsch)
+                print('  error : ', json_data, 'is not valid with schema : ', jsch)
     else:
         valid = validate(json_data, jsch) is None
     return valid    
