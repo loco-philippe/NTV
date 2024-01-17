@@ -91,7 +91,8 @@ def kw_validate(keyword, ntv_data, sch, mode):
     if mode:
         print('  validate : ', keyword, 
               ntv_data.ntv_name if keyword == 'properties' else '')
-    valid = val_items(ntv_data, sch['items.'], mode) if 'items.' in sch.keys() else True
+    valid = val_items(ntv_data, sch, mode) if 'items.' in sch.keys() else True
+    #valid = val_items(ntv_data, sch['items.'], mode) if 'items.' in sch.keys() else True
     valid &= val_simple(ntv_data, {key: val for key, val in sch.items() 
                                    if not key == 'items.'}, mode)
     return valid
@@ -108,7 +109,18 @@ def val_items(ntv_data, items_sch, mode) :
             - 1: list of controls and errors
             - 2: details of errors (traceback)
     '''  
-    return validat(_ntv_to_json(ntv_data), _items_to_jsch(items_sch), mode)
+    valid = True
+    for ntv in ntv_data:
+        valid &= ntv_validate(ntv, items_sch, mode)
+        """new_p_data = str(ntv.pointer())
+        parent_ntv = str(ntv_data.pointer())
+        row = list(ntv.pointer(index=True))[-1]
+        p_item = items_sch
+        mapping[new_p_data] = mapping[parent_ntv] + '/items.'
+        valid &= kw_validate('items ' + str(row), ntv_data['#' + new_p_data],
+                             _pure(p_item), mode)"""
+    return valid
+    #return validat(_ntv_to_json(ntv_data), _items_to_jsch(items_sch), mode)
     
 def val_simple(ntv_data, sch, mode) :
     '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.
