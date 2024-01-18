@@ -38,23 +38,17 @@ class NtvUtil:
         if not isinstance(string, str):
             raise NtvError('a json-name have to be str')
         if string == '':
-            return (None, None, None)
-        sep = None
-        if '::' in string:
-            sep = '::'
-        elif ':' in string:
-            sep = ':'
-        if sep is None:
-            #return (string, None, None)
-            return (string, None, None) if string[-1]!='.' else (None, string, None)
-        split = string.rsplit(sep, 2)
-        if len(split) == 1:
-            return (string, None, sep)
-        if split[0] == '':
-            return (None, split[1], sep)
-        if split[1] == '':
-            return (split[0], None, sep)
-        return (split[0], split[1], sep)
+            return (None, None, None)        
+        spl = string.rsplit(':', maxsplit=1)
+        if len(spl) == 1:
+            return(string, None, None)
+        if spl[0] =='':
+            return (None, spl[1], ':')
+        if spl[0][-1] == ':':
+            sp0 = spl[0][:-1]
+            return (None if sp0 == '' else sp0, None if spl[1] == '' else spl[1], '::') 
+        return (None if spl[0] == '' else spl[0], None if spl[1] == '' else spl[1], ':')
+
 
     @staticmethod
     def decode_ntv_tab(ntv, ntv_to_val):

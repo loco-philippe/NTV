@@ -280,6 +280,19 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj({'::': {':json':2}}).to_obj(), [2])
         self.assertEqual(Ntv.obj({'::': {':':2}}).to_obj(), [2])
 
+    def test_separator(self):
+        sings =[{'test::string:int32': [2,21]}, 
+                {'test::string::int32': [2,21]},
+                {'test:string:int32': [2,21]},
+                {'test:string::int32': [2,21]},
+                {'::string:int32': [2,21]},
+                {':string:int32': [2,21]},
+                {':int32': [2,21]},
+                {'::int32': [2,21]}]
+        for sing in sings:
+            self.assertEqual(Ntv.obj(sing).to_obj(), sing)
+            self.assertEqual(Ntv.obj(sing).type_str, 'int32')
+            
     def test_from_obj_json(self):
         dictstr = [['NtvSingle', None],
                    ['NtvSingle', {'none': None}],
