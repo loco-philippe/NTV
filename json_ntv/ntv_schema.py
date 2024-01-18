@@ -118,13 +118,6 @@ def _ntv_to_json(ntv_data):
     return {    'value' : ntv_data.ntv_value,
                 'name'  : ntv_data.ntv_name, 
                 'type'  : ntv_data.type_str}
-    """return {'value' : [ntv.ntv_value for ntv in ntv_data.ntv_value],
-            'name'  : [ntv.ntv_name if ntv.ntv_name else None for ntv in ntv_data.ntv_value], 
-            'type'  : [ntv.type_str for ntv in ntv_data.ntv_value]
-            } if isinstance (ntv_data, NtvList) else {
-                'value' : ntv_data.ntv_value,
-                'name'  : ntv_data.ntv_name, 
-                'type'  : ntv_data.type_str}"""
 
 def _simple_to_jsch(ntvsch):
     '''transform a simple NTVschema into a JSONschema'''
