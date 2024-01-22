@@ -109,6 +109,14 @@ class Test_Datatype(unittest.TestCase):
         for nsp in listkonsp:
             with self.assertRaises(DatatypeError):
                 lon.isin_namespace(nsp)  
-                
+ 
+    def test_org(self):
+        liststr = ['org.House.']
+        for nstr in liststr:
+            self.assertEqual(Namespace.add(nstr).long_name, nstr)
+        liststr = ['org.House.Country.name']
+        for nstr in liststr:
+            self.assertEqual(Datatype.add(nstr).long_name, nstr)
+        
 if __name__ == '__main__':
     unittest.main(verbosity=2)        

@@ -41,6 +41,8 @@ class NtvUtil:
             return (None, None, None)        
         spl = string.rsplit(':', maxsplit=1)
         if len(spl) == 1:
+            if string[-1] == '.':
+                return (None, string, None)
             return(string, None, None)
         if spl[0] =='':
             return (None, spl[1], ':')
