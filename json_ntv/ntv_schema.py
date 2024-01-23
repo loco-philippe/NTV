@@ -25,7 +25,46 @@ from jsonpointer import resolve_pointer
 from jsonschema import validate
 
 file = pathlib.Path(json_ntv.__file__).parent.parent / "RFC" / "NTV_NTVschema_namespace.ini"
-from_file(file, '$NTVschema.')
+#from_file(file, '$NTVschema.')
+
+def ntv_validate2(ntv_data, ntv_sch, mode=0):
+    valid = True 
+    if mode:
+        print('  validate : ', ntv_data.pointer()) #, sch)
+    for sch in ntv_sch: 
+        if sch.name.isdecimal() and len(ntv_data) > int(sch.name):
+            valid &= ntv_validate2(ntv_data.ntv_value[int(sch.name)], sch.ntv_value, mode)            
+        elif sch.type_str[:4] == 'sch.' and sch.type_str[-1] == '.':
+            valid &= val_prop2(ntv_data, sch, mode)
+        else:
+            valid &= val_simple2(ntv_data, sch, mode)     
+    return valid
+
+"""def _simp2(sch):
+    return NtvList([ntv for ntv in sch 
+                    if ntv.type_str[:4] == 'sch.' and ntv.type_str[-1] != '.'],
+                   ntv_name=sch.name)"""
+
+def val_prop2(ntv_data, sch, mode):
+    valid = True
+    sch_name = [ntv.name for ntv in sch]
+    for ntv in ntv_data:
+        p_name = ntv.ntv_name if ntv.ntv_name in sch_name else (ntv.json_name_str if ntv.json_name_str in sch_name else None)
+        if not p_name is None:
+            valid &= ntv_validate2(ntv, sch[p_name], mode)
+        #elif mode:
+        #    print('    not include : ', ntv.pointer()) 
+    return valid
+
+def val_simple2(ntv_data, sch, mode) :
+    print('simple : ', ntv_data, sch)
+    return True
+
+"""def val_pref2(ntv_data, idx, mode):
+    valid = True
+    if len(ntv_data) > idx:
+        return ntv_validate2(ntv.ntv_value[idx], sch_pref, mode)
+    return valid"""
 
 def ntv_validate(ntv_data, sch, mode=0):
     valid = True 
@@ -33,14 +72,13 @@ def ntv_validate(ntv_data, sch, mode=0):
         print('  validate : ', ntv_data.pointer()) #, sch)
     simp_sch = _simp(sch)
     if simp_sch:
-        valid &= val_simple(ntv_data, _simp(sch), mode) 
+        valid &= val_simple(ntv_data, simp_sch, mode) 
     if 'properties.' in sch:
         valid &= val_prop(ntv_data, sch['properties.'], mode)
     if 'prefixItems.' in sch:
         valid &= val_pref(ntv_data, sch['prefixItems.'], mode)
     if 'items.' in sch:
         valid &= val_item(ntv_data, sch['items.'], mode)        
-
     return valid
     
 def val_prop(ntv_data, sch, mode):
