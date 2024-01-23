@@ -30,12 +30,24 @@ file = pathlib.Path(json_ntv.__file__).parent.parent / "RFC" / "NTV_NTVschema_na
 def ntv_validate2(ntv_data, ntv_sch, mode=0):
     valid = True 
     if mode:
+        #print('\n           : ', ntv_data)
+        #print('           : ', ntv_sch)
         print('  validate : ', ntv_data.pointer()) #, sch)
+    if isinstance(ntv_sch, NtvSingle):
+        #return val_simple2(ntv_data, ntv_sch, mode)
+        ntv_sch = NtvList([ntv_sch])
     for sch in ntv_sch: 
-        if sch.name.isdecimal() and len(ntv_data) > int(sch.name):
-            valid &= ntv_validate2(ntv_data.ntv_value[int(sch.name)], sch.ntv_value, mode)            
+        if sch.name.isdecimal():
+            idx = int(sch.name)
+            if len(ntv_data) > idx:
+                valid &= ntv_validate2(ntv_data.ntv_value[idx], sch.ntv_value, mode)            
+                #valid &= ntv_validate2(ntv_data['#/'+idx], sch.ntv_value, mode)            
         elif sch.type_str[:4] == 'sch.' and sch.type_str[-1] == '.':
             valid &= val_prop2(ntv_data, sch, mode)
+        elif sch.type_str == "sch.items":
+            print('items : ', ntv_data, sch)
+        elif sch.type_str[:4] != 'sch.':
+            print('json_name : ', ntv_data, sch)
         else:
             valid &= val_simple2(ntv_data, sch, mode)     
     return valid
@@ -47,11 +59,13 @@ def ntv_validate2(ntv_data, ntv_sch, mode=0):
 
 def val_prop2(ntv_data, sch, mode):
     valid = True
-    sch_name = [ntv.name for ntv in sch]
+    #sch_name = [ntv.name for ntv in sch]
     for ntv in ntv_data:
-        p_name = ntv.ntv_name if ntv.ntv_name in sch_name else (ntv.json_name_str if ntv.json_name_str in sch_name else None)
+        p_name = ntv.ntv_name if ntv.ntv_name == sch.name else (ntv.json_name_str if ntv.json_name_str == sch.name else None)
+        #p_name = ntv.ntv_name if ntv.ntv_name in sch_name else (ntv.json_name_str if ntv.json_name_str in sch_name else None)
         if not p_name is None:
-            valid &= ntv_validate2(ntv, sch[p_name], mode)
+            valid &= ntv_validate2(ntv, sch, mode)
+            #valid &= ntv_validate2(ntv, sch[p_name], mode)
         #elif mode:
         #    print('    not include : ', ntv.pointer()) 
     return valid
