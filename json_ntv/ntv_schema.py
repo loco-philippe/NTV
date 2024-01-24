@@ -176,8 +176,9 @@ def ntv_validate(ntv_data, sch, mode=0):
 def _val_prop(ntv_data, sch, mode):
     '''return the properties validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
     valid = True
-    for ntv in ntv_data:
+    for idx,ntv in enumerate(ntv_data):
         p_name = ntv.ntv_name if ntv.ntv_name in sch else (ntv.json_name_str if ntv.json_name_str in sch else None)
+        p_name = p_name if p_name else (str(idx) if str(idx) in sch else None)
         if not p_name is None:
             valid &= ntv_validate(ntv, sch[p_name], mode)
     return valid
@@ -210,11 +211,12 @@ def _val_simple(ntv_data, sch, mode) :
 def _simple_to_jsch(ntvsch):
     '''transform a simple NTVschema into a JSONschema'''
     jsonsch = {}
-    jsonsch['type']  = ntvsch['typeNtv']  if 'typeNtv'  in ntvsch.keys() else {}
-    jsonsch['name']  = ntvsch['nameNtv']  if 'nameNtv'  in ntvsch.keys() else {}
-    jsonsch['value'] = ntvsch['valueNtv'] if 'valueNtv' in ntvsch.keys() else {}
+    jsonsch['type']  = ntvsch['typeNtv']  if 'typeNtv'  in ntvsch else {}
+    jsonsch['name']  = ntvsch['nameNtv']  if 'nameNtv'  in ntvsch else {}
+    jsonsch['value'] = ntvsch['valueNtv'] if 'valueNtv' in ntvsch else {}
     jsonsch['value'] |= {key:val for key, val in ntvsch.items() 
-                     if not key in ['typeNtv', 'nameNtv', 'valueNtv']}
+                     if not key in ['typeNtv', 'nameNtv', 'valueNtv', 'propertyNames']}
+    jsonsch['name'] |= ntvsch['propertyNames'] if 'propertyNames' in ntvsch else {}
     return _json(jsonsch)
 
 def _json(dic):
