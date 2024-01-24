@@ -14,9 +14,11 @@ from itertools import product
 import json
 
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
+from json_ntv.ntv_util import NtvUtil
 from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch, Datatype
 import ntv_pandas as npd #used to update NtvConnector.dic_connec()
 from shapely import geometry
+from jsonpointer import resolve_pointer
 
 class Test_Ntv_fast(unittest.TestCase):
 
@@ -471,7 +473,52 @@ class Test_Ntv_pointer(unittest.TestCase):
         self.assertEqual(a['t3'][0].parent.parent, a)
         self.assertEqual(list(a['t3'][0].pointer(index=True)), [0, 2, 0])
         self.assertEqual(str(a['t3'][0].pointer(index=True)), '0/2/0')
-                        
+
+    def test_json_ntv_pointer(self):
+        examples = [ {'data': {'a': 1, 'test': 'ok'}, 'pointer': '/test', 'canonical': '/1'},
+                     {'data': [{'a': 1}, 'ok'],       'pointer': '/1',    'canonical': '/1'},
+                     {'data': {'a': 1, '1': 'ok'},    'pointer': '/1',    'canonical': '/1'},
+                     {'data': ['a', 'ok'],            'pointer': '/1',    'canonical': '/1'}]
+        for example in examples:
+            data      = example['data']
+            pointer   = example['pointer']
+            canonical = example['canonical']
+        
+            ntv = Ntv.obj(data)
+            self.assertEqual(ntv['#'+canonical], ntv['#'+pointer])
+            self.assertEqual(ntv['#'+pointer].val, 'ok')
+            self.assertEqual(ntv['#'+pointer].val, resolve_pointer(data, pointer))
+
+    def test_conversion_json_ntv_pointer(self):
+        examples = [ {'data': {'test': 'ok'},                    'pointer': 'test' ,     'pointer json': '/test'},
+                     {'data': [1, {'test': 'ok'}],               'pointer': '/test',     'pointer json': '/1/test'},
+                     {'data': [1, [2, {'test': 'ok'}]],          'pointer': '/1/test',   'pointer json': '/1/1/test'},
+                     {'data': [1, {'a': {'test': 'ok'}}],        'pointer': '/a/test',   'pointer json': '/1/a/test'},
+                     {'data': {'b': [1, {'a': {'test': 'ok'}}]}, 'pointer': 'b/a/test',  'pointer json': '/b/1/a/test'},
+                     {'data': {'b': [1, {'a': {'test': 'ok'}}]}, 'pointer': '0/a/test',  'pointer json': '/b/1/a/test'},
+                     {'data': {'b': {'a': 1, 'test': 'ok'}},     'pointer': 'b/test',    'pointer json': '/b/test'},
+                     {'data': {'a': 1, 'test': 'ok'},            'pointer': '/test',     'pointer json': '/test'},
+                     {'data': [1, {'a': {'test': [1,'ok']}}],    'pointer': '/a/test/1', 'pointer json': '/1/a/test/1'},
+                     {'data': {'b': [1, {'a': {'test': 'ok'}}]}, 'pointer': 'b/a/test',  'pointer json': '/b/1/a/test'}]
+        for example in examples:
+            data         = example['data']
+            pointer      = example['pointer']
+            pointer_json = example['pointer json']
+            unique_root  = len(data) == 1
+        
+            ntv = Ntv.obj(data)
+            self.assertEqual(ntv['#'+pointer].val, resolve_pointer(data, pointer_json))
+            self.assertEqual(ntv['#'+pointer].pointer(), 
+                             ntv['#'+NtvUtil.to_ntvpointer(pointer_json, unique_root)].pointer())
+            if pointer[0] != '0':
+                self.assertEqual(NtvUtil.to_ntvpointer(pointer_json, unique_root), pointer)
+
+    def test_type_ntv_pointer(self):
+        ntv = Ntv.obj([{':int32': 4}, {':int64': 8}, {':int64':12}])
+        self.assertEqual(str(ntv[1].pointer()), '/1')
+        self.assertEqual(str(ntv[2].pointer()), '/2')
+        self.assertEqual(ntv[1].json_name_str, ntv[2].json_name_str)               
+        
 class Test_Ntv_tabular(unittest.TestCase):
 
     def test_tab(self):
