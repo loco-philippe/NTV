@@ -294,7 +294,7 @@ class Datatype(NtvUtil):
         return self.nspace.is_child(Namespace.add(long_name))
 
     def validate(self, value):
-        return False
+        return None
 
 class Namespace(NtvUtil):
     ''' Namespace of NTV entities.
