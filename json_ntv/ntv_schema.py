@@ -76,7 +76,7 @@ def ntv_validate2(ntv_data, ntv_sch, mode=0):
             idx = int(sch.name)
             if len(ntv_data) > idx:
                 valid &= ntv_validate2(ntv_data.ntv_value[idx], sch.ntv_value, mode)            
-        elif sch.type_str == "sch.items":
+        elif sch.type_str == "sch.items" or sch.name == "items":
             valid &= _val_item2(ntv_data, sch, mode)  
         elif sch.type_str[:4] == 'sch.' and sch.type_str[-1] == '.':
             valid &= _val_prop2(ntv_data, sch, mode)
