@@ -47,9 +47,9 @@ def validat(json_data, json_sch, part, mode):
 
 def _ntv_to_json(ntv_data):  
     '''transform a Ntv entity into a json representation'''
-    return {    'value' : ntv_data.ntv_value,
-                'name'  : ntv_data.ntv_name, 
-                'type'  : ntv_data.type_str}
+    return {    'valueNtv' : ntv_data.ntv_value,
+                'nameNtv'  : ntv_data.ntv_name, 
+                'typeNtv'  : ntv_data.type_str}
     
 # %% validate schema ntv
 def ntv_validate2(ntv_data, ntv_sch, mode=0):
@@ -105,7 +105,7 @@ def _val_simple2(ntv_data, sch, mode) :
     json_data = _ntv_to_json(ntv_data)
     json_sch  = _simple_to_jsch2(sch)
     valid = True
-    for part in ['value', 'type', 'name']:
+    for part in ['valueNtv', 'typeNtv', 'nameNtv']:
         valid &= validat(json_data[part], json_sch[part], part, mode)
     return valid
 
@@ -122,9 +122,6 @@ def _val_item2(ntv_data, sch, mode):
 def _replace(keyword):
     keyw = keyword[1:] if keyword[0] == ':' else keyword
     keyw = keyw[4:] if keyw[0:4] == 'sch.' else keyw
-    keyw = 'type' if keyw == 'typeNtv' else keyw
-    keyw = 'name' if keyw == 'nameNtv' else keyw
-    keyw = 'value' if keyw == 'valeNtv' else keyw
     return keyw
 
 def _json2(dic):
@@ -137,11 +134,11 @@ def _simple_to_jsch2(ntvsch):
     jssch = _json2(Ntv.to_obj(ntvsch))
  
     jsonsch = {}
-    jsonsch['type']  = jssch['type']  if 'type'  in jssch.keys() else {}
-    jsonsch['name']  = jssch['name']  if 'name'  in jssch.keys() else {}
-    jsonsch['value'] = jssch['value'] if 'value' in jssch.keys() else {}
-    jsonsch['value'] |= {key:val for key, val in jssch.items() 
-                     if not key in ['type', 'name', 'value']}
+    jsonsch['typeNtv']  = jssch.setdefault('typeNtv', {})
+    jsonsch['nameNtv']  = jssch.setdefault('nameNtv', {})
+    jsonsch['valueNtv']  = jssch.setdefault('valueNtv', {})
+    jsonsch['valueNtv'] |= {key:val for key, val in jssch.items() 
+                     if not key in ['typeNtv', 'nameNtv', 'valueNtv']}
     return jsonsch
 
 
@@ -204,19 +201,20 @@ def _val_simple(ntv_data, sch, mode) :
     json_data = _ntv_to_json(ntv_data)
     json_sch  = _simple_to_jsch(sch)
     valid = True
-    for part in ['value', 'type', 'name']:
+    for part in ['valueNtv', 'typeNtv', 'nameNtv']:
         valid &= validat(json_data[part], json_sch[part], part, mode)
     return valid
 
 def _simple_to_jsch(ntvsch):
     '''transform a simple NTVschema into a JSONschema'''
     jsonsch = {}
-    jsonsch['type']  = ntvsch['typeNtv']  if 'typeNtv'  in ntvsch else {}
-    jsonsch['name']  = ntvsch['nameNtv']  if 'nameNtv'  in ntvsch else {}
-    jsonsch['value'] = ntvsch['valueNtv'] if 'valueNtv' in ntvsch else {}
-    jsonsch['value'] |= {key:val for key, val in ntvsch.items() 
+    jsonsch['typeNtv']  = ntvsch.setdefault('typeNtv', {})
+    jsonsch['nameNtv']  = ntvsch.setdefault('nameNtv', {})
+    jsonsch['valueNtv']  = ntvsch.setdefault('valueNtv', {})
+    jsonsch['valueNtv'] |= {key:val for key, val in ntvsch.items() 
                      if not key in ['typeNtv', 'nameNtv', 'valueNtv', 'propertyNames']}
-    jsonsch['name'] |= ntvsch['propertyNames'] if 'propertyNames' in ntvsch else {}
+    #jsonsch['nameNtv'] |= ntvsch['propertyNames'] if 'propertyNames' in ntvsch else {}
+    jsonsch['nameNtv'] |= ntvsch.setdefault('propertyNames', {})
     return _json(jsonsch)
 
 def _json(dic):
