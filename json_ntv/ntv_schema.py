@@ -143,13 +143,13 @@ def _simple_to_jsch2(ntvsch):
 
 
 # %% validate schema json
-def ntv_validate(ntv_data, sch, mode=0):
+def ntv_validate(ntv_data, schema, mode=0):
     '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.
 
     *Parameters*
 
     - **ntv_data**: Ntv entity (json_ntv or NTV)
-    - **sch**: json-value - NTVschema (JsonSchema keywords)
+    - **schema**: json-value - NTVschema (JsonSchema keywords)
     - **mode**: integer (default 0) - level of information
         - 0: no information
         - 1: list of controls and errors
@@ -159,7 +159,21 @@ def ntv_validate(ntv_data, sch, mode=0):
     valid = True 
     if mode:
         print('  validate : ', ntv_data.pointer()) #, sch)
-    simp_sch = _simp(sch)
+
+    simp_sch = {}
+    for sch in schema:
+        if sch == 'properties':
+            valid &= _val_prop(ntv_data, schema[sch], mode)
+        elif sch == 'prefixItems':
+            valid &= _val_pref(ntv_data, schema[sch], mode)
+        elif sch == 'items':
+            valid &= _val_item(ntv_data, schema[sch], mode)  
+        else:
+            simp_sch[sch] = schema[sch] 
+    if simp_sch:
+        valid &= _val_simple(ntv_data, simp_sch, mode) 
+
+    '''simp_sch = _simp(sch)
     if simp_sch:
         valid &= _val_simple(ntv_data, simp_sch, mode) 
     if 'properties' in sch:
@@ -167,7 +181,7 @@ def ntv_validate(ntv_data, sch, mode=0):
     if 'prefixItems' in sch:
         valid &= _val_pref(ntv_data, sch['prefixItems'], mode)
     if 'items' in sch:
-        valid &= _val_item(ntv_data, sch['items'], mode)        
+        valid &= _val_item(ntv_data, sch['items'], mode)      '''  
     return valid
     
 def _val_prop(ntv_data, sch, mode):
