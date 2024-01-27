@@ -79,15 +79,15 @@ def ntv_validate2(ntv_data, ntv_sch, mode=0):
         elif sch.type_str == "sch.items" or sch.name == "items":
             valid &= _val_item2(ntv_data, sch, mode)  
         elif sch.type_str[:4] == 'sch.' and sch.type_str[-1] == '.':
-            valid &= _val_prop2(ntv_data, sch, mode)
+            valid &= _val_pointer2(ntv_data, sch, mode)
         elif sch.type_str[:4] != 'sch.':
-            valid &= _val_prop2(ntv_data, sch, mode)
+            valid &= _val_pointer2(ntv_data, sch, mode)
         else:
             valid &= _val_simple2(ntv_data, sch, mode)     
     return valid
 
-def _val_prop2(ntv_data, sch, mode):
-    '''return the properties validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
+def _val_pointer2(ntv_data, sch, mode):
+    '''return the pointer validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
     valid = True
     for ntv in ntv_data:
         if ntv.ntv_name and ntv.ntv_name == sch.name:
@@ -159,7 +159,6 @@ def ntv_validate(ntv_data, schema, mode=0):
     valid = True 
     if mode:
         print('  validate : ', ntv_data.pointer()) #, sch)
-
     simp_sch = {}
     for sch in schema:
         if sch == 'properties':
@@ -168,20 +167,25 @@ def ntv_validate(ntv_data, schema, mode=0):
             valid &= _val_pref(ntv_data, schema[sch], mode)
         elif sch == 'items':
             valid &= _val_item(ntv_data, schema[sch], mode)  
+        elif sch[0] == '/':
+            valid &= _val_pointer(ntv_data, schema[sch], mode)  
         else:
             simp_sch[sch] = schema[sch] 
     if simp_sch:
         valid &= _val_simple(ntv_data, simp_sch, mode) 
+    return valid
 
-    '''simp_sch = _simp(sch)
-    if simp_sch:
-        valid &= _val_simple(ntv_data, simp_sch, mode) 
-    if 'properties' in sch:
-        valid &= _val_prop(ntv_data, sch['properties'], mode)
-    if 'prefixItems' in sch:
-        valid &= _val_pref(ntv_data, sch['prefixItems'], mode)
-    if 'items' in sch:
-        valid &= _val_item(ntv_data, sch['items'], mode)      '''  
+def _val_pointer(ntv_data, sch, mode):
+    '''return the pointer validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
+    valid = True
+    sch_ptr = list(sch.keys())[0][1:]
+    for ntv in ntv_data:
+        if ntv.ntv_name and ntv.ntv_name == sch_ptr:
+            valid &= ntv_validate(ntv, sch, mode)
+            break
+        if ntv.json_name_str and ntv.json_name_str == sch_ptr:
+            valid &= ntv_validate2(ntv, Ntv.obj({'sch.':sch.val}), mode)
+            break
     return valid
     
 def _val_prop(ntv_data, sch, mode):
