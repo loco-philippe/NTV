@@ -20,7 +20,7 @@ from json_ntv.ntv import Ntv, NtvList, NtvSingle
 from jsonschema import validate
 
 # %% interface json schema
-def validat(json_data, json_sch, part, mode):
+def validat(json_data, json_sch, part, ptr, mode):
     '''return the validation (True/False) of a json data conformity to a 'json_sch' JSONschema.
 
     *Parameters*
@@ -33,14 +33,14 @@ def validat(json_data, json_sch, part, mode):
             - 2: details of errors (traceback)
     '''  
     if mode > 1 and json_sch:
-        print('    ', part, ' : ', json_data, json_sch)
+        print('    ', ptr, '-', part, ' : ', json_data, json_sch)
     valid = False
     if mode < 3:
         try:
             valid = validate(json_data, json_sch) is None
         except :
             if mode > 0:
-                print('  error : ', json_data, 'is not valid with schema : ', json_sch)
+                print('  error ', ptr, '-', part, ' : ', json_data, 'is not valid with schema : ', json_sch)
     else:
         valid = validate(json_data, json_sch) is None
     return valid    
@@ -67,7 +67,7 @@ def ntv_validate2(ntv_data, ntv_sch, mode=0):
     ntv_data = Ntv.obj(ntv_data)
     ntv_sch = Ntv.obj(ntv_sch)
     valid = True 
-    if mode:
+    if mode == 1:
         print('  validate : ', ntv_data.pointer()) #, sch)
     if isinstance(ntv_sch, NtvSingle):
         ntv_sch = NtvList([ntv_sch])
@@ -106,7 +106,7 @@ def _val_simple2(ntv_data, sch, mode) :
     json_sch  = _simple_to_jsch2(sch)
     valid = True
     for part in ['valueNtv', 'typeNtv', 'nameNtv']:
-        valid &= validat(json_data[part], json_sch[part], part, mode)
+        valid &= validat(json_data[part], json_sch[part], part, ntv_data.pointer(), mode)
     return valid
 
 def _val_item2(ntv_data, sch, mode):
@@ -144,7 +144,7 @@ def _simple_to_jsch2(ntvsch):
 
 # %% validate schema json
 def ntv_validate(ntv_data, schema, mode=0):
-    '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.
+    '''return the validation (True/False) of a NTV entity conformity to a 'sch' schema.
 
     *Parameters*
 
@@ -157,18 +157,20 @@ def ntv_validate(ntv_data, schema, mode=0):
     '''  
     ntv_data = Ntv.obj(ntv_data)
     valid = True 
-    if mode:
+    if mode == 1:
         print('  validate : ', ntv_data.pointer()) #, sch)
     simp_sch = {}
     for sch in schema:
-        if sch == 'properties':
+        if sch == 'required' and schema[sch][0][0] == '/':
+            valid &= _val_required(ntv_data, schema[sch], mode)  
+        elif sch == 'properties':
             valid &= _val_prop(ntv_data, schema[sch], mode)
         elif sch == 'prefixItems':
-            valid &= _val_pref(ntv_data, schema[sch], mode)
+            valid &= _val_prefix(ntv_data, schema[sch], mode)
         elif sch == 'items':
-            valid &= _val_item(ntv_data, schema[sch], mode)  
+            valid &= _val_items(ntv_data, schema[sch], mode)  
         elif sch[0] == '/':
-            valid &= _val_pointer(ntv_data, schema[sch], mode)  
+            valid &= _val_pointer(ntv_data, {sch: schema[sch]}, mode)  
         else:
             simp_sch[sch] = schema[sch] 
     if simp_sch:
@@ -176,20 +178,26 @@ def ntv_validate(ntv_data, schema, mode=0):
     return valid
 
 def _val_pointer(ntv_data, sch, mode):
-    '''return the pointer validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
+    '''return the pointer validation (True/False) of a NTV entity conformity to a 'sch' schema'''
     valid = True
     sch_ptr = list(sch.keys())[0][1:]
+    sch = sch['/' + sch_ptr]
+    if sch_ptr.isdecimal():
+        idx = int(sch_ptr)
+        if len(ntv_data) > idx:
+            valid &= ntv_validate(ntv_data.ntv_value[idx], sch, mode) 
+            return valid
     for ntv in ntv_data:
         if ntv.ntv_name and ntv.ntv_name == sch_ptr:
             valid &= ntv_validate(ntv, sch, mode)
             break
         if ntv.json_name_str and ntv.json_name_str == sch_ptr:
-            valid &= ntv_validate2(ntv, Ntv.obj({'sch.':sch.val}), mode)
+            valid &= ntv_validate(ntv, sch, mode)
             break
     return valid
     
 def _val_prop(ntv_data, sch, mode):
-    '''return the properties validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
+    '''return the properties validation (True/False) of a NTV entity conformity to a 'sch' schema.'''
     valid = True
     for idx,ntv in enumerate(ntv_data):
         p_name = ntv.ntv_name if ntv.ntv_name in sch else (ntv.json_name_str if ntv.json_name_str in sch else None)
@@ -198,29 +206,38 @@ def _val_prop(ntv_data, sch, mode):
             valid &= ntv_validate(ntv, sch[p_name], mode)
     return valid
 
-def _val_pref(ntv_data, sch, mode):
-    '''return the prefixItems validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
+def _val_prefix(ntv_data, sch, mode):
+    '''return the prefixItems validation (True/False) of a NTV entity conformity to a 'sch' schema.'''
     valid = True
     for ntv, sch_pref in zip(ntv_data, sch):
         valid &= ntv_validate(ntv, sch_pref, mode)
     return valid
 
-def _val_item(ntv_data, sch, mode):
-    '''return the items validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''
+def _val_required(ntv_data, sch, mode):
+    '''return the required validation (True/False) of a NTV entity conformity to a 'sch' schema.'''
+    valid = True
+    ntv_names = [ntv.name for ntv in ntv_data]
+    json_ntv_names = [ntv.json_name_str for ntv in ntv_data]
+    for ptr in sch:
+       valid &= (ptr[1:] in ntv_names) or (ptr[1:] in json_ntv_names)
+    return validat([ptr[1:] for ptr in sch], valid, 'required', ntv_data.pointer(), mode)
+
+def _val_items(ntv_data, sch, mode):
+    '''return the items validation (True/False) of a NTV entity conformity to a 'sch' schema.'''
     valid = True
     for ntv in ntv_data:
         valid &= ntv_validate(ntv, sch, mode)
     return valid
        
 def _val_simple(ntv_data, sch, mode) :
-    '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.'''  
+    '''return the validation (True/False) of a NTV entity conformity to a 'sch' schema.'''  
     if not sch:
         return True
     json_data = _ntv_to_json(ntv_data)
     json_sch  = _simple_to_jsch(sch)
     valid = True
     for part in ['valueNtv', 'typeNtv', 'nameNtv']:
-        valid &= validat(json_data[part], json_sch[part], part, mode)
+        valid &= validat(json_data[part], json_sch[part], part, ntv_data.pointer(), mode)
     return valid
 
 def _simple_to_jsch(ntvsch):
@@ -231,7 +248,6 @@ def _simple_to_jsch(ntvsch):
     jsonsch['valueNtv']  = ntvsch.setdefault('valueNtv', {})
     jsonsch['valueNtv'] |= {key:val for key, val in ntvsch.items() 
                      if not key in ['typeNtv', 'nameNtv', 'valueNtv', 'propertyNames']}
-    #jsonsch['nameNtv'] |= ntvsch['propertyNames'] if 'propertyNames' in ntvsch else {}
     jsonsch['nameNtv'] |= ntvsch.setdefault('propertyNames', {})
     return _json(jsonsch)
 
