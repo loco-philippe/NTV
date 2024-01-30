@@ -52,6 +52,10 @@ def _ntv_to_json(ntv_data):
                 'typeNtv'  : ntv_data.type_str}
     
 # %% validate schema ntv
+def ntv_validate_opt2(ntv_data, ntv_sch, mode=0):
+    ntv_sch = ntv_sch if 'sch.' in list(ntv_sch.keys())[0] else {'sch.': ntv_sch}
+    return ntv_validate2(ntv_data, ntv_sch, mode)
+    
 def ntv_validate2(ntv_data, ntv_sch, mode=0):
     '''return the validation (True/False) of a NTV entity conformity to a 'sch' NTVschema.
 
@@ -65,7 +69,7 @@ def ntv_validate2(ntv_data, ntv_sch, mode=0):
         - 2: details of errors (traceback)
     '''      
     ntv_data = Ntv.obj(ntv_data)
-    ntv_sch = Ntv.obj(ntv_sch)
+    ntv_sch = Ntv.obj(ntv_sch) 
     valid = True 
     if mode == 1:
         print('  validate : ', ntv_data.pointer()) #, sch)
