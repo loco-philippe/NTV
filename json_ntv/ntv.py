@@ -1176,8 +1176,9 @@ class NtvList(Ntv):
         
     def _obj_sep(self, json_name, json_type, def_type=None):
         ''' return separator to include in json_name'''
-        return '::' if (json_type and json_type[-1] != '.') or (json_type and json_name) else ''
-
+        sep = ':' if (json_type and json_type[-1] == '.') else '::'
+        return sep if (json_type and json_type[-1] != '.') or (json_type and json_name) else ''
+        
     def obj_value(self, def_type=None, **kwargs):
         '''return the ntv_value with different formats defined by kwargs
         '''

@@ -109,7 +109,8 @@ class Test_Ntv_fast(unittest.TestCase):
                    ['NtvList', {'Ntv1::fr.reg': [
                        [4, [5, 6]], {'heure': [21, 22]}]}],
                    ['NtvList', {'Ntv1::fr.reg': [4]}],
-                   ['NtvList', {'Ntv1::fr.': [4]}],
+                   #['NtvList', {'Ntv1::fr.': [4]}],
+                   ['NtvList', {'Ntv1:fr.': [4]}],
                    ['NtvList', {'cities::point': [[2.1, 40.3], [2.1, 40.3]]}],
                    ['NtvList', {}],
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
@@ -319,7 +320,8 @@ class Test_Ntv_creation(unittest.TestCase):
                    ['NtvList', {'Ntv1::fr.reg': [
                        [4, [5, 6]], {'heure': [21, 22]}]}],
                    ['NtvList', {'Ntv1::fr.reg': [4]}],
-                   ['NtvList', {'Ntv1::fr.': [4]}],
+                   #['NtvList', {'Ntv1::fr.': [4]}],
+                   ['NtvList', {'Ntv1:fr.': [4]}],
                    ['NtvList', {'cities::point': [[2.1, 40.3], [2.1, 40.3]]}],
                    ['NtvList', {}],
                    ['NtvList', {'Ntv1': 1, 'Ntv2': '2'}],
