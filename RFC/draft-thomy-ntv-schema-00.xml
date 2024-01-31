@@ -45,8 +45,8 @@
       <name>Note to Readers</name>
         <t>This document is a working document and not a specification document.
         The developments and principles presented have been validated by a Python implementation based on the jsonschema module 
-        (<eref target="https://github.com/loco-philippe/NTV/blob/main/json_ntv/ntv_schema.py">
-        https://github.com/loco-philippe/NTV/blob/main/json_ntv/ntv_schema.py</eref>)</t>
+        (<eref target="https://nbviewer.org/github/loco-philippe/NTV/blob/main/RFC/example_schema.ipynb">
+        https:https://nbviewer.org/github/loco-philippe/NTV/blob/main/RFC/example_schema.ipynb</eref>)</t>
     </note>
   </front>
   &nbsp;
@@ -67,7 +67,7 @@
     </section>
     <section><name>Presentation</name>
         <section><name>NTV</name>
-            <t>The NTV structure consists of representing data with three attributes: a name (NTVname: json-string), a value (NTVvalue: json-value) and a 
+            <t>The NTV structure <xref target="JSON NTV"/> consists of representing data with three attributes: a name (NTVname: json-string), a value (NTVvalue: json-value) and a 
             type (NTVtype: json-string).</t>
             <t>The json representation is obtained by grouping the NTVname and NTVtype (JsonNTVname) and associating it with NTVvalue in a key/value form. e.g.</t>
             <sourcecode type="json">{"firstname:string": "peter"}</sourcecode>
@@ -78,7 +78,7 @@
             <t>An NTV structure is therefore a tree composed of inner-nodes (NTVlist) and leaf-nodes (NTVsingle). 
             Each node of this structure can be uniquely identified by a name (JsonNTVname or NTVname if it is unique) or by its index in the parent node. 
             This identification can be carried out by an NTVpointer identical to the JSONpointer in the majority of cases.</t>
-            <t>For example,</t>
+            <t>For example (<xref target="NTV SCHEMA"/> <em>- Example 1</em>),</t>
             <sourcecode type="json">{"family": "doe", "childrens age": [15, 24, 12] }</sourcecode>
             <t>is a JSON representation of the NTV structure defined in <xref target="table1"/>.</t>
             <table anchor="table1" align="left" pn="table-1"><name>NTV structure</name><thead>
@@ -94,7 +94,7 @@
                 <li><em>Any JSON structure corresponds to an NTV structure with a default NTVtype (None for NTVlist and "json" for NTVsingle).</em></li></ul>
         </section>
         <section><name>JSON Schema</name>
-            <t>JSON Schema is one of the best-known tools for structuring JSON data. It proposes :</t><ul>
+            <t>JSON Schema <xref target="JSON SCHEMA"/> is one of the best-known tools for structuring JSON data. It proposes :</t><ul>
                 <li>A tool for describing constraints to be respected (schema).</li>
                 <li>A tool for validating JSON data for a defined schema.</li></ul>
             <t>A schema is a JsonObject (or a boolean) where JsonObject properties that are applied to the JSON data to control (instance) are called keywords.</t>
@@ -105,7 +105,7 @@
         </section>
         <section><name>OpenAPI</name>
             <t>An OpenAPI document is a self-contained or composite resource which defines or describes an API or elements of an API.</t>
-            <t>OpenAPI specification (OAS) defines a set of objects identified by a keyword.</t>
+            <t>OpenAPI specification <xref target="OAS"/> defines a set of objects identified by a keyword.</t>
             <t>An object is made up of Fields which can be an OpenAPI object or a JSONvalue. A JSON Schema is one of the OpenAPI objects (keyword: "schema").</t>
             <t>Unlike JSON Schema, keywords are interdependent and can only be used in the context of another keyword.</t>
         </section>
@@ -174,7 +174,7 @@
             <t>In an NTV structure, an NTVlist entity can be represented by a JsonArray or by a JsonObject. For a schema to be fully applicable to an NTV structure, 
             we must be able to apply the keywords "properties" and "items" equally to any type of NTVlist.</t>
             <t>With the principles identified in the previous chapter, this usage is valid (an entity is identified by its pointer which can be name or index). 
-            Thus, the following NTV instances:</t>
+            Thus, the following NTV instances (<xref target="NTV SCHEMA"/> <em>- Example 2</em>):</t>
             <sourcecode type="json">{"number1": [10, 20]}
 {"number2": {"val1": 10, "val2": 20}}
 {"number3": [ 10, {"val2": 20}]}</sourcecode>
@@ -192,7 +192,7 @@
             <t>Data naming is also partially addressed for JsonObjects (keyword "propertyName").</t>
             <t>For NTV entities, naming and typing are explicit (NTVname and NTVtype) and could be accessible in a schema with two new keywords 
             ("typeNTV" and "nameNTV"). These keywords place a constraint on the NTVname or on the NTVtype rather than on the NTVvalue.</t>
-            <t>For example, the following instances</t>
+            <t>For example, the following instances (<xref target="NTV SCHEMA"/> <em>- Example 3</em>)</t>
             <sourcecode type="json">{"location": "paris", "dating:date": "2023-10-01"}
 {"location": "paris", "dating:year": 2023}</sourcecode>
             <t>are valid for the following schema:</t>
@@ -290,15 +290,14 @@
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
       </references>
       <references><name>Informative References</name>
-        <reference anchor="TABLE" target="https://specs.frictionlessdata.io/table-schema/#language"><front>
-          <title>Table Schema</title><author><organization>"FrictionLess"</organization></author><date year="2021"/></front></reference>
-        <reference anchor="JSON-NTV" target="https://datatracker.ietf.org/doc/draft-thomy-json-ntv/"><front>
+        <reference anchor="NTV SCHEMA" target="https://nbviewer.org/github/loco-philippe/NTV/blob/main/RFC/example_schema.ipynb"><front>
+          <title>Implementation NTV Schema</title><author initials="P" surname="Thomy"></author><date year="2024"/></front></reference>
+        <reference anchor="JSON NTV" target="https://datatracker.ietf.org/doc/draft-thomy-json-ntv/"><front>
           <title>JSON semantic format (JSON-NTV)</title><author initials="P" surname="Thomy"></author><date year="2023"/></front></reference>
-        <reference anchor="TAB-ANA" target="https://github.com/loco-philippe/tab-analysis/blob/main/docs/tabular_analysis.pdf"><front>
-          <title>Tabular dataset analysis</title><author initials="P" surname="Thomy"></author><date year="2022"/></front></reference>                     
-        <reference anchor="W3C TAB" target="https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/"><front>
-          <title>Recommendation : Model for Tabular Data and Metadata on the Web</title>
-          <author><organization>"W3C"</organization></author><date year="17 December 2015"/></front></reference>                        
+        <reference anchor="JSON SCHEMA" target="https://json-schema.org/specification"><front>
+          <title>JSON Schema specification</title><author><organization>OpenJS Foundation</organization></author><date year="17 December 2015"/></front></reference>
+        <reference anchor="OAS" target="https://github.com/OAI/OpenAPI-Specification/"><front>
+          <title>OpenAPI Specification</title><author><organization>OpenAPI Initiative</organization></author><date year="15 February 2021"/></front></reference>                        
       </references>
     </references>
  </back>
