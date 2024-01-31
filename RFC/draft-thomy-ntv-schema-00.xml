@@ -64,6 +64,8 @@
                 <li>Extend the functionalities and uses.</li>
                 <li>Simplify the schemas.</li>
                 <li>Deport certain control tasks (eg type and format) to the NTV structure.</li></ul></li></ul>
+        <t><xref target="NTV SCHEMA"/> contains the python implementation of the examples presented in the document (examples 1 to 6) as well as 
+        more complete examples (examples 7, 8 and 9)</t>
     </section>
     <section><name>Presentation</name>
         <section><name>NTV</name>
@@ -215,14 +217,14 @@
             <t>To distinguish keywords from other names, we can consider that keywords are NTVtypes belonging to a NTV Namespace schema (noted "sch.").</t>
             <t>With this option, all keywords are NTVtype and are preceded in JSON representation by the separator ":". This distinction simplifies the schema
              by making the use of the "properties" and "prefixItems" keywords optional.</t>
-            <t>For example, the previous diagram then becomes:</t>
+            <t>For example, the previous diagram then becomes (<xref target="NTV SCHEMA"/> <em>- Example 4</em>):</t>
             <sourcecode type="json">{"dating": {
     ":typeNTV": {':enum": ['year', 'date', 'datetime']}},
  ":items": {
     ":nameNTV": {":maxLength": 10}}}</sourcecode>
             <t>Another option is to keep the naming of the keywords but to replace the names of the instance to be controlled by the associated pointer 
             (including the separator).</t>
-            <t>For example, the previous diagram then becomes:</t>
+            <t>For example, the previous diagram then becomes (<xref target="NTV SCHEMA"/> <em>- Example 5</em>):</t>
             <sourcecode type="json">{"/dating": {
     "typeNTV": {'enum': ['year', 'date', 'datetime'] }},
  items": {
@@ -240,7 +242,7 @@
                 <li>"OpenAPI.": Namespace containing a "server." Namespace</li>
                 <li>"Server.": Namespace containing a "variable." Namespace</li>
                 <li>"Variable.": Namespace containing the Datatypes "default", "description", "enum"</li></ul>
-            <t>The following example shown in the OpenAPI documentation:</t>
+            <t>The following example shown in the OpenAPI documentation (<xref target="NTV SCHEMA"/> <em>- Example 6</em>):</t>
             <sourcecode type="json">{"example openAPI":{
    "servers": [
       {
@@ -278,7 +280,7 @@
           "basePath": {":default": "v2"}}}}}}</sourcecode>
             <t><em>Note: Note: This extension is compatible with the other extensions presented previously.</em></t>
         </section>
-    </section>    
+    </section>
   </middle>
   &nbsp;
   <back>
@@ -300,5 +302,64 @@
           <title>OpenAPI Specification</title><author><organization>OpenAPI Initiative</organization></author><date year="15 February 2021"/></front></reference>                        
       </references>
     </references>
+    <section><name>JSON Schema keyword and NTV data</name>
+        <t><strong>type:</strong> schema applicable to NTVvalue</t>
+        <sourcecode type="json">{ "type": ["number", "string"] } 
+
+check if the NTVvalue is a number or a string</sourcecode>
+        <t><strong>length, format, regex:</strong> schema applicable to NTVvalue</t>
+        <sourcecode type="json">{ "type": "string", "minLength": 2, "maxLength": 3 } 
+        
+check the length of the NTVvalue</sourcecode>
+        <t><strong>multiples, range:</strong> schema applicable to NTVvalue</t>
+        <sourcecode type="json">{ "type": "number", "multipleOf" : 10 } 
+        
+check if the NTVvalue is a multiple of 10</sourcecode>
+        <t><strong>properties:</strong> schema applicable to the NTVvalue of the NTV entity defined by his relative ntv-pointer</t>
+        <sourcecode type="json">{ "properties": { "street_name": value_schema } } 
+        
+check the value_schema for the NTVvalue of the NTV entity 
+defined by "street_name" (relative ntv-pointer)</sourcecode>
+        <t><strong>patternProperties:</strong> schema applicable to the NTVvalue of the NTV entity whose relative ntv-pointer matches a pattern.</t>
+        <sourcecode type="json">{ "patternProperties": { "^S_": pat_schema } } 
+        
+check the pat_schema for the NTVvalue of the NTV entity 
+whose relative ntv-pointer matches "^S_"</sourcecode>
+        <t><strong>additionalProperties:</strong> schema applicable to the NTV entity not listed in the properties or patternProperties.</t>
+        <sourcecode type="json">{ "additionalProperties": add_schema } 
+
+check the add_schema for the NTVvalue of the NTV entity 
+not listed in the properties or patternProperties.</sourcecode>
+        <t><strong>propertyNames:</strong> schema applicable to the NTVname of the NTV entities </t>
+        <sourcecode type="json">{ "propertyNames": names_schema } 
+        
+check the names_schema for the NTVnames of the NTV entity</sourcecode>
+        <t><strong>minProperties, maxProperties:</strong> check the number of NTV entities included in the NTV entity</t>
+        <t><strong>required:</strong> check if the relative ntv-pointer are present in the schema</t>
+        <t><strong>unevaluatedProperties:</strong> same as additionalProperties</t>
+        <sourcecode type="json">{ "minProperties": 2, "maxProperties": 3 } 
+        
+check the number of NTV entities</sourcecode>
+        <t><strong>items:</strong> schema applicable to the NTV entities included in the NTV entity </t>
+        <sourcecode type="json">{ "items": items_schema }
+        
+check the items_schema for the NTVvalue 
+        of the NTV entities included in the NTV entity.</sourcecode>
+        <t><strong>uniqueItems:</strong> schema applicable to the NTVvalue of the NTV entities included in the NTV entity </t>
+        <sourcecode type="json">{ "uniqueItems": true }
+        
+check the uniqueness of the NTVvalue of the NTV entities.</sourcecode>
+        <t><strong>prefixItems:</strong> schemas applicable to the NTVvalue of the NTV entities included in the NTV entity</t>
+        <sourcecode type="json">{ "prefixItems": [ item_schema ] }
+        
+check the item_schema for the NTVvalue of the corresponding NTV entity 
+included in the NTV entity</sourcecode>
+        <t><strong>contains, maxContains, minContains:</strong> schema applicable to the NTVvalues of the NTV entities included in the NTV entity</t>
+        <sourcecode type="json">{ "contains": cont_schema, "minContains": 2, "maxContains": 3 } 
+
+check if the cont_schema is valid for 2 or 3 NTVvalue of the NTV entity included</sourcecode>
+        <t><strong>unevaluatedItems:</strong> applies to any NTVvalues not evaluated by an items, prefixItems, or contains keyword</t>
+        <t><strong>minItems, maxItems:</strong> equivalent to minProperties, maxProperties</t>
+    </section>
  </back>
 </rfc>
