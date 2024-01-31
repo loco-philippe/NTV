@@ -110,13 +110,63 @@
     </section>
     <section><name>Applicability of schemas to NTV</name>
         <section><name>Equivalence between JSON and NTV structures</name>
-            <t>Any Json structure being an NTV structure, a first response is to consider that if the Json representation of an NTV structure is valid 
+            <t>Any JSON structure being an NTV structure, a first response is to consider that if the JSON representation of an NTV structure is valid 
             for a schema then the NTV structure is valid for this schema.</t>
-            <t>However, this argument is not valid because there is no direct correspondence between an NTV structure and a Json structure.</t>
-            <t>For example, the following instances have a different json structure and will therefore not be able to respond to the same Json schema:</t>
+            <t>However, this argument is not valid because there is no direct correspondence between an NTV structure and a JSON structure.</t>
+            <t>For example, the following instances have a different JSON structure and will therefore not be able to respond to the same JSON Schema:</t>
                 <sourcecode type="json">{"number1": [1, 2] }
 {"number2": {"val1": 1, "val2": 2}}</sourcecode>
             <t>However, the NTV structure is identical for these two entities (an NTVlist entity composed of two NTVsingle entities).</t>
+        </section>
+        <section><name>Application of JSON Schema to NTV structure</name>
+          <t>This chapter presents how to transpose the principles of JSON Schema to an NTV structure.</t>
+          <section><name>Instance-schema correspondence</name>
+            <t>The identification of the instance to be validated is carried out by the json-pointer relating to the JsonObject or JsonArray which contains it
+              (name for properties or index for prefixItems). This principle can be transposed into access to entities via ntv-pointer (JsonNTVname or index).</t>
+            <t>It is interesting to note that the json-pointer and the ntv-pointer are identical except for two cases:</t><ul>
+              <li>case 1: named root structure</li></ul>
+                <sourcecode type="json">{"root": { "val1": 21, "pointed": "target"}}
+
+    json-pointer: "/root/pointed"
+    ntv-pointer:   "root/pointed"</sourcecode>
+              <ul><li>case 2: JsonObject with a single member included in an JsonArray</li></ul>
+                <sourcecode type="json">[10, 20, {"pointed": 30}, 40]
+
+    json-pointer: "/2/pointed"
+    ntv-pointer:  "/2" or "/pointed"</sourcecode>
+          </section>
+          <section><name>Scope of keywords</name>
+            <t>For a JSON instance, a validation keyword applies to the value (JsonMember or JsonElement) or sometimes to the key of JsonMember 
+            (e.g. "propertyName").</t>
+            <t>This principle can be transposed to an NTV entity and the constraint expressed in the schema can apply to the NTVvalue or to the NTVname. 
+            The keywords which will not apply to the NTVvalue concern entities of type NTVlist and apply to the elements in <xref target="table2"/>.</t>
+            <table anchor="table2" align="left" pn="table-2"><name>specific keywords</name><thead>
+                <tr><th>keyword</th><th>element</th></tr></thead><tbody>
+                <tr><td>patternProperties</td><td>ntv-pointer</td></tr>
+                <tr><td>required</td><td>ntv-pointer</td></tr>
+                <tr><td>propertyNames</td><td>NTVname</td></tr>
+                <tr><td>additionalProperties</td><td>NTVentity</td></tr>
+                <tr><td>unevaluatedProperties</td><td>NTVentity</td></tr>
+                <tr><td>minProperties (max)</td><td>NTVentity</td></tr>
+                <tr><td>items</td><td>NTVentity</td></tr>
+                <tr><td>minItems (max)</td><td>NTVentity</td></tr>
+                <tr><td>unevaluatedItems</td><td>NTVentity</td></tr>
+                <tr><td>uniqueItems</td><td>NTVentity</td></tr>
+                <tr><td>contains (min, max)</td><td>NTVentity</td></tr>
+                </tbody></table>
+          </section>
+          <section><name>Application of control keywords</name>
+            <t>For keywords applying to ntv-pointer, NTVname or NTVvalue elements, the application is identical to that defined for JSON Schema.</t>
+            <t>For keywords applying to NTVentities, the transposition is direct.</t>
+          </section>
+          <section><name>Implementation</name>
+            <t>Applying these principles to an NTV structure makes it possible to apply a JSON Schema in an equivalent manner to JSON instance 
+            or to the corresponding NTV instance.</t>
+            <t>The prototyping carried out confirms this point.</t>
+            <t>On the other hand, this implementation does not take into account the validation with the same schema of the following instances. e.g.</t>
+              <sourcecode type="json">{"number1": [1, 2] }
+{"number2": {"val1": 1, "val2": 2}}</sourcecode>
+          </section>
         </section>
     </section>    
   </middle>
