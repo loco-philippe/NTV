@@ -8,6 +8,9 @@ Version 1.x
     - enhancement #16, #17, #18, #19, #20, #21, #22, #25, #26
     - maintenance agreg_type and join_type
 
+- **methods**
+    - add `validate` method (type / value validation)
+    
 - **documentation**
     - ntv-pointer (test_pointer.ipynb)
     - add "org." and "sch" in global Namespace

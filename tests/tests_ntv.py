@@ -420,12 +420,19 @@ class Test_NtvValidator(unittest.TestCase):
     def test_validate(self):
         tests_True = [ {'val:day': 20},
                       {':string': 'truc'},
-                      {':float': 3.14}
+                      {':float': 3.14},
+                      {'val:bit': '1'},
+                      {'val:base64': '1Ade_-=DDR0'},
+                      {'val:base16': '1A0'},
+                      {'val:yearmonth': '1245-02'}
                       ]
         tests_False = [ {'val:day': 50},
                       {':string': 10},
-                      {':float': '3.14'}
-                      ]
+                      {':float': '3.14'},
+                      {'val:bit': 'a'},
+                      {'val:base64': '1Ade_+=DDR0'},
+                      {'val:base16': '1A0G'},
+                      {'val:yearmonth': '1245-062'}]
         for tst in tests_True:
             self.assertTrue(Ntv.obj(tst).validate()[0])
         for tst in tests_False:

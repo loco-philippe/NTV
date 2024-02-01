@@ -1,33 +1,142 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jan 24 14:35:22 2024
+@author: Philippe@loco-labs.io
 
-@author: a lab in the Air
+The `ntv_validate` module is part of the `NTV.json_ntv` package ([specification document](
+https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
+
+It contains the `Validator` class.
+
+Function in Validator class are Datatype.validate overloading for each subclass.
+
+For more information, see the 
+[user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html) 
+or the [github repository](https://github.com/loco-philippe/NTV).
 """
-'''from json_ntv.namespace import Datatype
-
-def mapping(typ=None, func=None):
-    if typ and func:
-        Datatype.add(typ).validate = func
-    else:
-        if isinstance(typ, str):
-            func_lis = [ typ + '_valid' ]
-        elif isinstance(typ, (list, tuple)):
-            func_lis = [ typ_str + '_valid' for typ_str in typ]
-        else:
-            func_lis = [ typ_str + '_valid' for typ_str in Datatype._types_]
-        for func_str in func_lis:
-            if func_str in Validator.__dict__:
-                Datatype.add(func_str[:-6]).validate = Validator.__dict__[func_str]            '''
-
 
 class Validator:
     
-    def float_valid(val):
-        return isinstance(val, float)
+    def json_valid(val):
+        return isinstance(val, (float, int, str, dict, list, bool)) or val is None
+
+    def number_valid(val):
+        return isinstance(val, (float, int))
+
+    def boolean_valid(val):
+        return isinstance(val, bool)
+
+    def null_valid(val):
+        return val is None
     
     def string_valid(val):
         return isinstance(val, str)
+
+    def array_valid(val):
+        return isinstance(val, list)
+
+    def object_valid(val):
+        return isinstance(val, dict)
+
+    def int_valid(val):
+        return isinstance(val, int)
+
+    def int8_valid(val):
+        return isinstance(val, int) and -128 <= val <= 127
+ 
+    def int16_valid(val):
+        return isinstance(val, int) and -32768 <= val <= 32767
+ 
+    def int32_valid(val):
+        return isinstance(val, int) and -2147483648 <= val <= 2147483647
+ 
+    def int64_valid(val):
+        return isinstance(val, int) and -2^63 <= val <= 2^63
+ 
+    def uint8_valid(val):
+        return isinstance(val, int) and 0 <= val <= 255
+ 
+    def uint16_valid(val):
+        return isinstance(val, int) and 0 <= val <= 65535
+ 
+    def uint32_valid(val):
+        return isinstance(val, int) and 0 <= val <= 4294967295
+ 
+    def uint64_valid(val):
+        return isinstance(val, int) and 0 <= val <= 2^64 - 1
+
+    def float_valid(val):
+        return isinstance(val, float)
+
+    def float16_valid(val):
+        return isinstance(val, float) and abs(val) <= 65500
+
+    def float32_valid(val):
+        return isinstance(val, float) and abs(val) <= 3.4028237E38
+
+    def float64_valid(val):
+        return isinstance(val, float)
+
+    def decimal64_valid(val):
+        return isinstance(val, float)    
+
+    def bit_valid(val):
+        return val in ['0', '1']
+
+    def binary_valid(val):
+        for char in val: 
+            if not char in ['0', '1']:
+                return False
+        return True
+    
+    def base64_valid(val):
+        for car in val: 
+            if (not 'a' <= car <= 'z' and not 'A' <= car <= 'Z' and 
+                not '0' <= car <= '9' and not car in ['-', '_', '=']):
+                return False
+        return True
+
+    def base32_valid(val):
+        for car in val: 
+            if not 'A' <= car <= 'Z' and not '1' < car < '8' and not car == '=':
+                return False
+        return True
+
+    def base16_valid(val):
+        for car in val: 
+            if not '0' <= car <= '9' and not 'A' <= car <= 'F':
+                return False
+        return True
+     
+    def year_valid(val):
+        return isinstance(val, int) and 0 <= val    
+
+    def month_valid(val):
+        return isinstance(val, int) and 0 < val < 13
+
+    def yearmonth_valid(val):
+        y_m = val.split('-', maxsplit=1)
+        return Validator.year_valid(int(y_m[0])) and Validator.month_valid(int(y_m[1]))
+    
+    def week_valid(val):
+        return isinstance(val, int) and 0 < val < 54
     
     def day_valid(val):
         return isinstance(val, int) and 0 < val < 32
+    
+    def wday_valid(val):
+        return isinstance(val, int) and 0 < val < 8
+        
+    def yday_valid(val):
+        return isinstance(val, int) and 0 < val < 367
+    
+    def hour_valid(val):
+        return isinstance(val, int) and 0 <= val < 13
+    
+    def minute_valid(val):
+        return isinstance(val, int) and 0 <= val < 60
+
+    def second_valid(val):
+        return isinstance(val, int) and 0 <= val < 60
+    
+    
+    
