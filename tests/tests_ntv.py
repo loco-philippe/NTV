@@ -415,6 +415,23 @@ class Test_Ntv_creation(unittest.TestCase):
         self.assertEqual(Ntv.obj({'paris:point': 'null'}).to_obj(format='obj'),
                          {'paris:point': None})
 
+class Test_NtvValidator(unittest.TestCase):
+
+    def test_validate(self):
+        tests_True = [ {'val:day': 20},
+                      {':string': 'truc'},
+                      {':float': 3.14}
+                      ]
+        tests_False = [ {'val:day': 50},
+                      {':string': 10},
+                      {':float': '3.14'}
+                      ]
+        for tst in tests_True:
+            self.assertTrue(Ntv.obj(tst).validate()[0])
+        for tst in tests_False:
+            self.assertFalse(Ntv.obj(tst).validate()[0])
+        
+        
 class Test_Ntv_compare(unittest.TestCase):
 
     def test_lt(self):

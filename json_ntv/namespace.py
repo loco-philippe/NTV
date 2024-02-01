@@ -6,7 +6,7 @@ The `namespace` module is part of the `NTV.json_ntv` package ([specification doc
 https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
 
 It contains the `Namespace`, `Datatype`, `DatatypeError` classes and 
-the functions `agreg_type`, `from_file`, `relative_type` and `str_type`.
+the functions `agreg_type`, `from_file`, `mapping`, `relative_type` and `str_type`.
 
 Namespace and Datatype entities are used to define NTVtype.
 
@@ -22,6 +22,7 @@ import requests
 
 import json_ntv
 from json_ntv.ntv_util import NtvUtil
+from json_ntv.ntv_validate import Validator
 
 SCH_ORG = 'https://schema.org/'
 
@@ -44,23 +45,14 @@ def agreg_type(str_typ, def_type, single):
     if not def_type:
         return clas.add(str_typ)
     if clas == Datatype or clas == Namespace and not single:
-        """agreg = clas.add(str_typ, error=False)
-        if agreg:
-            return agreg
-        for typ in _join_type(def_type.long_name, str_typ):
-            agreg = clas.add(typ, error=False)
-            if agreg:
-                return agreg         """   
         try:
             return clas.add(str_typ)
         except DatatypeError:
-            #return clas.add(_join_type(def_type.long_name, str_typ))
             for typ in _join_type(def_type.long_name, str_typ):
                 try:
                     return clas.add(typ)
                 except DatatypeError:
                     pass
-
     raise DatatypeError(str_typ + ' and ' + def_type.long_name + ' are incompatible')
 
 def from_file(file, name, long_parent=None):
@@ -83,7 +75,21 @@ def from_file(file, name, long_parent=None):
     if not name in config.sections():    
         raise DatatypeError(name + ' is not present in ' + str(file) )
     _add_namespace(config, schema_nsp)
-        
+
+def mapping(typ=None, func=None):
+    if typ and func:
+        Datatype.add(typ).validate = func
+    else:
+        if isinstance(typ, str):
+            func_lis = [ typ + '_valid' ]
+        elif isinstance(typ, (list, tuple)):
+            func_lis = [ typ_str + '_valid' for typ_str in typ]
+        else:
+            func_lis = [ typ_str + '_valid' for typ_str in Datatype._types_]
+        for func_str in func_lis:
+            if func_str in Validator.__dict__:
+                Datatype.add(func_str[:-6]).validate = Validator.__dict__[func_str]             
+                
 def relative_type(str_def, str_typ):
     '''return relative str_typ string from Datatype or Namespace str_def
 
@@ -185,7 +191,7 @@ class Datatype(NtvUtil):
 
     The methods defined in this class are :
 
-    *classmethods*
+    *staticmethods*
     - `types`
     - `add`
 
@@ -195,6 +201,7 @@ class Datatype(NtvUtil):
 
     *instance methods*
     - `isin_namespace`
+    - `validate`
     '''
 
     @staticmethod
@@ -203,7 +210,7 @@ class Datatype(NtvUtil):
         return [nam.long_name for nam in NtvUtil._types_.values()]
 
     @classmethod
-    def add(cls, long_name, module=False, force=False):
+    def add(cls, long_name, module=False, force=False, validate=None):
         '''activate and return a valid Datatype defined by the long name
         
         *parameters :*
@@ -211,6 +218,7 @@ class Datatype(NtvUtil):
         - **long_name** : String - absolut name of the Datatype
         - **module** : boolean (default False) - if True search data in the 
         local .ini file, else in the distant repository
+        - **validate** : function (default None) - validate function to include
         '''
         if long_name == '':
             return None
@@ -220,19 +228,21 @@ class Datatype(NtvUtil):
         if split_name[-1] == '':
             raise DatatypeError(long_name + ' is not a valid Datatype')
         if len(split_name) == 1:
-            return cls(split_name[0], force=force)
+            return cls(split_name[0], force=force, validate=validate)
         if len(split_name) == 2:
             nspace = Namespace.add(split_name[0]+'.', module=module, force=force)
             return cls(split_name[1], nspace, force=force)
         raise DatatypeError(long_name + ' is not a valid Datatype')
         
-    def __init__(self, name, nspace=None, force=False):
+    def __init__(self, name, nspace=None, force=False, validate=None):
         '''Datatype constructor.
 
         *Parameters*
 
         - **name** : string - name of the Type
-        - **nspace** : Namespace (default None) - namespace associated'''
+        - **nspace** : Namespace (default None) - namespace associated
+        - **force** : boolean (default False) - if True, no Namespace control
+        - **validate** : function (default None) - validate function to include'''
         if isinstance(name, Datatype):
             self.name = name.name
             self.nspace = name.nspace
@@ -253,6 +263,8 @@ class Datatype(NtvUtil):
         self.name = name
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
+        if validate:
+            self.validate = validate
         NtvUtil._types_[self.long_name] = self
         return
 
@@ -504,4 +516,5 @@ class DatatypeError(Exception):
 nroot = Namespace(module=True)
 for root_typ in nroot.content['type'].keys():
     typ = Datatype.add(root_typ, module=True)
+mapping(Datatype.types())
 typ_json = Datatype('json')

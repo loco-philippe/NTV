@@ -62,6 +62,7 @@ class Ntv(ABC, NtvUtil):
     - `alike`
     - `to_json_ntv`
     - `to_obj_ntv`
+    - `validate` (validation)
 
     *export - conversion (instance methods)*
     - `expand`
@@ -908,6 +909,22 @@ class Ntv(ABC, NtvUtil):
             return (clas, name, typ, [ntv.to_tuple(maxi=maxi) for ntv in val[:maxv]])
         raise NtvError('the ntv entity is not consistent')
 
+    def validate(self, unique=False):
+        '''check the ntv_type validity and return a boolean and a list of errors
+
+        *Parameters*
+
+        - **unique**: boolean (default False) - if True, stop validation at the 
+        first error'''
+        errors = []
+        for ntv in self.tree.leaf_nodes:
+            valid = ntv.ntv_type.validate(ntv.ntv_value)
+            if not valid:
+                errors.append(str(ntv.pointer()))
+                if unique:
+                    return (False, errors)
+        return (not errors, errors)
+    
     @abstractmethod
     def obj_value(self):
         '''return the ntv_value with different formats defined by kwargs (abstract method)'''
