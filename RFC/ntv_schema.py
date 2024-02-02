@@ -11,7 +11,7 @@ For examples, see the Jupyter Notebook in the same directory : `./example_schema
 
 
 from json_ntv.ntv import Ntv, NtvList, NtvSingle
-from jsonschema import validate
+from jsonschema import validate, SchemaError
 
 # %% interface json schema
 
@@ -35,7 +35,7 @@ def validat(json_data, json_sch, part, ptr, mode):
     if mode < 3:
         try:
             valid = validate(json_data, json_sch) is None
-        except NtvSchemaError:
+        except SchemaError:
             if mode > 0:
                 print('  error ', ptr, '-', part, ' : ', json_data,
                       'is not valid with schema : ', json_sch)

@@ -424,7 +424,9 @@ class Test_NtvValidator(unittest.TestCase):
                       {'val:bit': '1'},
                       {'val:base64': '1Ade_-=DDR0'},
                       {'val:base16': '1A0'},
-                      {'val:yearmonth': '1245-02'}
+                      {'val:yearmonth': '1245-02'},
+                      {':time': '04:23:01'},
+                      {':timetz': '04:23:01+04:00'}
                       ]
         tests_False = [ {'val:day': 50},
                       {':string': 10},
@@ -432,7 +434,10 @@ class Test_NtvValidator(unittest.TestCase):
                       {'val:bit': 'a'},
                       {'val:base64': '1Ade_+=DDR0'},
                       {'val:base16': '1A0G'},
-                      {'val:yearmonth': '1245-062'}]
+                      {'val:yearmonth': '1245-062'},
+                      {':timetz': '04:23:01'},
+                      {':time': '04:23:01+04:00'}
+                      ]
         for tst in tests_True:
             self.assertTrue(Ntv.obj(tst).validate()[0])
         for tst in tests_False:

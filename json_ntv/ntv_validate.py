@@ -13,6 +13,7 @@ For more information, see the
 [user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html) 
 or the [github repository](https://github.com/loco-philippe/NTV).
 """
+import datetime
 
 class Validator:
     
@@ -138,5 +139,41 @@ class Validator:
     def second_valid(val):
         return isinstance(val, int) and 0 <= val < 60
     
-    
+    def date_valid(val):
+        try:
+            datetime.date.fromisoformat(val)
+        except ValueError:
+            return False
+        return True
+
+    def time_valid(val):
+        try:
+            tim = datetime.time.fromisoformat(val)
+        except ValueError:
+            return False
+        return True if not tim.tzinfo else False
+
+    def timetz_valid(val):
+        try:
+            tim = datetime.time.fromisoformat(val)
+        except ValueError:
+            return False
+        return True if tim.tzinfo else False
+
+    def datetime_valid(val):
+        try:
+            tim = datetime.datetime.fromisoformat(val)
+        except ValueError:
+            return False
+        return True if not tim.tzinfo else False
+
+    def datetimetz_valid(val):
+        try:
+            tim = datetime.datetime.fromisoformat(val)
+        except ValueError:
+            return False
+        return True if tim.tzinfo else False
+
+class ValidateError(Exception):
+    '''Validator exception'''    
     

@@ -549,4 +549,3 @@ class NtvJsonEncoder(json.JSONEncoder):
 
 class NtvError(Exception):
     ''' NTV Exception'''
-    # pass

@@ -45,6 +45,10 @@ This package contains the following classes:
     - `NTV.json_ntv.ntv_connector.CborConnec`
     - `NTV.json_ntv.ntv_connector.ShapelyConnec` 
 
+- `NTV.json_ntv.ntv_validate` :
+    
+    - `NTV.json_ntv.ntv_validate.Validator`
+
 Note: pandas connector is in another package `ntv-pandas.ntv_pandas.pandas_ntv_connector`      
 
 For more information, see the 
