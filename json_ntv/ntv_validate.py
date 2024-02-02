@@ -14,6 +14,23 @@ For more information, see the
 or the [github repository](https://github.com/loco-philippe/NTV).
 """
 import datetime
+import re
+
+def duration(): 
+    dur_s = "([0-9]+S)"
+    dur_n = '(' + '([0-9]+M)' + dur_s + '?)'
+    dur_h = '(' + '([0-9]+H)' + dur_n + '?)'
+    dur_time = '(T(' + dur_h + '|' + dur_n + '|' + dur_s + '))'
+    dur_d = "([0-9]+D)"
+    dur_m = '(' + '([0-9]+M)' + dur_d + '?)'
+    dur_y = '(' + '([0-9]+Y)' + dur_m + '?)'
+    dur_date = '((' + dur_d + '|' + dur_m + '|' + dur_y + ')(' + dur_time + ')?)'
+    dur_week = '([0-9]+W)'
+    duration = 'P(' + dur_date + '|' + dur_time + '|' + dur_week + ')$'
+    return re.compile(duration)
+
+DURATION = duration()
+
 
 class Validator:
     
@@ -173,6 +190,18 @@ class Validator:
         except ValueError:
             return False
         return True if tim.tzinfo else False
+
+    def duration_valid(val):
+        return DURATION.match(val) is not None
+
+    def period_valid(val):
+        period = val.split('/', maxsplit=1)
+        for per in period:
+            if (not Validator.datetime_valid(per) and 
+                not Validator.datetimetz_valid(per) and
+                not Validator.duration_valid(per)):
+                return False
+        return True
 
 class ValidateError(Exception):
     '''Validator exception'''    
