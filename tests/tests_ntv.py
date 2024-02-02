@@ -418,7 +418,7 @@ class Test_Ntv_creation(unittest.TestCase):
 class Test_NtvValidator(unittest.TestCase):
 
     def test_validate(self):
-        tests_True = [ {'val:day': 20},
+        tests_True = [{'val:day': 20},
                       {':string': 'truc'},
                       {':float': 3.14},
                       {'val:bit': '1'},
@@ -429,9 +429,16 @@ class Test_NtvValidator(unittest.TestCase):
                       {':timetz': '04:23:01+04:00'},
                       {':datetime': '2011-01-02T04:23:01'},
                       {':datetimetz': '2011-01-02T04:23:01+04:00'},
-                      {':duration': 'P1YT200H'}
+                      {':duration': 'P1YT200H'},
+                      {':duration': 'P3Y6M4DT12H30M5S'},
+                      {':timearray': ['04:23:01+04:00', '2011-01-02T04:23:01']},
+                      {':period': 'P3Y6M4DT12H30M5S/2011-01-02T04:23:01+04:00'},
+                      {':pointstr': '4.35, 50.2'},
+                      {':pointobj': {'lon':4.35, 'lat': 50.2}},
+                      {':polygon': [[[1,2], [2,3]]]},
+                      {':multigeometry': [[[[1,2], [2,3]]], [1,2], [[1,2], [2,3]]]}
                       ]
-        tests_False = [ {'val:day': 50},
+        tests_False =[{'val:day': 50},
                       {':string': 10},
                       {':float': '3.14'},
                       {'val:bit': 'a'},
@@ -442,7 +449,8 @@ class Test_NtvValidator(unittest.TestCase):
                       {':time': '04:23:01+04:00'},
                       {':datetimetz': '2011-01-02T04:23:01'},
                       {':datetime': '2011-01-02T04:23:01+04:00'},
-                      {':duration': 'P1Y200H'}
+                      {':duration': 'P1Y200H'},
+                      {':pointstr': '4.35, 500.2'}                      
                       ]
         for tst in tests_True:
             self.assertTrue(Ntv.obj(tst).validate()[0])

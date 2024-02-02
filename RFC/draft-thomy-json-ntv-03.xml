@@ -747,19 +747,19 @@ ex_list = {
           <tr><td>pointstr (loc)</td><td>Point coordinates (string)</td><td>"5.12, 45.256" <em>(lon, lat)</em></td></tr>
           <tr><td>pointobj (loc)</td><td>Point coordinates (object)</td><td>{"lon": 5.12, "lat": 45.256}</td></tr>
           <tr><td>multipoint</td><td>MultiPoint coordinates <xref target="RFC7946"/></td>
-            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" DataTypeName</em></t></td></tr>
+            <td><t>[pt1, pt2, pt3]</t><t><em>ptx is "point" NTVvalue</em></t></td></tr>
           <tr><td>line (loc)</td><td>LineString coordinates <xref target="RFC7946"/></td>
-            <td><t>[pt1, pt2, pt3]</t><t><em>ptx has "point" DataTypeName</em></t></td></tr>
+            <td><t>[pt1, pt2, pt3]</t><t><em>ptx is "point" NTVvalue</em></t></td></tr>
           <tr><td>multiline</td><td>MultiLineString coordinates <xref target="RFC7946"/></td>
-            <td><t>[li1, li2, li3]</t><t><em>lix has "line" DataTypeName</em></t></td></tr>
+            <td><t>[li1, li2, li3]</t><t><em>lix is "line" NTVvalue</em></t></td></tr>
           <tr><td>polygon (loc)</td><td>Polygon coordinates <xref target="RFC7946"/></td>
-            <td><t>[rg1, rg2, rg3]</t><t><em>rgx has "line" DataTypeName (ring)</em></t></td></tr>
+            <td><t>[rg1, rg2, rg3]</t><t><em>rgx is "line" NTVvalue (ring)</em></t></td></tr>
           <tr><td>multipolygon (loc)</td><td>MultiPolygon coordinates <xref target="RFC7946"/></td>
-            <td><t>[pl1, pl2, pl3]</t><t><em>plx has "polygon" DataTypeName</em></t></td></tr>
-          <tr><td>geometry (loc)</td><td>Geometry coordinates <xref target="RFC7946"/></td>
-            <td><t>point, line or polygon</t><t>coordinates</t></td></tr>
-          <tr><td>multigeometry (loc)</td><td>MultiGeometry coordinates <xref target="RFC7946"/></td>
-            <td><t>[geo1, geo2, geo3]</t><t><em>geox is point, line, polygon or geometry</em></t></td></tr>
+            <td><t>[pl1, pl2, pl3]</t><t><em>plx is "polygon" NTVvalue</em></t></td></tr>
+          <tr><td>geometry</td><td>Geometry coordinates <xref target="RFC7946"/></td>
+            <td><t>"point", "line" or "polygon"</t><t>NTVvalue</t></td></tr>
+          <tr><td>multigeometry</td><td>MultiGeometry coordinates <xref target="RFC7946"/></td>
+            <td><t>[geo1, geo2, geo3]</t><t><em>geox is "geometry" NTVvalue</em></t></td></tr>
           <tr><td>box (loc)</td><td>box coordinates <xref target="RFC7946"/></td><td>[ -10.0, -10.0, 10.0, 10.0 ]</td></tr>
           <tr><td>geojson (loc)</td><td>geoJSON object <xref target="RFC7946"/></td><td>{"type": "point", "coordinates": [40.0, 0.0]}</td></tr>
           <tr><td>codeolc (loc)</td><td>Open Location Code <xref target="OLC"/></td><td>"8FW4V75V+8F6"</td></tr></tbody></table>

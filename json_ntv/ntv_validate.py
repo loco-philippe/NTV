@@ -98,15 +98,21 @@ class Validator:
         return isinstance(val, float)    
 
     def bit_valid(val):
+        if not isinstance(val, str):
+            return False
         return val in ['0', '1']
 
     def binary_valid(val):
+        if not isinstance(val, str):
+            return False
         for char in val: 
             if not char in ['0', '1']:
                 return False
         return True
     
     def base64_valid(val):
+        if not isinstance(val, str):
+            return False
         for car in val: 
             if (not 'a' <= car <= 'z' and not 'A' <= car <= 'Z' and 
                 not '0' <= car <= '9' and not car in ['-', '_', '=']):
@@ -114,12 +120,16 @@ class Validator:
         return True
 
     def base32_valid(val):
+        if not isinstance(val, str):
+            return False
         for car in val: 
             if not 'A' <= car <= 'Z' and not '1' < car < '8' and not car == '=':
                 return False
         return True
 
     def base16_valid(val):
+        if not isinstance(val, str):
+            return False
         for car in val: 
             if not '0' <= car <= '9' and not 'A' <= car <= 'F':
                 return False
@@ -132,6 +142,8 @@ class Validator:
         return isinstance(val, int) and 0 < val < 13
 
     def yearmonth_valid(val):
+        if not isinstance(val, str):
+            return False
         y_m = val.split('-', maxsplit=1)
         return Validator.year_valid(int(y_m[0])) and Validator.month_valid(int(y_m[1]))
     
@@ -155,6 +167,11 @@ class Validator:
 
     def second_valid(val):
         return isinstance(val, int) and 0 <= val < 60
+    
+    def dat_valid(val):
+        return (Validator.date_valid(val) or Validator.time_valid(val) or 
+                Validator.datetime_valid(val) or Validator.timetz_valid(val) or
+                Validator.datetimetz_valid(val))
     
     def date_valid(val):
         try:
@@ -192,17 +209,99 @@ class Validator:
         return True if tim.tzinfo else False
 
     def duration_valid(val):
+        if not isinstance(val, str):
+            return False
         return DURATION.match(val) is not None
 
     def period_valid(val):
+        if not isinstance(val, str):
+            return False
         period = val.split('/', maxsplit=1)
         for per in period:
-            if (not Validator.datetime_valid(per) and 
-                not Validator.datetimetz_valid(per) and
-                not Validator.duration_valid(per)):
+            if not (Validator.datetime_valid(per) or 
+                    Validator.datetimetz_valid(per) or
+                    Validator.duration_valid(per)):
+                return False
+        if period[0][0] == 'P' and period[1][0] == 'P':
+            return False
+        return True
+
+    def timearray_valid(val):
+        return (isinstance(val, list) and len(val) == 2 and 
+                Validator.dat_valid(val[0]) and Validator.dat_valid(val[1]))
+    
+    def point_valid(val):
+        return (isinstance(val, list) and len(val) == 2 and 
+                isinstance(val[0], (int,float)) and -90 <= val[0] <= 90 and
+                isinstance(val[1], (int,float)) and -90 <= val[1] <= 90)
+
+    def pointstr_valid(val):
+        if not isinstance(val, str):
+            return False
+        coord = val.split(',', maxsplit=1)
+        if len(coord) != 2:
+            return False
+        try:
+            point = [float(coord[0]), float(coord[1])]
+        except ValueError:
+            return False
+        return Validator.point_valid(point)
+
+    def pointobj_valid(val):
+        if not (isinstance(val, dict) and 'lon' in val and 'lat' in val):
+            return False
+        return Validator.point_valid([val['lon'], val['lat']])        
+
+    def multipoint_valid(val):
+        if not isinstance(val, list):
+            return False
+        for point in val:
+            if not Validator.point_valid(point):
                 return False
         return True
 
+    def line_valid(val):
+        return Validator.multipoint_valid(val)
+
+    def multiline_valid(val):
+        if not isinstance(val, list):
+            return False
+        for line in val:
+            if not Validator.multipoint_valid(line):
+                return False
+        return True
+ 
+    def polygon_valid(val):
+        return Validator.multiline_valid(val)    
+    
+    def multipolygon_valid(val):
+        if not isinstance(val, list):
+            return False
+        for poly in val:
+            if not Validator.multiline_valid(poly):
+                return False
+        return True    
+
+    def geometry_valid(val):
+        return (Validator.point_valid(val) or Validator.line_valid(val) or 
+                Validator.polygon_valid(val))    
+
+    def multigeometry_valid(val):
+        if not isinstance(val, list):
+            return False
+        for geo in val:
+            if not Validator.geometry_valid(geo):
+                return False
+        return True
+
+    def box_valid(val):
+        if not (isinstance(val, list) and len(val) == 4):
+            return False
+        for coor in val:
+            if not (isinstance(coor, (int,float)) and -90 <= coor <= 90):
+                return False 
+        return True        
+    
 class ValidateError(Exception):
     '''Validator exception'''    
     
