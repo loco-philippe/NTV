@@ -436,7 +436,10 @@ class Test_NtvValidator(unittest.TestCase):
                       {':pointstr': '4.35, 50.2'},
                       {':pointobj': {'lon':4.35, 'lat': 50.2}},
                       {':polygon': [[[1,2], [2,3]]]},
-                      {':multigeometry': [[[[1,2], [2,3]]], [1,2], [[1,2], [2,3]]]}
+                      {':multigeometry': [[[[1,2], [2,3]]], [1,2], [[1,2], [2,3]]]},
+                      {':geojson': {'type': 'Point', 'coordinates': [1,2]}},
+                      {':codeolc': '8FW4V75V+8F6'},
+                      {':uri': 'foo+://andrewj:myPassword:mySecondPassword@example.com:8042/over/there?name=ferret#nose'}
                       ]
         tests_False =[{'val:day': 50},
                       {':string': 10},

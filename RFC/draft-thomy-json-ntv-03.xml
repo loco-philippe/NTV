@@ -769,8 +769,9 @@ ex_list = {
           <tr><th>DataTypeName</th><th>NTVvalue</th></tr></thead><tbody>
           <tr><td>row</td><td>row <xref target="W3C TAB"/></td></tr>
           <tr><td>field</td><td>column <xref target="W3C TAB"/></td></tr>
-          <tr><td>tab</td><td>table <xref target="W3C TAB"/></td></tr>
-          <tr><td>ntv</td><td>JsonNTV</td></tr></tbody></table>
+          <tr><td>tab</td><td>table <xref target="NTV-TAB"/></td></tr>
+          <tr><td>ntv</td><td>JsonNTV</td></tr>
+          <tr><td>sch</td><td>Schema</td></tr></tbody></table>
           <t>The data structure associated to this DataTypeName are defined in specific document.</t>
       </section>
       <section><name>Normalized String</name>

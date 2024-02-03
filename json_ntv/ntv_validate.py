@@ -26,11 +26,18 @@ def duration():
     dur_y = '(' + '([0-9]+Y)' + dur_m + '?)'
     dur_date = '((' + dur_d + '|' + dur_m + '|' + dur_y + ')(' + dur_time + ')?)'
     dur_week = '([0-9]+W)'
-    duration = 'P(' + dur_date + '|' + dur_time + '|' + dur_week + ')$'
+    duration = 'P(' + dur_date + '|' + dur_time + '|' + dur_week + ')'
     return re.compile(duration)
 
 DURATION = duration()
-
+GEOJSON = {'Point': 'coordinates', 'LineString': 'coordinates', 
+           'Polygon': 'coordinates', 'MultiPoint': 'coordinates', 
+           'MultiLineString': 'coordinates', 'MultiPolygon': 'coordinates', 
+           'GeometryCollection': 'geometries', 'Feature': 'geometry', 
+           'FeatureCollection': 'features'}
+OLC = re.compile('([2-90CFGHJMPQRVWX]{2}){4}\+([2-9CFGHJMPQRVWX]{2}[2-9CFGHJMPQRVWX]*)?')
+_uri = '(?#URI)^(?#Scheme)([a-z][a-z0-9\+\-\.]*):(?#HeirPart)(\/\/(?#Authority)((?#UserInfo)(((\%[0-9a-f][0-9a-f]|[a-z0-9\-\.\_\~]|[\!\$\&\'\(\)\*\+\,\;\=]|\:)*)\@)?(?#Host)((?#IP Literal)\[((?#IPv6 Address)((([0-9a-f]{1,4})\:){6,6}((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|\:\:(([0-9a-f]{1,4})\:){5,5}((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|([0-9a-f]{1,4})?\:\:(([0-9a-f]{1,4})\:){4,4}((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|((([0-9a-f]{1,4})\:)?([0-9a-f]{1,4}))?\:\:(([0-9a-f]{1,4})\:){3,3}((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|((([0-9a-f]{1,4})\:){0,2}([0-9a-f]{1,4}))?\:\:(([0-9a-f]{1,4})\:){2,2}((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|((([0-9a-f]{1,4})\:){0,3}([0-9a-f]{1,4}))?\:\:([0-9a-f]{1,4})\:((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|((([0-9a-f]{1,4})\:){0,4}([0-9a-f]{1,4}))?\:\:((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|([0-9a-f]{1,4})\:([0-9a-f]{1,4}))|((([0-9a-f]{1,4})\:){0,5}([0-9a-f]{1,4}))?\:\:([0-9a-f]{1,4})|((([0-9a-f]{1,4})\:){0,6}([0-9a-f]{1,4}))?\:\:)|(?#IPvFuture Address)v[a-f0-9]+\.([a-z0-9\-\.\_\~]|[\!\$\&\'\(\)\*\+\,\;\=]|\:)+(?#))\]|(?#IPv4 Address)(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3,3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])|(?#RegName)([a-z0-9\-\.\_\~]|\%[0-9a-f][0-9a-f]|[\!\$\&\'\(\)\*\+\,\;\=])*(?#))(?#Port)(:([0-9]+))?(?#))(?#Path)((\/([a-z0-9\-\.\_\~\!\$\&\'\(\)\*\+\,\;\=\:\@]|(%[a-f0-9]{2,2}))*)*)(?#))(?#Query)(\?([a-z0-9\-\.\_\~\!\$\&\'\(\)\*\+\,\;\=\:\@\/\?]|(%[a-f0-9]{2,2}))*)?(?#Fragment)(#([a-z0-9\-\.\_\~\!\$\&\'\(\)\*\+\,\;\=\:\@\/\?]|(%[a-f0-9]{2,2}))*)?(?#)$'
+URI = re.compile(_uri, flags=re.IGNORECASE)
 
 class Validator:
     
@@ -211,7 +218,7 @@ class Validator:
     def duration_valid(val):
         if not isinstance(val, str):
             return False
-        return DURATION.match(val) is not None
+        return DURATION.fullmatch(val) is not None
 
     def period_valid(val):
         if not isinstance(val, str):
@@ -232,8 +239,8 @@ class Validator:
     
     def point_valid(val):
         return (isinstance(val, list) and len(val) == 2 and 
-                isinstance(val[0], (int,float)) and -90 <= val[0] <= 90 and
-                isinstance(val[1], (int,float)) and -90 <= val[1] <= 90)
+                isinstance(val[0], (int,float)) and -180 <= val[0] <= 180 and
+                isinstance(val[1], (int,float)) and -180 <= val[1] <= 180)
 
     def pointstr_valid(val):
         if not isinstance(val, str):
@@ -302,6 +309,21 @@ class Validator:
                 return False 
         return True        
     
+    def geojson_valid(val):
+        if not (isinstance(val, dict) and 'type' in val):
+            return False
+        return val['type'] in GEOJSON and GEOJSON[val['type']] in val
+
+    def codeolc_valid(val):
+        if not isinstance(val, str):
+            return False
+        return OLC.fullmatch(val) is not None
+
+    def uri_valid(val):
+        if not isinstance(val, str):
+            return False
+        return URI.fullmatch(val) is not None
+
 class ValidateError(Exception):
     '''Validator exception'''    
     
