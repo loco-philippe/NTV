@@ -444,7 +444,9 @@ class Test_NtvValidator(unittest.TestCase):
                       {':uri': 'http://helloworld.com/'},
                       {':uri': 'http://10.15.20.73/'},
                       {':uri': 'http://user.@com/'},
-                      {':uri': 'mailto:John.Doe@example.com'}
+                      {':uri': 'mailto:John.Doe@example.com'},
+                      {':uri': 'tel:+1-201-555-0123'},
+                      {':uuid': 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6'}
                       ]
         tests_False =[{'val:day': 50},
                       {':string': 10},

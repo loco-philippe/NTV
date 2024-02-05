@@ -16,20 +16,16 @@ or the [github repository](https://github.com/loco-philippe/NTV).
 import datetime
 import re
 
-def duration(): 
-    dur_s = "([0-9]+S)"
-    dur_n = '(' + '([0-9]+M)' + dur_s + '?)'
-    dur_h = '(' + '([0-9]+H)' + dur_n + '?)'
-    dur_time = '(T(' + dur_h + '|' + dur_n + '|' + dur_s + '))'
-    dur_d = "([0-9]+D)"
-    dur_m = '(' + '([0-9]+M)' + dur_d + '?)'
-    dur_y = '(' + '([0-9]+Y)' + dur_m + '?)'
-    dur_date = '((' + dur_d + '|' + dur_m + '|' + dur_y + ')(' + dur_time + ')?)'
-    dur_week = '([0-9]+W)'
-    duration = 'P(' + dur_date + '|' + dur_time + '|' + dur_week + ')'
-    return re.compile(duration)
-
-DURATION = duration()
+_dur_s = "([0-9]+S)"
+_dur_n = '(' + '([0-9]+M)' + _dur_s + '?)'
+_dur_h = '(' + '([0-9]+H)' + _dur_n + '?)'
+_dur_time = '(T(' + _dur_h + '|' + _dur_n + '|' + _dur_s + '))'
+_dur_d = "([0-9]+D)"
+_dur_m = '(' + '([0-9]+M)' + _dur_d + '?)'
+_dur_y = '(' + '([0-9]+Y)' + _dur_m + '?)'
+_dur_date = '(('+ _dur_d + '|'+_dur_m + '|'+ _dur_y + ')('+ _dur_time + ')?)'
+_dur_week = '([0-9]+W)'
+DURATION = re.compile('P('+_dur_date+'|'+_dur_time+'|'+_dur_week+')')
 GEOJSON = {'Point': 'coordinates', 'LineString': 'coordinates', 
            'Polygon': 'coordinates', 'MultiPoint': 'coordinates', 
            'MultiLineString': 'coordinates', 'MultiPolygon': 'coordinates', 
@@ -37,7 +33,8 @@ GEOJSON = {'Point': 'coordinates', 'LineString': 'coordinates',
            'FeatureCollection': 'features'}
 OLC = re.compile('([2-90CFGHJMPQRVWX]{2}){4}\+([2-9CFGHJMPQRVWX]{2}[2-9CFGHJMPQRVWX]*)?')
 URI = re.compile('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
-
+UUID = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                  flags=re.IGNORECASE)
 class Validator:
     
     def json_valid(val):
@@ -342,6 +339,11 @@ class Validator:
         if not isinstance(val, str):
             return False
         return URI.fullmatch(val) is not None
+    
+    def uuid_valid(val):
+        if not isinstance(val, str):
+            return False
+        return UUID.fullmatch(val) is not None
     
 class ValidateError(Exception):
     '''Validator exception'''    
