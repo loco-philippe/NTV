@@ -35,6 +35,16 @@ OLC = re.compile('([2-90CFGHJMPQRVWX]{2}){4}\+([2-9CFGHJMPQRVWX]{2}[2-9CFGHJMPQR
 URI = re.compile('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
 UUID = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
                   flags=re.IGNORECASE)
+_dot_atom = r'(\s*[a-zA-Z0-9!#\$%&\*\+-/=\^_`{}\|~.]+)'
+_quoted_string = r'(\s*"[\s*[!#-~]*]*\s*"\s*)'
+_domain_literal = r'(\s*\[(\s*[!-Z^-~]+)*\s*\]\s*)'
+_addr_spec = '((' + _dot_atom + '|' + _quoted_string + ')@(' + _dot_atom + '|' + _domain_literal + '))'
+_mailbox = r'((.*\s*\<' + _addr_spec + r'\>\s*)|' + _addr_spec + ')'
+ADDRESS = re.compile(_mailbox + '|(.*:(' + _mailbox + '(,' + _mailbox + r')*)?;\s*)') # without CFWS
+HOSTNAME = re.compile(r'[-a-zA-Z_]{1,63}(\.[-a-zA-Z_]{1,63})*')
+IPV4 = re.compile('(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])')
+_path_absolute = r'(([a-zA-Z]:)?((/([-a-z0-9_~!&,;=:@\.\$\'\(\)\*\+]|(%[a-f0-9]{2}))*)*))'
+
 class Validator:
     
     def json_valid(val):
@@ -344,6 +354,26 @@ class Validator:
         if not isinstance(val, str):
             return False
         return UUID.fullmatch(val) is not None
+
+    def email_valid(val):
+        if not isinstance(val, str):
+            return False
+        return ADDRESS.fullmatch(val) is not None    
+    
+    def hostname_valid(val):
+        if not isinstance(val, str) or len(val) > 253:
+            return False
+        return HOSTNAME.fullmatch(val) is not None    
+    
+    def jpointer_valid(val):
+        if not isinstance(val, str) or (len(val) > 0 and val[0] != '/'):
+            return False
+        return True  
+
+    def ipv4_valid(val):
+        if not isinstance(val, str):
+            return False
+        return IPV4.fullmatch(val) is not None        
     
 class ValidateError(Exception):
     '''Validator exception'''    
