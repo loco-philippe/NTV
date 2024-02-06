@@ -33,7 +33,6 @@ import json
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
 from json_ntv.ntv_util import NtvUtil
-#from observation import Sfield
 
 
 def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
@@ -362,12 +361,12 @@ class MermaidConnec(NtvConnector):
                 name += '<i>' + ntv.val + '</i>\n'
             else:
                 name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [ntv.pointer(index=True, item_idx=ind).json(default='/'), 
+            return [str(ntv.pointer(index=True, item_idx=ind)), 
                     ['rectangle', name[:-1]]]
         if not name:
             name = '<b>::</b>\n'
         name = name.replace('"', "'")
-        return [ntv.pointer(index=True, item_idx=ind).json(default='/'), 
+        return [str(ntv.pointer(index=True, item_idx=ind)), 
                 ['roundedge', name[:-1]]]
 
     @staticmethod
@@ -381,8 +380,8 @@ class MermaidConnec(NtvConnector):
                 MermaidConnec._mermaid_link(ntv_val, ntv.type_str,
                                             node_link, row, dic_node, ind)
                 node_link['links'].append(
-                    [ntv.pointer(index=True).json(default='/'), 'normalarrow',
-                     ntv_val.pointer(index=True, item_idx=ind).json(default='/')])
+                    [str(ntv.pointer(index=True)), 'normalarrow',
+                     str(ntv_val.pointer(index=True, item_idx=ind))])
 
     @staticmethod
     def _flowchart(ntv):

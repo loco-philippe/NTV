@@ -71,7 +71,6 @@ class NtvUtil:
         - coef (None or int): coef if primary Field else None
         - leng (int): length of the Field
         '''
-        #ntv = Ntv.obj(field)
         typ = ntv.type_str if ntv.ntv_type else None
         nam = ntv.name
         val = ntv_to_val(ntv)
@@ -271,7 +270,6 @@ class NtvConnector(ABC):
             type_str = value.type_str if value.ntv_type else None
             name = value.ntv_name
             value = value.ntv_value
-        #dic_obj = NtvConnector.dic_obj
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
         value_obj = NtvConnector._uncast_val(value, type_str, **option)
         return (value_obj, name, type_str if type_str else NtvConnector._typ_obj(value_obj))
@@ -320,7 +318,6 @@ class NtvConnector(ABC):
             connec = NtvConnector.connector()['other']
         if connec:
             return connec.to_obj_ntv(value, **option)
-        #raise NtvError('type of value not allowed for conversion')
         return value
 
     @staticmethod
@@ -420,7 +417,6 @@ class NtvConnector(ABC):
             lidx[ind][3] = None
             return
         lidx[ind][4] = NtvConnector.keysfromderkeys(lidx[parent][4], keys)  # relative
-        #lidx[ind][4] = [keys[pkey] for pkey in lidx[parent][4]]  # relative
         lidx[ind][3] = None
         return    
     
@@ -523,7 +519,6 @@ class NtvTree:
     @property
     def leaf_nodes(self):
         ''' return the list of leaf nodes according to the DFS preordering algorithm'''
-        #return [node for node in self.__class__(self._ntv) if not isinstance(node, NtvList)]
         return [node for node in self.__class__(self._ntv)
                 if node.__class__.__name__ == 'NtvSingle']
 

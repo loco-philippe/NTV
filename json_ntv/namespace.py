@@ -19,7 +19,7 @@ import configparser
 from pathlib import Path
 import json
 import requests
-
+    
 import json_ntv
 from json_ntv.ntv_util import NtvUtil
 from json_ntv.ntv_validate import Validator
@@ -247,6 +247,7 @@ class Datatype(NtvUtil):
             self.name = name.name
             self.nspace = name.nspace
             self.custom = name.custom
+            self.validate = name.validate
             return
         if not name or not isinstance(name, str):
             raise DatatypeError('null name is not allowed')
@@ -511,10 +512,11 @@ class Namespace(NtvUtil):
 
 class DatatypeError(Exception):
     ''' Datatype or Namespace Exception'''
-    # pass
 
 nroot = Namespace(module=True)
-for root_typ in nroot.content['type'].keys():
-    typ = Datatype.add(root_typ, module=True)
-mapping(Datatype.types())
+for root_typ in nroot.content['type']:
+    #typ = Datatype.add(root_typ, module=True)
+    typ = Datatype.add(root_typ, module=True, 
+                       validate=Validator.__dict__[root_typ + '_valid'])
+#mapping(Datatype.types())
 typ_json = Datatype('json')

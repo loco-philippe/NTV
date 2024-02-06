@@ -44,9 +44,14 @@ ADDRESS = re.compile(_mailbox + '|(.*:(' + _mailbox + '(,' + _mailbox + r')*)?;\
 HOSTNAME = re.compile(r'[-a-zA-Z_]{1,63}(\.[-a-zA-Z_]{1,63})*')
 IPV4 = re.compile('(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])')
 _path_absolute = r'(([a-zA-Z]:)?((/([-a-z0-9_~!&,;=:@\.\$\'\(\)\*\+]|(%[a-f0-9]{2}))*)*))'
+FILE = re.compile(r'/*[-a-z0-9_~!&,;=:@\.\$\'\(\)\*\+]*' + _path_absolute)
+
 
 class Validator:
-    
+    '''Validator class contains static methods.
+    Each method is associated to a global Datatype (name before the _) and 
+    return a boolean (type conformity).'''
+
     def json_valid(val):
         return isinstance(val, (float, int, str, dict, list, bool)) or val is None
 
@@ -325,6 +330,13 @@ class Validator:
             return False
         return OLC.fullmatch(val) is not None
 
+    def loc_valid(val):
+        return (Validator.point_valid(val) or Validator.pointstr_valid(val) or 
+                Validator.pointobj_valid(val) or Validator.line_valid(val) or
+                Validator.polygon_valid(val) or Validator.multipolygon_valid(val) or
+                Validator.box_valid(val) or Validator.geojson_valid(val) or
+                Validator.codeolc_valid(val))
+    
     def uri_valid(val):
         if not isinstance(val, str):
             return False
@@ -374,6 +386,41 @@ class Validator:
         if not isinstance(val, str):
             return False
         return IPV4.fullmatch(val) is not None        
+    
+    def file_valid(val):
+        if not isinstance(val, str):
+            return False
+        return FILE.fullmatch(val) is not None        
+
+    def ipv6_valid(val):
+        pass
+    
+    def idnemail_valid(val):
+        pass
+    
+    def idnhostname_valid(val):
+        pass
+    
+    def rjpointer_valid(val):
+        pass
+
+    def regex_valid(val):
+        pass
+        
+    def row_valid(val):
+        pass
+    
+    def tab_valid(val):
+        pass
+    
+    def field_valid(val):
+        pass
+    
+    def ntv_valid(val):
+        pass
+    
+    def sch_valid(val):
+        pass
     
 class ValidateError(Exception):
     '''Validator exception'''    

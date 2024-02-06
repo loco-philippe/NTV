@@ -555,8 +555,6 @@ class Ntv(ABC, NtvUtil):
         num = index or self.parent.json_array
         pointer = self.parent.pointer(index)
         pointer.append(idx if num else self.json_name_str)
-        #pointer.append(idx if num else self.json_name(def_type=self.parent.type_str,
-        #                                              string=True))
         return pointer
     
     def reduce(self, obj=True, maxi=6, level=3):
@@ -577,16 +575,13 @@ class Ntv(ABC, NtvUtil):
         if isinstance(self, NtvSingle):
             return ntv
         if level == 0:
-            #ntv.ntv_value = [NtvSingle('___',ntv_type=ntv.type_str)]
             ntv.ntv_value = [Ntv.obj('___',no_typ=True)]
-            #ntv.ntv_value = [Ntv.obj('___',typ_auto=True)]
         if len(self) <= maxi:
             ntv.ntv_value = [child.reduce(False, maxi, level-1) for child in ntv]
             return ntv
         mid = maxi // 2
         cont.set_type(ntv.type_str)
         start = [child.reduce(False, maxi, level-1) for child in ntv[:mid]]
-        #middle = [NtvSingle('...',ntv_type=ntv.type_str)]
         middle = [cont]
         end = [child.reduce(False, maxi, level-1) for child in ntv[-mid:]]
         ntv.ntv_value = start + middle + end
@@ -1060,32 +1055,32 @@ class NtvSingle(Ntv):
         return ''
 
     @staticmethod
-    def _decode_s(ntv_value, ntv_name, ntv_type):
-        '''return adjusted ntv_value, ntv_name, ntv_type'''
+    def _decode_s(ntv_value, ntv_name, ntv_type_str):
+        '''return adjusted ntv_value, ntv_name, ntv_type(str)'''
         is_json = NtvConnector.is_json(ntv_value)
         if is_json:
             if isinstance(ntv_value, (list)):
-                ntv_value = [NtvSingle._decode_s(val, '', ntv_type)[
+                ntv_value = [NtvSingle._decode_s(val, '', ntv_type_str)[
                     0] for val in ntv_value]
             elif isinstance(ntv_value, (dict)):
-                ntv_value = {key: NtvSingle._decode_s(val, '', ntv_type)[
+                ntv_value = {key: NtvSingle._decode_s(val, '', ntv_type_str)[
                     0] for key, val in ntv_value.items()}
         elif isinstance(ntv_value, NtvSingle):
             ntv_value = ntv_value.to_obj()
             return (ntv_value, ntv_name, 'ntv')
         else:
-            ntv_value, name, typ = NtvConnector.cast(ntv_value, ntv_name)  
-            ntv_type = Datatype(typ) if typ else ntv_type
-        if not ntv_type:
+            ntv_value, name, typ_str = NtvConnector.cast(ntv_value, ntv_name)  
+            ntv_type_str = Datatype.add(typ_str).name if typ_str else ntv_type_str
+        if not ntv_type_str:
             if is_json:
-                ntv_type = 'json'
+                ntv_type_str = 'json'
             else:
-                ntv_type = typ
+                ntv_type_str = typ_str
                 if not ntv_name:
                     ntv_name = name
-        elif not is_json and Datatype(ntv_type) != Datatype(typ):
+        elif not is_json and ntv_type_str != typ_str:
             raise NtvError('ntv_value is not compatible with ntv_type')
-        return (ntv_value, ntv_name, ntv_type)
+        return (ntv_value, ntv_name, ntv_type_str)
 
 
 class NtvList(Ntv):
@@ -1140,9 +1135,7 @@ class NtvList(Ntv):
     @property
     def json_array(self):
         ''' return the json_array dynamic attribute'''
-        #set_name = {ntv.ntv_name for ntv in self}
         set_name = {ntv.json_name(def_type=self.type_str, string=True) for ntv in self}
-        #return '' in set_name or len(set_name) != len(self) or len(set_name)==1
         return '' in set_name or len(set_name) != len(self)
 
     def __eq__(self, other):
@@ -1206,7 +1199,6 @@ class NtvList(Ntv):
         def_type = self.ntv_type.long_name if self.ntv_type else def_type
         values = [ntv.to_obj(def_type=def_type, **opt2)
                   for ntv in self.ntv_value[:maxv]]
-        #if len(values) == 1 and isinstance(values[0], dict):
         if len(self) == 1 and isinstance(self[0], NtvSingle) and isinstance(values[0], dict):
             return values[0]
         if self.json_array or option['simpleval'] or option['json_array']:

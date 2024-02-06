@@ -450,7 +450,8 @@ class Test_NtvValidator(unittest.TestCase):
                       {':email': 'A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;'},
                       {':hostname': 'en.wikipedia.org'},
                       {':jpointer': '/node0/node1'},
-                      {':ipv4': '192.168.1.1'}
+                      {':ipv4': '192.168.1.1'},
+                      {':file': '//host.example.com/path/to/file'}
                       ]
         tests_False =[{'val:day': 50},
                       {':string': 10},
