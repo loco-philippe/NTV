@@ -62,6 +62,7 @@ as well as two JSON formats:
 - named format when the name or type is present ((e.g. `{'age': 25}` or `{':int': 25}`)).
 
 The type incorporates a notion of `namespace` that can be nested.
+
 > *For example, the type: `ns1.ns2.type_a` means that:*
 >
 > - *`ns1.` is a namespace defined in the global namespace,*
@@ -79,6 +80,7 @@ Several variations and use cases of the NTV format are defined:
 - Comment and change management of JSON data
 - visualization of JSON or NTV tree
 - JSON data editor
+- data validation (value conformity to the Datatype)
 
 ## NTV and JSON
 

@@ -4,7 +4,7 @@
 The Python package includes 
 - NTV objects (creation, import, export, format obj-json-cbor-tuple-repr)
 - NTV connector (pandas, custom)
-- Namespace and Type management (config, creation, use)
+- Namespace and Datatype management (config, creation, use, validate)
 
 The 'Namespaces' used are defined in the [configuration files](https://github.com/loco-philippe/NTV/blob/main/config/README.md)
 
