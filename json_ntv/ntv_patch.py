@@ -11,8 +11,8 @@ It contains the classes `NtvOp`, `NtvPatch`, `NtvPointer`
 
 # 1 - NtvPointer
 
-NtvPointer defines a string syntax for identifying a specific node within a 
-Ntv tree. 
+NtvPointer defines a string syntax for identifying a specific node within a
+Ntv tree.
 
 It is the transposition of JSON Pointer defined in RFC6901.
 
@@ -31,7 +31,7 @@ make partial updates on an NTV entity.
 The representation of an NtvPatch is a JSON-Array of NtvOp that can be added to an NTV
 entity (e.g. NtvComment - comments and change management).
 
-The representation of an NtvOp is a JSON-Object 
+The representation of an NtvOp is a JSON-Object
 
 # 3 - Example
 
@@ -147,8 +147,9 @@ class NtvOp:
             elif self.ope == 'copy' and self.from_path:
                 ntv = copy(ntv_res[self.from_path.fragment])
             elif self.ope == 'move' and self.from_path:
-                ntv = ntv_res[self.from_path.fragment]  
-                del ntv_res[self.from_path[:-1].fragment][list(self.from_path)[-1]]
+                ntv = ntv_res[self.from_path.fragment]
+                del ntv_res[self.from_path[:-
+                                           1].fragment][list(self.from_path)[-1]]
                 ntv.parent = None
             else:
                 raise NtvOpError('op is not correct')
@@ -308,7 +309,7 @@ class NtvPointer(list):
 
     *dynamic values (@property)*
     - `fragment`
-    
+
     *static method*
     - `split`
     - `pointer_json`
@@ -340,8 +341,8 @@ class NtvPointer(list):
 
     def __getitem__(self, ind):
         ''' return value record (value conversion)'''
-        return NtvPointer(super().__getitem__(ind))    
-    
+        return NtvPointer(super().__getitem__(ind))
+
     @property
     def fragment(self):
         '''convert a NtvPointer into a fragment URI'''
@@ -370,7 +371,7 @@ class NtvPointer(list):
         '''
         json_p = '' if not fragment else '#'
         for name in list_pointer:
-            json_p += str(name).replace('~', '~0').replace('/', '~1') + '/' 
+            json_p += str(name).replace('~', '~0').replace('/', '~1') + '/'
         return json_p[:-1]
 
     @staticmethod

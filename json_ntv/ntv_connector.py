@@ -12,7 +12,7 @@ A NtvConnector is defined by:
 - clas_typ: str - define the Datatype of the converted object
 - to_obj_ntv: method - converter from JsonNTV to the object
 - to_json_ntv: method - converter from the object to JsonNTV
-    
+
 It contains :
 
 - methods `from_csv` and `to_csv` to convert CSV files and 'tab' NTV entity
@@ -96,13 +96,13 @@ class ShapelyConnec(NtvConnector):
 
         *Parameters*
 
-        - **type_geo** : type of geometry (point, multipoint, 
+        - **type_geo** : type of geometry (point, multipoint,
         linestring, multilinestring', polygon, multipolygon)
         - **ntv_value** : array - coordinates'''
         from shapely import geometry
         type_geo = ShapelyConnec.type_geo(ntv_value) if not 'type_geo' in kwargs \
             or kwargs['type_geo'] == 'geometry' else kwargs['type_geo']
-        return geometry.shape({"type": type_geo, 
+        return geometry.shape({"type": type_geo,
                                "coordinates": ntv_value})
 
     @staticmethod
@@ -132,14 +132,13 @@ class ShapelyConnec(NtvConnector):
         ''' convert geojson string into shapely geometry.'''
         from shapely import geometry
         return geometry.shape(json.loads(geojson))
-    
-    @staticmethod 
+
+    @staticmethod
     def to_geometry(value):
         '''convert geojson coordinates into shapely geometry'''
-        return ShapelyConnec.to_obj_ntv(value, type_geo=
-            NtvConnector.DIC_GEO[ShapelyConnec.type_geo(value)])
-    
-    @staticmethod 
+        return ShapelyConnec.to_obj_ntv(value, type_geo=NtvConnector.DIC_GEO[ShapelyConnec.type_geo(value)])
+
+    @staticmethod
     def type_geo(value):
         '''return geometry type of the value'''
         if not value or not isinstance(value, list):
@@ -149,9 +148,10 @@ class ShapelyConnec(NtvConnector):
             return 'point'
         val = val[0]
         if not isinstance(val, list):
-            return 'line'        
+            return 'line'
         return 'polygon'
-    
+
+
 class CborConnec(NtvConnector):
     '''NTV connector for binary data'''
 
@@ -285,6 +285,7 @@ class SdatasetConnec(NtvConnector):
         return (value.to_ntv().to_obj(), name,
                 SdatasetConnec.clas_typ if not typ else typ)
 
+
 class MermaidConnec(NtvConnector):
     '''NTV connector for Mermaid diagram'''
 
@@ -361,12 +362,12 @@ class MermaidConnec(NtvConnector):
                 name += '<i>' + ntv.val + '</i>\n'
             else:
                 name += '<i>' + json.dumps(ntv.val) + '</i>\n'
-            return [str(ntv.pointer(index=True, item_idx=ind)), 
+            return [str(ntv.pointer(index=True, item_idx=ind)),
                     ['rectangle', name[:-1]]]
         if not name:
             name = '<b>::</b>\n'
         name = name.replace('"', "'")
-        return [str(ntv.pointer(index=True, item_idx=ind)), 
+        return [str(ntv.pointer(index=True, item_idx=ind)),
                 ['roundedge', name[:-1]]]
 
     @staticmethod

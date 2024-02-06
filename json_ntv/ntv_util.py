@@ -7,7 +7,7 @@ Created on Feb 27 2023
 The `ntv_util` module is part of the `NTV.json_ntv` package ([specification document](
 https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
 
-It contains the classes `NtvUtil`, `NtvConnector`, `NtvTree`, `NtvJsonEncoder` 
+It contains the classes `NtvUtil`, `NtvConnector`, `NtvTree`, `NtvJsonEncoder`
 and `NtvError` for NTV entities.
 """
 from abc import ABC, abstractmethod
@@ -15,52 +15,52 @@ import datetime
 import json
 import re
 
+
 class NtvUtil:
     ''' The NtvUtil class includes static methods used by several NTV classes.
     NtvUtil is the parent class of `Datatype`, `Namespace`, `Ntv`.
-    
+
     *class variables :*
     - **_namespaces_** : list of Namespace defined
     - **_types_** : list of Datatype defined
-    
+
     *static methods :*
     - `from_obj_name`
     - `decode_ntv_tab`
     - `to_ntv_pointer`
-    
-    '''   
+
+    '''
     _namespaces_ = {}
     _types_ = {}
-    
+
     @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type_str and separator from string'''
         if not isinstance(string, str):
             raise NtvError('a json-name have to be str')
         if string == '':
-            return (None, None, None)        
+            return (None, None, None)
         spl = string.rsplit(':', maxsplit=1)
         if len(spl) == 1:
             if string[-1] == '.':
                 return (None, string, None)
             return(string, None, None)
-        if spl[0] =='':
+        if spl[0] == '':
             return (None, spl[1], ':')
         if spl[0][-1] == ':':
             sp0 = spl[0][:-1]
-            return (None if sp0 == '' else sp0, None if spl[1] == '' else spl[1], '::') 
+            return (None if sp0 == '' else sp0, None if spl[1] == '' else spl[1], '::')
         return (None if spl[0] == '' else spl[0], None if spl[1] == '' else spl[1], ':')
-
 
     @staticmethod
     def decode_ntv_tab(ntv, ntv_to_val):
         '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
-        
+
         *parameters:*
-        
+
         - **ntv**: Ntv data to decode,
         - **ntv_to_val**: method to convert external value form ntv in internal Field value
-        
+
         *Returns tuple: (name, dtype, codec, parent, keys, coef, leng)*
 
         - name (None or string): name of the Field
@@ -100,16 +100,17 @@ class NtvUtil:
     @staticmethod
     def to_ntvpointer(jsonpointer, unique_root=False):
         '''convert a json pointer inter a NTV pointer (string)
-        
+
         *parameters:*
-        
+
         - **jsonpointer**: String - json pointer to convert,
         - **unique_root**: Boolean (default False) - True if the json root length is 1 '''
         single = '/([0-9]+)(/[a-z])'
         if unique_root and not ('0' <= jsonpointer[1] <= '9'):
             return re.sub(single, '\g<2>', jsonpointer)[1:]
         return re.sub(single, '\g<2>', jsonpointer)
-        
+
+
 class NtvConnector(ABC):
     ''' The NtvConnector class is an abstract class used by all NTV connectors
     for conversion between NTV-JSON data and NTV-OBJ data.
@@ -119,7 +120,7 @@ class NtvConnector(ABC):
     - clas_typ: str - define the Datatype of the converted object
     - to_obj_ntv: method - converter from JsonNTV to the object
     - to_json_ntv: method - converter from the object to JsonNTV
-    
+
     *class method :*
     - `connector`
     - `dic_connec`
@@ -264,7 +265,7 @@ class NtvConnector(ABC):
         if type_str == 'json':
             return (value, name, type_str)
         if value.__class__.__name__ == 'NtvSingle':
-            if not (type_str in set(NtvConnector.dic_type.values()) and 
+            if not (type_str in set(NtvConnector.dic_type.values()) and
                     NtvConnector.is_json(value) or type_str is None):
                 return (value.ntv_value, value.name, value.type_str)
             type_str = value.type_str if value.ntv_type else None
@@ -293,7 +294,7 @@ class NtvConnector(ABC):
         dic_geo = NtvConnector.DIC_GEO
         dic_obj = NtvConnector.dic_obj | option['dicobj']
         dic_cbor = NtvConnector.DIC_CBOR
-        if not type_n or type_n == 'json' or (option['format'] == 'cbor' and 
+        if not type_n or type_n == 'json' or (option['format'] == 'cbor' and
                                               not dic_cbor.get(type_n, False)):
             return value
         if type_n in dic_fct:
@@ -367,7 +368,7 @@ class NtvConnector(ABC):
         *Returns* : list of keys'''
         return [derkeys[pkey] for pkey in parentkeys]
 
-    @staticmethod 
+    @staticmethod
     def encode_coef(lis):
         '''Generate a repetition coefficient for periodic list'''
         if len(lis) < 2:
@@ -377,49 +378,53 @@ class NtvConnector(ABC):
             if lis[coef-1] != lis[coef]:
                 break
             coef += 1
-        if (not len(lis) % (coef * (max(lis) + 1)) and 
-            lis == NtvConnector.keysfromcoef(coef, max(lis) + 1, len(lis))):
+        if (not len(lis) % (coef * (max(lis) + 1)) and
+                lis == NtvConnector.keysfromcoef(coef, max(lis) + 1, len(lis))):
             return coef
         return 0
-    
-    @staticmethod 
+
+    @staticmethod
     def keysfromcoef(coef, period, leng=None):
         ''' return a list of keys with periodic structure'''
         if not leng:
             leng = coef * period
-        return None if not (coef and period) else [(ind % (coef * period)) // coef 
-                                                   for ind in range(leng)]    
+        return None if not (coef and period) else [(ind % (coef * period)) // coef
+                                                   for ind in range(leng)]
+
     @staticmethod
     def init_ntv_keys(ind, lidx, leng):
         ''' initialization of explicit keys data in lidx object of tabular data'''
         # name: 0, type: 1, codec: 2, parent: 3, keys: 4, coef: 5, leng: 6
         name, typ, codec, parent, keys, coef, length = lidx[ind]
         if (keys, parent, coef) == (None, None, None):  # full or unique
-            if len(codec) == 1: # unique
+            if len(codec) == 1:  # unique
                 lidx[ind][4] = [0] * leng
             elif len(codec) == leng:    # full
                 lidx[ind][4] = list(range(leng))
             else:
                 raise NtvError('impossible to generate keys')
             return
-        if keys and len(keys) > 1 and parent is None:  #complete
+        if keys and len(keys) > 1 and parent is None:  # complete
             return
-        if coef:  #primary
-            lidx[ind][4] = [(ikey % (coef * len(codec))) // coef for ikey in range(leng)]
+        if coef:  # primary
+            lidx[ind][4] = [(ikey % (coef * len(codec))) //
+                            coef for ikey in range(leng)]
             lidx[ind][3] = None
-            return  
+            return
         if parent is None:
-            raise NtvError('keys not referenced')          
+            raise NtvError('keys not referenced')
         if not lidx[parent][4] or len(lidx[parent][4]) != leng:
             NtvConnector.init_ntv_keys(parent, lidx, leng)
         if not keys and len(codec) == len(lidx[parent][2]):    # implicit
             lidx[ind][4] = lidx[parent][4]
             lidx[ind][3] = None
             return
-        lidx[ind][4] = NtvConnector.keysfromderkeys(lidx[parent][4], keys)  # relative
+        lidx[ind][4] = NtvConnector.keysfromderkeys(
+            lidx[parent][4], keys)  # relative
         lidx[ind][3] = None
-        return    
-    
+        return
+
+
 class NtvTree:
     ''' The NtvTree class is an iterator class used to traverse a NTV tree structure.
     Some other methods give tree indicators and data.
@@ -428,7 +433,7 @@ class NtvTree:
 
     - **ntv** : Ntv entity
     - **_node**:  Ntv entity - node pointer
-    - **_stack**:  list - stack used to store context in recursive methods 
+    - **_stack**:  list - stack used to store context in recursive methods
 
     *dynamic values (@property)*
     - `breadth`
@@ -484,7 +489,7 @@ class NtvTree:
             self._node = parent
             self._stack.pop()
             self._next_up()
-            
+
     @property
     def breadth(self):
         ''' return the number of leaves'''
