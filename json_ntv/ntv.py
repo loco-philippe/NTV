@@ -1210,6 +1210,6 @@ class NtvList(Ntv):
                   for ntv in self.ntv_value[:maxv]]
         if len(self) == 1 and isinstance(self[0], NtvSingle) and isinstance(values[0], dict):
             return values[0]
-        if self.json_array or option['simpleval'] or option['json_array']:
+        if not NtvUtil.is_dictable(values) or option['simpleval'] or option['json_array']:
             return values
         return {list(val.items())[0][0]: list(val.items())[0][1] for val in values}

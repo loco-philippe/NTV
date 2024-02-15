@@ -34,6 +34,17 @@ class NtvUtil:
     _types_ = {}
 
     @staticmethod
+    def is_dictable(lis):
+        keys = set()
+        for val in lis:
+            if not isinstance(val, dict):
+                return False
+            if len(val) != 1:
+                return False
+            keys.add(list(val)[0])
+        return len(keys) == len(lis)
+    
+    @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type_str and separator from string'''
         if not isinstance(string, str):
@@ -154,6 +165,7 @@ class NtvConnector(ABC):
                 'multiline': False, 'polygon': False, 'multipolygon': False,
                 'date': True, 'time': False, 'datetime': True}
     DIC_OBJ = {'tab': 'DataFrameConnec', 'field': 'SeriesConnec',
+               'ndarray': 'NdarrayConnec',
                'point': 'ShapelyConnec', 'multipoint': 'ShapelyConnec',
                'line': 'ShapelyConnec', 'multiline': 'ShapelyConnec',
                'polygon': 'ShapelyConnec', 'multipolygon': 'ShapelyConnec',
@@ -392,6 +404,35 @@ class NtvConnector(ABC):
                                                    for ind in range(leng)]
 
     @staticmethod
+    def format_field(lidx_decode, leng):
+        ''' return a list of format'''
+        # name: 0, type: 1, codec: 2, parent: 3, keys: 4, coef: 5, leng: 6
+        field_format = []
+        for field_decode in lidx_decode:
+            name, typ, codec, parent, keys, coef, length = field_decode
+            if (keys, parent, coef) == (None, None, None):  # full or unique
+                if len(codec) == 1:  # unique
+                    field_format.append('unique')
+                elif len(codec) == leng:    # full
+                    field_format.append('full')
+                else:
+                    raise NtvError('impossible to generate keys')
+                continue
+            if keys and len(keys) > 1 and parent is None:  # complete
+                field_format.append('complete')
+                continue
+            if coef:  # primary
+                field_format.append('primary')
+                continue
+            if parent is None:
+                raise NtvError('keys not referenced')
+            if not keys:    # implicit
+                field_format.append('implicit')
+                continue
+            field_format.append('relative')
+        return field_format
+
+    @staticmethod
     def init_ntv_keys(ind, lidx, leng):
         ''' initialization of explicit keys data in lidx object of tabular data'''
         # name: 0, type: 1, codec: 2, parent: 3, keys: 4, coef: 5, leng: 6
@@ -423,8 +464,6 @@ class NtvConnector(ABC):
             lidx[parent][4], keys)  # relative
         lidx[ind][3] = None
         return
-
-
 class NtvTree:
     ''' The NtvTree class is an iterator class used to traverse a NTV tree structure.
     Some other methods give tree indicators and data.
