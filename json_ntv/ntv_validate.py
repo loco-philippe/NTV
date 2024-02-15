@@ -427,7 +427,9 @@ class Validator:
     def sch_valid(val):
         pass
 
-
+    def ndarray_valid(val):
+        pass
+    
 class ValidateError(Exception):
     '''Validator exception'''
 
