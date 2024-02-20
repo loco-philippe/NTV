@@ -342,6 +342,9 @@ class Validator:
                 Validator.box_valid(val) or Validator.geojson_valid(val) or
                 Validator.codeolc_valid(val))
 
+    def unit_valid(val):
+        return isinstance(val, str)
+
     def uri_valid(val):
         if not isinstance(val, str):
             return False
@@ -428,6 +431,9 @@ class Validator:
         pass
 
     def ndarray_valid(val):
+        pass
+
+    def xndarray_valid(val):
         pass
     
 class ValidateError(Exception):
