@@ -325,6 +325,26 @@ class Datatype(NtvUtil):
         return None
 
 
+class Datatypext(Datatype):
+    
+    def __init__(self, long_name, module=False, force=False, validate=None):
+        
+        spl_name = long_name.split('[', maxsplit=1)
+        long_base = spl_name[0]
+        self.extension = spl_name[1][:-1] if len(spl_name) == 2 else None
+        self.typebase = Datatype.add(long_base, module, force, validate)
+        ext_str = '[' + self.extension + ']' if self.extension else ''
+        self.name = self.typebase.name +  ext_str
+        self.nspace = self.typebase.nspace
+        self.custom = self.typebase.custom
+        self.validate = self.typebase.validate
+        return
+
+    @property
+    def gen_type(self):
+        '''return the generic type of the Datatype'''
+        return self.typebase.gen_type
+    
 class Namespace(NtvUtil):
     ''' Namespace of NTV entities.
 
@@ -509,10 +529,10 @@ class Namespace(NtvUtil):
     def is_child(self, nspace):
         '''return the number of level between self and nspace, -1 if None'''
         parent = self.parent
-        if not self.name:
-            return -1
         if self == nspace:
             return 0
+        if not self.name:
+            return -1
         rang = 1
         while parent.name != '' and parent != nspace:
             rang += 1
