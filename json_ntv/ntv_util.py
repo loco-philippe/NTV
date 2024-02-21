@@ -25,6 +25,7 @@ class NtvUtil:
     - **_types_** : list of Datatype defined
 
     *static methods :*
+    - `is_dictable`
     - `from_obj_name`
     - `decode_ntv_tab`
     - `to_ntv_pointer`
