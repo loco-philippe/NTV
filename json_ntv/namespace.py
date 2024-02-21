@@ -82,7 +82,7 @@ def from_file(file, name, long_parent=None):
 
 def mapping(typ=None, func=None):
     if typ and func:
-        Datatype.add(typ).validate = func
+        Datatype(typ).validate = func
     else:
         if isinstance(typ, str):
             func_lis = [typ + '_valid']
@@ -92,8 +92,7 @@ def mapping(typ=None, func=None):
             func_lis = [typ_str + '_valid' for typ_str in Datatype._types_]
         for func_str in func_lis:
             if func_str in Validator.__dict__:
-                Datatype.add(
-                    func_str[:-6]).validate = Validator.__dict__[func_str]
+                Datatype(func_str[:-6]).validate = Validator.__dict__[func_str]
 
 
 def relative_type(str_def, str_typ):
@@ -137,7 +136,7 @@ def str_type(long_name, single):
         raise DatatypeError('the long_name is not a string')
     if long_name[-1] == '.':
         return Namespace.add(long_name)
-    return Datatype.add(long_name)
+    return Datatype(long_name)
 
 
 def _add_namespace(config, namesp):
@@ -191,7 +190,6 @@ def _isin_schemaorg(name, prop=True, typ=None):
     return False
 
 
-#class Datatype(NtvUtil):
 class TypeBase(NtvUtil):
     ''' type of NTV entities.
 
@@ -200,6 +198,7 @@ class TypeBase(NtvUtil):
     - **name** : String - name of the type
     - **nspace** : Namespace - namespace associated
     - **custom** : boolean - True if not referenced
+    - **validate** : function (default None) - validate function
 
     The methods defined in this class are :
 
@@ -218,38 +217,37 @@ class TypeBase(NtvUtil):
 
     @staticmethod
     def types():
-        '''return the list of Datatype created'''
+        '''return the list of TypeBase created'''
         return [nam.long_name for nam in NtvUtil._types_.values()]
 
     @classmethod
     def add(cls, long_name, module=False, force=False, validate=None):
-        '''activate and return a valid Datatype defined by the long name
+        '''activate and return a valid TypeBase defined by the long name
 
         *parameters :*
 
-        - **long_name** : String - absolut name of the Datatype
+        - **long_name** : String - absolut name of the TypeBase
         - **module** : boolean (default False) - if True search data in the
         local .ini file, else in the distant repository
         - **validate** : function (default None) - validate function to include
         '''
         if long_name == '':
             return None
-        #if long_name in Datatype.types():
         if long_name in cls.types():
             return NtvUtil._types_[long_name]
         split_name = long_name.rsplit('.', 1)
         if split_name[-1] == '':
-            raise DatatypeError(long_name + ' is not a valid Datatype')
+            raise DatatypeError(long_name + ' is not a valid TypeBase')
         if len(split_name) == 1:
             return cls(split_name[0], force=force, validate=validate)
         if len(split_name) == 2:
             nspace = Namespace.add(
                 split_name[0]+'.', module=module, force=force)
             return cls(split_name[1], nspace, force=force)
-        raise DatatypeError(long_name + ' is not a valid Datatype')
+        raise DatatypeError(long_name + ' is not a valid TypeBase')
 
     def __init__(self, name, nspace=None, force=False, validate=None):
-        '''Datatype constructor.
+        '''TypeBase constructor.
 
         *Parameters*
 
@@ -257,7 +255,7 @@ class TypeBase(NtvUtil):
         - **nspace** : Namespace (default None) - namespace associated
         - **force** : boolean (default False) - if True, no Namespace control
         - **validate** : function (default None) - validate function to include'''
-        if isinstance(name, Datatype):
+        if isinstance(name, TypeBase):
             self.name = name.name
             self.nspace = name.nspace
             self.custom = name.custom
@@ -309,7 +307,7 @@ class TypeBase(NtvUtil):
 
     @property
     def gen_type(self):
-        '''return the generic type of the Datatype'''
+        '''return the generic type of the TypeBase'''
         if self.custom:
             return ''
         return self.nspace.content['type'][self.name]
@@ -327,11 +325,45 @@ class TypeBase(NtvUtil):
         return None
 
 
-#class Datatypext(Datatype):
 class Datatype(TypeBase):
-    
+    ''' The Datatype of NTV entities is composed with a TypeBase and an optional
+    extension.
+
+    *Attributes :*
+
+    - **name** : String - name of the Datatype
+    - **nspace** : Namespace - namespace associated
+    - **custom** : boolean - True if not referenced
+    - **validate** : function (default None) - validate function
+    - **typebase** : TypeBase - TypeBas of the Datatype
+    - **extension** : String (default None) - extension of the TypeBase
+
+    The methods defined in this class are :
+
+    *classmethod*
+    - `add`
+
+    *dynamic values (@property)*
+    - `gen_type`
+    - `long_name` (TypeBase)
+
+    *staticmethods*
+    - `types` (TypeBase)
+
+    *instance methods*
+    - `isin_namespace` (TypeBase)
+    - `validate` (TypeBase)
+    '''    
     def __init__(self, long_name, module=False, force=False, validate=None):
-        
+        '''DataType constructor.
+
+        *Parameters*
+
+        - **long_name** : String - absolut name of the TypeBase
+        - **module** : boolean (default False) - if True search data in the
+        local .ini file, else in the distant repository
+        - **force** : boolean (default False) - if True, no Namespace control
+        - **validate** : function (default None) - validate function to include'''        
         if isinstance(long_name, Datatype):
             self.name = long_name.name
             self.nspace = long_name.nspace
@@ -343,7 +375,6 @@ class Datatype(TypeBase):
         spl_name = long_name.split('[', maxsplit=1)
         long_base = spl_name[0]
         self.extension = spl_name[1][:-1] if len(spl_name) == 2 else None
-        #self.typebase = Datatype.add(long_base, module, force, validate)
         self.typebase = TypeBase.add(long_base, module, force, validate)
         ext_str = '[' + self.extension + ']' if self.extension else ''
         self.name = self.typebase.name +  ext_str
@@ -359,6 +390,7 @@ class Datatype(TypeBase):
 
     @classmethod    
     def add(cls, long_name, module=False, force=False, validate=None):
+        '''method eqivalent to the constructor'''
         return cls(long_name, module, force, validate)
         
 class Namespace(NtvUtil):
@@ -569,8 +601,7 @@ class DatatypeError(Exception):
 
 nroot = Namespace(module=True)
 for root_typ in nroot.content['type']:
-    #typ = Datatype.add(root_typ, module=True)
-    typ = Datatype.add(root_typ, module=True,
+    typ = Datatype(root_typ, module=True,
                        validate=Validator.__dict__[root_typ + '_valid'])
 # mapping(Datatype.types())
 typ_json = Datatype('json')

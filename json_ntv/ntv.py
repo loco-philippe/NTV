@@ -112,7 +112,7 @@ class Ntv(ABC, NtvUtil):
         if ntv_type.__class__.__name__ in ['Datatype', 'Namespace']:
             self.ntv_type = ntv_type
         elif ntv_type and ntv_type[-1] != '.':
-            self.ntv_type = Datatype.add(ntv_type)
+            self.ntv_type = Datatype(ntv_type)
         elif ntv_type and ntv_type[-1] == '.':
             self.ntv_type = Namespace.add(ntv_type)
         else:
@@ -866,7 +866,7 @@ class Ntv(ABC, NtvUtil):
             elif not leaf.is_json:
                 leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.cast(
                     leaf.ntv_value, leaf.ntv_name, leaf.type_str)
-                leaf.ntv_type = Datatype.add(type_str)
+                leaf.ntv_type = Datatype(type_str)
                 leaf.is_json = True
         return ntv
 
@@ -883,7 +883,7 @@ class Ntv(ABC, NtvUtil):
                     or leaf.ntv_type is None):
                 leaf.ntv_value, leaf.ntv_name, type_str = NtvConnector.uncast(
                     leaf, **kwargs)
-                leaf.ntv_type = Datatype.add(type_str) if type_str else None
+                leaf.ntv_type = Datatype(type_str) if type_str else None
                 leaf.is_json = NtvConnector.is_json(leaf.ntv_value)
         return ntv
 
@@ -1077,8 +1077,7 @@ class NtvSingle(Ntv):
             return (ntv_value, ntv_name, 'ntv')
         else:
             ntv_value, name, typ_str = NtvConnector.cast(ntv_value, ntv_name)
-            ntv_type_str = Datatype.add(
-                typ_str).name if typ_str else ntv_type_str
+            ntv_type_str = Datatype(typ_str).name if typ_str else ntv_type_str
         if not ntv_type_str:
             if is_json:
                 ntv_type_str = 'json'
