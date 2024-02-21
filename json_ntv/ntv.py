@@ -339,6 +339,13 @@ class Ntv(ABC, NtvUtil):
         return NtvTree(self)
 
     @property
+    def typebase_str(self):
+        '''return a string with the value of the TypeBase of the entity'''
+        if not self.ntv_type:
+            return ''
+        return self.ntv_type.typebase.long_name
+
+    @property
     def type_str(self):
         '''return a string with the value of the NtvType of the entity'''
         if not self.ntv_type:
@@ -829,20 +836,23 @@ class Ntv(ABC, NtvUtil):
         - **simpleval** : boolean (default False) - if True, only value (without
         name and type) is included
         - **name** : boolean (default true) - if False, name is not included
+        - **type** : boolean (default False) - if True, type is always included
         - **json_array** : boolean (default false) - if True, Json-object is not used for NtvList
         - **fast** : boolean (default False) - if True, json is created without conversion
         - **maxi**: Integer (default -1) - number of values to include for NtvList
         entities. If maxi < 1 all the values are included.
         '''
         option = {'encoded': False, 'format': 'json', 'fast': False, 'maxi': -1,
-                  'simpleval': False, 'name': True, 'json_array': False} | kwargs
+                  'simpleval': False, 'name': True, 'json_array': False, 
+                  'type': False} | kwargs
         value = self.obj_value(def_type=def_type, **option)
         obj_name = self.json_name(def_type)
         if not option['name']:
             obj_name[0] = ''
         if option['simpleval']:
             name = ''
-        elif option['format'] in ('cbor', 'obj') and not NtvConnector.is_json_class(value):
+        elif (option['format'] in ('cbor', 'obj') and 
+              not NtvConnector.is_json_class(value) and not option['type']):
             name = obj_name[0]
         else:
             name = obj_name[0] + obj_name[1] + obj_name[2]

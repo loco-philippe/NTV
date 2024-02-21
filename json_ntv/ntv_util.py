@@ -277,15 +277,17 @@ class NtvConnector(ABC):
         '''
         if type_str == 'json':
             return (value, name, type_str)
+        typebase_str = type_str
         if value.__class__.__name__ == 'NtvSingle':
             if not (type_str in set(NtvConnector.dic_type.values()) and
                     NtvConnector.is_json(value) or type_str is None):
                 return (value.ntv_value, value.name, value.type_str)
             type_str = value.type_str if value.ntv_type else None
+            typebase_str = value.typebase_str if value.ntv_type else None
             name = value.ntv_name
             value = value.ntv_value
         option = {'dicobj': {}, 'format': 'json', 'type_obj': False} | kwargs
-        value_obj = NtvConnector._uncast_val(value, type_str, **option)
+        value_obj = NtvConnector._uncast_val(value, typebase_str, **option)
         return (value_obj, name, type_str if type_str else NtvConnector._typ_obj(value_obj))
 
     @staticmethod
