@@ -465,6 +465,8 @@ class NtvConnector(ABC):
             lidx[parent][4], keys)  # relative
         lidx[ind][3] = None
         return
+
+
 class NtvTree:
     ''' The NtvTree class is an iterator class used to traverse a NTV tree structure.
     Some other methods give tree indicators and data.

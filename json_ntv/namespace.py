@@ -191,7 +191,8 @@ def _isin_schemaorg(name, prop=True, typ=None):
     return False
 
 
-class Datatype(NtvUtil):
+#class Datatype(NtvUtil):
+class TypeBase(NtvUtil):
     ''' type of NTV entities.
 
     *Attributes :*
@@ -233,7 +234,8 @@ class Datatype(NtvUtil):
         '''
         if long_name == '':
             return None
-        if long_name in Datatype.types():
+        #if long_name in Datatype.types():
+        if long_name in cls.types():
             return NtvUtil._types_[long_name]
         split_name = long_name.rsplit('.', 1)
         if split_name[-1] == '':
@@ -325,14 +327,24 @@ class Datatype(NtvUtil):
         return None
 
 
-class Datatypext(Datatype):
+#class Datatypext(Datatype):
+class Datatype(TypeBase):
     
     def __init__(self, long_name, module=False, force=False, validate=None):
         
+        if isinstance(long_name, Datatype):
+            self.name = long_name.name
+            self.nspace = long_name.nspace
+            self.custom = long_name.custom
+            self.validate = long_name.validate
+            self.typebase = long_name.typebase
+            self.extension = long_name.extension
+            return
         spl_name = long_name.split('[', maxsplit=1)
         long_base = spl_name[0]
         self.extension = spl_name[1][:-1] if len(spl_name) == 2 else None
-        self.typebase = Datatype.add(long_base, module, force, validate)
+        #self.typebase = Datatype.add(long_base, module, force, validate)
+        self.typebase = TypeBase.add(long_base, module, force, validate)
         ext_str = '[' + self.extension + ']' if self.extension else ''
         self.name = self.typebase.name +  ext_str
         self.nspace = self.typebase.nspace
@@ -344,7 +356,11 @@ class Datatypext(Datatype):
     def gen_type(self):
         '''return the generic type of the Datatype'''
         return self.typebase.gen_type
-    
+
+    @classmethod    
+    def add(cls, long_name, module=False, force=False, validate=None):
+        return cls(long_name, module, force, validate)
+        
 class Namespace(NtvUtil):
     ''' Namespace of NTV entities.
 

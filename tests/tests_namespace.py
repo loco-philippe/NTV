@@ -84,23 +84,28 @@ class Test_Datatype(unittest.TestCase):
         liststr = ['fr.BAN.lon', 'fr.BAN.$lon', 'year', 'fr.reg', 'fr.BAN.numero',
                    'fr.reg', 'fr.$IRVE.$a', '$a.$c', 'fr.$c']
         for tstr in liststr:
-            self.assertEqual(Datatype.add(tstr).long_name, tstr)
+            self.assertEqual(Datatype(tstr).long_name, tstr)
+            self.assertEqual(Datatype(tstr + '[kg]').long_name, tstr + '[kg]')
         liststr = ['$a.c.c.d', 'fr.$a.b.d']
         for tstr in liststr:
-            self.assertEqual(Datatype.add(tstr, force=True).long_name, tstr)    
+            self.assertEqual(Datatype(tstr, force=True).long_name, tstr)    
+            self.assertEqual(Datatype(tstr + '[kg]', force=True).long_name, tstr + '[kg]')
+            
     def test_add_ko(self):
         liststr = ['fr.BAN.test', 'fr', 'fr.BANN.lon']
         for tstr in liststr:
             with self.assertRaises(DatatypeError):
-                Datatype.add(tstr)        
+                Datatype(tstr)        
 
     def test_isinNamespace(self):
-        lon = Datatype.add("fr.BAN.lon")
+        lon = Datatype("fr.BAN.lon")
         listnsp = ['fr.BAN.', 'fr.', '']
         #listnotnsp = ['fr.IRVE.', 'fr.BAN.test.', 'schemaorg.']
         listnotnsp = ['fr.IRVE.', 'fr.BAN.test.']
         listkonsp = ['fr.BAN.lon', 'fr.BAN.teste.', 'fr', 'fr.BANN.test.']
         res = 0
+        self.assertEqual(Datatype("int").isin_namespace(''), 0)
+        self.assertEqual(Datatype("int[kg]").isin_namespace(''), 0)
         for nsp in listnsp:
             self.assertEqual(lon.isin_namespace(nsp), res)
             res += 1
@@ -116,7 +121,7 @@ class Test_Datatype(unittest.TestCase):
             self.assertEqual(Namespace.add(nstr).long_name, nstr)
         liststr = ['org.House.Country.name']
         for nstr in liststr:
-            self.assertEqual(Datatype.add(nstr).long_name, nstr)
+            self.assertEqual(Datatype(nstr).long_name, nstr)
         
 if __name__ == '__main__':
     unittest.main(verbosity=2)        
