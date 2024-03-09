@@ -260,6 +260,8 @@ class TypeBase(NtvUtil):
             self.nspace = name.nspace
             self.custom = name.custom
             self.validate = name.validate
+            #self.gen_type = name.gen_type
+            #self.long_name = name.long_name
             return
         if not name or not isinstance(name, str):
             raise DatatypeError('null name is not allowed')
@@ -278,6 +280,8 @@ class TypeBase(NtvUtil):
         self.name = name
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
+        #self.gen_type = '' if self.custom else self.nspace.content['type'][self.name]
+        #self.long_name = self.nspace.long_name + self.name
         if validate:
             self.validate = validate
         NtvUtil._types_[self.long_name] = self
@@ -310,6 +314,8 @@ class TypeBase(NtvUtil):
         '''return the generic type of the TypeBase'''
         if self.custom:
             return ''
+        if isinstance(self.nspace.content['type'][self.name], list):
+            return self.nspace.content['type'][self.name][0]
         return self.nspace.content['type'][self.name]
 
     @property
@@ -354,33 +360,33 @@ class Datatype(TypeBase):
     - `isin_namespace` (TypeBase)
     - `validate` (TypeBase)
     '''    
-    def __init__(self, long_name, module=False, force=False, validate=None):
+    def __init__(self, full_name, module=False, force=False, validate=None):
         '''DataType constructor.
 
         *Parameters*
 
-        - **long_name** : String - absolut name of the TypeBase
+        - **long_name** : String - absolut name of the Datatype
         - **module** : boolean (default False) - if True search data in the
         local .ini file, else in the distant repository
         - **force** : boolean (default False) - if True, no Namespace control
         - **validate** : function (default None) - validate function to include'''        
-        if isinstance(long_name, Datatype):
-            self.name = long_name.name
-            self.nspace = long_name.nspace
-            self.custom = long_name.custom
-            self.validate = long_name.validate
-            self.typebase = long_name.typebase
-            self.extension = long_name.extension
+        if isinstance(full_name, Datatype):
+            self.name = full_name.name
+            #self.nspace = full_name.nspace
+            #self.custom = full_name.custom
+            #self.validate = full_name.validate
+            self.typebase = full_name.typebase
+            self.extension = full_name.extension
             return
-        spl_name = long_name.split('[', maxsplit=1)
+        spl_name = full_name.split('[', maxsplit=1)
         long_base = spl_name[0]
         self.extension = spl_name[1][:-1] if len(spl_name) == 2 else None
         self.typebase = TypeBase.add(long_base, module, force, validate)
         ext_str = '[' + self.extension + ']' if self.extension else ''
         self.name = self.typebase.name +  ext_str
-        self.nspace = self.typebase.nspace
-        self.custom = self.typebase.custom
-        self.validate = self.typebase.validate
+        #self.nspace = self.typebase.nspace
+        #self.custom = self.typebase.custom
+        #self.validate = self.typebase.validate
         return
 
     @property
@@ -388,6 +394,21 @@ class Datatype(TypeBase):
         '''return the generic type of the Datatype'''
         return self.typebase.gen_type
 
+    @property
+    def nspace(self):
+        '''return the nspace of the Datatype'''
+        return self.typebase.nspace
+    
+    @property
+    def custom(self):
+        '''return the custom of the Datatype'''
+        return self.typebase.custom
+    
+    @property
+    def validate(self):
+        '''return the validate of the Datatype'''
+        return self.typebase.validate
+    
     @classmethod    
     def add(cls, long_name, module=False, force=False, validate=None):
         '''method eqivalent to the constructor'''
