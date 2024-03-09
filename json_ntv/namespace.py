@@ -207,6 +207,8 @@ class TypeBase(NtvUtil):
     - `add`
 
     *dynamic values (@property)*
+    - `category`
+    - `json_type`
     - `gen_type`
     - `long_name`
 
@@ -310,13 +312,34 @@ class TypeBase(NtvUtil):
         return self.__class__.__name__ + '(' + self.long_name + ')'
 
     @property
+    def json_type(self):
+        '''return the json type of the TypeBase'''
+        if self.custom:
+            return ''
+        prop = self.nspace.content['type'][self.name]
+        if isinstance(prop, list):
+            return prop[1]
+        return 'json'
+
+    @property
+    def category(self):
+        '''return the category of the TypeBase'''
+        if self.custom:
+            return ''
+        prop = self.nspace.content['type'][self.name]
+        if isinstance(prop, list):
+            return prop[2]
+        return 'local'
+
+    @property
     def gen_type(self):
         '''return the generic type of the TypeBase'''
         if self.custom:
             return ''
-        if isinstance(self.nspace.content['type'][self.name], list):
-            return self.nspace.content['type'][self.name][0]
-        return self.nspace.content['type'][self.name]
+        prop = self.nspace.content['type'][self.name]
+        if isinstance(prop, list):
+            return prop[0]
+        return prop
 
     @property
     def long_name(self):
@@ -350,6 +373,8 @@ class Datatype(TypeBase):
     - `add`
 
     *dynamic values (@property)*
+    - `category`
+    - `json_type`
     - `gen_type`
     - `long_name` (TypeBase)
 
@@ -393,6 +418,16 @@ class Datatype(TypeBase):
     def gen_type(self):
         '''return the generic type of the Datatype'''
         return self.typebase.gen_type
+
+    @property
+    def json_type(self):
+        '''return the json type of the Datatype'''
+        return self.typebase.json_type
+
+    @property
+    def category(self):
+        '''return the category of the Datatype'''
+        return self.typebase.category
 
     @property
     def nspace(self):

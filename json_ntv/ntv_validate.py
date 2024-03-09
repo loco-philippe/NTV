@@ -435,6 +435,9 @@ class Validator:
 
     def xndarray_valid(val):
         pass
+
+    def xdataset_valid(val):
+        pass
     
 class ValidateError(Exception):
     '''Validator exception'''
