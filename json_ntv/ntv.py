@@ -1075,6 +1075,7 @@ class NtvSingle(Ntv):
     def _decode_s(ntv_value, ntv_name, ntv_type_str):
         '''return adjusted ntv_value, ntv_name, ntv_type(str)'''
         is_json = NtvConnector.is_json(ntv_value)
+        name = None
         if is_json:
             if isinstance(ntv_value, (list)):
                 ntv_value = [NtvSingle._decode_s(val, '', ntv_type_str)[
@@ -1093,10 +1094,19 @@ class NtvSingle(Ntv):
                 ntv_type_str = 'json'
             else:
                 ntv_type_str = typ_str
-                if not ntv_name:
-                    ntv_name = name
         elif not is_json and ntv_type_str != typ_str:
             raise NtvError('ntv_value is not compatible with ntv_type')
+        ntv_name = name if not ntv_name else ntv_name                
+        '''
+        if not ntv_type_str:
+            if is_json:
+                ntv_type_str = 'json'
+            else:
+                ntv_type_str = typ_str
+            if not ntv_name:
+                ntv_name = name
+        elif not is_json and ntv_type_str != typ_str:
+            raise NtvError('ntv_value is not compatible with ntv_type')'''
         return (ntv_value, ntv_name, ntv_type_str)
 
 
