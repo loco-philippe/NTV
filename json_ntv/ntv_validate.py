@@ -430,6 +430,9 @@ class Validator:
     def sch_valid(val):
         pass
 
+    def narray_valid(val):
+        pass
+
     def ndarray_valid(val):
         pass
 
