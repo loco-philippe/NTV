@@ -361,10 +361,11 @@ class Datatype(TypeBase):
     *Attributes :*
 
     - **name** : String - name of the Datatype
+    - **base_name** : String - name of the TypeBase
     - **nspace** : Namespace - namespace associated
     - **custom** : boolean - True if not referenced
     - **validate** : function (default None) - validate function
-    - **typebase** : TypeBase - TypeBas of the Datatype
+    - **typebase** : TypeBase - TypeBase of the Datatype
     - **extension** : String (default None) - extension of the TypeBase
 
     The methods defined in this class are :
@@ -390,16 +391,14 @@ class Datatype(TypeBase):
 
         *Parameters*
 
-        - **long_name** : String - absolut name of the Datatype
+        - **full_name** : String - absolut name of the Datatype
         - **module** : boolean (default False) - if True search data in the
         local .ini file, else in the distant repository
         - **force** : boolean (default False) - if True, no Namespace control
         - **validate** : function (default None) - validate function to include'''        
         if isinstance(full_name, Datatype):
             self.name = full_name.name
-            #self.nspace = full_name.nspace
-            #self.custom = full_name.custom
-            #self.validate = full_name.validate
+            self.base_name = full_name.base_name
             self.typebase = full_name.typebase
             self.extension = full_name.extension
             return
@@ -408,10 +407,8 @@ class Datatype(TypeBase):
         self.extension = spl_name[1][:-1] if len(spl_name) == 2 else None
         self.typebase = TypeBase.add(long_base, module, force, validate)
         ext_str = '[' + self.extension + ']' if self.extension else ''
+        self.base_name = self.typebase.name
         self.name = self.typebase.name +  ext_str
-        #self.nspace = self.typebase.nspace
-        #self.custom = self.typebase.custom
-        #self.validate = self.typebase.validate
         return
 
     @property
