@@ -271,7 +271,7 @@ class NtvConnector(ABC):
 
         *Parameters*
 
-        - **data**: NtvSingle entity or NTVvalue of the NTV entity
+        - **value**: NtvSingle entity or NTVvalue of the NTV entity
         - **name** : String (default None) - name of the NTV entity
         - **type_str**: String (default None) - type of the NTV entity
         '''
@@ -304,7 +304,12 @@ class NtvConnector(ABC):
 
     @staticmethod
     def _uncast_val(value, type_n, **option):
-        '''return value from ntv value'''
+        '''return value from ntv value
+        
+        *Parameters*
+
+        - **value**: NtvSingle entity or NTVvalue of the NTV entity
+        '''
         dic_fct = NtvConnector.DIC_FCT
         dic_geo = NtvConnector.DIC_GEO
         dic_obj = NtvConnector.dic_obj | option['dicobj']
