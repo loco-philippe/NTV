@@ -36,6 +36,7 @@ class NtvUtil:
 
     @staticmethod
     def is_dictable(lis):
+        '''check if a list can be translated in a dict'''
         keys = set()
         for val in lis:
             if not isinstance(val, dict):
@@ -44,7 +45,7 @@ class NtvUtil:
                 return False
             keys.add(list(val)[0])
         return len(keys) == len(lis)
-    
+
     @staticmethod
     def from_obj_name(string):
         '''return a tuple with name, type_str and separator from string'''
@@ -56,7 +57,7 @@ class NtvUtil:
         if len(spl) == 1:
             if string[-1] == '.':
                 return (None, string, None)
-            return(string, None, None)
+            return (string, None, None)
         if spl[0] == '':
             return (None, spl[1], ':')
         if spl[0][-1] == ':':
@@ -118,7 +119,7 @@ class NtvUtil:
         - **jsonpointer**: String - json pointer to convert,
         - **unique_root**: Boolean (default False) - True if the json root length is 1 '''
         single = '/([0-9]+)(/[a-z])'
-        if unique_root and not ('0' <= jsonpointer[1] <= '9'):
+        if unique_root and not '0' <= jsonpointer[1] <= '9':
             return re.sub(single, '\g<2>', jsonpointer)[1:]
         return re.sub(single, '\g<2>', jsonpointer)
 
@@ -305,7 +306,7 @@ class NtvConnector(ABC):
     @staticmethod
     def _uncast_val(value, type_n, **option):
         '''return value from ntv value
-        
+
         *Parameters*
 
         - **value**: NtvSingle entity or NTVvalue of the NTV entity

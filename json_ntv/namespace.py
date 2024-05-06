@@ -81,6 +81,7 @@ def from_file(file, name, long_parent=None):
 
 
 def mapping(typ=None, func=None):
+    '''Affect a validate function (func) to a Datatype (typ) '''
     if typ and func:
         Datatype(typ).validate = func
     else:
@@ -165,12 +166,6 @@ def _join_type(namesp, str_typ):
         namesp_sp = namesp_sp[:idx]
     return ['.'.join(namesp_sp[:i+1]+str_typ_sp) for i in range(len(namesp_sp)-1, -1, -1)]
 
-    """namesp_split = namesp.split('.')[:-1]
-    for name in str_typ.split('.'):
-        if not name in namesp_split:
-            namesp_split.append(name)
-    return '.'.join(namesp_split)"""
-
 
 def _isin_schemaorg(name, prop=True, typ=None):
     ''' return True if a schema.org Property is present and associated to a Type
@@ -178,15 +173,15 @@ def _isin_schemaorg(name, prop=True, typ=None):
     n_org = name if prop else name[:-1]
     t_org = typ[:-1] if typ else None
     req_name = requests.get(
-        SCH_ORG + n_org, allow_redirects=True).content.decode()
+        SCH_ORG + n_org, allow_redirects=True, timeout=10).content.decode()
     if not prop:
         return 'Type</ti' in req_name
     is_prop = 'Property</ti' in req_name
     if not t_org:
         return is_prop
     if is_prop:
-        return '/' + n_org in requests.get(SCH_ORG + t_org, allow_redirects=True
-                                           ).content.decode()
+        return '/' + n_org in requests.get(SCH_ORG + t_org, allow_redirects=True,
+                                           timeout=10).content.decode()
     return False
 
 
@@ -214,7 +209,6 @@ class TypeBase(NtvUtil):
 
     *instance methods*
     - `isin_namespace`
-    - `validate`
     '''
 
     @staticmethod
@@ -262,8 +256,8 @@ class TypeBase(NtvUtil):
             self.nspace = name.nspace
             self.custom = name.custom
             self.validate = name.validate
-            #self.gen_type = name.gen_type
-            #self.long_name = name.long_name
+            # self.gen_type = name.gen_type
+            # self.long_name = name.long_name
             return
         if not name or not isinstance(name, str):
             raise DatatypeError('null name is not allowed')
@@ -273,8 +267,9 @@ class TypeBase(NtvUtil):
             nspace = NtvUtil._namespaces_['']
         if nspace.file and SCH_ORG in nspace.file:
             if not _isin_schemaorg(name, typ=nspace.name):
-                raise DatatypeError(
-                    name + ' is not a schema.org Property associated to the ' + nspace.name + 'Type ')
+                raise DatatypeError(name +
+                                    ' is not a schema.org Property associated to the ' +
+                                    nspace.name + 'Type ')
         else:
             if not (name[0] == '$' or force or name in nspace.content['type']):
                 raise DatatypeError(
@@ -282,8 +277,8 @@ class TypeBase(NtvUtil):
         self.name = name
         self.nspace = nspace
         self.custom = nspace.custom or name[0] == '$'
-        #self.gen_type = '' if self.custom else self.nspace.content['type'][self.name]
-        #self.long_name = self.nspace.long_name + self.name
+        # self.gen_type = '' if self.custom else self.nspace.content['type'][self.name]
+        # self.long_name = self.nspace.long_name + self.name
         if validate:
             self.validate = validate
         NtvUtil._types_[self.long_name] = self
@@ -350,8 +345,6 @@ class TypeBase(NtvUtil):
         '''return the number of level between self and nspace, -1 if None'''
         return self.nspace.is_child(Namespace.add(long_name))
 
-    def validate(self, value):
-        return None
 
 
 class Datatype(TypeBase):
@@ -385,7 +378,8 @@ class Datatype(TypeBase):
     *instance methods*
     - `isin_namespace` (TypeBase)
     - `validate` (TypeBase)
-    '''    
+    '''
+
     def __init__(self, full_name, module=False, force=False, validate=None):
         '''DataType constructor.
 
@@ -395,7 +389,7 @@ class Datatype(TypeBase):
         - **module** : boolean (default False) - if True search data in the
         local .ini file, else in the distant repository
         - **force** : boolean (default False) - if True, no Namespace control
-        - **validate** : function (default None) - validate function to include'''        
+        - **validate** : function (default None) - validate function to include'''
         if isinstance(full_name, Datatype):
             self.name = full_name.name
             self.base_name = full_name.base_name
@@ -408,7 +402,7 @@ class Datatype(TypeBase):
         self.typebase = TypeBase.add(long_base, module, force, validate)
         ext_str = '[' + self.extension + ']' if self.extension else ''
         self.base_name = self.typebase.name
-        self.name = self.typebase.name +  ext_str
+        self.name = self.typebase.name + ext_str
         return
 
     @property
@@ -430,22 +424,23 @@ class Datatype(TypeBase):
     def nspace(self):
         '''return the nspace of the Datatype'''
         return self.typebase.nspace
-    
+
     @property
     def custom(self):
         '''return the custom of the Datatype'''
         return self.typebase.custom
-    
+
     @property
     def validate(self):
         '''return the validate of the Datatype'''
         return self.typebase.validate
-    
-    @classmethod    
+
+    @classmethod
     def add(cls, long_name, module=False, force=False, validate=None):
         '''method eqivalent to the constructor'''
         return cls(long_name, module, force, validate)
-        
+
+
 class Namespace(NtvUtil):
     ''' Namespace of NTV entities.
 
@@ -518,10 +513,6 @@ class Namespace(NtvUtil):
         '''
         if name and not parent:
             parent = NtvUtil._namespaces_['']
-        '''if name and name[0] != '$' and not force and not (
-           name in parent.content['namespace'] or 'schema.org' in parent.file):
-            raise DatatypeError(name + ' is not defined in ' + parent.long_name)'''
-
         if parent and parent.file and SCH_ORG in parent.file:
             if not _isin_schemaorg(name, False):
                 raise DatatypeError(name + ' is not a schema.org Type ')
@@ -529,7 +520,6 @@ class Namespace(NtvUtil):
             if name and not (name[0] == '$' or force or name in parent.content['namespace']):
                 raise DatatypeError(
                     name + ' is not defined in ' + parent.long_name)
-
         self.name = name
         self.parent = parent
         self.custom = parent.custom or name[0] == '$' if parent else False
@@ -584,7 +574,7 @@ class Namespace(NtvUtil):
                 config.read(Path(json_ntv.__file__).parent / 'config' / p_file)
             else:
                 config.read_string(requests.get(
-                    parent.file, allow_redirects=True).content.decode())
+                    parent.file, allow_redirects=True, timeout=10).content.decode())
             return Namespace._pathconfig_ + json.loads(config['data']['namespace'])[name]
         return Namespace._pathconfig_ + Namespace._global_
 
@@ -613,7 +603,7 @@ class Namespace(NtvUtil):
             config.read(Path(json_ntv.__file__).parent / 'config' / p_file)
         else:
             config.read_string(requests.get(
-                file, allow_redirects=True).content.decode())
+                file, allow_redirects=True, timeout=10).content.decode())
         config_name = config['data']['name']
         if config_name != name:
             raise DatatypeError(file + ' is not correct')
@@ -640,8 +630,7 @@ class Namespace(NtvUtil):
             parent = parent.parent
         if parent == nspace:
             return rang
-        if parent.name == '':
-            return -1
+        return -1
 
     def is_parent(self, nspace):
         '''return the number of level between self and nspace, -1 if None'''
@@ -654,7 +643,8 @@ class DatatypeError(Exception):
 
 nroot = Namespace(module=True)
 for root_typ in nroot.content['type']:
-    typ = Datatype(root_typ, module=True,
-                       validate=Validator.__dict__[root_typ + '_valid'])
+    # typ = Datatype(root_typ, module=True,
+    Datatype(root_typ, module=True,
+             validate=Validator.__dict__[root_typ + '_valid'])
 # mapping(Datatype.types())
 typ_json = Datatype('json')

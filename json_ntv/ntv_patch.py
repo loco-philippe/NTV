@@ -109,7 +109,6 @@ class NtvOp:
         if self.comment:
             txt += self.comment
         return txt
-        # return 'op : ' + (self.ope + ',').ljust(8, ' ') + ' path : ' + str(self.path)
 
     def __str__(self):
         '''return json format'''

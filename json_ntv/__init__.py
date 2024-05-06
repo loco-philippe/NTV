@@ -62,7 +62,6 @@ from json_ntv.ntv_comment import NtvComment
 from json_ntv.ntv import Ntv, NtvSingle, NtvList
 from json_ntv.ntv_validate import Validator
 from json_ntv.ntv_util import NtvTree, NtvJsonEncoder, NtvConnector, NtvError
-#from json_ntv.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json, to_json, as_def_type
 from json_ntv.ntv_connector import from_csv, to_csv
 from json_ntv.ntv_connector import MermaidConnec, CborConnec, ShapelyConnec
 from json_ntv.ntv_connector import NfieldConnec, SfieldConnec

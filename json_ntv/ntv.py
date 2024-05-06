@@ -145,11 +145,8 @@ class Ntv(ABC, NtvUtil):
         is the ntv_type of the first Ntv in the ntv_value
         - **fast** : boolean (default False) - if True, Ntv entity is created without conversion
         - **decode_str**: boolean (default False) - if True, string are loaded in json data'''
-        #print('obj : ', Namespace.namespaces(), '\n')
-
         if isinstance(data, tuple):
             return Ntv.from_att(*data, decode_str=decode_str, fast=fast)
-        # if isinstance(data, str) and data.lstrip() and data.lstrip()[0] in '{[':
         if isinstance(data, str):
             try:
                 data = json.loads(data)
@@ -208,7 +205,6 @@ class Ntv(ABC, NtvUtil):
             ntv_type = agreg_type(str_typ, def_type, False)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
         if sep is None and not isinstance(ntv_value, dict):
-            #is_single_json = isinstance(value, (int, str, float, bool))
             is_single_json = isinstance(ntv_value, (int, str, float, bool))
             ntv_type = agreg_type(str_typ, def_type, is_single_json)
             return NtvSingle(ntv_value, ntv_name, ntv_type, fast=fast)
@@ -226,7 +222,6 @@ class Ntv(ABC, NtvUtil):
 
     def __repr__(self):
         '''return classname and code'''
-        # return json.dumps(self.to_repr(False, False, False, 10), cls=NtvJsonEncoder)
         return self.reduce(obj=False, level=3, maxi=6).to_obj(encoded=True)
 
     def __contains__(self, item):
@@ -238,7 +233,6 @@ class Ntv(ABC, NtvUtil):
     def __iter__(self):
         ''' iterator for Ntv entities'''
         if isinstance(self, NtvSingle):
-            # return iter([self.val])
             return iter([self])
         return iter(self.val)
 
@@ -256,7 +250,7 @@ class Ntv(ABC, NtvUtil):
             return self
         if isinstance(selec, (list, tuple)) and len(selec) == 1:
             selec = selec[0]
-        if (selec == 0 or selec == self.ntv_name) and isinstance(self, NtvSingle):
+        if selec in (0, self.ntv_name) and isinstance(self, NtvSingle):
             return self.ntv_value
         if isinstance(self, NtvSingle):
             raise NtvError('item not present')
@@ -399,7 +393,7 @@ class Ntv(ABC, NtvUtil):
         if isinstance(self, NtvSingle) and full:
             return exp | {NAME: self.name, TYPE: self.type_str, VALUE: self.val}
         exp |= {} if not self.name else {NAME: self.name}
-        if not self.type_str in ['json', '']:
+        if self.type_str not in ['json', '']:
             exp[TYPE] = self.type_str
         if isinstance(self, NtvList):
             exp[VALUE] = [ntv.expand(full) for ntv in self.val]
@@ -428,9 +422,10 @@ class Ntv(ABC, NtvUtil):
         json_name = self.ntv_name if self.ntv_name else ''
         json_type = relative_type(
             def_type, self.type_str) if self.ntv_type else ''
-        implicit = isinstance(self, NtvSingle) and (json_type == 'json'
-                                                    and (not def_type or def_type == 'json' or def_type[-1] == '.')
-                                                    or not NtvConnector.is_json_class(self.val))
+        implicit = isinstance(self, NtvSingle) and (
+            json_type == 'json' and (
+                not def_type or def_type == 'json' or def_type[-1] == '.')
+            or not NtvConnector.is_json_class(self.val))
         if implicit and not explicit:
             json_type = ''
         json_sep = self._obj_sep(json_name, json_type, def_type)
@@ -636,7 +631,7 @@ class Ntv(ABC, NtvUtil):
             if not self in parent:
                 self.parent = None
         else:
-            self = ntv
+            raise NtvError('replace is not available for root node')
 
     def set_name(self, name='', nodes='simple'):
         '''set new names to the entity
@@ -843,7 +838,7 @@ class Ntv(ABC, NtvUtil):
         entities. If maxi < 1 all the values are included.
         '''
         option = {'encoded': False, 'format': 'json', 'fast': False, 'maxi': -1,
-                  'simpleval': False, 'name': True, 'json_array': False, 
+                  'simpleval': False, 'name': True, 'json_array': False,
                   'type': False} | kwargs
         value = self.obj_value(def_type=def_type, **option)
         obj_name = self.json_name(def_type)
@@ -851,7 +846,7 @@ class Ntv(ABC, NtvUtil):
             obj_name[0] = ''
         if option['simpleval']:
             name = ''
-        elif (option['format'] in ('cbor', 'obj') and 
+        elif (option['format'] in ('cbor', 'obj') and
               not NtvConnector.is_json_class(value) and not option['type']):
             name = obj_name[0]
         else:
@@ -938,7 +933,7 @@ class Ntv(ABC, NtvUtil):
         return (not errors, errors)
 
     @abstractmethod
-    def obj_value(self):
+    def obj_value(self, def_type=None, **kwargs):
         '''return the ntv_value with different formats defined by kwargs (abstract method)'''
 
     @property
@@ -947,7 +942,7 @@ class Ntv(ABC, NtvUtil):
         ''' return the json_array dynamic attribute (abstract method)'''
 
     @abstractmethod
-    def _obj_sep(self, json_type, def_type):
+    def _obj_sep(self, json_name, json_type, def_type=None):
         ''' return separator to include in json_name (abstract method)'''
 
     @staticmethod
@@ -1096,17 +1091,7 @@ class NtvSingle(Ntv):
                 ntv_type_str = typ_str
         elif not is_json and ntv_type_str != typ_str:
             raise NtvError('ntv_value is not compatible with ntv_type')
-        ntv_name = name if not ntv_name else ntv_name                
-        '''
-        if not ntv_type_str:
-            if is_json:
-                ntv_type_str = 'json'
-            else:
-                ntv_type_str = typ_str
-            if not ntv_name:
-                ntv_name = name
-        elif not is_json and ntv_type_str != typ_str:
-            raise NtvError('ntv_value is not compatible with ntv_type')'''
+        ntv_name = name if not ntv_name else ntv_name
         return (ntv_value, ntv_name, ntv_type_str)
 
 
@@ -1200,7 +1185,7 @@ class NtvList(Ntv):
         ''' add ntv at the end of the list of Ntv entities included'''
         old_parent = ntv.parent
         if old_parent:
-            del(old_parent[old_parent.ntv_value.index(ntv)])
+            del old_parent[old_parent.ntv_value.index(ntv)]
         self.ntv_value.append(ntv)
         ntv.parent = self
 
@@ -1208,7 +1193,7 @@ class NtvList(Ntv):
         ''' add ntv at the index idx of the list of Ntv entities included'''
         old_parent = ntv.parent
         if old_parent:
-            del(old_parent[old_parent.ntv_value.index(ntv)])
+            del old_parent[old_parent.ntv_value.index(ntv)]
         self.ntv_value.insert(idx, ntv)
         ntv.parent = self
 

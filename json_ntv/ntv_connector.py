@@ -44,7 +44,7 @@ def from_csv(file_name, single_tab=True, dialect='excel', **fmtparams):
     - **single_tab** : boolean (default True) - if True return a 'tab' NtvSingle,
     else return a NtvSet.
     - **dialect, fmtparams** : parameters of csv.DictReader object'''
-    with open(file_name, newline='') as csvfile:
+    with open(file_name, newline='', encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile, dialect=dialect, **fmtparams)
         names = reader.fieldnames
         list_ntv_value = [[] for nam in names]
@@ -74,7 +74,7 @@ def to_csv(file_name, ntv, *args, restval='', extrasaction='raise', dialect='exc
         ntv_set = ntv
     list_ntv = [Ntv.obj(field) for field in ntv_set]
     fieldnames = [ntv_field.json_name(string=True) for ntv_field in list_ntv]
-    with open(file_name, 'w', newline='') as csvfile:
+    with open(file_name, 'w', newline='', encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval=restval,
                                 extrasaction=extrasaction, dialect=dialect, *args, **kwds)
         writer.writeheader()
@@ -100,7 +100,7 @@ class ShapelyConnec(NtvConnector):
         linestring, multilinestring', polygon, multipolygon)
         - **ntv_value** : array - coordinates'''
         from shapely import geometry
-        type_geo = ShapelyConnec.type_geo(ntv_value) if not 'type_geo' in kwargs \
+        type_geo = ShapelyConnec.type_geo(ntv_value) if 'type_geo' not in kwargs \
             or kwargs['type_geo'] == 'geometry' else kwargs['type_geo']
         return geometry.shape({"type": type_geo,
                                "coordinates": ntv_value})
@@ -136,7 +136,9 @@ class ShapelyConnec(NtvConnector):
     @staticmethod
     def to_geometry(value):
         '''convert geojson coordinates into shapely geometry'''
-        return ShapelyConnec.to_obj_ntv(value, type_geo=NtvConnector.DIC_GEO[ShapelyConnec.type_geo(value)])
+        return ShapelyConnec.to_obj_ntv(value,
+                                        type_geo=NtvConnector.DIC_GEO[
+                                            ShapelyConnec.type_geo(value)])
 
     @staticmethod
     def type_geo(value):
@@ -371,11 +373,11 @@ class MermaidConnec(NtvConnector):
                 ['roundedge', name[:-1]]]
 
     @staticmethod
-    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node, ind):
+    def _mermaid_link(ntv, def_typ_str, node_link, row, dic_node, indic):
         '''add nodes and links from ntv in node_link '''
         num = str(len(node_link['nodes'])) if row else ''
         node_link['nodes'].append(MermaidConnec._mermaid_node(
-            ntv, def_typ_str, num, dic_node, ind))
+            ntv, def_typ_str, num, dic_node, indic))
         if isinstance(ntv, NtvList):
             for ind, ntv_val in enumerate(ntv):
                 MermaidConnec._mermaid_link(ntv_val, ntv.type_str,

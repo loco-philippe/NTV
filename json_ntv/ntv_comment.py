@@ -74,7 +74,6 @@ class NtvComment:
 
         - **comment**: NtvPatch (default None) - new comment to apply
         '''
-        #comment = comment if isinstance(comment, (NtvPatch, NtvOp)) else NtvPatch(comment)
         self._comments.append(NtvPatch(comment))
         return len(self._comments)-1
 

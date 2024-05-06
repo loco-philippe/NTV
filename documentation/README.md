@@ -13,6 +13,7 @@ The documentation presents :
 
 - API
   - [dev](https://loco-philippe.github.io/NTV/json_ntv.html)
+  - [v1.4.0](https://loco-philippe.github.io/NTV/v1.4.0/json_ntv.html)
   - [v1.3.0](https://loco-philippe.github.io/NTV/v1.3.0/json_ntv.html)
   - [v1.2.0](https://loco-philippe.github.io/NTV/v1.2.0/json_ntv.html)
   - [v1.1.0](https://loco-philippe.github.io/NTV/v1.1.0/json_ntv.html)
@@ -25,7 +26,7 @@ The documentation presents :
 ## Roadmap
 
 - **NTV schema** : use data schema compatible with Json-schema
-- **tabular data** : specific Internet-Draft for this format
+- **multidimensional data** : specific Internet-Draft for this format
 - **indicators** : extract structural data
 - **types** : tools to control (NTV_values, NTV_type)
 - **CBOR interface** : using CBOR tags
