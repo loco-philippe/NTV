@@ -28,4 +28,4 @@ json_ntv itself is a pure Python package. It can be installed with pip
 
 dependency:
 
-- only packages associated to connectors (e.g. `Mermaid` if we use `MermaidConnec`)
+- only packages associated to used connectors (e.g. `Mermaid` if we use `MermaidConnec`)

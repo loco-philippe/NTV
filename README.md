@@ -69,13 +69,21 @@ The type incorporates a notion of `namespace` that can be nested.
 > - *`ns2.` is a namespace defined in the `ns1.` namespace.,*
 > - *`type_a` is defined in the `ns2.` namespace.*
 
+The type can be extended with additional data.
+
+> *For example, the type: `float[kg]` means that:*
+>
+> - *`float` is a main type of the data,*
+> - *`kg` is an additional type (e.g. an unit),*
+> - *`float[kg]` may represent a Quantity.*
+
 This structuring of type makes it possible to reference any type of data that has a JSON representation and to consolidate all the shared data structures within the same tree of types.
 
 ## NTV uses
 
 Several variations and use cases of the NTV format are defined:
 
-- Tabular data exchange format (e.g. open-data)
+- Tabular and multidimensional data exchange format (e.g. open-data)
 - Compact, reversible and semantic pandas-JSON interface
 - Comment and change management of JSON data
 - visualization of JSON or NTV tree
@@ -100,7 +108,7 @@ flowchart LR
     nat--->|to NTV|ntv
 ```
 
-The conversion between native entity and JSON-text is reversible (round trip).
+The conversion between native entity and JSON-text is reversible (lossless round trip).
 
 ```python
 In [6]: loc_and_date = {'newyear': date(2023, 1, 2), 'Paris': Point(2.3, 48.9)}
