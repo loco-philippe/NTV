@@ -640,6 +640,7 @@ class TestNtvTabular(unittest.TestCase):
                          Ntv.obj({":datetime": "2022-01-21"}))
         self.assertEqual(tab[4][2], tab['res']['res3'], Ntv.obj(30))
 
+
 class TestNtvFunction(unittest.TestCase):
     '''test NTV functions'''
 

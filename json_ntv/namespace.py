@@ -346,7 +346,6 @@ class TypeBase(NtvUtil):
         return self.nspace.is_child(Namespace.add(long_name))
 
 
-
 class Datatype(TypeBase):
     ''' The Datatype of NTV entities is composed with a TypeBase and an optional
     extension.
