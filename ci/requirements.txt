@@ -1,2 +1,4 @@
 flake8
 pdoc
+requests
+jsonschema

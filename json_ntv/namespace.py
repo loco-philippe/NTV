@@ -70,12 +70,12 @@ def from_file(file, name, long_parent=None):
     long_parent = '' if not long_parent else long_parent
     if name[0] != '$':
         raise DatatypeError(name + ' is not a custom Datatype')
-    if not long_parent in Namespace.namespaces():
+    if long_parent not in Namespace.namespaces():
         raise DatatypeError(long_parent + ' is not a valid Datatype')
     schema_nsp = Namespace(name, long_parent)
     config = configparser.ConfigParser()
     config.read(file)
-    if not name in config.sections():
+    if name not in config.sections():
         raise DatatypeError(name + ' is not present in ' + str(file))
     _add_namespace(config, schema_nsp)
 
@@ -107,7 +107,7 @@ def relative_type(str_def, str_typ):
         return ''
     if str_def == str_typ:
         return ''
-    if not str_def or not str_def in str_typ:
+    if not str_def or str_def not in str_typ:
         return str_typ
     if not str_typ and str_def[-1] != ".":
         return str_def
@@ -115,7 +115,7 @@ def relative_type(str_def, str_typ):
     str_typ_split = str_typ.split('.')
     ind = 0
     for ind, name in enumerate(str_typ_split):
-        if not name in str_def_split:
+        if name not in str_def_split:
             break
     return '.'.join(str_typ_split[ind:])
 

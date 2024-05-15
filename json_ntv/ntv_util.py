@@ -120,8 +120,8 @@ class NtvUtil:
         - **unique_root**: Boolean (default False) - True if the json root length is 1 '''
         single = '/([0-9]+)(/[a-z])'
         if unique_root and not '0' <= jsonpointer[1] <= '9':
-            return re.sub(single, '\g<2>', jsonpointer)[1:]
-        return re.sub(single, '\g<2>', jsonpointer)
+            return re.sub(single, r'\g<2>', jsonpointer)[1:]
+        return re.sub(single, r'\g<2>', jsonpointer)
 
 
 class NtvConnector(ABC):
@@ -372,7 +372,7 @@ class NtvConnector(ABC):
                     raise NtvError('key in dict in not string')
                 return min(is_js(obj_in) for obj_in in obj.values())
             case _:
-                if not obj.__class__.__name__ in NtvConnector.castable:
+                if obj.__class__.__name__ not in NtvConnector.castable:
                     raise NtvError(obj.__class__.__name__ +
                                    ' is not valid for NTV')
                 return False

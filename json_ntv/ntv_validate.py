@@ -175,7 +175,7 @@ class Validator:
         if not isinstance(val, str):
             return False
         for char in val:
-            if not char in ['0', '1']:
+            if char not in ['0', '1']:
                 return False
         return True
 
@@ -186,7 +186,7 @@ class Validator:
             return False
         for car in val:
             if (not 'a' <= car <= 'z' and not 'A' <= car <= 'Z' and
-                    not '0' <= car <= '9' and not car in ['-', '_', '=']):
+                    not '0' <= car <= '9' and car not in ['-', '_', '=']):
                 return False
         return True
 

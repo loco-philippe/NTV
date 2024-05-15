@@ -96,7 +96,7 @@ class NtvOp:
         self.from_path = NtvPointer(
             ope.get('from')) if dic else NtvPointer(from_path)
         self.path = NtvPointer(ope.get('path')) if dic else NtvPointer(path)
-        if self.ope and (not self.path or not self.ope in OPERATIONS):
+        if self.ope and (not self.path or self.ope not in OPERATIONS):
             raise NtvOpError('path or op is not correct')
 
     def __repr__(self):

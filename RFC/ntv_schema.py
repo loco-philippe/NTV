@@ -9,15 +9,15 @@ The main function `ntv_validate_opt2` validate a NTVdata against a schema (NTV d
 For examples, see the Jupyter Notebook in the same directory : `./example_schema.ipynb`
 """
 
+from jsonschema import validate, SchemaError
 
 from json_ntv.ntv import Ntv, NtvList, NtvSingle
-from jsonschema import validate, SchemaError
 
 # %% interface json schema
 
 
 def validat(json_data, json_sch, part, ptr, mode):
-    '''return the validation (True/False) of a json data conformity 
+    '''return the validation (True/False) of a json data conformity
     to a 'json_sch' JSONschema.
 
     *Parameters*
@@ -89,7 +89,7 @@ def ntv_validate(ntv_data, schema, mode=0):
 
 
 def _val_pointer(ntv_data, sch, mode):
-    '''return the pointer validation (True/False) of a NTV entity conformity 
+    '''return the pointer validation (True/False) of a NTV entity conformity
     to a 'sch' schema'''
     valid = True
     sch_ptr = list(sch.keys())[0][1:]
@@ -117,7 +117,7 @@ def _val_prop(ntv_data, sch, mode):
         p_name = ntv.ntv_name if ntv.ntv_name in sch else (
             ntv.json_name_str if ntv.json_name_str in sch else None)
         p_name = p_name if p_name else (str(idx) if str(idx) in sch else None)
-        if not p_name is None:
+        if p_name is not None:
             valid &= ntv_validate(ntv, sch[p_name], mode)
     return valid
 
@@ -171,7 +171,7 @@ def _simple_to_jsch(ntvsch):
     jsonsch['typeNtv'] = ntvsch.setdefault('typeNtv', {})
     jsonsch['nameNtv'] = ntvsch.setdefault('nameNtv', {})
     jsonsch['valueNtv'] = ntvsch.setdefault('valueNtv', {})
-    jsonsch['valueNtv'] |= {key: val for key, val in ntvsch.items() if not key in
+    jsonsch['valueNtv'] |= {key: val for key, val in ntvsch.items() if key not in
                             ['typeNtv', 'nameNtv', 'valueNtv', 'propertyNames']}
     jsonsch['nameNtv'] |= ntvsch.setdefault('propertyNames', {})
     return _json(jsonsch)
@@ -188,7 +188,7 @@ def _simp(dic, keywords=None):
     keyw = list(keywords) if keywords else []
     keyw += ['properties', 'prefixItems', 'items']
     return {key: val for key, val in dic.items()
-            if not key in keyw} if isinstance(dic, dict) else dic
+            if key not in keyw} if isinstance(dic, dict) else dic
 
 # %% validate schema ntv
 
@@ -309,7 +309,7 @@ def _simple_to_jsch2(ntvsch):
     jsonsch['nameNtv'] = jssch.setdefault('nameNtv', {})
     jsonsch['valueNtv'] = jssch.setdefault('valueNtv', {})
     jsonsch['valueNtv'] |= {key: val for key, val in jssch.items()
-                            if not key in ['typeNtv', 'nameNtv', 'valueNtv']}
+                            if key not in ['typeNtv', 'nameNtv', 'valueNtv']}
     return jsonsch
 
 

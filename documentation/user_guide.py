@@ -5,6 +5,5 @@
 .. include:: ../README.md
 .. include:: ../json_ntv/README.md
 .. include:: ../example/README.md
-.. include:: ./README.md    
-
+.. include:: ./README.md
 """

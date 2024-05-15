@@ -457,7 +457,7 @@ class Ntv(ABC, NtvUtil):
                     res = None if v1.val == v2.val else v1.val < v2.val
                 else:
                     res = False
-            if not res is None:
+            if res is not None:
                 break
         return res
 
@@ -617,7 +617,7 @@ class Ntv(ABC, NtvUtil):
             while self in parent:
                 idx = parent.ntv_value.index(self)
                 del parent.ntv_value[idx]
-        if not self in parent:
+        if self not in parent:
             self.parent = None
         return
 
@@ -628,7 +628,7 @@ class Ntv(ABC, NtvUtil):
             idx = parent.ntv_value.index(self)
             parent.insert(idx, ntv)
             del parent[idx+1]
-            if not self in parent:
+            if self not in parent:
                 self.parent = None
         else:
             raise NtvError('replace is not available for root node')
