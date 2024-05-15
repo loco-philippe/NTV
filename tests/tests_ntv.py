@@ -16,7 +16,6 @@ import json
 from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
 from json_ntv.ntv_util import NtvUtil
 from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch, Datatype
-import ntv_pandas as npd  # used to update NtvConnector.dic_connec()
 from shapely import geometry
 from jsonpointer import resolve_pointer
 

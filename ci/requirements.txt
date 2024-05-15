@@ -2,3 +2,5 @@ flake8
 pdoc
 requests
 jsonschema
+jsonpointer
+shapely
