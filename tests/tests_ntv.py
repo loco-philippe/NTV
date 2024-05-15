@@ -9,11 +9,10 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-import csv
 from itertools import product
 import json
 
-from json_ntv import NtvSingle, NtvList, Ntv, NtvError, from_csv, to_csv, NtvComment
+from json_ntv import NtvSingle, NtvList, Ntv, NtvError, NtvComment
 from json_ntv.ntv_util import NtvUtil
 from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch, Datatype
 from shapely import geometry
@@ -640,42 +639,6 @@ class TestNtvTabular(unittest.TestCase):
         self.assertEqual(tab[1][2], tab['dates::datetime'][2],
                          Ntv.obj({":datetime": "2022-01-21"}))
         self.assertEqual(tab[4][2], tab['res']['res3'], Ntv.obj(30))
-
-    def test_tab_field_pandas_ilist_Iindex(self):
-        field = Ntv.obj({':field':
-                         {'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21']}})
-        tab = Ntv.obj({':tab':
-                       {'index':           [1, 2, 3],
-                        'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'],
-                        'value':           [10, 20, 30],
-                        'value32::int32':  [10, 20, 30],
-                        'res':             {'res1': 10, 'res2': 20, 'res3': 30},
-                        'coord::point':    [[1, 2], [3, 4], [5, 6]],
-                        'names::string':   ['john', 'eric', 'judith']}})
-        sr = field.to_obj(format='obj', dicobj={
-                          'field': 'SeriesConnec'})
-        self.assertTrue(sr.equals(Ntv.obj(sr).to_obj(
-            format='obj', dicobj={'field': 'SeriesConnec'})))
-        df = tab.to_obj(format='obj', dicobj={'tab': 'DataFrameConnec'})
-        # il  = tab.to_obj  (format='obj')
-        # idx = field.to_obj(format='obj')
-        # self.assertEqual(idx, Ntv.obj(idx).to_obj(format='obj'))
-        # self.assertEqual(il, Ntv.obj(il).to_obj(format='obj'))
-        self.assertTrue(df.equals(Ntv.obj(df).to_obj(
-            format='obj', dicobj={'tab': 'DataFrameConnec'})))
-
-    def test_csv(self):
-        tab = Ntv.obj({':tab':
-                       {'index':           [1, 2, 3],
-                        'dates::datetime': ['1964-01-01', '1985-02-05', '2022-01-21'],
-                        'value':           [10, 20, 30],
-                        'value32::int32':  [10, 20, 30],
-                        'coord::point':    [[1, 2], [3, 4], [5, 6]],
-                        'names::string':   ['john', 'eric', 'judith']}})
-        self.assertEqual(tab, from_csv(to_csv('test.csv', tab)))
-        self.assertEqual(tab, from_csv(
-            to_csv('test.csv', tab, quoting=csv.QUOTE_ALL)))
-
 
 class TestNtvFunction(unittest.TestCase):
     '''test NTV functions'''
