@@ -44,3 +44,7 @@ jobs:
     - name: Test
       run: |
         python -m unittest discover -s ./tests  -p 'tests_*.py'
+
+    - name: Doc
+      run: |
+        pdoc ./json_ntv -o ../pdoc --logo "https://loco-philippe.github.io/ES/logo_loco.png" --footer-text json_ntv dev
