@@ -12,6 +12,9 @@ on:
       - 'example/**'
       - 'json_ntv/**'
 
+permissions:
+  contents: read
+  
 jobs:
   build:
 
@@ -47,4 +50,4 @@ jobs:
 
     - name: Doc
       run: |
-        pdoc "NTV.json_ntv" -o ..\pdoc --logo "https://loco-philippe.github.io/ES/logo_loco.png" --footer-text "json_ntv dev"
+        pdoc ./json_ntv -o ..\pdoc --logo "https://loco-philippe.github.io/ES/logo_loco.png" --footer-text "json_ntv dev"
