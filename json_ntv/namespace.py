@@ -26,7 +26,7 @@ SCH_ORG = 'https://schema.org/'
 
 def agreg_type(str_typ, def_type, single):
     '''
-    Aggregate str_typ and def_type.
+    Aggregate  str_typ and def_type.
 
     Parameters
     ----------
