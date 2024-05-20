@@ -4,6 +4,9 @@ repos:
     hooks:
       - id: check-toml
       - id: check-yaml
+      - id: check-json
+      - id: check-docstring-first
+      - id: check-ast
       - id: end-of-file-fixer
       - id: trailing-whitespace
 

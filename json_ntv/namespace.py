@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Namespace and Datatype entities are used to define NTVtype.
 
