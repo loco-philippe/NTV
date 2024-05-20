@@ -1,0 +1,13 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0  # the release, git tag, or commit you want to use
+    hooks:
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  #- repo: https://github.com/numpy/numpydoc
+  #  rev: v1.6.0
+  #  hooks:
+  #    - id: numpydoc-validation

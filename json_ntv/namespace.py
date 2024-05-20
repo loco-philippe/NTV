@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-@author: Philippe@loco-labs.io
+Namespace and Datatype entities are used to define NTVtype.
 
 The `namespace` module is part of the `NTV.json_ntv` package ([specification document](
 https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
@@ -8,12 +7,9 @@ https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)).
 It contains the `Namespace`, `Datatype`, `DatatypeError` classes and
 the functions `agreg_type`, `from_file`, `mapping`, `relative_type` and `str_type`.
 
-Namespace and Datatype entities are used to define NTVtype.
-
 For more information, see the
 [user guide](https://loco-philippe.github.io/NTV/documentation/user_guide.html)
-or the [github repository](https://github.com/loco-philippe/NTV).
-
+or the [github repository](https://github.com/loco-philippe/NTV)
 """
 import configparser
 from pathlib import Path
@@ -28,13 +24,23 @@ SCH_ORG = 'https://schema.org/'
 
 
 def agreg_type(str_typ, def_type, single):
-    '''aggregate str_typ and def_type to return an Datatype or a Namespace if not single
+    '''
+    Aggregate str_typ and def_type.
 
-    *Parameters*
+    Parameters
+    ----------
+    str_typ : Datatype or String (long_name)
+        Datatype to aggregate.
+    def_type : Datatype or String (long_name)
+        Default Datatype or Namespace.
+    single : Boolean
+        Ntv entity concerned (True if NtvSingle).
 
-        - **str_typ** : Datatype or String (long_name) - Datatype to aggregate
-        - **def_typ** : Datatype or String (long_name) - default Datatype or Namespace
-        - **single** : Boolean - Ntv entity concerned (True if NtvSingle)'''
+    Returns
+    -------
+    aggregation
+        Datatype or Namespace if not single.
+    '''
     if isinstance(str_typ, Datatype):
         str_typ = str_typ.long_name
     def_type = str_type(def_type, single)
