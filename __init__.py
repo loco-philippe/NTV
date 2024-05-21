@@ -6,4 +6,4 @@ Created on Fri Sep 30 10:09:01 2022
 
 """
 
-name = 'json_ntv'
+name = "json_ntv"

@@ -25,10 +25,11 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3"],
+        "Programming Language :: Python :: 3",
+    ],
     keywords="JSON-NTV, semantic JSON, development, environmental data",
-    packages=find_packages(include=['json_ntv', 'json_ntv.*']),
-    package_data={'json_ntv': ['./config/*.ini']},
+    packages=find_packages(include=["json_ntv", "json_ntv.*"]),
+    package_data={"json_ntv": ["./config/*.ini"]},
     python_requires=">=3.7, <4",
-    install_requires=['shapely', 'cbor2', 'tab_dataset']
+    install_requires=["shapely", "cbor2", "tab_dataset"],
 )
