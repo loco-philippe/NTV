@@ -10,7 +10,7 @@ Version 1.x
 - **NTV Structure**
     - add NTVtype extension (class `TypeBase` / `Datatype`)
     - add attributes in global Namespace (#29, #31)
-    
+
 - **documentation**
     - add NTVtype : `narray`, `ndarray`, `unit`, `xndarray`, `xdataset`
     - new version of NTV-tab Internet Draft (Version 01)
@@ -27,7 +27,7 @@ Version 1.x
 - **Validate**
     - add new module `ntv_validate` (class Validator)
     - add `Ntv.validate` method (type / value validation)
-    
+
 - **documentation**
     - add ntv-pointer documentation (test_pointer.ipynb)
     - add `org.` and `sch` in global Namespace
@@ -35,7 +35,7 @@ Version 1.x
 - **Schema**
     - Internet-draft for NTV Schema (extending JSON Schema)
     - new module `ntv_schema`
-    - documentation (Jupyter Notebooks) 
+    - documentation (Jupyter Notebooks)
 
 
 1.2.0 (2024-01-05)
@@ -83,11 +83,11 @@ Version 1.x
     - Internet-Draft for JSON-NTV format (see IETF)
 
 - **NTV Structure:**
-    - add comment and change management in NTV data (new class `NtvComment`) 
-    - add string syntax for identifying a specific NTV entity (RFC6901 - new class `NtvPointer`), 
-    - add JSON data expressing a sequence of operations to apply (RFC6902 - new classes `NtvPatch` and `NtvOp`), 
+    - add comment and change management in NTV data (new class `NtvComment`)
+    - add string syntax for identifying a specific NTV entity (RFC6901 - new class `NtvPointer`),
+    - add JSON data expressing a sequence of operations to apply (RFC6902 - new classes `NtvPatch` and `NtvOp`),
     - initialization of `NtvType` without distant access
     - extension of `NtvTree`: add `dic_nodes` iterator
-    - add conversion methods: `no_type` (NTV entity -> NV entity), `to_list` (NtvSingle -> NtvList) and `to_single` (NtvList -> NtvSingle) 
+    - add conversion methods: `no_type` (NTV entity -> NV entity), `to_list` (NtvSingle -> NtvList) and `to_single` (NtvList -> NtvSingle)
     - add methods to change NTV structure: `append`, `insert`, `replace`, `copy`, `remove`
     - add NTV data access `childs` method
