@@ -23,11 +23,11 @@
           <city>BOLLENE</city>
           <code>84 500</code>
           <country>FR</country>
-        </postal>        
-        <email>philippe@loco-labs.io</email>  
+        </postal>
+        <email>philippe@loco-labs.io</email>
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
-    </author> 
+    </author>
     <date year="2024" month="02" day="01"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
@@ -36,15 +36,15 @@
     <keyword>semantic</keyword>
     <keyword>data interchange format</keyword>
     <abstract pn="section-abstract">
-      <t>The NTV format is an extension of the JSON format integrating a semantic dimension through the notion of type. 
+      <t>The NTV format is an extension of the JSON format integrating a semantic dimension through the notion of type.
       This format remains compatible with the current JSON format but it is relevant to examine its compatibility and its impacts with data schemas.
-      This document provides some answers to this question and presents some of the possible developments based mainly on the example of JSON Schema 
+      This document provides some answers to this question and presents some of the possible developments based mainly on the example of JSON Schema
       and additionally on the example of OpenAPI.</t>
     </abstract>
     <note>
       <name>Note to Readers</name>
         <t>This document is a working document and not a specification document.
-        The developments and principles presented have been validated by a Python implementation based on the jsonschema module 
+        The developments and principles presented have been validated by a Python implementation based on the jsonschema module
         (<eref target="https://nbviewer.org/github/loco-philippe/NTV/blob/main/RFC/example_schema.ipynb">
         https:https://nbviewer.org/github/loco-philippe/NTV/blob/main/RFC/example_schema.ipynb</eref>)</t>
     </note>
@@ -64,14 +64,14 @@
                 <li>Extend the functionalities and uses.</li>
                 <li>Simplify the schemas.</li>
                 <li>Deport certain control tasks (eg type and format) to the NTV structure.</li></ul></li></ul>
-        <t><xref target="NTV SCHEMA"/> contains the python implementation of the examples presented in the document (examples 1 to 6) as well as 
+        <t><xref target="NTV SCHEMA"/> contains the python implementation of the examples presented in the document (examples 1 to 6) as well as
         more complete examples (examples 7, 8 and 9)</t>
     </section>
     <section><name>Conventions Used in This Document</name>
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
             RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <xref target="RFC2119"/>
             <xref target="RFC8174"/> when, and only when, they appear in all capitals, as shown here.</t>
-        <t>This document also uses the following terms:</t><dl newline="true">    
+        <t>This document also uses the following terms:</t><dl newline="true">
             <dt><strong> JsonText, JsonValue, JsonObject, JsonMember, JsonElement, JsonArray, JsonNumber,
             JsonString, JsonFalse, JsonNull, JsonTrue:</strong></dt>
             <dd>These terms are defined in <xref target="JSON NTV"/>.</dd>
@@ -83,7 +83,7 @@
     </section>
     <section><name>Presentation</name>
         <section><name>NTV</name>
-            <t>The NTV structure <xref target="JSON NTV"/> consists of representing data with three attributes: a name (NTVname: json-string), a value (NTVvalue: json-value) and a 
+            <t>The NTV structure <xref target="JSON NTV"/> consists of representing data with three attributes: a name (NTVname: json-string), a value (NTVvalue: json-value) and a
             type (NTVtype: json-string).</t>
             <t>The json representation is obtained by grouping the NTVname and NTVtype (JsonNTVname) and associating it with NTVvalue in a key/value form. e.g.</t>
             <sourcecode type="json">{"firstname:string": "peter"}</sourcecode>
@@ -91,8 +91,8 @@
                 <li>NTVsingle where the NTVvalue is a JsonValue</li>
                 <li>NTVlist where the NTVvalue is an ordered list of NTV entities</li></ul>
             <t>The NTVtype can be simple (eg 'int') or structured from nested namespaces (eg 'org.Person.givenName' for a type defined by Schema.org).</t>
-            <t>An NTV structure is therefore a tree composed of inner-nodes (NTVlist) and leaf-nodes (NTVsingle). 
-            Each node of this structure can be uniquely identified by a name (JsonNTVname or NTVname if it is unique) or by its index in the parent node. 
+            <t>An NTV structure is therefore a tree composed of inner-nodes (NTVlist) and leaf-nodes (NTVsingle).
+            Each node of this structure can be uniquely identified by a name (JsonNTVname or NTVname if it is unique) or by its index in the parent node.
             This identification can be carried out by an ntv-pointer identical to the json-pointer in the majority of cases.</t>
             <t>For example (<xref target="NTV SCHEMA"/> <em>- Example 1</em>),</t>
             <sourcecode type="json">{"family": "doe", "childrens age": [15, 24, 12] }</sourcecode>
@@ -115,7 +115,7 @@
                 <li>A tool for validating JSON data for a defined schema.</li></ul>
             <t>A schema is a JsonObject (or a boolean) where JsonObject properties that are applied to the JSON data to control (instance) are called keywords.</t>
             <t>A schema can be represented by a simple association between an instance and a set of constraints to respect:</t><ul>
-                <li>The instance is identified as a json-pointer (a name associated with the keyword "properties" when it concerns data included in a JsonObject 
+                <li>The instance is identified as a json-pointer (a name associated with the keyword "properties" when it concerns data included in a JsonObject
                 or an index associated with the keyword "prefixItems" when it is a JsonArray).</li>
                 <li>The set of constraints is expressed as keywords associated with parameters. This set may include subschemas.</li></ul>
         </section>
@@ -128,7 +128,7 @@
     </section>
     <section><name>Applicability of schemas to NTV</name>
         <section><name>Equivalence between JSON and NTV structures</name>
-            <t>Any JSON structure being an NTV structure, a first response is to consider that if the JSON representation of an NTV structure is valid 
+            <t>Any JSON structure being an NTV structure, a first response is to consider that if the JSON representation of an NTV structure is valid
             for a schema then the NTV structure is valid for this schema.</t>
             <t>However, this argument is not valid because there is no direct correspondence between an NTV structure and a JSON structure.</t>
             <t>For example, the following instances have a different JSON structure and will therefore not be able to respond to the same JSON Schema:</t>
@@ -154,9 +154,9 @@
     ntv-pointer:  "/2" or "/pointed"</sourcecode>
           </section>
           <section><name>Scope of keywords</name>
-                <t>For a JSON instance, a validation keyword applies to the value (JsonMember or JsonElement) or sometimes to the key of JsonMember 
+                <t>For a JSON instance, a validation keyword applies to the value (JsonMember or JsonElement) or sometimes to the key of JsonMember
                 (e.g. "propertyName").</t>
-                <t>This principle can be transposed to an NTV entity and the constraint expressed in the schema can apply to the NTVvalue or to the NTVname. 
+                <t>This principle can be transposed to an NTV entity and the constraint expressed in the schema can apply to the NTVvalue or to the NTVname.
                 The keywords which will not apply to the NTVvalue concern entities of type NTVlist and apply to the elements in <xref target="table2"/>.</t>
                 <table anchor="table2" align="left" pn="table-2"><name>specific keywords</name><thead>
                     <tr><th>keyword</th><th>element</th></tr></thead><tbody>
@@ -179,7 +179,7 @@
                 <t><xref target="keywords"/> presents the transposition of keywords.</t>
             </section>
             <section><name>Implementation</name>
-                <t>Applying these principles to an NTV structure makes it possible to apply a JSON Schema in an equivalent manner to JSON instance 
+                <t>Applying these principles to an NTV structure makes it possible to apply a JSON Schema in an equivalent manner to JSON instance
                 or to the corresponding NTV instance.</t>
                 <t>The prototyping carried out confirms this point.</t>
                 <t>On the other hand, this implementation does not take into account the validation with the same schema of the following instances. e.g.</t>
@@ -188,9 +188,9 @@
             </section>
         </section>
         <section><name>Adaptation of a JSON Schema to an NTV instance</name>
-            <t>In an NTV structure, an NTVlist entity can be represented by a JsonArray or by a JsonObject. For a schema to be fully applicable to an NTV structure, 
+            <t>In an NTV structure, an NTVlist entity can be represented by a JsonArray or by a JsonObject. For a schema to be fully applicable to an NTV structure,
             we must be able to apply the keywords "properties" and "items" equally to any type of NTVlist.</t>
-            <t>With the principles identified in the previous chapter, this usage is valid (an entity is identified by its pointer which can be name or index). 
+            <t>With the principles identified in the previous chapter, this usage is valid (an entity is identified by its pointer which can be name or index).
             Thus, the following NTV instances (<xref target="NTV SCHEMA"/> <em>- Example 2</em>):</t>
             <sourcecode type="json">{"number1": [10, 20]}
 {"number2": {"val1": 10, "val2": 20}}
@@ -207,7 +207,7 @@
         <section><name>Extension to NTVtype and NTVname</name>
             <t>Data typing is partially addressed in a JSON Schema (keyword "type" and "format").</t>
             <t>Data naming is also partially addressed for JsonObjects (keyword "propertyName").</t>
-            <t>For NTV entities, naming and typing are explicit (NTVname and NTVtype) and could be accessible in a schema with two new keywords 
+            <t>For NTV entities, naming and typing are explicit (NTVname and NTVtype) and could be accessible in a schema with two new keywords
             ("typeNTV" and "nameNTV"). These keywords place a constraint on the NTVname or on the NTVtype rather than on the NTVvalue.</t>
             <t>For example, the following instances (<xref target="NTV SCHEMA"/> <em>- Example 3</em>)</t>
             <sourcecode type="json">{"location": "paris", "dating:date": "2023-10-01"}
@@ -221,11 +221,11 @@
         </section>
         <section><name>Use of "type" and "format" keywords</name>
             <t>The "type" and "format" keywords address the same notion as the "typeNTV" keyword but cover two different uses:</t><ul>
-                <li>Either the data to be checked is typed (NTVtype present): In this case, the type control is carried out upstream of the schema 
+                <li>Either the data to be checked is typed (NTVtype present): In this case, the type control is carried out upstream of the schema
                 and the schema only defines the check of the correct declaration of NTVtype (see previous example).</li>
-                <li>Either the data is not typed (NTVtype not present): In this case, the control is carried out by the schema 
+                <li>Either the data is not typed (NTVtype not present): In this case, the control is carried out by the schema
                 (keywords "type" and "format").</li></ul>
-            <t>It should be noted that in the previous example, the "dating" data can have several formats (the "year" format is not defined in JSON Schema and the 
+            <t>It should be noted that in the previous example, the "dating" data can have several formats (the "year" format is not defined in JSON Schema and the
             "format" is not authorized for numeric data) but also several types ("integer" or "string").</t>
         </section>
         <section><name>Separation of keywords and pointers</name>
@@ -237,17 +237,17 @@
     ":typeNTV": {':enum": ['year', 'date', 'datetime']}},
  ":items": {
     ":nameNTV": {":maxLength": 10}}}</sourcecode>
-            <t>Another option is to keep the naming of the keywords but to replace the names of the instance to be controlled by the associated pointer 
+            <t>Another option is to keep the naming of the keywords but to replace the names of the instance to be controlled by the associated pointer
             (including the separator).</t>
             <t>For example, the previous diagram then becomes (<xref target="NTV SCHEMA"/> <em>- Example 5</em>):</t>
             <sourcecode type="json">{"/dating": {
     "typeNTV": {'enum': ['year', 'date', 'datetime'] }},
  items": {
     "nameNTV": {"maxLength": 10}}}</sourcecode>
-            <t>This solution seems preferable because it does not call into question the current solution and makes the distinction between name (instance) and 
+            <t>This solution seems preferable because it does not call into question the current solution and makes the distinction between name (instance) and
             pointer (schema) more explicit. </t>
             <t>It also allows you to use numeric pointers (eg "/0") and to be applicable to both NTV instances and JSON instances.</t>
-        </section>    
+        </section>
         <section><name>Using nested keywords</name>
             <t>In the OpenAPI data schema, keywords identify an object. The objects are defined in a tree structure.</t>
             <t>For example, the OpenAPI Object (root object) defines a "servers" field which is a set of "server" type objects.</t>
@@ -265,7 +265,7 @@
         "description": "The production API server",
         "variables": {
           "username": {
-            "default": "demo", 
+            "default": "demo",
             "description": "assigned by provider"},
           "port": {"enum": ["8443", "443"], "default": "8443"},
           "basePath": {"default": "v2"}}}]}}</sourcecode>
@@ -277,7 +277,7 @@
         ":description": "The production API server",
         "variables.": {
           "username": {
-            ":default": "demo", 
+            ":default": "demo",
             ":description": "assigned by provider"},
           "port": {":enum": ["8443", "443"], "default": "8443"},
           "basePath": {":default": "v2"}}}]}}</sourcecode>
@@ -295,7 +295,7 @@
         "prod:description": "The production API server",
         "variables.": {
           "username":{
-            "user:default": "demo", 
+            "user:default": "demo",
             ":description": "assigned by provider"},
           "port": {":enum": ["8443", "443"], "default": "8443"},
           "basePath": {":default": "v2"}}}}}}</sourcecode>
@@ -310,7 +310,7 @@
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6901.xml"/>
-      </references>    
+      </references>
       <references><name>Informative References</name>
         <reference anchor="NTV SCHEMA" target="https://nbviewer.org/github/loco-philippe/NTV/blob/main/RFC/example_schema.ipynb"><front>
           <title>Implementation NTV Schema</title><author initials="P" surname="Thomy"></author><date year="2024"/></front></reference>
@@ -319,66 +319,66 @@
         <reference anchor="JSON SCHEMA" target="https://json-schema.org/specification"><front>
           <title>JSON Schema specification</title><author><organization>OpenJS Foundation</organization></author><date year="17 December 2015"/></front></reference>
         <reference anchor="OAS" target="https://github.com/OAI/OpenAPI-Specification/"><front>
-          <title>OpenAPI Specification</title><author><organization>OpenAPI Initiative</organization></author><date year="15 February 2021"/></front></reference>                        
+          <title>OpenAPI Specification</title><author><organization>OpenAPI Initiative</organization></author><date year="15 February 2021"/></front></reference>
       </references>
     </references>
     <section anchor="keywords"><name>JSON Schema keyword and NTV data</name>
         <t>This section describes the application of control keywords to NTV instances.</t>
         <t><strong>type:</strong> schema applicable to NTVvalue</t>
-        <sourcecode type="json">{ "type": ["number", "string"] } 
+        <sourcecode type="json">{ "type": ["number", "string"] }
 
 check if the NTVvalue is a number or a string</sourcecode>
         <t><strong>length, format, regex:</strong> schema applicable to NTVvalue</t>
-        <sourcecode type="json">{ "type": "string", "minLength": 2, "maxLength": 3 } 
-        
+        <sourcecode type="json">{ "type": "string", "minLength": 2, "maxLength": 3 }
+
 check the length of the NTVvalue</sourcecode>
         <t><strong>multiples, range:</strong> schema applicable to NTVvalue</t>
-        <sourcecode type="json">{ "type": "number", "multipleOf" : 10 } 
-        
+        <sourcecode type="json">{ "type": "number", "multipleOf" : 10 }
+
 check if the NTVvalue is a multiple of 10</sourcecode>
         <t><strong>properties:</strong> schema applicable to the NTVvalue of the NTV entity defined by his relative ntv-pointer</t>
-        <sourcecode type="json">{ "properties": { "street_name": value_schema } } 
-        
-check the value_schema for the NTVvalue of the NTV entity 
+        <sourcecode type="json">{ "properties": { "street_name": value_schema } }
+
+check the value_schema for the NTVvalue of the NTV entity
 defined by "street_name" (relative ntv-pointer)</sourcecode>
         <t><strong>patternProperties:</strong> schema applicable to the NTVvalue of the NTV entity whose relative ntv-pointer matches a pattern.</t>
-        <sourcecode type="json">{ "patternProperties": { "^S_": pat_schema } } 
-        
-check the pat_schema for the NTVvalue of the NTV entity 
+        <sourcecode type="json">{ "patternProperties": { "^S_": pat_schema } }
+
+check the pat_schema for the NTVvalue of the NTV entity
 whose relative ntv-pointer matches "^S_"</sourcecode>
         <t><strong>additionalProperties:</strong> schema applicable to the NTV entity not listed in the properties or patternProperties.</t>
-        <sourcecode type="json">{ "additionalProperties": add_schema } 
+        <sourcecode type="json">{ "additionalProperties": add_schema }
 
-check the add_schema for the NTVvalue of the NTV entity 
+check the add_schema for the NTVvalue of the NTV entity
 not listed in the properties or patternProperties.</sourcecode>
         <t><strong>propertyNames:</strong> schema applicable to the NTVname of the NTV entities </t>
-        <sourcecode type="json">{ "propertyNames": names_schema } 
-        
+        <sourcecode type="json">{ "propertyNames": names_schema }
+
 check the names_schema for the NTVnames of the NTV entity</sourcecode>
         <t><strong>minProperties, maxProperties:</strong> check the number of NTV entities included in the NTV entity</t>
         <t><strong>required:</strong> check if the relative ntv-pointer are present in the schema</t>
         <t><strong>unevaluatedProperties:</strong> same as additionalProperties</t>
-        <sourcecode type="json">{ "minProperties": 2, "maxProperties": 3 } 
-        
+        <sourcecode type="json">{ "minProperties": 2, "maxProperties": 3 }
+
 check the number of NTV entities</sourcecode>
         <t><strong>items:</strong> schema applicable to the NTV entities included in the NTV entity </t>
         <sourcecode type="json">{ "items": items_schema }
-        
-check the items_schema for the NTVvalue 
+
+check the items_schema for the NTVvalue
         of the NTV entities included in the NTV entity.</sourcecode>
         <t><strong>uniqueItems:</strong> schema applicable to the NTVvalue of the NTV entities included in the NTV entity </t>
         <sourcecode type="json">{ "uniqueItems": true }
-        
+
 check the uniqueness of the NTVvalue of the NTV entities.</sourcecode>
         <t><strong>prefixItems:</strong> schemas applicable to the NTVvalue of the NTV entities included in the NTV entity</t>
         <sourcecode type="json">{ "prefixItems": [ item_schema ] }
-        
-check the item_schema for the NTVvalue of the corresponding 
+
+check the item_schema for the NTVvalue of the corresponding
 NTV entity included in the NTV entity</sourcecode>
         <t><strong>contains, maxContains, minContains:</strong> schema applicable to the NTVvalues of the NTV entities included in the NTV entity</t>
-        <sourcecode type="json">{ "contains": cont_schema, "minContains": 2, "maxContains": 3 } 
+        <sourcecode type="json">{ "contains": cont_schema, "minContains": 2, "maxContains": 3 }
 
-check if the cont_schema is valid for 2 or 3 NTVvalue 
+check if the cont_schema is valid for 2 or 3 NTVvalue
 of the NTV entity included</sourcecode>
         <t><strong>unevaluatedItems:</strong> applies to any NTVvalues not evaluated by an items, prefixItems, or contains keyword</t>
         <t><strong>minItems, maxItems:</strong> equivalent to minProperties, maxProperties</t>

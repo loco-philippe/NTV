@@ -11,7 +11,7 @@ For more information, see the [user guide](https://loco-philippe.github.io/NTV/d
 The semantic level of shared JSON (or CSV) data (e.g. Open Data) remains low, which makes automated reuse difficult.
 
 JSON-NTV proposes to enrich it to obtain a real interoperable exchange format.
-  
+
 ## NTV format
 
 The NTV format consists of representing data by three attributes: a name, a type and a value. This representation is common in programming languages (for example a variable with Python typing is defined by `age: int = 25`), however the JSON format represents data with only a value or a key:value pair.

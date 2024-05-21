@@ -7,7 +7,7 @@ source:
 
 build:
   noarch: python
-  
+
 requirements:
   host:
     - python
@@ -15,4 +15,4 @@ requirements:
   run:
     - shapely
     - pandas
-    - python>=3.9
+    - python>=3.10

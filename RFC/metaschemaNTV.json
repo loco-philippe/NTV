@@ -2,25 +2,25 @@
     "$id": "https://example.com/ntv.schema.json",
     "title": "NTV",
     "description": "schema for NTV entities",
-    
+
     "type": "object",
     "properties": {
         "NTVentity": { "enum" : ["NtvSingle", "NtvList"] },
         "NTVname":   { "type": "string" },
-        "NTVtype":   { "$ref": "#/$defs/types" } 
+        "NTVtype":   { "$ref": "#/$defs/types" }
     },
     "$defs":{
         "json":    { "type": [ "boolean", "array", "null", "object", "number", "integer", "string" ] },
         "listNTV": { "type": "array", "items": { "$ref": "#" } },
-        "types":   { "enum": [ "int32", "float", "point", "date", "string", "boolean", "object"] } 
-    }, 
-    "allOf": [ 
+        "types":   { "enum": [ "int32", "float", "point", "date", "string", "boolean", "object"] }
+    },
+    "allOf": [
         { "$comment": "test consistency of the structure",
         "if":  {"properties":{ "NTVentity": {"const": "NtvList"} } },
         "then":{"properties":{ "NTVvalue":{ "$ref": "#/$defs/listNTV" } },
                 "required": ["NTVentity", "NTVvalue"] },
         "else":{"properties":{ "NTVvalue":{ "$ref": "#/$defs/json" } },
-                "required": ["NTVentity", "NTVvalue", "NTVtype"] } 
+                "required": ["NTVentity", "NTVvalue", "NTVtype"] }
         },
         {"$comment": "test consistency of the NtvValue",
         "if":  {"properties":{ "NTVtype": {"const": "int32"}, "NTVentity": {"const": "NtvSingle"} } },
