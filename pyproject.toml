@@ -11,13 +11,13 @@ checks = [
 extend-exclude = [
   "doc",
 ]
-ignore = [
-  "E402",
-]
 target-version = "py310"
 
 [tool.ruff.lint]
 # E402: module level import not at top of file
 extend-safe-fixes = [
   "TID252", # absolute imports
+]
+ignore = [
+  "E402",
 ]
