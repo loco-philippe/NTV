@@ -770,6 +770,9 @@ ex_list = {
           <tr><td>row</td><td>row <xref target="W3C TAB"/></td></tr>
           <tr><td>field</td><td>column <xref target="W3C TAB"/></td></tr>
           <tr><td>tab</td><td>table <xref target="NTV-TAB"/></td></tr>
+          <tr><td>ndarray</td><td>multidimensional array <xref target="NTV-TAB"/></td></tr>
+          <tr><td>xndarray</td><td>labelled multidimensional array<xref target="NTV-TAB"/></td></tr>
+          <tr><td>xdataset</td><td>coordinated multidimensional array<xref target="NTV-TAB"/></td></tr>
           <tr><td>ntv</td><td>JsonNTV</td></tr>
           <tr><td>sch</td><td>Schema</td></tr></tbody></table>
           <t>The data structure associated to this DataTypeName are defined in specific document.</t>
@@ -777,6 +780,7 @@ ex_list = {
       <section><name>Normalized String</name>
         <table anchor="table10" align="left" pn="table-10"><name>Structured DataType</name><thead>
           <tr><th>DataTypeName</th><th>NTVvalue</th><th>example NTVvalue</th></tr></thead><tbody>
+          <tr><td>unit</td><td>Physical quantities</td><td>"kg / s2"</td></tr>
           <tr><td>uri</td><td>URI (RFC3986)</td><td><t>"https://www.ietf.org/rfc/rfc3986.txt"</t>
             <t>"geo:13.4125,103.86673" (RFC5870)</t><t>"info:eu-repo/dai/nl/12345"</t><t>"mailto:John.Doe@example.com"</t>
             <t>"tel:+1-201-555-0123" (RFC3966)</t></td></tr>
