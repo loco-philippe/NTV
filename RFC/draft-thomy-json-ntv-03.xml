@@ -28,7 +28,7 @@
         <uri>https://github.com/loco-philippe/NTV/blob/main/README.md</uri>
       </address>
     </author>
-    <date year="2023" month="12" day="19"/>
+    <date year="2024" month="05" day="27"/>
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
     <keyword>JSON</keyword>
@@ -228,28 +228,32 @@
             <li>NamespaceParent of GlobalNamespace is None.</li></ol></li></ul>
         </section>
         <section><name>DataType</name>
+          <t>The DataType represents the semantic of a data and is structured in a flat classification. For example, "email" and "string" are two DataType.</t>
+          <t>A DataType is composed with a TypeBase and an optional TypeExtension. The TypeExtension defines an additional property. For example:<ul>
+            <li>a "float" TypeBase may have a "kg" extension to indicate a unit.</li>
+            <li>a "string" TypeBase may have a "fr" extension to indicate a langage. </li></ul></t>
           <t>A DataType is defined by a name (DataTypeName) and a Namespace parent (NamespaceParent).
-          The DataType is unique in the NamespaceParent.</t>
-          <t>DataType and the rules to encode or decode NTVvalues MUST be understood by data producers and data consumers.
-          So DataType and rules associated have to be defined in a specification shared by a large community.
+          The TypeBase of a DataType is unique in the NamespaceParent. The TypeExtension of a DataType is free.</t>
+          <t>TypeBase and the rules to encode or decode NTVvalues MUST be understood by data producers and data consumers.
+          So TypeBase and rules associated have to be defined in a specification shared by a large community.
           On the other hand, it must be possible for everyone to share data according to their own data structure.</t>
-          <t>There are therefore two categories of DataType: <ul>
-            <li>custom DataType (and Namespace) which can be created by anyone without control,</li>
-            <li>shared DataType (and Namespace) that are defined in a single, shared repository.
-            Each 'shared' Namespace or DataType is uniquely managed.</li></ul></t>
-          <t>For shared DataType, three sub-categories are defined (None, Simple, Generic).<ul>
-            <li>The "None" DataType is used with NTVlist as defaultDataType.</li>
-            <li>Simple DataType is associated to conversion rules between a native entity and a NTV entity.</li>
-            <li>Generic DataType is equivalent to a set of Simple DataType.
-            This indicates that parsers use associated simple DataType to decode the JsonNTVvalue.</li></ul></t>
+          <t>There are therefore two categories of TypeBase: <ul>
+            <li>custom TypeBase (and Namespace) which can be created by anyone without control,</li>
+            <li>shared TypeBase (and Namespace) that are defined in a single, shared repository.
+            Each 'shared' Namespace or TypeBase is uniquely managed.</li></ul></t>
+          <t>For shared TypeBase, three sub-categories are defined (None, Simple, Generic).<ul>
+            <li>The "None" TypeBase is used with NTVlist as defaultDataType.</li>
+            <li>Simple TypeBase is associated to conversion rules between a native entity and a NTV entity.</li>
+            <li>Generic TypeBase is equivalent to a set of Simple TypeBase.
+            This indicates that parsers use associated simple TypeBase to decode the JsonNTVvalue.</li></ul></t>
           <t><em>Example:</em> <ul empty="true">
-            <li><em>"dat" is the generic DataTypeName for "datetime" and "timeposix"</em> </li>
+            <li><em>"dat" is the generic TypeBaseName for "datetime" and "timeposix"</em> </li>
             <li><em> If a JSONvalue is { "::dat" : ["2022-01-28T18-23-54", 123456.78] }, the parser deduces that the first entity has a "datetime"
-            DataTypeName and the second a "timeposix" DataTypeName.</em></li></ul></t>
+            TypeBaseName and the second a "timeposix" TypeBaseName.</em></li></ul></t>
         </section>
         <section><name>Representation</name>
           <t>A Namespace is defined by a string followed by a point (NamespaceName).</t>
-          <t>A DataType is defined by a string (DataTypeName).</t>
+          <t>A DataType is defined by a string (DataTypeName) composed by the TypeBaseName and the TypeExtensionName.</t>
           <t>The representation of a Namespace (NamespaceLongName) is composed by all the nested NamespaceName.</t>
           <t>The representation of a DataType (DataTypeLongName) is composed by the NamespaceLongName and the DataTypeName.</t>
           <t>The DataTypeLongName is defined in  <xref target="DataTypeLongName-abnf" derivedContent="Figure 2"/>,
@@ -259,13 +263,15 @@
               <![CDATA[
 ; representation of DataType and Namespace (Name and LongName)
 
-DataTypeLongName     = NamespaceParentLongName DataTypeName
+DataTypeLongName  = NamespaceParentLongName DataTypeName
 
-NamespaceLongName   = NamespaceParentLongName NamespaceName
+NamespaceLongName = NamespaceParentLongName NamespaceName
 NamespaceParentLongName = NamespaceLongName
 
 NamespaceName   = [ ["$"] JsonString "." ]      ; REQ2 REQ3
-DataTypeName     = ["$"] JsonString              ; REQ3
+DataTypeName    = TypeBaseName ["[" TypeExtensionName "]"]
+TypeBaseName    = ["$"] JsonString              ; REQ3
+TypeExtensionName   = JsonString
             ]]>
           </sourcecode></figure>
           <t>The corresponding rules are as follows:</t><ul empty="true"><li><ol type="REQ%d:" group="reqs">
@@ -430,7 +436,8 @@ NTVsingleValue     = JsonValue
         <li><em>{ "city" : "paris" }</em></li>
         <li><em>{ "paris:" : [4.8357, 45.7640] }</em></li></ul>
       <t><strong>TVsingle: </strong></t><ul empty="true">
-        <li><em>{ ":point" : [4.8357, 45.7640] }</em></li></ul>
+        <li><em>{ ":point" : [4.8357, 45.7640] }</em></li>
+        <li><em>{ ":string[fr]" : "Paris est un belle ville" }</em></li></ul>
       <t><strong>NTVsingle: </strong></t><ul empty="true">
         <li><em>{ "paris:point" : [2.3522, 48.8566] }</em></li>
         <li><em>{ "paris:ntv" : { "coordinate:point" : [4.8357, 45.7640] } }</em></li></ul>
@@ -831,23 +838,24 @@ ex_list = {
         <figure anchor="Complete-abnf" align="left" suppress-title="false" pn="figure-8">
           <name>Collected ABNF grammar</name><sourcecode type="abnf" markers="false">
             <![CDATA[
-; representation of NtvType and Namespace (LongName)
+; representation of DataType and Namespace (Name and LongName)
 
-NTVtypeLongName     = NamespaceParentLongName NTVtypeName
+DataTypeLongName  = NamespaceParentLongName DataTypeName
 
-NamespaceLongName   = NamespaceParentLongName NamespaceName
+NamespaceLongName = NamespaceParentLongName NamespaceName
 NamespaceParentLongName = NamespaceLongName
 
 NamespaceName   = [ ["$"] JsonString "." ]      ; REQ2 REQ3
-NTVtypeName     = ["$"] JsonString              ; REQ3
+DataTypeName    = TypeBaseName ["[" TypeExtensionName "]"]
+TypeBaseName    = ["$"] JsonString              ; REQ3
+TypeExtensionName   = JsonString
 
 ; JSON representation of NTV entities (JsonNTV)
 
-JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ5
+JsonNTV        = JsonNTVnamed / JsonNTVsimple      ; REQ4
 
 JsonNTVnamed   = beginObject JsonNTVMember endObject
-JsonNTVsimple  = JsonNTVvalue / ArrayValue         ; REQ6
-ArrayValue     = beginArray JsonNTVvalue endArray
+JsonNTVsimple  = JsonNTVvalue
 
 JsonNTVMember  = JsonNTVname nSep JsonNTVvalue
 
@@ -867,21 +875,22 @@ JsonString = JsonString  ; indicates that rule is defined in RFC8259
 ; JSON representation of NTVname and NTVtype (JsonNTVname)
 
 JsonNTVname = NTVname JsonSepType
-JsonSepType = [singleSep [JsonNTVtype]]/[listSep JsonNTVtype]
-    ; REQ7 REQ8
+JsonSepType = [singleSep [JsonNTVtype]]/([listSep] JsonNTVtype)
+    ; REQ5 REQ6
 
 NTVname = JsonString
 
 singleSep   = ":"      ; NTVsingle separator
 listSep     = "::"     ; NTVlist separator
 
-; JSON representation of NtvType (JsonNTVtype)
+; JSON representation of NTVType (JsonNTVtype)
 
-JsonNTVtype = [ NTVtypeLongName / relativeNTVtypeLongName ]
-    ; REQ9
+JsonNTVtype = [ NTVtypeLongName / NTVtypeRelativeName ]
+    ; REQ7
 
-relativeNTVtypeLongName = *NamespaceName NTVtypeName
-    ; REQ9
+NTVtypeLongName = DataTypeLongName / NamespaceLongName
+NTVtypeRelativeName = *NamespaceName (DataTypeName / NamespaceName)
+    ; REQ7
 
 ; JSON representation of NTVvalue (JsonNTVvalue)
 
@@ -889,7 +898,7 @@ JsonNTVvalue       = JsonNTVsingleValue / JsonNTVlistValue
 
 JsonNTVsingleValue = NTVsingleValue
 JsonNTVlistValue   = JsonNTVarrayValue / JsonNTVobjectValue
-    ; REQ10
+    ; REQ8 REQ9
 
 JsonNTVarrayValue  = beginArray ListJsonNTVvalue endArray
 ListJsonNTVvalue   = [JsonNTV  *( vSep JsonNTV )]
