@@ -4,7 +4,7 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="info"
-  docName="draft-thomy-json-ntv-03"
+  docName="draft-thomy-json-ntv-04"
   ipr="trust200902"
   obsoletes=""
   updates=""
@@ -14,7 +14,7 @@
 
   <front>
     <title>JSON semantic format (JSON-NTV)</title>
-    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv-03"/>
+    <seriesInfo name="Internet-Draft" value="draft-thomy-json-ntv-04"/>
     <author fullname="Philippe THOMY" initials="P." surname="THOMY">
       <organization>Loco-labs</organization>
       <address>
