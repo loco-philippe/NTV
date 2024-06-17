@@ -450,11 +450,13 @@ class NtvConnector(ABC):
                 if not obj:
                     return True
                 if not min(isinstance(key, str) for key in obj.keys()):
-                    raise NtvError("key in dict in not string")
+                    raise NtvError("key in dict is not string")
                 return min(is_js(obj_in) for obj_in in obj.values())
             case _:
                 if obj.__class__.__name__ not in NtvConnector.castable:
-                    raise NtvError(obj.__class__.__name__ + " is not valid for NTV")
+                    raise NtvError(
+                        "type " + obj.__class__.__name__ + " is not valid for NTV"
+                    )
                 return False
 
     @staticmethod
