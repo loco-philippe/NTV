@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Mar  1 09:57:26 2023
 
@@ -9,7 +8,9 @@ The `NTV.test_namespace` module contains the unit tests (class unittest) for the
 """
 
 import unittest
-from json_ntv.namespace import Namespace, DatatypeError, Datatype, _join_type
+
+from json_ntv.namespace import Datatype, DatatypeError, Namespace, _join_type
+
 # from observation import  Ilist
 
 

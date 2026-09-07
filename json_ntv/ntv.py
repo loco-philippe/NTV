@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 @author: Philippe@loco-labs.io
 
@@ -14,13 +13,13 @@ or the [github repository](https://github.com/loco-philippe/NTV).
 """
 
 import copy
+import json
 from abc import ABC, abstractmethod
 from numbers import Number
-import json
 
-from json_ntv.namespace import Datatype, Namespace, str_type, relative_type, agreg_type
-from json_ntv.ntv_util import NtvError, NtvJsonEncoder, NtvConnector, NtvTree, NtvUtil
+from json_ntv.namespace import Datatype, Namespace, agreg_type, relative_type, str_type
 from json_ntv.ntv_patch import NtvPointer
+from json_ntv.ntv_util import NtvConnector, NtvError, NtvJsonEncoder, NtvTree, NtvUtil
 
 NAME = "N"
 TYPE = "T"
