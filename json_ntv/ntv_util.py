@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Feb 27 2023
 
@@ -11,10 +10,10 @@ It contains the classes `NtvUtil`, `NtvConnector`, `NtvTree`, `NtvJsonEncoder`
 and `NtvError` for NTV entities.
 """
 
-from abc import ABC, abstractmethod
 import datetime
 import json
 import re
+from abc import ABC, abstractmethod
 
 
 class NtvUtil:

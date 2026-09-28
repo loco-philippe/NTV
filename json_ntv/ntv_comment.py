@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Sun Oct  2 22:24:59 2022
 
@@ -8,6 +7,7 @@ The `NTV.json_ntv.ntv_comment` module contains the `NtvComment` class.
 """
 
 import json
+
 from json_ntv.ntv_patch import NtvPatch
 
 
