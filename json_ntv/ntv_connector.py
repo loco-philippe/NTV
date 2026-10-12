@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Feb 27 2023
 
@@ -28,8 +27,8 @@ It contains :
 
 """
 
-import datetime
 import csv
+import datetime
 import json
 
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle, NtvTree
@@ -346,6 +345,7 @@ class MermaidConnec(NtvConnector):
         - **leaves**: Boolean (default False) - if True, add the leaf row
         """
         from base64 import b64encode
+
         from IPython.display import Image, display
 
         option = {"title": "", "disp": False, "row": False, "leaves": False} | kwargs
