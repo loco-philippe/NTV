@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Namespace and Datatype entities are used to define NTVtype.
 
@@ -14,8 +13,9 @@ or the [github repository](https://github.com/loco-philippe/NTV)
 """
 
 import configparser
-from pathlib import Path
 import json
+from pathlib import Path
+
 import requests
 
 import json_ntv
