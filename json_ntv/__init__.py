@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 ***JSON-NTV Package***
 
@@ -57,31 +56,31 @@ or the [github repository](https://github.com/loco-philippe/NTV).
 
 """
 
-from json_ntv.namespace import Namespace as Namespace
 from json_ntv.namespace import Datatype as Datatype
-from json_ntv.namespace import str_type as str_type
-from json_ntv.namespace import relative_type as relative_type
+from json_ntv.namespace import Namespace as Namespace
 from json_ntv.namespace import agreg_type as agreg_type
+from json_ntv.namespace import relative_type as relative_type
+from json_ntv.namespace import str_type as str_type
+from json_ntv.ntv import Ntv as Ntv
+from json_ntv.ntv import NtvList as NtvList
+from json_ntv.ntv import NtvSingle as NtvSingle
+from json_ntv.ntv_comment import NtvComment as NtvComment
+from json_ntv.ntv_connector import CborConnec as CborConnec
+from json_ntv.ntv_connector import MermaidConnec as MermaidConnec
+from json_ntv.ntv_connector import NdatasetConnec as NdatasetConnec
+from json_ntv.ntv_connector import NfieldConnec as NfieldConnec
+from json_ntv.ntv_connector import SdatasetConnec as SdatasetConnec
+from json_ntv.ntv_connector import SfieldConnec as SfieldConnec
+from json_ntv.ntv_connector import ShapelyConnec as ShapelyConnec
+from json_ntv.ntv_connector import from_csv as from_csv
+from json_ntv.ntv_connector import to_csv as to_csv
 from json_ntv.ntv_patch import NtvOp as NtvOp
 from json_ntv.ntv_patch import NtvPatch as NtvPatch
 from json_ntv.ntv_patch import NtvPointer as NtvPointer
-from json_ntv.ntv_comment import NtvComment as NtvComment
-from json_ntv.ntv import Ntv as Ntv
-from json_ntv.ntv import NtvSingle as NtvSingle
-from json_ntv.ntv import NtvList as NtvList
-from json_ntv.ntv_validate import Validator as Validator
-from json_ntv.ntv_util import NtvTree as NtvTree
-from json_ntv.ntv_util import NtvJsonEncoder as NtvJsonEncoder
 from json_ntv.ntv_util import NtvConnector as NtvConnector
 from json_ntv.ntv_util import NtvError as NtvError
-from json_ntv.ntv_connector import from_csv as from_csv
-from json_ntv.ntv_connector import to_csv as to_csv
-from json_ntv.ntv_connector import MermaidConnec as MermaidConnec
-from json_ntv.ntv_connector import CborConnec as CborConnec
-from json_ntv.ntv_connector import ShapelyConnec as ShapelyConnec
-from json_ntv.ntv_connector import NfieldConnec as NfieldConnec
-from json_ntv.ntv_connector import SfieldConnec as SfieldConnec
-from json_ntv.ntv_connector import NdatasetConnec as NdatasetConnec
-from json_ntv.ntv_connector import SdatasetConnec as SdatasetConnec
+from json_ntv.ntv_util import NtvJsonEncoder as NtvJsonEncoder
+from json_ntv.ntv_util import NtvTree as NtvTree
+from json_ntv.ntv_validate import Validator as Validator
 
 # print('package :', __package__)

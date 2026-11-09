@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The `ntv_schema` module is a demonstrator of the application of JSON Schema to
 NTV data. It relies on the `jsonschema` module.
@@ -9,7 +8,7 @@ The main function `ntv_validate_opt2` validate a NTVdata against a schema (NTV d
 For examples, see the Jupyter Notebook in the same directory : `./example_schema.ipynb`
 """
 
-from jsonschema import validate, SchemaError
+from jsonschema import SchemaError, validate
 
 from json_ntv.ntv import Ntv, NtvList, NtvSingle
 
@@ -264,9 +263,11 @@ def ntv_validate2(ntv_data, ntv_sch, mode=0):
                 valid &= ntv_validate2(ntv_data.ntv_value[idx], sch.ntv_value, mode)
         elif sch.type_str == "sch.items" or sch.name == "items":
             valid &= _val_item2(ntv_data, sch, mode)
-        elif sch.type_str[:4] == "sch." and sch.type_str[-1] == ".":
-            valid &= _val_pointer2(ntv_data, sch, mode)
-        elif sch.type_str[:4] != "sch.":
+        elif (
+            sch.type_str[:4] == "sch."
+            and sch.type_str[-1] == "."
+            or sch.type_str[:4] != "sch."
+        ):
             valid &= _val_pointer2(ntv_data, sch, mode)
         else:
             valid &= _val_simple2(ntv_data, sch, mode)
