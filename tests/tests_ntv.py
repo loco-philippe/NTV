@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Mar  1 09:57:26 2023
 
@@ -8,16 +7,28 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 `NtvSingle`, `NtvList` and `NtvSet` classes.
 """
 
-import unittest
 import datetime
-from itertools import product
 import json
+import unittest
+from itertools import product
 
-from json_ntv import NtvSingle, NtvList, Ntv, NtvError, NtvComment
-from json_ntv.ntv_util import NtvUtil
-from json_ntv import agreg_type, NtvTree, NtvConnector, NtvOp, NtvPatch, Datatype
-from shapely import geometry
 from jsonpointer import resolve_pointer
+from shapely import geometry
+
+from json_ntv import (
+    Datatype,
+    Ntv,
+    NtvComment,
+    NtvConnector,
+    NtvError,
+    NtvList,
+    NtvOp,
+    NtvPatch,
+    NtvSingle,
+    NtvTree,
+    agreg_type,
+)
+from json_ntv.ntv_util import NtvUtil
 
 
 class TestNtvFast(unittest.TestCase):
@@ -908,7 +919,7 @@ class TestNtvFunction(unittest.TestCase):
             line.append(
                 geometry.linestring.LineString((point[i], point[i + 1], point[i + 2]))
             )
-            pol.append(geometry.polygon.Polygon((line[i])))
+            pol.append(geometry.polygon.Polygon(line[i]))
         list_obj = [
             datetime.datetime(2021, 2, 1, 0, 0),
             datetime.time(21, 2, 1),
